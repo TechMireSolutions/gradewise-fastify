@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "Bash(ls \"C:/Users/Hassan/.claude/plugins/ui-ux-pro-max-skill/.claude-plugin\" \"C:/Users/Hassan/.claude/plugins/ui-ux-pro-max-skill/.claude\")",
+      "Bash(ls \"C:/Users/Hassan/.claude/plugins/ui-ux-pro-max-skill/.claude/skills\")",
+      "Bash(mkdir -p \"C:/Users/Hassan/.claude/skills\")",
+      "Bash(cp -r \"C:/Users/Hassan/.claude/plugins/ui-ux-pro-max-skill/.claude/skills/\"* \"C:/Users/Hassan/.claude/skills/\")",
+      "Read(//c/Users/Hassan/.claude/**)",
+      "PowerShell(claude mcp add magic --scope user --env API_KEY=\"ae545739689061879c4e4d6fcb39325e8db635adcc1eed6d34473785e37ac59d\" -- npx -y '@21st-dev/magic@latest')",
+      "PowerShell($path = \"C:\\\\Users\\\\Hassan\\\\.claude.json\"; $j = Get-Content $path -Raw | ConvertFrom-Json; $magic = [PSCustomObject]@{ type = \"stdio\"; command = \"npx\"; args = @\\(\"-y\",\"@21st-dev/magic@latest\"\\); env = [PSCustomObject]@{ API_KEY = \"ae545739689061879c4e4d6fcb39325e8db635adcc1eed6d34473785e37ac59d\" } }; $mcp = [PSCustomObject]@{ magic = $magic }; $j | Add-Member -NotePropertyName mcpServers -NotePropertyValue $mcp -Force; \\($j | ConvertTo-Json -Depth 50\\) | Set-Content -Path $path -Encoding utf8; Write-Output \"Added\")",
+      "PowerShell($j = Get-Content \"C:\\\\Users\\\\Hassan\\\\.claude.json\" -Raw | ConvertFrom-Json; $j.mcpServers | ConvertTo-Json -Depth 10)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node --check DB/db.js)",
+      "Bash(git stash *)",
+      "Bash(node --check services/ai/aiProviders.js)",
+      "Bash(node --check models/configModel.js)",
+      "Bash(node --check controllers/configController.js)",
+      "Bash(npx vite *)",
+      "Bash(node --check routes/configRoutes.js)",
+      "Bash(node --check index.js)",
+      "Bash(node --check routes/authRoutes.js)",
+      "Bash(git config *)",
+      "Bash(git --version)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git rm *)",
+      "Bash(rm -rf grade-wise-ai-frontend-next/.git)"
+    ]
+  }
+}
