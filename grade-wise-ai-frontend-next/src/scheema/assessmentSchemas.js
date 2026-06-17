@@ -12,12 +12,12 @@ selectedResources: z.array(z.number()).optional(),
     questionBlocks: z
       .array(
         z.object({
-          question_type: z.enum(["multiple_choice", "true_false"]),
-          question_count: z.number().min(1),
-          duration_per_question: z.number().min(30),
-          num_options: z.number().min(2).optional(),
-          positive_marks: z.number().min(0),
-          negative_marks: z.number().min(0),
+          questionType: z.enum(["multiple_choice", "true_false"]),
+          questionCount: z.number().min(1),
+          durationPerQuestion: z.number().min(30),
+          numOptions: z.number().min(2).optional(),
+          positiveMarks: z.number().min(0),
+          negativeMarks: z.number().min(0),
         })
       )
       .min(1, "At least one question block is required"),

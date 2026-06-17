@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import useAuthStore from "../store/authStore.js";
+import useAuthStore from "@/features/auth/store.js";
 import useHydrated from "../hooks/useHydrated.js";
 import LoadingSpinner from "./ui/LoadingSpinner.jsx";
 

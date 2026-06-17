@@ -6,7 +6,24 @@ description: "Backend development guidelines for the Fastify v5 + TypeScript + D
 
 # Backend Rules — grade-wise-ai-backend-fastify
 
-**Stack**: Node.js 22 · Fastify v5 · TypeScript (strict) · Drizzle ORM 0.45 · PostgreSQL (postgres.js) · Zod v4 · Vercel AI SDK v6
+**Stack**: Node.js 22 · Fastify v5 · TypeScript 6 (strict) · Drizzle ORM 0.45 · PostgreSQL (postgres.js) · Zod v4 · Vercel AI SDK v6
+
+## Current Package Versions (as of last audit)
+
+| Package | Version | Notes |
+|---------|---------|-------|
+| typescript | 6.0.3 | Strict mode; verified compiles cleanly at v6 |
+| ai (Vercel AI SDK) | 6.0.207 | |
+| @ai-sdk/google / openai / anthropic / groq / mistral | 3.0.83–3.0.85 | |
+| fastify | 5.8.5 | |
+| drizzle-orm | 0.45.2 | |
+| bcrypt | 6.0.0 | API unchanged: `hash(pwd, rounds)` / `compare(plain, hash)` |
+| dotenv | 17.4.2 | Loaded via `import "dotenv/config"` — no API changes |
+| nodemailer | 9.0.0 | API unchanged: `createTransport` / `sendMail` |
+| pdf-parse | 2.4.5 | Still loaded via CJS `require()` — ESM interop only |
+| pdfkit | 0.19.1 | |
+| sharp | 0.35.1 | |
+| @types/node | 22.x | **Intentionally pinned to Node.js 22** — do not bump to 25+ while server runtime is Node 22 |
 
 ---
 
@@ -239,3 +256,48 @@ Optional:
 - No `console.log` in production paths — use `console.error` for error logging only.
 - No hardcoded mock data or test seeds in production code.
 - All destructive operations (delete assessment, delete key) must verify ownership/role before executing.
+
+---
+
+## Dependency Maintenance Policy
+
+**Always keep dependencies at the latest stable version.** Run `npm outdated` before any major feature work and upgrade anything flagged.
+
+### Upgrade Decision Matrix
+| Semver change | Action |
+|---------------|--------|
+| Patch (x.y.**Z**) | Upgrade immediately — always safe |
+| Minor (x.**Y**.z) | Upgrade immediately — backwards-compatible by spec |
+| Major (**X**.y.z) | Check release notes + verify call-sites, then upgrade |
+
+### Upgrade Steps
+```bash
+# 1. Identify outdated packages
+npm outdated
+
+# 2. Upgrade all safe packages
+npm install pkg1@latest pkg2@latest ...
+
+# 3. Type-check after any TypeScript or types upgrade
+npx tsc --noEmit
+
+# 4. Verify no regressions
+npm outdated   # should be empty (except intentional pins)
+npm audit
+```
+
+### Intentional Version Pins
+| Package | Pinned to | Reason |
+|---------|-----------|--------|
+| `@types/node` | `^22.x` | Must match the Node.js 22 runtime — using Node 25 types adds API definitions that don't exist at runtime, creating false type safety |
+
+### Known Transitive Vulnerabilities (accepted, cannot self-fix)
+| Package | Vulnerability | Why unfixable |
+|---------|--------------|---------------|
+| `drizzle-kit` → internal `esbuild ≤0.28.0` | Dev-server SSRF + Deno binary integrity (high) | `npm audit fix --force` downgrades drizzle-kit to 0.19.1 — catastrophic. Dev-time only, not in production. Awaiting drizzle-kit internal esbuild update. |
+
+### Rules for AI Agents
+- When adding a **new dependency**, always use the latest stable version — never an old pinned version.
+- Never use `--legacy-peer-deps` as a workaround; resolve the actual conflict.
+- After any dependency change, run `npm outdated` and `npx tsc --noEmit` to confirm no regressions.
+- `uuid` was removed — it is not used in the codebase. Use `crypto.randomBytes()` for tokens instead.

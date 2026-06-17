@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import useStudentAssessmentStore from "../../../store/studentAssessmentStore.js";
+import useStudentAssessmentStore from "@/features/student-assessment/store.js";
 import { Card } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";

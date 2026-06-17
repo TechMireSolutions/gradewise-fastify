@@ -65,7 +65,8 @@ export default async function resourcesModule(app: FastifyInstance) {
       return reply.code(201).send({
         success: true,
         message: `Uploaded ${uploaded.length} resource(s).`,
-        data: { uploaded, skipped },
+        resources: uploaded,
+        skipped,
       });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);

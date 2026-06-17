@@ -1,4 +1,4 @@
-import useAuthStore from "../store/authStore.js";
+import useAuthStore from "@/features/auth/store.js";
 import {
   FaFacebookF,
   FaTwitter,

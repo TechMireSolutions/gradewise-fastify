@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import useAuthStore from "../../store/authStore.js";
-import useAssessmentStore from "../../store/assessmentStore.js";
-import useInstructorAnalyticsStore from "../../store/useInstructorAssessmentAnalyticsStore.js";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import useAuthStore from "@/features/auth/store.js";
+import useAssessmentStore from "@/features/assessments/store.js";
+import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
 import { Card, CardHeader, CardContent } from "../../components/ui/Card.jsx";
 import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
 import Modal from "../../components/ui/Modal.jsx";
@@ -27,7 +28,7 @@ import {
 import PhysicalPaperModal from "../../components/PhysicalPaperModal.jsx";
 
 function InstructorDashboard() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user } = useAuthStore();
   const { assessments, getInstructorAssessments } = useAssessmentStore();
   const { overview, loading, getInstructorOverview } = useInstructorAnalyticsStore();
@@ -59,7 +60,7 @@ function InstructorDashboard() {
         const errorMessage = error.response?.data?.message || error.message || "Failed to fetch dashboard data.";
         setModal({ isOpen: true, type: "error", title: "Error", message: errorMessage });
         if (error.response?.status === 403 || error.message === "No authentication token found") {
-          navigate("/login");
+          router.push("/login");
         }
       } finally {
         setIsLoading(false);
@@ -67,7 +68,8 @@ function InstructorDashboard() {
     };
 
     fetchData();
-  }, [getInstructorAssessments, getInstructorOverview, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const showModal = (type, title, message) => {
     setModal({ isOpen: true, type, title, message });
@@ -227,7 +229,7 @@ function InstructorDashboard() {
                   {quickActions.map((action, index) => (
                     <Link
                       key={index}
-                      to={action.link}
+                      href={action.link}
                       className={`${action.color} text-white p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl transition-all duration-300 shadow-lg hover:shadow-2xl ${action.shadow} transform hover:-translate-y-2 text-center group`}
                     >
                       <div className="flex justify-center mb-3 sm:mb-4 transform group-hover:scale-110 transition-transform duration-300">
@@ -252,7 +254,7 @@ function InstructorDashboard() {
                     Recent Assessments
                   </h2>
                   <Link
-                    to="/instructor/assessments"
+                    href="/instructor/assessments"
                     className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm sm:text-base transition-colors group"
                   >
                     View All
@@ -271,7 +273,7 @@ function InstructorDashboard() {
                       Create your first assessment to start evaluating your students' progress and performance.
                     </p>
                     <Link
-                      to="/instructor/assessments/create"
+                      href="/instructor/assessments/create"
                       className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-base sm:text-lg font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                     >
                       <FaPen />
@@ -331,14 +333,14 @@ function InstructorDashboard() {
                               <td className="px-6 py-4 text-sm">
                                 <div className="flex flex-wrap items-center gap-3">
                                   <Link
-                                    to={`/instructor/assessments/${assessment.id}`}
+                                    href={`/instructor/assessments/${assessment.id}`}
                                     className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition"
                                   >
                                     <FaEye />
                                     View
                                   </Link>
                                   <Link
-                                    to={`/instructor/assessments/${assessment.id}/enroll`}
+                                    href={`/instructor/assessments/${assessment.id}/enroll`}
                                     className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 font-semibold hover:underline transition"
                                   >
                                     <FaUserPlus />
@@ -346,7 +348,7 @@ function InstructorDashboard() {
                                   </Link>
                                   {!assessment.is_executed && (
                                     <Link
-                                      to={`/instructor/assessments/${assessment.id}/edit`}
+                                      href={`/instructor/assessments/${assessment.id}/edit`}
                                       className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-semibold hover:underline transition"
                                     >
                                       <FaEdit />
@@ -371,7 +373,7 @@ function InstructorDashboard() {
                                   )}
                                   {assessment.is_executed && (
                                     <Link
-                                      to={`/instructor/assessments/${assessment.id}/analytics`}
+                                      href={`/instructor/assessments/${assessment.id}/analytics`}
                                       className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 font-semibold hover:underline transition"
                                     >
                                       <FaChartBar />
@@ -387,7 +389,7 @@ function InstructorDashboard() {
                                   </button>
                                   {!assessment.is_executed && (
                                     <Link
-                                      to={`/instructor/assessments/${assessment.id}/preview`}
+                                      href={`/instructor/assessments/${assessment.id}/preview`}
                                       className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 font-semibold hover:underline transition"
                                     >
                                       <FaBinoculars />
@@ -438,14 +440,14 @@ function InstructorDashboard() {
 
                           <div className="grid grid-cols-2 gap-2 sm:gap-3 text-sm">
                             <Link
-                              to={`/instructor/assessments/${assessment.id}`}
+                              href={`/instructor/assessments/${assessment.id}`}
                               className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-100 text-blue-700 rounded-lg sm:rounded-xl font-semibold hover:bg-blue-200 transition-colors"
                             >
                               <FaEye />
                               <span className="hidden xs:inline">View</span>
                             </Link>
                             <Link
-                              to={`/instructor/assessments/${assessment.id}/enroll`}
+                              href={`/instructor/assessments/${assessment.id}/enroll`}
                               className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-green-100 text-green-700 rounded-lg sm:rounded-xl font-semibold hover:bg-green-200 transition-colors"
                             >
                               <FaUserPlus />
@@ -454,7 +456,7 @@ function InstructorDashboard() {
                             {!assessment.is_executed && (
                               <>
                                 <Link
-                                  to={`/instructor/assessments/${assessment.id}/edit`}
+                                  href={`/instructor/assessments/${assessment.id}/edit`}
                                   className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-indigo-100 text-indigo-700 rounded-lg sm:rounded-xl font-semibold hover:bg-indigo-200 transition-colors"
                                 >
                                   <FaEdit />
@@ -475,7 +477,7 @@ function InstructorDashboard() {
                                   <span className="hidden xs:inline">Delete</span>
                                 </button>
                                 <Link
-                                  to={`/instructor/assessments/${assessment.id}/preview`}
+                                  href={`/instructor/assessments/${assessment.id}/preview`}
                                   className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-teal-100 text-teal-700 rounded-lg sm:rounded-xl font-semibold hover:bg-teal-200 transition-colors col-span-2"
                                 >
                                   <FaBinoculars />
@@ -485,7 +487,7 @@ function InstructorDashboard() {
                             )}
                             {assessment.is_executed && (
                               <Link
-                                to={`/instructor/assessments/${assessment.id}/analytics`}
+                                href={`/instructor/assessments/${assessment.id}/analytics`}
                                 className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-100 text-purple-700 rounded-lg sm:rounded-xl font-semibold hover:bg-purple-200 transition-colors"
                               >
                                 <FaChartBar />

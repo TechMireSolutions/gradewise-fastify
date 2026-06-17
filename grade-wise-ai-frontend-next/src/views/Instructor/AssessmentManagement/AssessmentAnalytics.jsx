@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
-import useInstructorAnalyticsStore from "../../../store/useInstructorAssessmentAnalyticsStore";
+import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
 import { FaList, FaTable, FaCalendarAlt, FaCheckCircle, FaEye, FaChartBar, FaArrowUp } from "react-icons/fa";
 
 function AssessmentAnalytics() {

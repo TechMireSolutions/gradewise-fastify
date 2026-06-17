@@ -165,8 +165,8 @@ export default async function assessmentsModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      const data = await previewQuestionsService(request.params.id, request.query.language);
-      return reply.send({ success: true, data });
+      const questions = await previewQuestionsService(request.params.id, request.query.language);
+      return reply.send({ success: true, questions });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });

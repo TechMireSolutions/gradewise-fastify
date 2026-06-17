@@ -1,6 +1,6 @@
 "use client";
 
-import useStudentAssessmentStore from "@/store/studentAssessmentStore";
+import useStudentAssessmentStore from "@/features/student-assessment/store.js";
 import useHydrated from "@/hooks/useHydrated";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 

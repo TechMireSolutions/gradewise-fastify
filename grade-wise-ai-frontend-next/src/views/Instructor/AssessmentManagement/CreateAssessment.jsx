@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import useAssessmentStore from "../../../store/assessmentStore.js";
-import useResourceStore from "../../../store/resourceStore.js";
+import useAssessmentStore from "@/features/assessments/store.js";
+import useResourceStore from "@/features/resources/store.js";
 import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
@@ -30,12 +30,12 @@ useEffect(() => {
 
   const [questionBlocks, setQuestionBlocks] = useState([
     {
-      question_type: "multiple_choice",
-      question_count: 1,
-      duration_per_question: 120,
-      num_options: 4,
-      positive_marks: 1,
-      negative_marks: 0,
+      questionType: "multiple_choice",
+      questionCount: 1,
+      durationPerQuestion: 120,
+      numOptions: 4,
+      positiveMarks: 1,
+      negativeMarks: 0,
     },
   ]);
 
@@ -58,9 +58,9 @@ useEffect(() => {
           ? {
             ...block,
             [field]:
-              field === "question_count" || field === "duration_per_question" || field === "num_options"
+              field === "questionCount" || field === "durationPerQuestion" || field === "numOptions"
                 ? Math.max(Number.parseInt(value) || 1, 1)
-                : field === "positive_marks" || field === "negative_marks"
+                : field === "positiveMarks" || field === "negativeMarks"
                   ? value === "" || value === null
                     ? null
                     : Math.max(Number.parseFloat(value) || 0, 0)
@@ -75,12 +75,12 @@ useEffect(() => {
     setQuestionBlocks((prev) => [
       ...prev,
       {
-        question_type: "multiple_choice",
-        question_count: 1,
-        duration_per_question: 120,
-        num_options: 4,
-        positive_marks: 1,
-        negative_marks: 0,
+        questionType: "multiple_choice",
+        questionCount: 1,
+        durationPerQuestion: 120,
+        numOptions: 4,
+        positiveMarks: 1,
+        negativeMarks: 0,
       },
     ]);
   };
@@ -121,57 +121,44 @@ useEffect(() => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-const validationResult = createAssessmentSchema.safeParse({
-  title: formData.title,
-  prompt: formData.prompt,
-  selectedResources,
- externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
-  questionBlocks,
-});
 
-if (!validationResult.success) {
-  setModal({
-    isOpen: true,
-    type: "error",
-    title: "Validation Error",
-message: validationResult.error.issues?.[0]?.message || "Invalid data",
-  });
-  return;
-}
+    const validationResult = createAssessmentSchema.safeParse({
+      title: formData.title,
+      prompt: formData.prompt,
+      selectedResources,
+      externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
+      questionBlocks,
+    });
 
+    if (!validationResult.success) {
+      setModal({
+        isOpen: true,
+        type: "error",
+        title: "Validation Error",
+        message: validationResult.error.issues?.[0]?.message || "Invalid data",
+      });
+      return;
+    }
 
     setIsProcessing(true);
-    
-    const assessmentData = new FormData();
-    assessmentData.append("title", formData.title.trim());
-    assessmentData.append("prompt", formData.prompt.trim());
-// When appending FormData:
-assessmentData.append(
-  "external_links", 
-  JSON.stringify(formData.externalLinks.filter(link => link.trim()))
-);
-assessmentData.append(
-  "selected_resources", 
-  JSON.stringify(selectedResources)
-);
-assessmentData.append(
-  "question_blocks",
-  JSON.stringify(questionBlocks.map(block => ({
-    question_type: block.question_type,
-    question_count: Number(block.question_count),
-    duration_per_question: Number(block.duration_per_question),
-    num_options: block.question_type === "multiple_choice" ? Number(block.num_options) : null,
-    positive_marks: Number(block.positive_marks || 1),
-    negative_marks: Number(block.negative_marks || 0),
-  })))
-);
 
-
-
-    // No new files appended
+    const payload = {
+      title: formData.title.trim(),
+      prompt: formData.prompt.trim(),
+      externalLinks: formData.externalLinks.filter((link) => link.trim()),
+      selectedResources,
+      questionBlocks: questionBlocks.map((block) => ({
+        questionType: block.questionType,
+        questionCount: Number(block.questionCount),
+        durationPerQuestion: Number(block.durationPerQuestion),
+        ...(block.questionType === "multiple_choice" ? { numOptions: Number(block.numOptions) } : {}),
+        positiveMarks: Number(block.positiveMarks ?? 1),
+        negativeMarks: Number(block.negativeMarks ?? 0),
+      })),
+    };
 
     try {
-      await createAssessment(assessmentData);
+      await createAssessment(payload);
 
       setModal({
         isOpen: true,
@@ -347,8 +334,8 @@ assessmentData.append(
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
                         <select
-                          value={block.question_type}
-                          onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
+                          value={block.questionType}
+                          onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 bg-white"
                           disabled={isProcessing}
                         >
@@ -361,8 +348,8 @@ assessmentData.append(
                         <label className="block text-sm font-medium text-gray-700 mb-2">Question Count</label>
                         <input
                           type="number"
-                          value={block.question_count}
-                          onChange={(e) => handleBlockChange(index, "question_count", e.target.value)}
+                          value={block.questionCount}
+                          onChange={(e) => handleBlockChange(index, "questionCount", e.target.value)}
                           min="1"
                           placeholder="e.g. 5"
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
@@ -375,8 +362,8 @@ assessmentData.append(
                         <label className="block text-sm font-medium text-gray-700 mb-2">Duration (seconds)</label>
                         <input
                           type="number"
-                          value={block.duration_per_question}
-                          onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
+                          value={block.durationPerQuestion}
+                          onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
                           min="30"
                           placeholder="e.g. 120"
                           className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
@@ -385,13 +372,13 @@ assessmentData.append(
                         />
                       </div>
 
-                      {block.question_type === "multiple_choice" && (
+                      {block.questionType === "multiple_choice" && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Number of Options</label>
                           <input
                             type="number"
-                            value={block.num_options}
-                            onChange={(e) => handleBlockChange(index, "num_options", e.target.value)}
+                            value={block.numOptions}
+                            onChange={(e) => handleBlockChange(index, "numOptions", e.target.value)}
                             min="2"
                             max="6"
                             placeholder="2 to 6"
@@ -406,8 +393,8 @@ assessmentData.append(
                         <label className="block text-sm font-medium text-gray-700 mb-2">Positive Marks</label>
                         <input
                           type="number"
-                          value={block.positive_marks || ""}
-                          onChange={(e) => handleBlockChange(index, "positive_marks", e.target.value)}
+                          value={block.positiveMarks || ""}
+                          onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
                           min="0"
                           step="0.1"
                           placeholder="e.g. 1"
@@ -420,8 +407,8 @@ assessmentData.append(
                         <label className="block text-sm font-medium text-gray-700 mb-2">Negative Marks</label>
                         <input
                           type="number"
-                          value={block.negative_marks || ""}
-                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
+                          value={block.negativeMarks || ""}
+                          onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
                           min="0"
                           step="0.1"
                           placeholder="e.g. 0.25"

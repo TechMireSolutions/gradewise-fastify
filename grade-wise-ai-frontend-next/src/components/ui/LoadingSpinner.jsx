@@ -27,7 +27,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
   // Modern circular spinner with gradient
   if (type === "spinner" || !type) {
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center" role="status" aria-label="Loading">
         <div className="relative">
           <div
             className={`${sizeClasses[size]} rounded-full border-4 border-gray-200`}
@@ -43,7 +43,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
   // Gradient spinner with glow effect
   if (type === "gradient") {
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center" role="status" aria-label="Loading">
         <div className="relative">
           <div
             className={`${sizeClasses[size]} rounded-full bg-gradient-to-r ${gradientColors[color]} animate-spin`}
@@ -76,7 +76,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     };
 
     return (
-      <div className="flex justify-center items-center space-x-2">
+      <div className="flex justify-center items-center space-x-2" role="status" aria-label="Loading">
         <div
           className={`${dotSize[size]} ${dotColor[color]} rounded-full animate-bounce`}
           style={{ animationDelay: "0ms" }}
@@ -105,7 +105,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     };
 
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center" role="status" aria-label="Loading">
         <div className="relative">
           <div
             className={`${sizeClasses[size]} ${pulseColor[color]} rounded-full animate-ping opacity-75`}
@@ -144,7 +144,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     };
 
     return (
-      <div className="flex justify-center items-center space-x-1">
+      <div className="flex justify-center items-center space-x-1" role="status" aria-label="Loading">
         <div
           className={`${barWidth[size]} ${barHeight[size]} ${barColor[color]} rounded-full animate-pulse`}
           style={{ animationDelay: "0ms", animationDuration: "1s" }}

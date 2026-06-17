@@ -27,7 +27,9 @@
       "Bash(git init *)",
       "Bash(git remote *)",
       "Bash(git rm *)",
-      "Bash(rm -rf grade-wise-ai-frontend-next/.git)"
+      "Bash(rm -rf grade-wise-ai-frontend-next/.git)",
+      "Bash(git check-ignore *)",
+      "Bash(git commit -m 'Push full Gradewise AI codebase \\(Fastify backend + Next.js frontend\\) *)"
     ]
   }
 }

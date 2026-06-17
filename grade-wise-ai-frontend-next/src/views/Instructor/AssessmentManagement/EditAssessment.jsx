@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import useAssessmentStore from "../../../store/assessmentStore.js";
-import useResourceStore from "../../../store/resourceStore.js";
+import useAssessmentStore from "@/features/assessments/store.js";
+import useResourceStore from "@/features/resources/store.js";
 import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
-import { validateAssessmentForm, validateFiles } from "../../../scheema/editAssessmnetSchemas.js";
+import { validateAssessmentForm, validateFiles } from "../../../scheema/editAssessmentSchemas.js";
 
 function EditAssessment() {
   const { id } = useParams();

@@ -9,7 +9,7 @@ import { sanitizeFileName } from "../utils/paperUtils";
 import PaperFormFields from "./PaperFormFields";
 import FormattingOptions from "./FormattingOptions";
 import { LANGUAGE_OPTIONS, getTranslation, isRTLLanguage } from "../utils/translations";
-import useAssessmentStore from "../store/assessmentStore";
+import useAssessmentStore from "@/features/assessments/store.js";
 
 const INITIAL_FORM = {
   instituteName: "",

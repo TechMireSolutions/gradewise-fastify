@@ -165,7 +165,7 @@ export default async function authModule(app: FastifyInstance) {
   }, async (request, reply) => {
     try {
       const allUsers = await getAllUsers();
-      return reply.send({ success: true, data: allUsers });
+      return reply.send({ success: true, users: allUsers });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });

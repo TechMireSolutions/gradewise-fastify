@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import useAssessmentStore from "../store/assessmentStore.js";
+import useAssessmentStore from "@/features/assessments/store.js";
 
 function useAssessmentPreview(assessmentId) {
   const { getAssessmentById, fetchPreviewQuestions } = useAssessmentStore();

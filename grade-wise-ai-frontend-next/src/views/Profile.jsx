@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import useAuthStore from "../store/authStore.js";
+import useAuthStore from "@/features/auth/store.js";
 import { Card, CardHeader, CardContent } from "../components/ui/Card.jsx";
 import {
   FaUser,

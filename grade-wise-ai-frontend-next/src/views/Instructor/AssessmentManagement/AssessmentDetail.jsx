@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import useAssessmentStore from "../../../store/assessmentStore.js";
+import useAssessmentStore from "@/features/assessments/store.js";
 import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
@@ -55,7 +55,7 @@ function AssessmentDetail() {
       }
     };
     fetchData();
-  }, [id, getAssessmentById, navigate]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 

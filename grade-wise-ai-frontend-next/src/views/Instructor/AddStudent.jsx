@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useAssessmentStore from "../../store/assessmentStore.js";
-import useAuthStore from "../../store/authStore.js";
+import useAssessmentStore from "@/features/assessments/store.js";
+import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import Modal from "../../components/ui/Modal";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaArrowLeft, FaUserGraduate, FaUserShield } from "react-icons/fa";

@@ -10,7 +10,7 @@ import {
   deleteAiKey as apiDeleteAiKey,
   testStoredAiKey,
   testInlineAiKey,
-} from "../../api/config.api.js";
+} from "@/features/ai-config/api.js";
 import {
   FaKey,
   FaFileAlt,

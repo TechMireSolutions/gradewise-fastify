@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import useAuthStore from "../store/authStore.js";
+import useAuthStore from "@/features/auth/store.js";
 import {
   FaHome,
   FaUser,
@@ -130,6 +130,7 @@ function Navbar() {
                 <Link
                   key={link.name}
                   href={link.href}
+                  aria-current={isActiveLink(link.href) ? "page" : undefined}
                   className={`flex items-center gap-1.5 px-2 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-out whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-1 ${
                     isActiveLink(link.href)
                       ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg"
@@ -172,6 +173,7 @@ function Navbar() {
             <button
               onClick={handleMobileMenuToggle}
               aria-label="Toggle mobile menu"
+              aria-expanded={isMobileMenuOpen}
               className="p-2 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-violet-950/30 transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer"
             >
               <span className="sr-only">Open menu</span>
@@ -197,6 +199,7 @@ function Navbar() {
                   key={link.name}
                   href={link.href}
                   onClick={closeMobileMenu}
+                  aria-current={isActiveLink(link.href) ? "page" : undefined}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200 ease-out min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
                     isActiveLink(link.href)
                       ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg"
