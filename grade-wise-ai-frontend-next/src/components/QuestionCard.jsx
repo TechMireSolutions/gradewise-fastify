@@ -1,3 +1,22 @@
+// Question fields (text / options) may arrive as plain strings or as objects
+// (e.g. { text, is_correct }). Coerce any value into something React can render
+// so the view never crashes on unexpected AI output.
+function displayText(value) {
+  if (value == null) return "";
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (typeof value === "object") {
+    const candidate =
+      value.text ?? value.label ?? value.value ?? value.option ?? value.answer ?? value.content;
+    if (typeof candidate === "string" || typeof candidate === "number") return String(candidate);
+    const firstPrimitive = Object.values(value).find(
+      (v) => typeof v === "string" || typeof v === "number"
+    );
+    if (firstPrimitive != null) return String(firstPrimitive);
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
 function QuestionCard({ question, index }) {
   return (
     <div
@@ -10,7 +29,7 @@ function QuestionCard({ question, index }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-base sm:text-lg font-semibold text-gray-900 mb-4 break-words">
-            {question.question_text}
+            {displayText(question.question_text)}
           </p>
 
           {/* Options Display */}
@@ -36,7 +55,7 @@ function QuestionCard({ question, index }) {
                   <div className="w-8 h-8 border-2 border-gray-400 rounded-full flex items-center justify-center font-semibold text-gray-700 flex-shrink-0">
                     {key}
                   </div>
-                  <span className="text-gray-800 break-words">{text}</span>
+                  <span className="text-gray-800 break-words">{displayText(text)}</span>
                 </div>
               ))}
             </div>
@@ -44,7 +63,7 @@ function QuestionCard({ question, index }) {
 
           <div className="mt-4 pt-4 border-t border-gray-200 flex flex-wrap gap-2 text-xs sm:text-sm text-gray-600">
             <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
-              {question.question_type.replace("_", " ")}
+              {(question.question_type ?? "question").replace("_", " ")}
             </span>
             <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
               +{question.positive_marks} marks
