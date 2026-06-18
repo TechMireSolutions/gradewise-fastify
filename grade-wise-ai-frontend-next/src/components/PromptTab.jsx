@@ -1,4 +1,4 @@
-import { FaFileAlt, FaCopy, FaCheckCircle } from "react-icons/fa";
+import { FaCopy, FaCheckCircle } from "react-icons/fa";
 import { generateAIPrompt } from "../utils/promptGenerator";
 
 function PromptTab({ assessment, copied, onCopy }) {

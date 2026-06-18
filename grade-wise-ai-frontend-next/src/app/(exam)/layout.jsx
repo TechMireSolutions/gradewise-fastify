@@ -5,7 +5,7 @@ import useHydrated from "@/hooks/useHydrated";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export default function ExamLayout({ children }) {
-  const { language, hasStarted } = useStudentAssessmentStore();
+  const { language } = useStudentAssessmentStore();
   const hydrated = useHydrated();
 
   // Handle SSR hydration safety

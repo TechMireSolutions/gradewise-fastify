@@ -62,7 +62,8 @@ function AdminDashboard() {
     return filteredUsers.reduce(
       (acc, u) => {
         acc[u.role] = (acc[u.role] || 0) + 1;
-        u.verified ? acc.verified++ : acc.unverified++;
+        if (u.verified) acc.verified++;
+        else acc.unverified++;
         return acc;
       },
       { admin: 0, instructor: 0, student: 0, verified: 0, unverified: 0 }

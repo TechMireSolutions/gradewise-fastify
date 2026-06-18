@@ -81,7 +81,8 @@ const useAuthStore = create(
 
       registerStudent: async (studentData) => {
         try {
-          const { role: _, ...cleanedData } = studentData;
+          const cleanedData = { ...studentData };
+          delete cleanedData.role;
           const response = await registerStudentApi(cleanedData);
           return response.data;
         } catch (error) {
