@@ -8,7 +8,7 @@ export default function useAssessmentSocket() {
   const [progressMessage, setProgressMessage] = useState("");
 
   useEffect(() => {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005";
     const socket = io(API_URL, {
       transports: ["websocket"],
       withCredentials: true,
