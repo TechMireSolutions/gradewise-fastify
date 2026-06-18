@@ -84,8 +84,8 @@ export default async function configModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      await addAiKeys(request.body.provider, request.body.purpose, request.body.keys);
-      return reply.send({ success: true, message: `Keys added for ${request.body.provider} (${request.body.purpose}).` });
+      const { added } = await addAiKeys(request.body.provider, request.body.purpose, request.body.keys);
+      return reply.send({ success: true, message: `Keys added for ${request.body.provider} (${request.body.purpose}).`, added });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });

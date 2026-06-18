@@ -6,21 +6,18 @@ import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { createAssessmentSchema } from "../../../scheema/assessmentSchemas.js";
+import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiCheckSquare, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
+
 function CreateAssessment() {
   const navigate = useNavigate();
   const { createAssessment, loading } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
   const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
-const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-
-
-
-useEffect(() => {
-  fetchAllResources();
-}, [fetchAllResources]);
-
-
+  useEffect(() => {
+    fetchAllResources();
+  }, [fetchAllResources]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -40,8 +37,6 @@ useEffect(() => {
   ]);
 
   const [selectedResources, setSelectedResources] = useState([]);
-
- 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -118,7 +113,6 @@ useEffect(() => {
     );
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -183,27 +177,47 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Create New Assessment</h1>
-          <p className="text-gray-600">Design a comprehensive assessment with customizable question blocks</p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Instructor Portal</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">Create New Assessment</h1>
+            <p className="text-slate-400 leading-relaxed">Design a comprehensive assessment with customizable question blocks</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/instructor/assessments")}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer self-start sm:self-auto"
+          >
+            <FiArrowLeft className="text-base" />
+            Back to Assessments
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Assessment Details Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-0">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
-              <h2 className="text-xl font-semibold">📝 Assessment Details</h2>
-            </CardHeader>
-            <CardContent className="p-6 sm:p-8">
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <FiFileText className="text-white text-base" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Assessment Details</h2>
+            </div>
+            <div className="p-6 sm:p-8">
               <div className="space-y-6">
                 {/* Title Input */}
                 <div>
-                  <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Assessment Title <span className="text-red-500">*</span>
+                  <label htmlFor="title" className="block text-slate-400 text-sm font-medium mb-1.5">
+                    Assessment Title <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -211,7 +225,7 @@ useEffect(() => {
                     id="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
+                    className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                     placeholder="e.g., Data Structures Final Exam"
                     required
                   />
@@ -219,8 +233,8 @@ useEffect(() => {
 
                 {/* Prompt Textarea */}
                 <div>
-                  <label htmlFor="prompt" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Prompt <span className="text-gray-500 font-normal">(Optional if using resources or links)</span>
+                  <label htmlFor="prompt" className="block text-slate-400 text-sm font-medium mb-1.5">
+                    Prompt <span className="text-slate-500 font-normal">(Optional if using resources or links)</span>
                   </label>
                   <textarea
                     name="prompt"
@@ -228,66 +242,92 @@ useEffect(() => {
                     value={formData.prompt}
                     onChange={handleInputChange}
                     rows={5}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 resize-none"
+                    className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
                     placeholder="Provide a detailed prompt for question generation. Describe the topics, difficulty level, and any specific requirements..."
                   />
                 </div>
 
-                {/* Resources Section — Only Existing */}
-                <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-100">
-                  <label className="block text-sm font-semibold text-gray-700 mb-4">📚 Select Existing Resources</label>
+                {/* Resources Section */}
+                <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FiBook className="text-indigo-400 text-sm" />
+                    <label className="block text-slate-400 text-sm font-medium">Select Existing Resources</label>
+                    {selectedResources.length > 0 && (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
+                        {selectedResources.length} selected
+                      </span>
+                    )}
+                  </div>
                   {resourcesLoading ? (
                     <div className="flex justify-center py-8">
                       <LoadingSpinner size="sm" type="dots" color="blue" />
                     </div>
                   ) : resources.length > 0 ? (
-                    <div className="space-y-2 max-h-64 overflow-y-auto border-2 border-gray-200 rounded-lg p-4 bg-white">
+                    <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
                       {resources.map((resource) => (
-                        <div key={resource.id} className="flex items-center p-2 hover:bg-gray-50 rounded-md transition-colors duration-150">
+                        <div
+                          key={resource.id}
+                          className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
+                            selectedResources.includes(resource.id)
+                              ? "bg-indigo-500/10 border-indigo-500/30"
+                              : "bg-slate-900/30 border-slate-700/40 hover:bg-indigo-500/5 hover:border-indigo-500/20"
+                          }`}
+                          onClick={() => !isProcessing && handleResourceToggle(resource.id)}
+                        >
                           <input
                             type="checkbox"
                             id={`resource-${resource.id}`}
                             checked={selectedResources.includes(resource.id)}
                             onChange={() => handleResourceToggle(resource.id)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            className="h-4 w-4 accent-indigo-500 border-slate-600 rounded focus:ring-indigo-500 cursor-pointer"
                             disabled={isProcessing}
                           />
-                          <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm text-gray-700 cursor-pointer flex-1">
-                            <span className="font-medium">{resource.name}</span>
-                            <span className="text-gray-500 ml-2">({resource.content_type})</span>
+                          <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
+                            <span className="font-medium text-slate-200">{resource.name}</span>
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-700/60 text-slate-400 border border-slate-600/40">{resource.content_type}</span>
                           </label>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 bg-white border-2 border-dashed border-gray-200 rounded-lg">
-                      <p className="text-gray-500">No resources available. Upload them from the Resources page.</p>
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-3">
+                        <FiBook className="text-indigo-400 text-lg" />
+                      </div>
+                      <p className="text-slate-400 text-sm">No resources available.</p>
+                      <p className="text-slate-500 text-xs mt-1">Upload them from the Resources page.</p>
                     </div>
                   )}
                 </div>
 
                 {/* External Links */}
-                <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-100">
-                  <label className="block text-sm font-semibold text-gray-700 mb-4">🔗 External Links</label>
+                <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FiLink className="text-indigo-400 text-sm" />
+                    <label className="block text-slate-400 text-sm font-medium">External Links</label>
+                  </div>
                   <div className="space-y-3">
                     {formData.externalLinks.map((link, index) => (
                       <div key={index} className="flex items-center gap-2">
-                        <input
-                          type="url"
-                          value={link}
-                          onChange={(e) => handleLinkChange(index, e.target.value)}
-                          placeholder="https://example.com/resource"
-                          className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
-                          disabled={isProcessing}
-                        />
+                        <div className="relative flex-1">
+                          <FiLink className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
+                          <input
+                            type="url"
+                            value={link}
+                            onChange={(e) => handleLinkChange(index, e.target.value)}
+                            placeholder="https://example.com/resource"
+                            className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                            disabled={isProcessing}
+                          />
+                        </div>
                         {formData.externalLinks.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeExternalLink(index)}
-                            className="px-4 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200 font-medium"
+                            className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
                             disabled={isProcessing}
                           >
-                            Remove
+                            <FiX className="text-base" />
                           </button>
                         )}
                       </div>
@@ -296,47 +336,60 @@ useEffect(() => {
                   <button
                     type="button"
                     onClick={addExternalLink}
-                    className="mt-4 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium"
+                    className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
                     disabled={isProcessing}
                   >
-                    + Add Link
+                    <FiPlus className="text-base" />
+                    Add Link
                   </button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Question Blocks Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-0">
-            <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-lg">
-              <h2 className="text-xl font-semibold">❓ Question Configuration</h2>
-            </CardHeader>
-            <CardContent className="p-6 sm:p-8">
-              <div className="space-y-6">
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
+                <FiList className="text-white text-base" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Question Configuration</h2>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-400 border border-slate-600/40 ml-auto">
+                {questionBlocks.length} {questionBlocks.length === 1 ? "Block" : "Blocks"}
+              </span>
+            </div>
+            <div className="p-6 sm:p-8">
+              <div className="space-y-5">
                 {questionBlocks.map((block, index) => (
-                  <div key={index} className="p-6 border-2 border-gray-200 rounded-xl bg-gradient-to-br from-white to-gray-50 hover:border-blue-300 transition-all duration-300">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Block {index + 1}</span>
-                      </h3>
+                  <div key={index} className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5 hover:border-indigo-500/25 transition-all duration-200">
+                    <div className="flex justify-between items-center mb-5">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                          Block {index + 1}
+                        </span>
+                        <h3 className="text-base font-semibold text-slate-200">
+                          {block.questionType === "multiple_choice" ? "Multiple Choice" : "True / False"}
+                        </h3>
+                      </div>
                       {questionBlocks.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeQuestionBlock(index)}
-                          className="text-red-600 hover:text-red-800 font-medium hover:bg-red-50 px-3 py-1 rounded-lg transition-colors duration-200"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
                           disabled={isProcessing}
                         >
-                          🗑️ Remove
+                          <FiTrash2 className="text-sm" />
+                          Remove
                         </button>
                       )}
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Type</label>
                         <select
                           value={block.questionType}
                           onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 bg-white"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer"
                           disabled={isProcessing}
                         >
                           <option value="multiple_choice">Multiple Choice</option>
@@ -345,28 +398,28 @@ useEffect(() => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Question Count</label>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Count</label>
                         <input
                           type="number"
                           value={block.questionCount}
                           onChange={(e) => handleBlockChange(index, "questionCount", e.target.value)}
                           min="1"
                           placeholder="e.g. 5"
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                           required
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Duration (seconds)</label>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Duration (seconds)</label>
                         <input
                           type="number"
                           value={block.durationPerQuestion}
                           onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
                           min="30"
                           placeholder="e.g. 120"
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                           required
                           disabled={isProcessing}
                         />
@@ -374,7 +427,7 @@ useEffect(() => {
 
                       {block.questionType === "multiple_choice" && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Number of Options</label>
+                          <label className="block text-slate-400 text-sm font-medium mb-1.5">Number of Options</label>
                           <input
                             type="number"
                             value={block.numOptions}
@@ -382,7 +435,7 @@ useEffect(() => {
                             min="2"
                             max="6"
                             placeholder="2 to 6"
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
+                            className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                             required
                             disabled={isProcessing}
                           />
@@ -390,7 +443,7 @@ useEffect(() => {
                       )}
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Positive Marks</label>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Positive Marks</label>
                         <input
                           type="number"
                           value={block.positiveMarks || ""}
@@ -398,13 +451,13 @@ useEffect(() => {
                           min="0"
                           step="0.1"
                           placeholder="e.g. 1"
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Negative Marks</label>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Negative Marks</label>
                         <input
                           type="number"
                           value={block.negativeMarks || ""}
@@ -412,60 +465,62 @@ useEffect(() => {
                           min="0"
                           step="0.1"
                           placeholder="e.g. 0.25"
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
                           disabled={isProcessing}
                         />
                       </div>
                     </div>
                   </div>
                 ))}
+
                 <button
                   type="button"
                   onClick={addQuestionBlock}
-                  className="w-full py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 rounded-lg hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 font-semibold border-2 border-dashed border-blue-300 hover:border-blue-400"
+                  className="w-full py-3.5 flex items-center justify-center gap-2 bg-slate-800/40 hover:bg-indigo-500/10 border-2 border-dashed border-slate-600/60 hover:border-indigo-500/40 text-slate-400 hover:text-indigo-400 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer"
                   disabled={isProcessing}
                 >
-                  + Add Question Block
+                  <FiPlus className="text-base" />
+                  Add Question Block
                 </button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 pb-4">
             <button
               type="button"
               onClick={() => navigate("/instructor/assessments")}
-              className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium order-2 sm:order-1"
+              className="px-6 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer order-2 sm:order-1"
               disabled={isProcessing}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-semibold shadow-md hover:shadow-lg order-1 sm:order-2"
+              className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
               disabled={loading || isProcessing}
             >
               {isProcessing ? (
                 <>
                   <LoadingSpinner size="sm" color="white" type="gradient" />
-                  <span className="ml-2">Processing...</span>
+                  <span>Processing...</span>
                 </>
               ) : loading ? (
                 <>
                   <LoadingSpinner size="sm" color="white" type="gradient" />
-                  <span className="ml-2">Creating...</span>
+                  <span>Creating...</span>
                 </>
               ) : (
                 <>
-                  <span>✨ Create Assessment</span>
+                  <FiZap className="text-base" />
+                  <span>Create Assessment</span>
                 </>
               )}
             </button>
           </div>
         </form>
       </div>
-
 
       <Modal
         isOpen={modal.isOpen}

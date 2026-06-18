@@ -20,10 +20,10 @@ import useRecaptchaInit from "../hooks/useRecaptchaInit.js";
 import { ZodError } from "zod";
 import { loginSchema } from "../scheema/authSchemas.js";
 
-const inputBase =
-  "w-full pl-10 pr-4 py-3 border-2 rounded-xl shadow-sm transition-all duration-200 bg-white dark:bg-slate-700/50 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1";
-const inputValid = `${inputBase} border-slate-300 dark:border-slate-600 focus-visible:border-violet-500 focus-visible:ring-violet-400/50`;
-const inputError = `${inputBase} border-rose-500 dark:border-rose-500 focus-visible:ring-rose-400/50`;
+const inputValid =
+  "w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30";
+const inputError =
+  "w-full bg-slate-800/60 backdrop-blur-sm border border-red-500/50 hover:border-red-500/70 focus:border-red-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/30";
 
 function Login() {
   const navigate = useNavigate();
@@ -105,163 +105,167 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/20 to-indigo-50/30 dark:from-slate-950 dark:via-violet-950/10 dark:to-slate-950 transition-colors duration-200">
-      <div className="flex flex-col items-center justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full max-w-md">
 
         {/* Back link */}
-        <div className="w-full max-w-md mb-4">
+        <div className="mb-6">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 font-semibold transition-colors duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 rounded-lg px-1"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
           >
-            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform duration-150" />
+            <FaArrowLeft className="text-xs" />
             <span>Back to Home</span>
           </Link>
         </div>
 
-        <Card className="w-full max-w-md shadow-2xl border-2 border-slate-200 dark:border-slate-700 rounded-2xl sm:rounded-3xl overflow-hidden dark:bg-slate-800">
+        {/* Form card */}
+        <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
 
-          {/* Card header */}
-          <CardHeader className="bg-gradient-to-r from-violet-600 to-indigo-700 text-white p-6 sm:p-8">
-            <div className="text-center">
-              <div className="bg-white/20 backdrop-blur-sm w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <FaUserCircle className="text-3xl sm:text-4xl" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Welcome Back</h2>
-              <p className="text-violet-100 text-sm sm:text-base">Sign in to your Gradewise AI account</p>
+          {/* Brand header */}
+          <div className="mb-8 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex items-center justify-center mx-auto mb-4">
+              <FaUserCircle className="text-white text-2xl" />
             </div>
-          </CardHeader>
+            <h1 className="text-3xl font-bold tracking-tight mb-1">
+              <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Welcome Back
+              </span>
+            </h1>
+            <p className="text-slate-400 text-sm">Sign in to your Gradewise AI account</p>
+          </div>
 
-          <CardContent className="p-6 sm:p-8">
+          {/* Google button */}
+          <button
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || loading}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500/70 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-h-[44px] mb-6"
+          >
+            {googleLoading ? (
+              <LoadingSpinner size="sm" type="dots" color="blue" />
+            ) : (
+              <>
+                <FaGoogle className="text-base" />
+                <span>Continue with Google</span>
+              </>
+            )}
+          </button>
 
-            {/* Google button */}
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-700/50" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-4 bg-slate-800/50 text-slate-500 font-semibold uppercase tracking-widest">
+                Or continue with email
+              </span>
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-slate-400 text-sm font-medium mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={errors.email ? inputError : inputValid}
+                  placeholder="Enter your email address"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+                  <FaExclamationTriangle className="flex-shrink-0" />
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label htmlFor="password" className="block text-slate-400 text-sm font-medium mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className={errors.password ? inputError : inputValid}
+                  placeholder="Enter your password"
+                />
+              </div>
+              {errors.password && (
+                <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+                  <FaExclamationTriangle className="flex-shrink-0" />
+                  {errors.password}
+                </p>
+              )}
+            </div>
+
+            {/* Submit */}
             <button
-              onClick={handleGoogleLogin}
-              disabled={googleLoading || loading}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 sm:py-4 border-2 border-slate-300 dark:border-slate-600 rounded-xl shadow-md bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 mb-6 font-semibold min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
+              type="submit"
+              disabled={loading || googleLoading}
+              className="w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-h-[44px]"
             >
-              {googleLoading ? (
-                <LoadingSpinner size="sm" type="dots" color="blue" />
+              {loading ? (
+                <LoadingSpinner size="sm" color="white" type="dots" />
               ) : (
                 <>
-                  <FaGoogle className="text-xl" />
-                  <span>Continue with Google</span>
+                  <FaSignInAlt />
+                  <span>Sign In</span>
                 </>
               )}
             </button>
+          </form>
 
-            {/* Divider */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t-2 border-slate-200 dark:border-slate-700" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold">
-                  Or continue with email
-                </span>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaEnvelope className="text-slate-400" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={errors.email ? inputError : inputValid}
-                    placeholder="Enter your email address"
-                  />
-                </div>
-                {errors.email && (
-                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <FaExclamationTriangle className="flex-shrink-0" />
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaLock className="text-slate-400" />
-                  </div>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className={errors.password ? inputError : inputValid}
-                    placeholder="Enter your password"
-                  />
-                </div>
-                {errors.password && (
-                  <p className="mt-2 text-sm text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <FaExclamationTriangle className="flex-shrink-0" />
-                    {errors.password}
-                  </p>
-                )}
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading || googleLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 sm:py-4 px-4 rounded-xl shadow-lg text-base font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2"
-              >
-                {loading ? (
-                  <LoadingSpinner size="sm" color="white" type="dots" />
-                ) : (
-                  <>
-                    <FaSignInAlt />
-                    <span>Sign In</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Footer links */}
-            <div className="mt-6 space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className="font-bold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 hover:underline transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 rounded"
-                  >
-                    Create one here
-                  </Link>
-                </p>
-              </div>
-              <div className="text-center pt-4 border-t border-slate-200 dark:border-slate-700">
+          {/* Footer links */}
+          <div className="mt-6 space-y-4">
+            <div className="text-center">
+              <p className="text-sm text-slate-400">
+                Don&apos;t have an account?{" "}
                 <Link
-                  to="/forgot-password"
-                  className="text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 rounded"
+                  to="/signup"
+                  className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors duration-150 cursor-pointer"
                 >
-                  Forgot your password?
+                  Create one here
                 </Link>
-              </div>
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-center pt-4 border-t border-slate-700/50">
+              <Link
+                to="/forgot-password"
+                className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
       <Modal

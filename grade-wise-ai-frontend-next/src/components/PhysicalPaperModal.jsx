@@ -17,6 +17,8 @@ const INITIAL_FORM = {
   subjectName: "",
   paperDate: "",
   paperTime: "",
+  paperDuration: "",
+  totalMarks: "",
   notes: "",
   pageSize: "A4",
   headerFontSize: 18,
@@ -57,11 +59,30 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
       return;
     }
 
+    if (!form.instituteName.trim()) { showNotify("warning", "Required", "Please enter the institute name."); return; }
+    if (!form.teacherName.trim())   { showNotify("warning", "Required", "Please enter the teacher name."); return; }
+    if (!form.subjectName.trim())   { showNotify("warning", "Required", "Please enter the subject name."); return; }
+    if (!form.paperDate)            { showNotify("warning", "Required", "Please select the paper date."); return; }
+    if (!form.paperTime)            { showNotify("warning", "Required", "Please select the paper time."); return; }
+    if (!form.paperDuration.trim()) { showNotify("warning", "Required", "Please enter the paper duration (e.g. 3 Hours)."); return; }
+    if (!form.totalMarks || Number(form.totalMarks) <= 0) { showNotify("warning", "Required", "Please enter total marks (must be greater than 0)."); return; }
+
     setLoading(true);
     try {
       const blob = await generatePhysicalPaper(assessmentId, {
         language: selectedLanguage,
-        ...form,
+        instituteName: form.instituteName,
+        teacherName: form.teacherName,
+        subjectName: form.subjectName,
+        paperDate: form.paperDate,
+        paperTime: form.paperTime,
+        paperDuration: form.paperDuration,
+        totalMarks: Number(form.totalMarks),
+        notes: form.notes,
+        pageSize: form.pageSize.toUpperCase(),
+        headerFontSize: Number(form.headerFontSize),
+        bodyFontSize: Number(form.questionFontSize),
+        outputFormat: "pdf",
       });
 
       const fileName = `${sanitizeFileName(assessmentTitle)}_Paper_${selectedLanguage.toUpperCase()}.pdf`;

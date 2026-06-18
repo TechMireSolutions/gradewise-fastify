@@ -74,7 +74,7 @@ export async function addAiKeys(
   provider: ProviderType,
   purpose: PurposeType,
   keys: string[]
-): Promise<void> {
+): Promise<{ added: number }> {
   const configKey = `${purpose.toUpperCase()}_${provider.toUpperCase()}_KEYS`;
   const existing = await db
     .select()
@@ -88,6 +88,7 @@ export async function addAiKeys(
     .filter(Boolean) ?? [];
 
   const merged = Array.from(new Set([...existingKeys, ...keys]));
+  const added = merged.length - existingKeys.length;
   const newValue = merged.join(",");
 
   if (existing.length > 0) {
@@ -100,6 +101,7 @@ export async function addAiKeys(
   }
 
   invalidateConfigCache();
+  return { added };
 }
 
 export async function setProviderModel(

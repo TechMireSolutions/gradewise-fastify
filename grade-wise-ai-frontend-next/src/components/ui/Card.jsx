@@ -2,8 +2,8 @@
 function Card({ children, className = "", hover = false }) {
   return (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-lg shadow-md border border-gray-200 dark:border-slate-700 ${
-        hover ? "hover:shadow-lg transition-shadow duration-300" : ""
+      className={`bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl ${
+        hover ? "hover:border-indigo-500/30 transition-all duration-200" : ""
       } ${className}`}
     >
       {children}
@@ -12,7 +12,7 @@ function Card({ children, className = "", hover = false }) {
 }
 
 function CardHeader({ children, className = "" }) {
-  return <div className={`p-6 border-b border-gray-200 dark:border-slate-700 ${className}`}>{children}</div>
+  return <div className={`px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 ${className}`}>{children}</div>
 }
 
 function CardContent({ children, className = "" }) {

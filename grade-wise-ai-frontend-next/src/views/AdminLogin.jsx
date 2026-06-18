@@ -7,7 +7,7 @@ import { Card, CardHeader, CardContent } from "../components/ui/Card.jsx";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
 import { getCaptchaToken } from "../config/captcha.js";
-import { FaLock, FaSignInAlt, FaUserShield, FaArrowLeft } from "react-icons/fa";
+import { FaLock, FaSignInAlt, FaUserShield, FaArrowLeft, FaEnvelope } from "react-icons/fa";
 import { redirectByRole } from "../utils/redirectByRole.js";
 import useRecaptchaInit from "../hooks/useRecaptchaInit.js";
 import { loginSchema } from "../scheema/authSchemas.js";
@@ -59,102 +59,113 @@ function AdminLogin() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Decorations */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
-      <div className="w-full max-w-md z-10">
+      <div className="w-full max-w-md relative z-10">
+        {/* Back link */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors duration-150 ease-out group"
+          className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6 transition-colors duration-150 group"
         >
           <FaArrowLeft className="group-hover:-translate-x-1 transition-transform duration-150" />
-          <span>Back to Home Page</span>
+          <span className="text-sm font-medium">Back to Home Page</span>
         </Link>
 
-        <Card className="shadow-2xl border-0 bg-slate-800 text-white rounded-3xl overflow-hidden ring-1 ring-slate-700">
-          <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-700 border-b border-slate-700 p-8">
-            <div className="text-center">
-              <div className="bg-indigo-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl rotate-3 transform hover:rotate-0 transition-transform duration-300">
-                <FaUserShield className="text-4xl text-white" />
-              </div>
-              <h2 className="text-3xl font-black tracking-tight mb-2">Admin Portal</h2>
-              <p className="text-slate-400 font-medium">Secure Administrative Access</p>
+        {/* Form card */}
+        <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+          {/* Brand header */}
+          <div className="mb-8 text-center">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 w-16 h-16 flex items-center justify-center mx-auto mb-5">
+              <FaUserShield className="text-white text-2xl" />
             </div>
-          </CardHeader>
+            <h1 className="text-3xl font-bold tracking-tight mb-1">
+              <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Admin Portal
+              </span>
+            </h1>
+            <p className="text-slate-400 text-sm">Secure administrative access only</p>
+          </div>
 
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">
-                  Admin Email
-                </label>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div>
+              <label className="block text-slate-400 text-sm font-medium mb-1.5">
+                Admin Email
+              </label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
                 <input
                   {...register("email")}
                   type="email"
-                  className={`w-full px-5 py-4 bg-slate-900/50 border-2 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 transition-all duration-200 ease-out ${
+                  className={`w-full bg-slate-800/60 backdrop-blur-sm border hover:border-slate-600 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.email
-                      ? "border-rose-500 focus:ring-rose-500/20"
-                      : "border-slate-700 focus:border-indigo-500 focus:ring-indigo-500/20"
+                      ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
+                      : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="admin@gradewise.ai"
                 />
-                {errors.email && (
-                  <p className="mt-2 text-xs text-rose-400 font-bold ml-1 uppercase tracking-wider italic">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
+              {errors.email && (
+                <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.email.message}</p>
+              )}
+            </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2 ml-1">
-                  Secure Password
-                </label>
+            {/* Password */}
+            <div>
+              <label className="block text-slate-400 text-sm font-medium mb-1.5">
+                Secure Password
+              </label>
+              <div className="relative">
+                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
                 <input
                   {...register("password")}
                   type="password"
-                  className={`w-full px-5 py-4 bg-slate-900/50 border-2 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-4 transition-all duration-200 ease-out ${
+                  className={`w-full bg-slate-800/60 backdrop-blur-sm border hover:border-slate-600 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.password
-                      ? "border-rose-500 focus:ring-rose-500/20"
-                      : "border-slate-700 focus:border-indigo-500 focus:ring-indigo-500/20"
+                      ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
+                      : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="••••••••••••"
                 />
-                {errors.password && (
-                  <p className="mt-2 text-xs text-rose-400 font-bold ml-1 uppercase tracking-wider italic">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-4 border-0 rounded-2xl shadow-xl text-lg font-black text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-600/50 disabled:opacity-50 transition-all duration-200 ease-out transform active:scale-95 min-h-[44px]"
-              >
-                {loading ? (
-                  <LoadingSpinner size="sm" color="white" type="dots" />
-                ) : (
-                  <>
-                    <FaSignInAlt />
-                    <span>Authorize Access</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-8 pt-6 border-t border-slate-700 text-center">
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">
-                System Security Level: High
-              </p>
+              {errors.password && (
+                <p className="mt-1.5 text-xs text-red-400 font-medium">{errors.password.message}</p>
+              )}
             </div>
-          </CardContent>
-        </Card>
 
-        <p className="mt-8 text-center text-slate-500 text-sm font-medium">
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 min-h-[44px]"
+            >
+              {loading ? (
+                <LoadingSpinner size="sm" color="white" type="dots" />
+              ) : (
+                <>
+                  <FaSignInAlt />
+                  <span>Authorize Access</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer note */}
+          <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+              System Security Level: High
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-6 text-center text-slate-500 text-xs">
           Gradewise AI Management Systems &copy; 2026
         </p>
       </div>

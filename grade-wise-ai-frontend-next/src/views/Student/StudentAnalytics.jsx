@@ -108,53 +108,71 @@ const StudentAnalytics = () => {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
-        <div className="text-center">
-          <LoadingSpinner size="lg" color="purple" type="gradient" />
-          <p className="mt-4 text-gray-600 font-semibold">Loading analytics...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+            <LoadingSpinner size="lg" type="spinner" color="blue" />
+          </div>
+          <p className="text-slate-400 text-sm">Loading analytics...</p>
         </div>
       </div>
     );
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
-        <div className="text-center bg-white p-8 rounded-2xl shadow-2xl border-2 border-red-200">
-          <FaTimesCircle className="text-6xl text-red-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-red-600 mb-2">Error Loading Data</h2>
-          <p className="text-gray-600">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4">
+        <div className="flex flex-col items-center justify-center py-28 text-center px-4">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6">
+            <FaTimesCircle className="text-3xl text-red-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-2">Error Loading Data</h3>
+          <p className="text-slate-400 max-w-sm">{error}</p>
         </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
 
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
         {/* Header */}
         <div className="mb-8 sm:mb-10">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl text-white text-center">
-            <FaChartLine className="text-4xl sm:text-5xl mx-auto mb-4" />
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">My Analytics</h1>
-            <p className="text-blue-100 text-sm sm:text-base">Review your performance and track your progress</p>
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-6 sm:p-8 text-center">
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <FaChartLine className="text-white text-2xl sm:text-3xl" />
+              </div>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">My Analytics</h1>
+            <p className="text-slate-400 text-sm sm:text-base">Review your performance and track your progress</p>
           </div>
         </div>
 
         {/* Assessment List */}
-        <div ref={assessmentsRef} className="space-y-4 sm:space-y-6 max-w-5xl mx-auto scroll-mt-24">
-       {Array.isArray(assessments) && assessments.length > 0 ? (
+        <div ref={assessmentsRef} className="space-y-4 sm:space-y-5 max-w-5xl mx-auto scroll-mt-24">
+          {Array.isArray(assessments) && assessments.length > 0 ? (
             assessments.map((a) => (
-              <Card
+              <div
                 key={a.id}
-                className={`w-full shadow-xl hover:shadow-2xl transition-all duration-300 border-2 transform hover:-translate-y-1 ${selectedAssessment === a.id
-                    ? "border-indigo-500 ring-4 ring-indigo-200"
-                    : "border-gray-200"
-                  }`}
+                className={`bg-slate-800/40 backdrop-blur-sm border rounded-2xl shadow-2xl transition-all duration-200 hover:border-indigo-500/30 ${
+                  selectedAssessment === a.id
+                    ? "border-indigo-500/50 ring-1 ring-indigo-500/30"
+                    : "border-slate-700/50"
+                }`}
               >
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 sm:p-5 text-white rounded-t-xl">
-                  <h3 className="text-lg sm:text-xl font-bold mb-1">{a.title}</h3>
-                  <p className="text-xs sm:text-sm opacity-90 flex items-center gap-2">
-                    <FaClock />
+                {/* Card header */}
+                <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{a.title}</h3>
+                  <p className="text-xs text-slate-500 flex items-center gap-2">
+                    <FaClock className="text-slate-500" />
                     {new Date(a.date).toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
@@ -164,16 +182,16 @@ const StudentAnalytics = () => {
                   </p>
                 </div>
 
-                <CardContent className="p-4 sm:p-6">
+                <div className="p-5 sm:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <p className="text-gray-600 font-semibold">
+                    <p className="text-slate-400 text-sm">
                       Click to review your answers and performance
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={() => handleSeeResults(a.id)}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
                       >
                         <FaTrophy />
                         <span>Results</span>
@@ -181,23 +199,23 @@ const StudentAnalytics = () => {
 
                       <button
                         onClick={() => handleSeeQuestions(a.id)}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
                       >
                         <FaEye />
                         <span>Questions</span>
                       </button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))
           ) : (
-            <div className="text-center py-16 sm:py-20 bg-white rounded-2xl shadow-xl border-2 border-gray-200">
-              <div className="bg-gradient-to-br from-gray-100 to-blue-100 w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center mx-auto mb-6">
-                <FaBook className="text-5xl sm:text-6xl text-gray-400" />
+            <div className="flex flex-col items-center justify-center py-28 text-center px-4">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                <FaBook className="text-3xl text-indigo-400" />
               </div>
-              <p className="text-xl sm:text-2xl font-bold text-gray-700 mb-2">No assessments completed yet</p>
-              <p className="text-gray-500">Complete assessments to see your analytics here</p>
+              <h3 className="text-2xl font-bold text-white mb-2">No assessments completed yet</h3>
+              <p className="text-slate-400 max-w-sm mb-8">Complete assessments to see your analytics here</p>
             </div>
           )}
         </div>
@@ -206,47 +224,57 @@ const StudentAnalytics = () => {
         {showType === "results" && selectedAssessmentDetails && (
           <div
             ref={resultsRef}
-            className="mt-10 sm:mt-12 space-y-6 sm:space-y-8 max-w-5xl mx-auto scroll-mt-24 animate-fadeIn"
+            className="mt-10 sm:mt-12 space-y-6 sm:space-y-8 max-w-5xl mx-auto scroll-mt-24 animate-fade-in"
           >
-            <Card className="shadow-2xl border-2 border-indigo-300 transform transition-all duration-500">
-              <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-center py-6 sm:py-8">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+              {/* Results header */}
+              <div className="px-6 py-5 border-b border-slate-700/50 bg-slate-800/60 text-center">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Performance Summary</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-white">
                   {selectedAssessmentDetails.assessment_title}
                 </h2>
-                <p className="text-indigo-100 text-sm mt-2">Performance Summary</p>
-              </CardHeader>
+              </div>
 
-              <CardContent className="p-6 sm:p-8">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-center">
-                  <div className="p-6 sm:p-8 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl shadow-xl transform hover:scale-105 transition-transform duration-300 animate-slideInLeft">
-                    <FaTrophy className="text-4xl sm:text-5xl mx-auto mb-3" />
-                    <p className="text-4xl sm:text-5xl font-extrabold">{selectedAssessmentDetails.score}%</p>
-                    <p className="text-base sm:text-lg mt-2 font-semibold">Score</p>
+              <div className="p-6 sm:p-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5 text-center">
+                  {/* Score */}
+                  <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-3 hover:border-emerald-500/50 transition-all duration-200">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+                      <FaTrophy className="text-white text-xl" />
+                    </div>
+                    <p className="text-4xl sm:text-5xl font-bold text-white leading-none">{selectedAssessmentDetails.score}%</p>
+                    <p className="text-xs text-slate-400 mt-0.5 font-semibold uppercase tracking-wider">Score</p>
                   </div>
 
-                  <div className="p-6 sm:p-8 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl shadow-xl transform hover:scale-105 transition-transform duration-300 animate-slideInUp">
-                    <FaClock className="text-4xl sm:text-5xl mx-auto mb-3" />
-                    <p className="text-3xl sm:text-4xl font-extrabold">{formatTime(selectedAssessmentDetails.time_taken)}</p>
-                    <p className="text-base sm:text-lg mt-2 font-semibold">Time</p>
+                  {/* Time */}
+                  <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-3 hover:border-indigo-500/50 transition-all duration-200">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                      <FaClock className="text-white text-xl" />
+                    </div>
+                    <p className="text-3xl sm:text-4xl font-bold text-white leading-none">{formatTime(selectedAssessmentDetails.time_taken)}</p>
+                    <p className="text-xs text-slate-400 mt-0.5 font-semibold uppercase tracking-wider">Time Taken</p>
                   </div>
 
-                  <div className="p-6 sm:p-8 bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl shadow-xl transform hover:scale-105 transition-transform duration-300 animate-slideInRight">
-                    <FaCheckCircle className="text-4xl sm:text-5xl mx-auto mb-3" />
-                    <p className="text-3xl sm:text-4xl font-extrabold">
+                  {/* Correct */}
+                  <div className="bg-gradient-to-br from-sky-500/20 to-blue-500/20 backdrop-blur-sm border border-sky-500/30 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-3 hover:border-sky-500/50 transition-all duration-200">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/25">
+                      <FaCheckCircle className="text-white text-xl" />
+                    </div>
+                    <p className="text-3xl sm:text-4xl font-bold text-white leading-none">
                       {selectedAssessmentDetails.correct_answers} / {selectedAssessmentDetails.total_questions}
                     </p>
-                    <p className="text-base sm:text-lg mt-2 font-semibold">Correct</p>
+                    <p className="text-xs text-slate-400 mt-0.5 font-semibold uppercase tracking-wider">Correct</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <div className="text-center animate-fadeIn">
+            <div className="text-center animate-fade-in">
               <button
                 onClick={() => downloadReport(selectedAssessment)}
-                className="inline-flex items-center gap-3 px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all text-base sm:text-lg shadow-2xl hover:shadow-indigo-500/50 transform hover:-translate-y-1 active:translate-y-0"
+                className="inline-flex items-center gap-3 px-8 sm:px-10 py-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer text-sm sm:text-base"
               >
-                <FaDownload className="text-xl" />
+                <FaDownload />
                 <span>Download Full Report (PDF)</span>
               </button>
             </div>
@@ -257,9 +285,9 @@ const StudentAnalytics = () => {
         {showType === "questions" && (
           <div
             ref={questionsRef}
-            className="mt-10 sm:mt-12 space-y-6 sm:space-y-8 max-w-5xl mx-auto scroll-mt-24"
+            className="mt-10 sm:mt-12 space-y-5 sm:space-y-6 max-w-5xl mx-auto scroll-mt-24"
           >
-            {/* Floating Back Arrow - Only at the end */}
+            {/* Floating Back Arrow */}
             <button
               onClick={() => {
                 setShowType(null);
@@ -267,72 +295,89 @@ const StudentAnalytics = () => {
                   assessmentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
               }}
-              className="fixed left-1/2 -translate-x-1/2 top-24 z-40 group animate-fadeIn"
+              className="fixed left-1/2 -translate-x-1/2 top-24 z-40 group animate-fade-in"
               aria-label="Back to assessments"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
-                  <FaArrowUp className="text-white text-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div className="relative bg-gradient-to-r from-indigo-500 to-violet-600 p-4 rounded-full shadow-2xl shadow-indigo-500/30 transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                  <FaArrowUp className="text-white text-xl" />
                 </div>
               </div>
-              <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
+              <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700/50 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
                 Back to Assessments
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-gray-900"></div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-slate-900"></div>
               </div>
             </button>
+
             {questionsLoading ? (
-              <Card className="shadow-xl animate-pulse">
-                <CardContent className="py-16 sm:py-20 text-center">
-                  <LoadingSpinner size="lg" color="blue" type="dots" />
-                  <p className="mt-4 text-gray-600 font-semibold">Loading questions...</p>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col items-center justify-center py-32 gap-4">
+                <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                  <LoadingSpinner size="lg" type="spinner" color="blue" />
+                </div>
+                <p className="text-slate-400 text-sm">Loading questions...</p>
+              </div>
             ) : Array.isArray(questions) && questions.length > 0 ? (
               <>
-                <div className="text-center mb-6 animate-fadeIn">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+                <div className="text-center mb-6 animate-fade-in">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Assessment Review</p>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                     Question Review
                   </h2>
-                  <p className="text-gray-600">Review all questions and your answers</p>
+                  <p className="text-slate-400 text-sm">Review all questions and your answers</p>
                 </div>
 
                 {questions.map((q, i) => (
-                  <Card
+                  <div
                     key={i}
-                    className="shadow-2xl border-2 border-gray-200 overflow-hidden transform transition-all duration-300 hover:shadow-3xl animate-slideInUp"
-                    style={{ animationDelay: `${i * 0.1}s` }}
+                    className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden animate-fade-in"
+                    style={{ animationDelay: `${i * 0.05}s` }}
                   >
-                    <div className="bg-gradient-to-r from-gray-800 to-gray-900 text-white p-4 sm:p-5">
-                      <h3 className="text-base sm:text-lg lg:text-xl font-bold flex items-center gap-2">
-                        <FaBook />
-                        Question {q.question_order || i + 1} ({q.type})
+                    {/* Question header */}
+                    <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60">
+                      <h3 className="text-base sm:text-lg font-semibold text-slate-200 flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 shadow-sm">
+                          <FaBook className="text-white text-xs" />
+                        </div>
+                        Question {q.question_order || i + 1}
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-1">
+                          {q.type}
+                        </span>
                       </h3>
                     </div>
-                    <CardContent className="p-5 sm:p-6 lg:p-8 space-y-6">
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 p-4 sm:p-5 rounded-xl">
-                        <p className="font-bold text-blue-900 mb-2 text-sm sm:text-base">Question:</p>
-                        <p className="text-sm sm:text-base text-gray-800 leading-relaxed">{q.question}</p>
+
+                    <div className="p-5 sm:p-6 space-y-5">
+                      {/* Question text */}
+                      <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Question</p>
+                        <p className="text-sm sm:text-base text-slate-300 leading-relaxed">{q.question}</p>
                       </div>
 
+                      {/* Options (MCQ) */}
                       {["multiple_choice", "MCQ"].includes(q.type) && q.options && (
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 p-4 sm:p-5 rounded-xl">
-                          <p className="font-bold text-purple-900 mb-3 text-sm sm:text-base">Options</p>
+                        <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Options</p>
                           <div className="space-y-2">
                             {Object.entries(q.options).map(([k, v]) => (
-                              <div key={k} className="bg-white border border-purple-200 p-3 rounded-lg text-gray-700 text-xs sm:text-sm transition-all hover:shadow-md">
-                                <strong className="text-purple-600">{k}:</strong> {v}
+                              <div key={k} className="bg-slate-900/50 border border-slate-700/40 hover:border-slate-600/60 p-3 rounded-xl text-slate-300 text-xs sm:text-sm transition-all duration-150">
+                                <strong className="text-indigo-400 mr-1">{k}:</strong> {v}
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
 
+                      {/* Answer comparison */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 p-5 sm:p-6 rounded-xl text-center transform transition-all hover:scale-105">
-                          <FaCheckCircle className="text-3xl sm:text-4xl text-green-600 mx-auto mb-2" />
-                          <p className="font-bold text-green-900 text-sm sm:text-base">Correct Answer</p>
-                          <p className="font-bold text-lg mt-2 text-green-700">
+                        {/* Correct answer */}
+                        <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-5 sm:p-6 text-center hover:border-emerald-500/50 transition-all duration-200">
+                          <div className="flex justify-center mb-3">
+                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+                              <FaCheckCircle className="text-white text-lg" />
+                            </div>
+                          </div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Correct Answer</p>
+                          <p className="font-bold text-lg text-emerald-400">
                             {q.type === 'true_false'
                               ? (q.correct_answer === true || q.correct_answer === 'true' ? 'True' : 'False')
                               : q.correct_answer || "N/A"
@@ -340,17 +385,25 @@ const StudentAnalytics = () => {
                           </p>
                         </div>
 
-                        <div className={`border-2 p-5 sm:p-6 rounded-xl text-center transform transition-all hover:scale-105 ${q.is_correct
-                            ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
-                            : "bg-gradient-to-br from-red-50 to-pink-50 border-red-200"
-                          }`}>
-                          {q.is_correct ? (
-                            <FaCheckCircle className="text-3xl sm:text-4xl text-green-600 mx-auto mb-2" />
-                          ) : (
-                            <FaTimesCircle className="text-3xl sm:text-4xl text-red-600 mx-auto mb-2" />
-                          )}
-                          <p className="font-bold text-gray-900 text-sm sm:text-base">Your Answer</p>
-                          <p className={`text-lg font-bold mt-2 ${q.is_correct ? "text-green-600" : "text-red-600"}`}>
+                        {/* Student answer */}
+                        <div className={`backdrop-blur-sm rounded-xl p-5 sm:p-6 text-center transition-all duration-200 ${
+                          q.is_correct
+                            ? "bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 hover:border-emerald-500/50"
+                            : "bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 hover:border-red-500/50"
+                        }`}>
+                          <div className="flex justify-center mb-3">
+                            {q.is_correct ? (
+                              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+                                <FaCheckCircle className="text-white text-lg" />
+                              </div>
+                            ) : (
+                              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25">
+                                <FaTimesCircle className="text-white text-lg" />
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Your Answer</p>
+                          <p className={`text-lg font-bold ${q.is_correct ? "text-emerald-400" : "text-red-400"}`}>
                             {q.type === 'true_false'
                               ? (q.student_answer === true || q.student_answer === 'true' ? 'True' : 'False')
                               : q.student_answer || "Not Answered"
@@ -358,11 +411,11 @@ const StudentAnalytics = () => {
                           </p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
 
-                {/* Floating Back Arrow */}
+                {/* Floating Back Arrow (duplicate at end) */}
                 <button
                   onClick={() => {
                     setShowType(null);
@@ -370,28 +423,29 @@ const StudentAnalytics = () => {
                       assessmentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 100);
                   }}
-                  className="fixed left-1/2 -translate-x-1/2 top-24 z-40 group animate-fadeIn"
+                  className="fixed left-1/2 -translate-x-1/2 top-24 z-40 group animate-fade-in"
                   aria-label="Back to assessments"
                 >
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                    <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
-                      <FaArrowUp className="text-white text-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                    <div className="relative bg-gradient-to-r from-indigo-500 to-violet-600 p-4 rounded-full shadow-2xl shadow-indigo-500/30 transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                      <FaArrowUp className="text-white text-xl" />
                     </div>
                   </div>
-                  <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
+                  <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700/50 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
                     Back to Assessments
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-gray-900"></div>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-slate-900"></div>
                   </div>
                 </button>
               </>
             ) : (
-              <Card className="shadow-xl">
-                <CardContent className="py-16 sm:py-20 text-center">
-                  <FaBook className="text-6xl sm:text-7xl text-gray-300 mx-auto mb-4" />
-                  <p className="text-lg sm:text-xl text-gray-500 font-semibold">No questions available</p>
-                </CardContent>
-              </Card>
+              <div className="flex flex-col items-center justify-center py-28 text-center px-4">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                  <FaBook className="text-3xl text-indigo-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">No questions available</h3>
+                <p className="text-slate-400 max-w-sm mb-8">There are no questions to display for this assessment.</p>
+              </div>
             )}
           </div>
         )}
@@ -411,10 +465,10 @@ const StudentAnalytics = () => {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-indigo-500/50 transform hover:scale-110 transition-all duration-300 animate-fadeIn"
+          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-full shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 transform hover:scale-110 transition-all duration-200 active:scale-95 cursor-pointer"
           aria-label="Scroll to top"
         >
-          <FaArrowUp className="text-xl" />
+          <FaArrowUp className="text-lg" />
         </button>
       )}
 
@@ -464,6 +518,10 @@ const StudentAnalytics = () => {
         }
 
         .animate-fadeIn {
+          animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-fade-in {
           animation: fadeIn 0.6s ease-out;
         }
 

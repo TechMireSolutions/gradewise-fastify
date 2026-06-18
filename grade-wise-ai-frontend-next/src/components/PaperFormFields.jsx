@@ -5,6 +5,8 @@ import {
   FaCalendarAlt,
   FaClock,
   FaStickyNote,
+  FaHourglass,
+  FaStar,
 } from "react-icons/fa";
 import { getTranslation } from "../utils/translations";
 
@@ -107,6 +109,48 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
               value={form.paperTime}
               onChange={onChange}
               className="w-full bg-transparent outline-none text-sm sm:text-base font-medium"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Duration and Total Marks */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="group">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t("paperDuration") || "Paper Duration"}
+          </label>
+          <div className="flex items-center gap-3 bg-gradient-to-r from-teal-50 to-cyan-50 p-3 sm:p-4 rounded-xl border-2 border-teal-200 hover:border-teal-400 transition-all duration-200 focus-within:border-teal-500 focus-within:shadow-lg">
+            <div className="bg-teal-600 text-white p-2 rounded-lg">
+              <FaHourglass className="text-base sm:text-lg" />
+            </div>
+            <input
+              type="text"
+              name="paperDuration"
+              placeholder="e.g. 3 Hours"
+              value={form.paperDuration}
+              onChange={onChange}
+              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-gray-400 font-medium"
+            />
+          </div>
+        </div>
+
+        <div className="group">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            {t("totalMarks") || "Total Marks"}
+          </label>
+          <div className="flex items-center gap-3 bg-gradient-to-r from-violet-50 to-purple-50 p-3 sm:p-4 rounded-xl border-2 border-violet-200 hover:border-violet-400 transition-all duration-200 focus-within:border-violet-500 focus-within:shadow-lg">
+            <div className="bg-violet-600 text-white p-2 rounded-lg">
+              <FaStar className="text-base sm:text-lg" />
+            </div>
+            <input
+              type="number"
+              name="totalMarks"
+              placeholder="e.g. 100"
+              min={1}
+              value={form.totalMarks}
+              onChange={onChange}
+              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-gray-400 font-medium"
             />
           </div>
         </div>

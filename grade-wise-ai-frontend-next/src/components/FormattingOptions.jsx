@@ -27,7 +27,7 @@ const FormattingOptions = ({ form, onChange, language = "en" }) => {
           >
             <option value="A4">A4</option>
             <option value="A5">A5</option>
-            <option value="Letter">Letter</option>
+            <option value="LETTER">Letter</option>
           </select>
         </div>
 

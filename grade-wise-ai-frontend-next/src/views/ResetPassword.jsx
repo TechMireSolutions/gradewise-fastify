@@ -4,7 +4,7 @@ import useAuthStore from "@/features/auth/store.js";
 import { Card, CardContent } from "../components/ui/Card.jsx";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
-import { FaEnvelope, FaPaperPlane, FaArrowLeft, FaLock } from "react-icons/fa";
+import { FaEnvelope, FaPaperPlane, FaArrowLeft, FaLock, FaExclamationTriangle } from "react-icons/fa";
 import { resetPasswordSchema } from "../scheema/passwordSchemas.js";
 function ResetPassword() {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ function ResetPassword() {
     }
   };
 
-  
+
 
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
@@ -70,93 +70,100 @@ try {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <Card className="w-full max-w-md shadow-2xl border-2 border-gray-200 rounded-2xl sm:rounded-3xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 sm:p-8">
-            <div className="text-center">
-              <div className="bg-white/20 backdrop-blur-sm w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <FaLock className="text-3xl sm:text-4xl" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Forgot Password</h2>
-              <p className="text-blue-100 text-sm sm:text-base">Enter your email to receive a password reset link</p>
-            </div>
-          </div>
-
-          <CardContent className="p-6 sm:p-8">
-            <form onSubmit={handleForgotSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaEnvelope className="text-gray-400" />
-                  </div>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all duration-200 ${
-                      errors.email 
-                        ? "border-red-500 focus:ring-red-200" 
-                        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-                    }`}
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                {errors.email && (
-                  <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                    <span>⚠️</span>
-                    {errors.email}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 sm:py-4 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-bold text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <LoadingSpinner size="sm" color="white" type="dots" />
-                    <span>Sending Reset Link...</span>
-                  </>
-                ) : (
-                  <>
-                    <FaPaperPlane />
-                    <span>Send Reset Link</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-6 border-t-2 border-gray-200">
-              <div className="text-center">
-                <Link 
-                  to="/login" 
-                  className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-bold hover:underline transition-colors"
-                >
-                  <FaArrowLeft />
-                  <span>Back to Login</span>
-                </Link>
-              </div>
-              
-              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-xs text-gray-700 leading-relaxed">
-                  <strong>💡 Note:</strong> The reset link will be sent to your email if an account exists. 
-                  Please check your spam folder if you don't see it in your inbox.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
+      <div className="relative w-full max-w-md">
+        {/* Form card */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+          {/* Logo/brand header */}
+          <div className="mb-8 text-center">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 w-fit mx-auto mb-5">
+              <FaLock className="text-white text-2xl" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
+              Forgot Password
+            </h1>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Enter your email address and we'll send you a link to reset your password.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleForgotSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-slate-400 text-sm font-medium mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-800/60 backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                    errors.email
+                      ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
+                      : "border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500/30"
+                  }`}
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
+                  <FaExclamationTriangle className="text-xs flex-shrink-0" />
+                  {errors.email}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" color="white" type="dots" />
+                  <span>Sending Reset Link...</span>
+                </>
+              ) : (
+                <>
+                  <FaPaperPlane />
+                  <span>Send Reset Link</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-6 pt-6 border-t border-slate-700/50 space-y-4">
+            <div className="text-center">
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
+              >
+                <FaArrowLeft className="text-xs" />
+                <span>Back to Login</span>
+              </Link>
+            </div>
+
+            <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4">
+              <p className="text-xs text-slate-400 leading-relaxed">
+                <span className="text-slate-300 font-medium">Note:</span> The reset link will be sent to your email if an account exists. Please check your spam folder if you don't see it in your inbox.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Modal
         isOpen={modal.isOpen}

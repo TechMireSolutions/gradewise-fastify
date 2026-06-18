@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
-import { FaList, FaTable, FaCalendarAlt, FaCheckCircle, FaEye, FaChartBar, FaArrowUp } from "react-icons/fa";
+import { FaList, FaTable, FaCalendarAlt, FaCheckCircle, FaEye, FaChartBar, FaArrowUp, FaUsers, FaExclamationTriangle } from "react-icons/fa";
 
 function AssessmentAnalytics() {
   const { assessmentId } = useParams();
@@ -75,23 +75,27 @@ function AssessmentAnalytics() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col items-center justify-center">
-        <LoadingSpinner size="lg" type="gradient" />
-        <p className="mt-4 text-gray-600 font-medium">Loading analytics...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+            <LoadingSpinner size="lg" type="spinner" color="blue" />
+          </div>
+          <p className="text-slate-400 text-sm">Loading analytics...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <Card className="max-w-md shadow-lg border-0">
-          <CardContent className="p-8 text-center">
-            <div className="text-6xl mb-4">⚠️</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Error</h3>
-            <p className="text-red-600 font-medium">{error}</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-8 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mx-auto mb-5">
+            <FaExclamationTriangle className="text-red-400 text-2xl" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Error</h3>
+          <p className="text-red-400 font-medium text-sm">{error}</p>
+        </div>
       </div>
     );
   }
@@ -111,70 +115,83 @@ function AssessmentAnalytics() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl">
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center">
-              <FaChartBar className="text-indigo-600 text-xl" />
+        <div className="mb-10">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <FaChartBar className="text-white text-xl" />
             </div>
-            Assessment Analytics
-          </h1>
-          <p className="text-gray-600 ml-0 sm:ml-15">Monitor student performance and assessment results</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+              Assessment Analytics
+            </h1>
+          </div>
+          <p className="text-slate-400 ml-0 sm:ml-14">Monitor student performance and assessment results</p>
         </div>
 
         {/* Executed Assessments List */}
-        <div ref={assessmentsRef} className="scroll-mt-24">
-          <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 mb-8 border-0">
-            <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-lg">
-              <h3 className="text-xl font-semibold flex items-center gap-2">
-                <FaList /> My Executed Assessments
-              </h3>
-            </CardHeader>
-            <CardContent className="p-6 sm:p-8">
+        <div ref={assessmentsRef} className="scroll-mt-24 mb-8">
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+            {/* Card Header */}
+            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20">
+                <FaList className="text-indigo-400 text-sm" />
+              </div>
+              <h3 className="text-xl font-bold text-white">My Executed Assessments</h3>
+            </div>
+            <div className="p-6 sm:p-8">
               {assessments.length > 0 ? (
                 <div className="space-y-4">
                   {assessments.map((assessment) => (
                     <div
                       key={assessment.id}
                       onClick={() => navigate(`/instructor/assessments/${assessment.id}/analytics`)}
-                      className={`p-5 sm:p-6 rounded-xl border-2 cursor-pointer transition-all duration-200 transform hover:-translate-y-1 ${assessment.id === Number(assessmentId)
-                          ? "border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 shadow-md scale-[1.02] ring-4 ring-indigo-200"
-                          : "border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md"
+                      className={`p-5 sm:p-6 rounded-xl border cursor-pointer transition-all duration-200 transform hover:-translate-y-0.5 ${assessment.id === Number(assessmentId)
+                          ? "border-indigo-500/60 bg-indigo-500/10 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/30"
+                          : "border-slate-700/50 bg-slate-800/60 hover:border-indigo-500/30 hover:bg-slate-700/40"
                         }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                         <div className="flex-1">
-                          <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                          <h4 className="text-lg sm:text-xl font-bold text-white mb-2">
                             {assessment.title}
                           </h4>
-                          <div className="flex items-center text-sm text-gray-600">
-                            <FaCalendarAlt className="mr-2 text-indigo-500" />
+                          <div className="flex items-center text-sm text-slate-400">
+                            <FaCalendarAlt className="mr-2 text-indigo-400" />
                             Created: {new Date(assessment.created_at).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="text-center sm:text-right bg-white rounded-lg px-6 py-3 border-2 border-indigo-200">
-                          <div className="text-3xl font-bold text-indigo-600 flex items-center justify-center sm:justify-end gap-2">
-                            <FaCheckCircle />
+                        <div className="text-center sm:text-right bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl px-6 py-3">
+                          <div className="text-3xl font-bold text-white flex items-center justify-center sm:justify-end gap-2 leading-none">
+                            <FaCheckCircle className="text-emerald-400 text-xl" />
                             {assessment.completed_attempts}
                           </div>
-                          <p className="text-sm text-gray-600 font-medium mt-1">Completed</p>
+                          <p className="text-xs text-slate-400 mt-1">Completed</p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16">
-                  <div className="text-7xl mb-6 opacity-30">📊</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">No Executed Assessments</h3>
-                  <p className="text-gray-600">Execute an assessment to see analytics here</p>
+                <div className="flex flex-col items-center justify-center py-28 text-center px-4">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                    <FaChartBar className="text-indigo-400 text-3xl" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">No Executed Assessments</h3>
+                  <p className="text-slate-400 max-w-sm">Execute an assessment to see analytics here</p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Student Results */}
@@ -182,108 +199,112 @@ function AssessmentAnalytics() {
           <div ref={studentsRef} className="scroll-mt-24 animate-fadeIn">
             {/* Desktop Table */}
             <div className="hidden lg:block mb-10">
-              <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-0 overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                  <h3 className="text-xl font-semibold"> {selectedAssessment?.title}</h3>
-                </CardHeader>
-                <CardContent className="p-0">
-                  {students.length > 0 ? (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gradient-to-r from-gray-100 to-blue-50">
-                          <tr>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Student</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Questions</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Correct</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Score</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Time Used</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</th>
+              <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
+                    <FaUsers className="text-violet-400 text-sm" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{selectedAssessment?.title}</h3>
+                </div>
+                {students.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="bg-slate-800/60">
+                          <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Student</th>
+                          <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Questions</th>
+                          <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Correct</th>
+                          <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Score</th>
+                          <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Time Used</th>
+                          <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-700/30">
+                        {students.map((s) => (
+                          <tr key={s.student_id} className="hover:bg-indigo-500/5 transition-colors duration-150">
+                            <td className="px-6 py-4 font-semibold text-white text-sm">{s.name || `Student ${s.student_id}`}</td>
+                            <td className="px-6 py-4 text-slate-300 font-medium text-sm">{s.total_questions || 0}</td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                                {s.correct_answers || 0}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                                {s.percentage}%
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-slate-300 text-sm">{s.time_used}</td>
+                            <td className="px-6 py-4">
+                              <button
+                                onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
+                                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+                              >
+                                <FaEye /> View Answers
+                              </button>
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
-                          {students.map((s) => (
-                            <tr key={s.student_id} className="hover:bg-blue-50 transition-colors duration-150">
-                              <td className="px-6 py-4 font-semibold text-gray-900">{s.name || `Student ${s.student_id}`}</td>
-                              <td className="px-6 py-4 text-gray-700 font-medium">{s.total_questions || 0}</td>
-                              <td className="px-6 py-4">
-                                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold text-sm">
-                                  {s.correct_answers || 0}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-bold text-sm">
-                                  {s.percentage}%
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 text-gray-700">{s.time_used}</td>
-                              <td className="px-6 py-4">
-                                <button
-                                  onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
-                                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 text-sm font-semibold flex items-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
-                                >
-                                  <FaEye /> View Answers
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-28 text-center px-4">
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                      <FaUsers className="text-indigo-400 text-3xl" />
                     </div>
-                  ) : (
-                    <div className="text-center py-16">
-                      <div className="text-6xl mb-4 opacity-30">👥</div>
-                      <p className="text-gray-500 font-medium">No students have completed this assessment</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    <h3 className="text-2xl font-bold text-white mb-2">No Students Yet</h3>
+                    <p className="text-slate-400 max-w-sm">No students have completed this assessment</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Mobile Cards */}
             <div className="lg:hidden space-y-4 mb-10">
               {students.length > 0 ? students.map((s, idx) => (
-                <Card 
-                  key={s.student_id} 
-                  className="shadow-md hover:shadow-lg transition-all duration-200 border-0 animate-slideInUp"
+                <div
+                  key={s.student_id}
+                  className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 p-5 animate-slideInUp"
                   style={{ animationDelay: `${idx * 0.1}s` }}
                 >
-                  <CardContent className="p-5">
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 mb-4 border-2 border-indigo-200">
-                      <h4 className="font-bold text-lg text-gray-900">{s.name || `Student ${s.student_id}`}</h4>
+                  <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 rounded-xl p-4 mb-4">
+                    <h4 className="font-bold text-lg text-white">{s.name || `Student ${s.student_id}`}</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-4">
+                    <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-3">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-1">Questions</span>
+                      <span className="text-xl font-bold text-white">{s.total_questions}</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <strong className="text-gray-600 text-xs uppercase block mb-1">Questions</strong>
-                        <span className="text-lg font-bold text-gray-900">{s.total_questions}</span>
-                      </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
-                        <strong className="text-gray-600 text-xs uppercase block mb-1">Correct</strong>
-                        <span className="text-lg font-bold text-green-600">{s.correct_answers}</span>
-                      </div>
-                      <div className="bg-indigo-50 p-3 rounded-lg">
-                        <strong className="text-gray-600 text-xs uppercase block mb-1">Score</strong>
-                        <span className="text-lg font-bold text-indigo-600">{s.percentage}%</span>
-                      </div>
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <strong className="text-gray-600 text-xs uppercase block mb-1">Time</strong>
-                        <span className="text-lg font-bold text-gray-900">{s.time_used}</span>
-                      </div>
+                    <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-1">Correct</span>
+                      <span className="text-xl font-bold text-emerald-400">{s.correct_answers}</span>
                     </div>
-                    <button
-                      onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
-                      className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                    >
-                      <FaEye /> View Detailed Answers
-                    </button>
-                  </CardContent>
-                </Card>
+                    <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-3">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-1">Score</span>
+                      <span className="text-xl font-bold text-indigo-400">{s.percentage}%</span>
+                    </div>
+                    <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-3">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-1">Time</span>
+                      <span className="text-xl font-bold text-white">{s.time_used}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
+                    className="w-full py-3 px-5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <FaEye /> View Detailed Answers
+                  </button>
+                </div>
               )) : (
-                <Card className="shadow-md border-0">
-                  <CardContent className="text-center py-16">
-                    <div className="text-6xl mb-4 opacity-30">👥</div>
-                    <p className="text-gray-500 font-medium">No results yet</p>
-                  </CardContent>
-                </Card>
+                <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-8">
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-4">
+                      <FaUsers className="text-indigo-400 text-2xl" />
+                    </div>
+                    <p className="text-slate-400 font-medium">No results yet</p>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -303,54 +324,55 @@ function AssessmentAnalytics() {
               aria-label="Back to assessments"
             >
               <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 p-4 rounded-full shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-violet-600 rounded-full blur-xl opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                <div className="relative bg-gradient-to-r from-indigo-500 to-violet-600 p-4 rounded-full shadow-2xl shadow-indigo-500/30 transform transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
                   <FaArrowUp className="text-white text-2xl" />
                 </div>
               </div>
-              <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1">
+              <div className="absolute top-full mt-3 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700/50 text-slate-200 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform group-hover:translate-y-1 shadow-2xl">
                 Back to Assessments
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-gray-900"></div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-slate-900"></div>
               </div>
             </button>
 
-            <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 mt-10 border-0">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-t-lg">
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <FaTable /> Student Answer Details
-                </h3>
-              </CardHeader>
-              <CardContent className="p-6 sm:p-8">
+            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 mt-10 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
+                  <FaTable className="text-violet-400 text-sm" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Student Answer Details</h3>
+              </div>
+              <div className="p-6 sm:p-8">
                 <div className="space-y-6">
                   {studentQuestions.map((q, i) => {
                     const isCorrect = isAnswerCorrect(q.correct_answer, q.student_answer, q.question_type);
 
                     return (
-                      <div 
-                        key={i} 
-                        className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl p-5 sm:p-6 hover:border-purple-300 transition-all duration-200 animate-slideInUp"
+                      <div
+                        key={i}
+                        className="bg-slate-800/60 border border-slate-700/40 rounded-xl p-5 sm:p-6 hover:border-indigo-500/30 transition-all duration-200 animate-slideInUp"
                         style={{ animationDelay: `${i * 0.1}s` }}
                       >
                         <div className="flex items-start justify-between mb-4">
-                          <h4 className="font-bold text-lg text-gray-900 flex items-center gap-2">
-                            <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                          <h4 className="font-bold text-lg text-white flex items-center gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
                               Question {q.question_order || i + 1}
                             </span>
-                            <span className="text-sm font-normal text-gray-600">({q.question_type})</span>
+                            <span className="text-sm font-normal text-slate-400">({q.question_type})</span>
                           </h4>
                         </div>
 
-                        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-                          <p className="text-gray-900 font-medium">{q.question_text}</p>
+                        <div className="bg-slate-900/50 border border-slate-700/40 rounded-xl p-4 mb-4">
+                          <p className="text-slate-200 font-medium leading-relaxed">{q.question_text}</p>
                         </div>
 
                         {q.options && (
-                          <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <strong className="text-sm font-semibold text-gray-700 uppercase block mb-2">Options:</strong>
-                            <ul className="space-y-1">
+                          <div className="mb-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl p-4">
+                            <strong className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-2">Options:</strong>
+                            <ul className="space-y-1.5">
                               {(typeof q.options === "string" ? JSON.parse(q.options) : q.options).map((opt, idx) => (
-                                <li key={idx} className="text-sm text-gray-700 flex items-start gap-2">
-                                  <span className="text-blue-600 font-bold">•</span>
+                                <li key={idx} className="text-sm text-slate-300 flex items-start gap-2">
+                                  <span className="text-indigo-400 font-bold mt-0.5">•</span>
                                   <span>{opt}</span>
                                 </li>
                               ))}
@@ -359,27 +381,30 @@ function AssessmentAnalytics() {
                         )}
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 transform transition-all hover:scale-105">
-                            <strong className="text-xs font-semibold text-gray-700 uppercase block mb-2">Correct Answer</strong>
-                            <p className="font-bold text-lg text-green-700">
+                          <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 transition-transform hover:scale-[1.02]">
+                            <strong className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-2">Correct Answer</strong>
+                            <p className="font-bold text-lg text-emerald-400">
                               {q.question_type === 'true_false'
                                 ? (q.correct_answer === true || q.correct_answer === 'true' ? 'True' : 'False')
                                 : q.correct_answer || "N/A"
                               }
                             </p>
                           </div>
-                          <div className={`border-2 rounded-lg p-4 transform transition-all hover:scale-105 ${isCorrect ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>
-                            <strong className="text-xs font-semibold text-gray-700 uppercase block mb-2">Student Answer</strong>
-                            <p className={`font-bold text-lg ${isCorrect ? "text-green-700" : "text-red-700"}`}>
+                          <div className={`border rounded-xl p-4 backdrop-blur-sm transition-transform hover:scale-[1.02] ${isCorrect
+                              ? "bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-500/30"
+                              : "bg-gradient-to-br from-red-500/20 to-rose-500/20 border-red-500/30"
+                            }`}>
+                            <strong className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-2">Student Answer</strong>
+                            <p className={`font-bold text-lg ${isCorrect ? "text-emerald-400" : "text-red-400"}`}>
                               {q.question_type === 'true_false'
                                 ? (q.student_answer === true || q.student_answer === 'true' ? 'True' : 'False')
                                 : q.student_answer || "—"
                               }
                             </p>
                           </div>
-                          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <strong className="text-xs font-semibold text-gray-700 uppercase block mb-2">Score</strong>
-                            <p className="font-bold text-lg text-gray-900">
+                          <div className="bg-slate-800/60 border border-slate-700/40 rounded-xl p-4 transition-transform hover:scale-[1.02]">
+                            <strong className="text-xs font-semibold text-slate-500 uppercase tracking-widest block mb-2">Score</strong>
+                            <p className="font-bold text-lg text-white">
                               {isCorrect ? (q.positive_marks || 1) : (q.score || -Math.abs(q.negative_marks || 0))}
                             </p>
                           </div>
@@ -388,8 +413,8 @@ function AssessmentAnalytics() {
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
 
@@ -399,13 +424,12 @@ function AssessmentAnalytics() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-indigo-500/50 transform hover:scale-110 transition-all duration-300 animate-fadeIn"
+          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-full shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 transform hover:scale-110 transition-all duration-300 animate-fadeIn cursor-pointer"
           aria-label="Scroll to top"
         >
           <FaArrowUp className="text-xl" />
         </button>
       )}
-
 
       {/* Custom CSS for animations */}
       <style dangerouslySetInnerHTML={{ __html: `

@@ -33,7 +33,7 @@ function TestResultPill({ r }) {
   if (!r) return null;
   if (r.state === "testing") {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 rounded-full text-xs font-semibold">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-700/60 text-slate-300 border border-slate-600/40 rounded-full text-xs font-semibold">
         <span className="w-2 h-2 rounded-full bg-slate-400 animate-pulse" />
         Testing…
       </span>
@@ -42,21 +42,21 @@ function TestResultPill({ r }) {
   if (r.state === "ok") {
     return (
       <div className="flex flex-col gap-1">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 rounded-full text-xs font-semibold w-fit">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-semibold w-fit">
           <FaCheck className="w-2.5 h-2.5" /> Valid
           {typeof r.latencyMs === "number" && (
             <span className="font-mono opacity-70">{r.latencyMs}ms</span>
           )}
         </span>
         {r.autoSwitchedModelFrom && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 dark:text-indigo-300 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800 w-fit">
+          <span className="inline-flex items-center gap-1 text-[11px] text-indigo-400 bg-indigo-500/15 border border-indigo-500/20 px-2 py-0.5 rounded w-fit">
             <FaWrench className="w-2.5 h-2.5 flex-shrink-0" /> Model auto-switched:{" "}
             <code className="font-mono">{r.autoSwitchedModelFrom}</code>{" "}→{" "}
             <code className="font-mono">{r.modelUsed}</code>
           </span>
         )}
         {r.providerOverridden && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 w-fit">
+          <span className="inline-flex items-center gap-1 text-[11px] text-amber-400 bg-amber-500/15 border border-amber-500/20 px-2 py-0.5 rounded w-fit">
             <FaExclamationTriangle className="w-2.5 h-2.5 flex-shrink-0" /> Key belongs to{" "}
             <strong>{r.providerDetected}</strong> — consider moving it there.
           </span>
@@ -66,12 +66,12 @@ function TestResultPill({ r }) {
   }
   return (
     <div className="flex flex-col gap-1">
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300 rounded-full text-xs font-semibold max-w-xs truncate w-fit">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/15 text-red-400 border border-red-500/20 rounded-full text-xs font-semibold max-w-xs truncate w-fit">
         <FaTimes className="w-2.5 h-2.5 flex-shrink-0" />{" "}
         {(r.message || "Invalid key").substring(0, 60)}
       </span>
       {r.providerOverridden && (
-        <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-300 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800 w-fit">
+        <span className="inline-flex items-center gap-1 text-[11px] text-amber-400 bg-amber-500/15 border border-amber-500/20 px-2 py-0.5 rounded w-fit">
           <FaExclamationTriangle className="w-2.5 h-2.5 flex-shrink-0" /> Key prefix suggests{" "}
           <strong>{r.providerDetected}</strong> provider.
         </span>
@@ -161,58 +161,64 @@ const modelOptions = {
 
 const providerTheme = {
   gemini:   {
-    sidebarActive: "bg-indigo-50 dark:bg-indigo-900/20",
-    activeText:    "text-indigo-700 dark:text-indigo-300",
     dot:           "bg-indigo-500",
-    badge:         "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+    badge:         "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20",
+    activeSidebar: "bg-indigo-500/15 border-indigo-500/30 text-indigo-300",
+    activeText:    "text-indigo-300",
     panelGradient: "from-indigo-600 to-violet-600",
     saveGradient:  "from-indigo-500 to-violet-600",
-    focusBorder:   "focus:border-indigo-400 dark:focus:border-indigo-500",
+    focusBorder:   "focus:border-indigo-500",
+    accentBg:      "bg-gradient-to-br from-indigo-500 to-violet-600",
   },
   groq:     {
-    sidebarActive: "bg-amber-50 dark:bg-amber-900/20",
-    activeText:    "text-amber-700 dark:text-amber-300",
     dot:           "bg-amber-500",
-    badge:         "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
-    panelGradient: "from-amber-500 to-amber-600",
-    saveGradient:  "from-amber-500 to-amber-600",
-    focusBorder:   "focus:border-amber-400 dark:focus:border-amber-500",
+    badge:         "bg-amber-500/15 text-amber-400 border border-amber-500/20",
+    activeSidebar: "bg-amber-500/15 border-amber-500/30 text-amber-300",
+    activeText:    "text-amber-300",
+    panelGradient: "from-amber-500 to-orange-600",
+    saveGradient:  "from-amber-500 to-orange-600",
+    focusBorder:   "focus:border-amber-500",
+    accentBg:      "bg-gradient-to-br from-amber-500 to-orange-600",
   },
   openai:   {
-    sidebarActive: "bg-emerald-50 dark:bg-emerald-900/20",
-    activeText:    "text-emerald-700 dark:text-emerald-300",
     dot:           "bg-emerald-500",
-    badge:         "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-    panelGradient: "from-emerald-600 to-emerald-700",
-    saveGradient:  "from-emerald-500 to-emerald-700",
-    focusBorder:   "focus:border-emerald-400 dark:focus:border-emerald-500",
+    badge:         "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
+    activeSidebar: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
+    activeText:    "text-emerald-300",
+    panelGradient: "from-emerald-600 to-teal-600",
+    saveGradient:  "from-emerald-500 to-teal-600",
+    focusBorder:   "focus:border-emerald-500",
+    accentBg:      "bg-gradient-to-br from-emerald-500 to-teal-600",
   },
   claude:   {
-    sidebarActive: "bg-violet-50 dark:bg-violet-900/20",
-    activeText:    "text-violet-700 dark:text-violet-300",
     dot:           "bg-violet-500",
-    badge:         "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
-    panelGradient: "from-violet-600 to-violet-700",
-    saveGradient:  "from-violet-500 to-violet-700",
-    focusBorder:   "focus:border-violet-400 dark:focus:border-violet-500",
+    badge:         "bg-violet-500/15 text-violet-400 border border-violet-500/20",
+    activeSidebar: "bg-violet-500/15 border-violet-500/30 text-violet-300",
+    activeText:    "text-violet-300",
+    panelGradient: "from-violet-600 to-purple-700",
+    saveGradient:  "from-violet-500 to-purple-700",
+    focusBorder:   "focus:border-violet-500",
+    accentBg:      "bg-gradient-to-br from-violet-500 to-purple-700",
   },
   mistral:  {
-    sidebarActive: "bg-rose-50 dark:bg-rose-900/20",
-    activeText:    "text-rose-700 dark:text-rose-300",
     dot:           "bg-rose-500",
-    badge:         "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
-    panelGradient: "from-rose-600 to-rose-700",
-    saveGradient:  "from-rose-500 to-rose-700",
-    focusBorder:   "focus:border-rose-400 dark:focus:border-rose-500",
+    badge:         "bg-rose-500/15 text-rose-400 border border-rose-500/20",
+    activeSidebar: "bg-rose-500/15 border-rose-500/30 text-rose-300",
+    activeText:    "text-rose-300",
+    panelGradient: "from-rose-600 to-pink-700",
+    saveGradient:  "from-rose-500 to-pink-700",
+    focusBorder:   "focus:border-rose-500",
+    accentBg:      "bg-gradient-to-br from-rose-500 to-pink-700",
   },
   deepseek: {
-    sidebarActive: "bg-slate-100 dark:bg-slate-700/40",
-    activeText:    "text-slate-700 dark:text-slate-200",
-    dot:           "bg-slate-600",
-    badge:         "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300",
-    panelGradient: "from-slate-700 to-slate-800",
-    saveGradient:  "from-slate-600 to-slate-800",
-    focusBorder:   "focus:border-slate-400 dark:focus:border-slate-500",
+    dot:           "bg-sky-500",
+    badge:         "bg-sky-500/15 text-sky-400 border border-sky-500/20",
+    activeSidebar: "bg-sky-500/15 border-sky-500/30 text-sky-300",
+    activeText:    "text-sky-300",
+    panelGradient: "from-sky-600 to-blue-700",
+    saveGradient:  "from-sky-500 to-blue-700",
+    focusBorder:   "focus:border-sky-500",
+    accentBg:      "bg-gradient-to-br from-sky-500 to-blue-700",
   },
 };
 
@@ -453,43 +459,53 @@ function SuperAdminApiConfig() {
 
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-violet-50/20 to-slate-100 dark:from-slate-950 dark:via-violet-950/10 dark:to-slate-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
 
-        {/* ── Hero ──────────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-violet-700 via-violet-700 to-indigo-700 dark:from-violet-800 dark:via-violet-800 dark:to-indigo-900 rounded-2xl p-6 sm:p-8 shadow-2xl text-white mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-            <div className="flex-1 min-w-0">
-              <Link
-                to="/super-admin/dashboard"
-                className="inline-flex items-center gap-2 text-white/65 hover:text-white text-sm font-medium mb-4 transition-colors duration-150 ease-out group"
-              >
-                <FaArrowLeft className="w-3 h-3 transition-transform duration-150 group-hover:-translate-x-0.5" />
-                Back to Dashboard
-              </Link>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-1.5 flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <FaKey className="w-5 h-5" />
-                </span>
-                API Key Configuration
-              </h1>
-              <p className="text-white/70 text-sm">
-                Manage AI provider API keys for PDF extraction and text generation.
-              </p>
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
+        {/* ── Page Header ───────────────────────────────────── */}
+        <div className="mb-8">
+          <Link
+            to="/super-admin/dashboard"
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium mb-6 transition-colors duration-150 group"
+          >
+            <FaArrowLeft className="w-3 h-3 transition-transform duration-150 group-hover:-translate-x-0.5" />
+            Back to Dashboard
+          </Link>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <FaKey className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Super Admin</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">API Key Configuration</h1>
+                <p className="text-slate-400 text-sm mt-1 leading-relaxed">
+                  Manage AI provider API keys for PDF extraction and text generation.
+                </p>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="flex gap-3 sm:flex-col sm:items-end">
-              <div className="bg-white/15 backdrop-blur-sm rounded-xl px-5 py-3 text-center min-w-[80px]">
-                <div className="text-2xl font-bold tabular-nums">{totalKeys}</div>
-                <div className="text-[11px] text-white/65 mt-0.5">Total keys</div>
+            {/* Stats row */}
+            <div className="flex gap-3 flex-shrink-0">
+              <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-3 sm:p-4 text-center min-w-[80px]">
+                <div className="text-xl sm:text-2xl font-bold text-white leading-none">{totalKeys}</div>
+                <div className="text-xs text-slate-400 mt-0.5">Total keys</div>
               </div>
-              <div className="bg-white/15 backdrop-blur-sm rounded-xl px-5 py-3 text-center min-w-[80px]">
-                <div className="text-2xl font-bold tabular-nums">
+              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3 sm:p-4 text-center min-w-[80px]">
+                <div className="text-xl sm:text-2xl font-bold text-white leading-none">
                   {configuredCount}
-                  <span className="text-sm font-normal text-white/60">/6</span>
+                  <span className="text-sm font-normal text-slate-400">/6</span>
                 </div>
-                <div className="text-[11px] text-white/65 mt-0.5">
+                <div className="text-xs text-slate-400 mt-0.5">
                   {purpose === "pdf" ? "PDF" : "Text"} providers
                 </div>
               </div>
@@ -498,18 +514,16 @@ function SuperAdminApiConfig() {
         </div>
 
         {/* ── Two-column layout ─────────────────────────────── */}
-        <div className="flex flex-col lg:flex-row gap-5">
+        <div className="flex flex-col lg:flex-row gap-6">
 
           {/* ── Sidebar ─────────────────────────────────────── */}
-          <aside className="lg:w-60 xl:w-64 flex-shrink-0">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden sticky top-4">
+          <aside className="lg:w-64 xl:w-72 flex-shrink-0">
+            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden sticky top-4">
 
               {/* Purpose tabs */}
-              <div className="p-3 border-b border-slate-100 dark:border-slate-700">
-                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 px-2 mb-2">
-                  Purpose
-                </div>
-                <div className="space-y-1">
+              <div className="p-4 border-b border-slate-700/50">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest px-1 mb-3">Purpose</p>
+                <div className="space-y-1.5">
                   {[
                     { id: "pdf",  label: "PDF Reading",     Icon: FaFileAlt,   tKeys: totalPdfKeys  },
                     { id: "text", label: "Text Generation", Icon: FaPencilAlt, tKeys: totalTextKeys },
@@ -519,20 +533,18 @@ function SuperAdminApiConfig() {
                       <button
                         key={id}
                         onClick={() => setConfigSubTab(id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 ease-out min-h-[52px] cursor-pointer ${
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-200 min-h-[52px] cursor-pointer ${
                           isActive
-                            ? id === "pdf"
-                              ? "bg-violet-600 text-white shadow-sm"
-                              : "bg-indigo-600 text-white shadow-sm"
-                            : "hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300"
+                            ? "bg-gradient-to-r from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 text-white shadow-sm"
+                            : "hover:bg-slate-700/60 border border-transparent text-slate-400 hover:text-white"
                         }`}
                       >
-                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isActive ? "bg-white/20" : "bg-slate-100 dark:bg-slate-700"}`}>
-                          <Icon className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-slate-500 dark:text-slate-400"}`} />
+                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isActive ? "bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/25" : "bg-slate-700/60"}`}>
+                          <Icon className="w-3.5 h-3.5 text-white" />
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-semibold truncate">{label}</div>
-                          <div className={`text-xs ${isActive ? "text-white/65" : "text-slate-400 dark:text-slate-500"}`}>
+                          <div className={`text-xs mt-0.5 ${isActive ? "text-slate-400" : "text-slate-500"}`}>
                             {tKeys} key{tKeys !== 1 ? "s" : ""} stored
                           </div>
                         </div>
@@ -543,11 +555,9 @@ function SuperAdminApiConfig() {
               </div>
 
               {/* Provider list */}
-              <div className="p-3">
-                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500 px-2 mb-2">
-                  Providers
-                </div>
-                <div className="space-y-0.5">
+              <div className="p-4">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest px-1 mb-3">Providers</p>
+                <div className="space-y-1">
                   {ALL_PROVIDERS.map(p => {
                     const isActive = p === provider;
                     const count    = aiState[purpose][p].list.length;
@@ -556,29 +566,27 @@ function SuperAdminApiConfig() {
                       <button
                         key={p}
                         onClick={() => setActiveProvider(prev => ({ ...prev, [purpose]: p }))}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 ease-out min-h-[48px] cursor-pointer group ${
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 min-h-[48px] cursor-pointer group ${
                           isActive
-                            ? `${t.sidebarActive} ${t.activeText} shadow-sm`
-                            : "hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-400"
+                            ? `${t.activeSidebar} bg-slate-700/40 border shadow-sm`
+                            : "hover:bg-slate-700/40 border border-transparent text-slate-400 hover:text-slate-200"
                         }`}
                       >
                         {/* Status dot */}
-                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${count > 0 ? t.dot : "bg-slate-200 dark:bg-slate-600"}`} />
+                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${count > 0 ? t.dot : "bg-slate-600"}`} />
 
                         <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-semibold truncate ${!isActive ? "group-hover:text-slate-900 dark:group-hover:text-slate-200" : ""}`}>
+                          <div className={`text-sm font-semibold truncate ${isActive ? t.activeText : ""}`}>
                             {providerLabels[p]}
                           </div>
-                          <div className="text-xs text-slate-400 dark:text-slate-500 truncate font-mono leading-tight">
+                          <div className="text-xs text-slate-500 truncate font-mono leading-tight mt-0.5">
                             {aiState[purpose][p].model}
                           </div>
                         </div>
 
-                        {/* Key count */}
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                          count > 0
-                            ? t.badge
-                            : "bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500"
+                        {/* Key count badge */}
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 inline-flex items-center ${
+                          count > 0 ? t.badge : "bg-slate-700/60 text-slate-500 border border-slate-600/40"
                         }`}>
                           {count}
                         </span>
@@ -591,25 +599,25 @@ function SuperAdminApiConfig() {
           </aside>
 
           {/* ── Main panel ──────────────────────────────────── */}
-          <main className="flex-1 min-w-0 space-y-4">
+          <main className="flex-1 min-w-0 space-y-5">
 
             {/* ── Provider config card ── */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200">
 
               {/* Provider gradient header */}
               <div className={`bg-gradient-to-r ${pStyle.panelGradient} px-6 py-5 text-white`}>
                 <div className="flex items-center gap-4">
-                  <span className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <span className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 shadow-lg">
                     <FaKey className="w-5 h-5" />
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold leading-tight">{providerLabels[provider]}</h2>
-                    <p className="text-white/70 text-sm">
-                      {purpose === "pdf" ? "PDF Reading" : "Text Generation"} ·{" "}
+                    <h2 className="text-xl font-bold text-white leading-tight">{providerLabels[provider]}</h2>
+                    <p className="text-white/70 text-sm mt-0.5">
+                      {purpose === "pdf" ? "PDF Reading" : "Text Generation"} &middot;{" "}
                       {card.list.length} key{card.list.length !== 1 ? "s" : ""} stored
                     </p>
                   </div>
-                  <span className="hidden sm:inline-flex px-3 py-1.5 bg-white/20 rounded-lg text-xs font-semibold flex-shrink-0">
+                  <span className="hidden sm:inline-flex px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-lg text-xs font-semibold flex-shrink-0">
                     {purpose === "pdf" ? "PDF Reading" : "Text Generation"}
                   </span>
                 </div>
@@ -619,9 +627,9 @@ function SuperAdminApiConfig() {
               <div className="p-6 space-y-6">
 
                 {/* Info notice */}
-                <div className="flex items-start gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600 rounded-xl">
-                  <FaInfoCircle className="w-4 h-4 text-slate-400 dark:text-slate-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                <div className="flex items-start gap-3 px-4 py-3.5 bg-slate-800/60 border border-slate-700/40 rounded-xl">
+                  <FaInfoCircle className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-slate-400 leading-relaxed">
                     {purpose === "pdf"
                       ? "These keys are used when the system extracts content from uploaded PDFs."
                       : "These keys are used when the system generates questions, feedback, and answers."}
@@ -632,37 +640,37 @@ function SuperAdminApiConfig() {
                 {/* Model + stats row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-slate-400 text-sm font-medium mb-1.5">
                       Active Model
                     </label>
                     <select
                       value={card.model}
                       onChange={e => updateActiveCard("model", e.target.value)}
-                      className={`w-full px-4 py-3 border-2 border-slate-200 dark:border-slate-600 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-1 text-sm font-medium bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 ${pStyle.focusBorder} transition-colors duration-150 ease-out min-h-[48px] cursor-pointer`}
+                      className={`w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 ${pStyle.focusBorder} rounded-xl px-4 py-3 text-slate-200 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer min-h-[48px]`}
                     >
                       {(modelOptions[provider] || []).map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value} className="bg-slate-800 text-slate-200">{opt.label}</option>
                       ))}
                     </select>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5">
+                    <p className="text-slate-500 text-xs mt-1.5">
                       Applied to all keys in this provider pool.
                     </p>
                   </div>
 
                   <div>
-                    <div className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <div className="text-slate-400 text-sm font-medium mb-1.5">
                       Pool Status
                     </div>
                     <div className="flex gap-3">
-                      <div className="flex-1 bg-slate-50 dark:bg-slate-700/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-600">
-                        <div className="text-xl font-bold text-slate-800 dark:text-slate-200 tabular-nums">{card.list.length}</div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Stored keys</div>
+                      <div className="flex-1 bg-slate-800/60 rounded-xl px-4 py-3 border border-slate-700/40">
+                        <div className="text-xl sm:text-2xl font-bold text-white leading-none">{card.list.length}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">Stored keys</div>
                       </div>
-                      <div className="flex-1 bg-slate-50 dark:bg-slate-700/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-600">
-                        <div className={`text-sm font-bold mt-1 ${card.list.length > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                      <div className="flex-1 bg-slate-800/60 rounded-xl px-4 py-3 border border-slate-700/40">
+                        <div className={`text-sm font-bold mt-1 ${card.list.length > 0 ? "text-emerald-400" : "text-slate-500"}`}>
                           {card.list.length > 0 ? "Active" : "Empty"}
                         </div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Pool state</div>
+                        <div className="text-xs text-slate-400 mt-0.5">Pool state</div>
                       </div>
                     </div>
                   </div>
@@ -670,9 +678,9 @@ function SuperAdminApiConfig() {
 
                 {/* Key textarea */}
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-slate-400 text-sm font-medium mb-1.5">
                     Add New API Key
-                    <span className="ml-2 text-xs font-normal text-slate-400 dark:text-slate-500">
+                    <span className="ml-2 text-xs font-normal text-slate-500">
                       comma-separate for bulk add
                     </span>
                   </label>
@@ -680,33 +688,33 @@ function SuperAdminApiConfig() {
                     value={card.newKeys}
                     onChange={e => updateActiveCard("newKeys", e.target.value)}
                     rows={3}
-                    className={`w-full px-4 py-3 border-2 rounded-xl outline-none text-sm font-mono bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 transition-all duration-150 resize-none ${
+                    className={`w-full bg-slate-800/60 backdrop-blur-sm border rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm font-mono transition-all duration-200 focus:outline-none resize-none ${
                       card.keysDirty
-                        ? "border-violet-400 dark:border-violet-600 ring-2 ring-violet-100 dark:ring-violet-900/30"
-                        : `border-slate-200 dark:border-slate-600 focus-visible:ring-2 focus-visible:ring-violet-400/50 focus-visible:ring-offset-1 ${pStyle.focusBorder}`
+                        ? "border-indigo-500 ring-2 ring-indigo-500/30"
+                        : `border-slate-700/60 hover:border-slate-600 ${pStyle.focusBorder} focus:ring-2 focus:ring-indigo-500/30`
                     }`}
                     placeholder={`Paste your ${providerLabels[provider]} API key — a key with a recognizable prefix auto-switches the provider sidebar`}
                   />
                   {card.keysDirty ? (
-                    <p className="text-xs font-medium text-violet-600 dark:text-violet-400 mt-2 flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+                    <p className="text-xs font-medium text-indigo-400 mt-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
                       Key ready — will be added to the {providerLabels[provider]} pool on save.
                     </p>
                   ) : (
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-                      Pasting a key with a known prefix (e.g. <code className="font-mono">sk-ant-</code>, <code className="font-mono">gsk_</code>) auto-detects and switches providers.
+                    <p className="text-slate-500 text-xs mt-2">
+                      Pasting a key with a known prefix (e.g. <code className="font-mono text-slate-400">sk-ant-</code>, <code className="font-mono text-slate-400">gsk_</code>) auto-detects and switches providers.
                     </p>
                   )}
                 </div>
 
                 {/* Test + Save */}
-                <div className="flex flex-wrap items-center gap-3 pt-1">
+                <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-slate-700/50">
                   {card.keysDirty && (
                     <>
                       <button
                         type="button"
                         onClick={handleTestInlineKey}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl text-sm font-semibold transition-all duration-150 ease-out min-h-[44px] cursor-pointer"
+                        className="px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center gap-2 min-h-[44px]"
                       >
                         <FaFlask className="w-3.5 h-3.5" />
                         Test Key
@@ -719,7 +727,7 @@ function SuperAdminApiConfig() {
                   <button
                     onClick={handleSaveCard}
                     disabled={configLoading}
-                    className={`inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r ${pStyle.saveGradient} text-white rounded-xl font-semibold text-sm shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 ease-out min-h-[44px] cursor-pointer`}
+                    className={`px-5 py-3 bg-gradient-to-r ${pStyle.saveGradient} text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 inline-flex items-center gap-2 min-h-[44px] cursor-pointer`}
                   >
                     {configLoading ? (
                       <><LoadingSpinner size="sm" /> Saving…</>
@@ -735,26 +743,28 @@ function SuperAdminApiConfig() {
             </div>
 
             {/* ── Stored keys card ── */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200">
+
+              {/* Card header */}
+              <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                    <FaKey className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  <span className="p-2 rounded-lg bg-slate-700/60">
+                    <FaKey className="w-3.5 h-3.5 text-slate-400" />
                   </span>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-200">
                       Stored Keys
-                      <span className="ml-2 font-normal text-slate-400 dark:text-slate-500">
+                      <span className="ml-2 text-sm font-normal text-slate-500">
                         — {providerLabels[provider]}
                       </span>
                     </h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="text-slate-500 text-xs mt-0.5">
                       {purpose === "pdf" ? "PDF Reading" : "Text Generation"} pool · load-balanced automatically
                     </p>
                   </div>
                 </div>
                 {card.list.length > 0 && (
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${pStyle.badge}`}>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${pStyle.badge}`}>
                     {card.list.length} key{card.list.length !== 1 ? "s" : ""}
                   </span>
                 )}
@@ -762,14 +772,12 @@ function SuperAdminApiConfig() {
 
               {card.list.length === 0 ? (
                 /* Empty state */
-                <div className="px-6 py-14 text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center mx-auto mb-4 border border-slate-200 dark:border-slate-600">
-                    <FaKey className="w-6 h-6 text-slate-300 dark:text-slate-600" />
+                <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-5">
+                    <FaKey className="w-6 h-6 text-indigo-400" />
                   </div>
-                  <h4 className="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    No keys stored yet
-                  </h4>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs mx-auto">
+                  <h3 className="text-lg font-bold text-white mb-2">No keys stored yet</h3>
+                  <p className="text-slate-400 text-sm max-w-xs">
                     Add a {providerLabels[provider]} API key in the form above to populate this pool.
                   </p>
                 </div>
@@ -777,49 +785,49 @@ function SuperAdminApiConfig() {
                 /* Keys table */
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50 dark:bg-slate-700/40 border-b border-slate-100 dark:border-slate-700">
+                    <thead className="bg-slate-800/60">
                       <tr>
-                        <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-12">#</th>
-                        <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Masked Key</th>
-                        <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider hidden sm:table-cell">Model</th>
-                        <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                        <th className="px-5 py-3 text-right text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 w-12">#</th>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Masked Key</th>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 hidden sm:table-cell">Model</th>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Status</th>
+                        <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                    <tbody className="divide-y divide-slate-700/30">
                       {card.list.map(k => {
                         const status    = card.testStatus[k.index];
                         const delLoading = actionLoading === `delete-key-${purpose}-${provider}-${k.index}`;
                         return (
                           <tr
                             key={k.index}
-                            className="hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors duration-150"
+                            className="hover:bg-indigo-500/5 transition-colors duration-150"
                           >
-                            <td className="px-5 py-4 font-mono text-xs text-slate-400 dark:text-slate-500">
+                            <td className="px-6 py-4 font-mono text-xs text-slate-500">
                               {k.index + 1}
                             </td>
-                            <td className="px-5 py-4 font-mono text-sm text-slate-700 dark:text-slate-300 max-w-[200px] truncate">
+                            <td className="px-6 py-4 font-mono text-sm text-slate-300 max-w-[200px] truncate">
                               {k.snippet}
                             </td>
-                            <td className="px-5 py-4 hidden sm:table-cell">
-                              <span className="inline-flex items-center px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-lg text-xs font-mono">
+                            <td className="px-6 py-4 hidden sm:table-cell">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-400 border border-slate-600/40 font-mono">
                                 {card.model}
                               </span>
                             </td>
-                            <td className="px-5 py-4">
+                            <td className="px-6 py-4">
                               {status ? (
                                 <TestResultPill r={status} />
                               ) : (
-                                <span className="text-xs text-slate-400 dark:text-slate-500 italic">Untested</span>
+                                <span className="text-xs text-slate-500 italic">Untested</span>
                               )}
                             </td>
-                            <td className="px-5 py-4">
+                            <td className="px-6 py-4">
                               <div className="flex gap-2 justify-end">
                                 <button
                                   onClick={() => handleTestStoredKey(purpose, provider, k.index)}
                                   disabled={status?.state === "testing"}
                                   aria-label={`Test key ${k.index + 1}`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40 rounded-lg text-xs font-semibold transition-colors duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
                                 >
                                   {status?.state === "testing" ? (
                                     <><span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" /> Testing</>
@@ -831,10 +839,10 @@ function SuperAdminApiConfig() {
                                   onClick={() => handleDeleteStoredKey(purpose, provider, k.index, k.snippet)}
                                   disabled={delLoading}
                                   aria-label={`Delete key ${k.index + 1}`}
-                                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-900/20 dark:text-rose-300 dark:hover:bg-rose-900/40 rounded-lg text-xs font-semibold transition-colors duration-150 ease-out disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
                                 >
                                   {delLoading ? (
-                                    <><span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" /> Deleting</>
+                                    <><span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" /> Deleting</>
                                   ) : (
                                     <><FaTrash className="w-3 h-3" /> Delete</>
                                   )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner.jsx";
 import AssessmentHeader from "../../../components/AssessmentHeader.jsx";
 import AssessmentInfoCard from "../../../components/AssessmentInfoCard.jsx";
@@ -33,7 +33,7 @@ function AssessmentPreview() {
 
   const handleCopyPrompt = () => {
     if (!assessment) return;
-    
+
     const promptText = generateAIPrompt(assessment);
     navigator.clipboard.writeText(promptText);
     setCopied(true);
@@ -42,23 +42,39 @@ function AssessmentPreview() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 flex flex-col items-center justify-center">
-        <LoadingSpinner size="lg" color="blue" type="dots" />
-        <p className="mt-4 text-gray-600 font-medium">Loading assessment...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col items-center justify-center">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+        <div className="relative flex flex-col items-center justify-center py-32 gap-4">
+          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+            <LoadingSpinner size="lg" type="spinner" color="blue" />
+          </div>
+          <p className="text-slate-400 text-sm">Loading assessment...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
-        <div className="bg-white border-2 border-red-200 rounded-2xl p-8 shadow-xl text-center max-w-md">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-red-600 mb-2">Unable to Load Assessment</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+        <div className="relative bg-slate-800/40 backdrop-blur-sm border border-red-500/30 rounded-2xl p-8 shadow-2xl text-center max-w-md">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 flex items-center justify-center mx-auto mb-5">
+            <FaExclamationTriangle className="text-white text-2xl" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Unable to Load Assessment</h2>
+          <p className="text-slate-400 mb-6">{error}</p>
           <Link
             to="/instructor/assessments"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
           >
             <FaArrowLeft />
             Back to Assessments
@@ -69,32 +85,38 @@ function AssessmentPreview() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl">
+
         <AssessmentHeader assessmentId={id} />
         <AssessmentInfoCard assessment={assessment} />
 
         {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 overflow-x-auto">
+        <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="border-b border-slate-700/50 overflow-x-auto bg-slate-800/60">
             <div className="flex min-w-max">
               <button
                 onClick={() => setTab("prompt")}
-                className={`flex-1 sm:flex-none px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold transition-all whitespace-nowrap ${
+                className={`flex-1 sm:flex-none px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   tab === "prompt"
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20"
+                    : "text-slate-400 hover:text-white hover:bg-slate-700/60"
                 }`}
               >
                 Full AI Prompt
               </button>
               <button
                 onClick={() => setTab("assessment")}
-                className={`flex-1 sm:flex-none px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold transition-all whitespace-nowrap ${
+                className={`flex-1 sm:flex-none px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer ${
                   tab === "assessment"
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/20"
+                    : "text-slate-400 hover:text-white hover:bg-slate-700/60"
                 }`}
               >
                 Sample Assessment
@@ -104,17 +126,17 @@ function AssessmentPreview() {
 
           <div className="p-4 sm:p-6 lg:p-8">
             {tab === "prompt" && (
-              <PromptTab 
-                assessment={assessment} 
-                copied={copied} 
-                onCopy={handleCopyPrompt} 
+              <PromptTab
+                assessment={assessment}
+                copied={copied}
+                onCopy={handleCopyPrompt}
               />
             )}
 
             {tab === "assessment" && (
-              <SampleQuestionsTab 
-                questions={questions} 
-                questionError={questionError} 
+              <SampleQuestionsTab
+                questions={questions}
+                questionError={questionError}
                 loading={questionsLoading || (questions.length === 0 && !questionError)}
               />
             )}
@@ -125,40 +147,13 @@ function AssessmentPreview() {
         <div className="mt-6 sm:mt-8 text-center">
           <Link
             to="/instructor/assessments"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 font-medium shadow-lg transform transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
           >
             <FaArrowLeft />
             <span>Back to Assessments</span>
           </Link>
         </div>
       </div>
-
-      {/* Custom CSS for animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        .animate-slideInUp {
-          animation: slideInUp 0.5s ease-out;
-        }
-      ` }} />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
-import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import {
@@ -12,7 +11,9 @@ import {
   FaFilePdf,
   FaUserPlus,
   FaClipboardList,
-  FaBinoculars
+  FaBinoculars,
+  FaPlus,
+  FaSearch,
 } from "react-icons/fa";
 
 // Import Physical Paper Modal
@@ -60,7 +61,7 @@ setModal({
     fetchData();
   }, [getInstructorAssessments]);
 
-  
+
 
 const handleDeleteAssessment = (assessmentId, assessmentTitle) => {
   setDeleteTarget({ id: assessmentId, title: assessmentTitle });
@@ -77,222 +78,279 @@ const handleDeleteAssessment = (assessmentId, assessmentTitle) => {
   ) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">My Assessments</h1>
-            <p className="text-gray-600">Manage and view all your assessments</p>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Instructor Portal</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">My Assessments</h1>
+            <p className="text-slate-400">Manage and view all your assessments</p>
           </div>
           <Link
             to="/instructor/assessments/create"
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg text-sm font-semibold flex items-center justify-center gap-2"
+            className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
           >
-            <span className="text-lg">+</span>
+            <FaPlus className="w-3.5 h-3.5" />
             <span>Create Assessment</span>
           </Link>
         </div>
 
         {/* Search */}
-        <Card className="mb-6 shadow-md border-0">
-          <CardContent className="p-5">
-            <div className="relative">
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search assessments by title..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 text-sm"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mb-6 bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-5">
+          <div className="relative">
+            <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
+            <input
+              type="text"
+              placeholder="Search assessments by title..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+            />
+          </div>
+        </div>
 
         {/* Loading or Content */}
         {isLoading || loading ? (
-          <Card className="shadow-md border-0">
-            <CardContent>
-              <div className="flex flex-col justify-center items-center py-20">
-                <LoadingSpinner size="lg" type="spinner" color="blue" />
-                <span className="mt-4 text-gray-600 font-medium">Loading assessments...</span>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+              <LoadingSpinner size="lg" type="spinner" color="blue" />
+            </div>
+            <p className="text-slate-400 text-sm">Loading assessments...</p>
+          </div>
         ) : filteredAssessments.length === 0 ? (
-          <Card className="shadow-md border-0">
-            <CardContent className="text-center py-20">
-              <div className="text-7xl mb-6">📝</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                {searchTerm ? "No assessments found" : "No assessments yet"}
-              </h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                {searchTerm ? "Try a different search term or clear your search" : "Start by creating your first assessment to get started"}
-              </p>
-              {!searchTerm && (
-                <Link
-                  to="/instructor/assessments/create"
-                  className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
-                >
-                  <span className="text-xl">+</span>
-                  <span>Create Your First Assessment</span>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-28 text-center px-4">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+              <FaClipboardList className="w-8 h-8 text-indigo-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">
+              {searchTerm ? "No assessments found" : "No assessments yet"}
+            </h3>
+            <p className="text-slate-400 max-w-sm mb-8">
+              {searchTerm ? "Try a different search term or clear your search" : "Start by creating your first assessment to get started"}
+            </p>
+            {!searchTerm && (
+              <Link
+                to="/instructor/assessments/create"
+                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+              >
+                <FaPlus className="w-3.5 h-3.5" />
+                <span>Create Your First Assessment</span>
+              </Link>
+            )}
+          </div>
         ) : (
           <>
             {/* Desktop Table */}
             <div className="hidden lg:block">
-              <Card className="shadow-md border-0 overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-blue-50 border-b-2 border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-900">
-                      All Assessments ({filteredAssessments.length})
-                    </h2>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Title
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Created
-                          </th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider pr-8">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-100">
-                        {filteredAssessments.map((assessment) => (
-                          <tr key={assessment.id} className="hover:bg-blue-50/50 transition-colors">
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-                                  <FaClipboardList className="w-4 h-4" />
-                                </div>
-                                <span className="font-semibold text-gray-900">{assessment.title}</span>
+              <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-hidden shadow-2xl">
+                <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-white">
+                    All Assessments
+                    <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                      {filteredAssessments.length}
+                    </span>
+                  </h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead className="bg-slate-800/60">
+                      <tr>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                          Title
+                        </th>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                          Created
+                        </th>
+                        <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                          Status
+                        </th>
+                        <th className="px-6 py-3.5 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50 pr-8">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/30">
+                      {filteredAssessments.map((assessment) => (
+                        <tr key={assessment.id} className="hover:bg-indigo-500/5 transition-colors duration-150">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                                <FaClipboardList className="w-4 h-4 text-white" />
                               </div>
-                            </td>
-                            <td className="px-6 py-4 text-sm text-gray-600">
-                              {new Date(assessment.created_at).toLocaleDateString("en-US", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </td>
-                            <td className="px-6 py-4">
-                              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${assessment.is_executed
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
-                                }`}>
-                                {assessment.is_executed ? "Executed" : "Draft"}
+                              <span className="font-semibold text-slate-200">{assessment.title}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-400">
+                            {new Date(assessment.created_at).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </td>
+                          <td className="px-6 py-4">
+                            {assessment.is_executed ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                                Executed
                               </span>
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <div className="flex flex-wrap justify-end items-center gap-3">
-                                <Link to={`/instructor/assessments/${assessment.id}`} className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold hover:underline transition">
-                                  <FaEye /> View
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
+                                Draft
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex flex-wrap justify-end items-center gap-2">
+                              <Link
+                                to={`/instructor/assessments/${assessment.id}`}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-indigo-500/20 border border-slate-600/50 hover:border-indigo-500/40 text-slate-300 hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                              >
+                                <FaEye className="w-3 h-3" /> View
+                              </Link>
+                              <Link
+                                to={`/instructor/assessments/${assessment.id}/enroll`}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-emerald-500/20 border border-slate-600/50 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                              >
+                                <FaUserPlus className="w-3 h-3" /> Enroll
+                              </Link>
+                              {!assessment.is_executed && (
+                                <Link
+                                  to={`/instructor/assessments/${assessment.id}/edit`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-violet-500/20 border border-slate-600/50 hover:border-violet-500/40 text-slate-300 hover:text-violet-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                                >
+                                  <FaEdit className="w-3 h-3" /> Edit
                                 </Link>
-                                <Link to={`/instructor/assessments/${assessment.id}/enroll`} className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 font-semibold hover:underline transition">
-                                  <FaUserPlus /> Enroll
-                                </Link>
-                                {!assessment.is_executed && (
-                                  <Link to={`/instructor/assessments/${assessment.id}/edit`} className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 font-semibold hover:underline transition">
-                                    <FaEdit /> Edit
-                                  </Link>
-                                )}
-                                {!assessment.is_executed && (
-                                  <button onClick={() => handleDeleteAssessment(assessment.id, assessment.title)} className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 font-semibold hover:underline transition">
-                                    <FaTrash /> Delete
-                                  </button>
-                                )}
-                                {assessment.is_executed && (
-                                  <Link to={`/instructor/assessments/${assessment.id}/analytics`} className="inline-flex items-center gap-1 text-purple-600 hover:text-purple-800 font-semibold hover:underline transition">
-                                    <FaChartBar /> Analytics
-                                  </Link>
-                                )}
-                                <button onClick={() => openPaperModal(assessment)} className="inline-flex items-center gap-1 text-orange-600 hover:text-orange-800 font-semibold hover:underline transition">
-                                  <FaFilePdf /> Paper
+                              )}
+                              {!assessment.is_executed && (
+                                <button
+                                  onClick={() => handleDeleteAssessment(assessment.id, assessment.title)}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer"
+                                >
+                                  <FaTrash className="w-3 h-3" /> Delete
                                 </button>
-                                {!assessment.is_executed && (
-                                  <Link to={`/instructor/assessments/${assessment.id}/preview`} className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 font-semibold hover:underline transition">
-                                    <FaBinoculars /> Preview
-                                  </Link>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+                              )}
+                              {assessment.is_executed && (
+                                <Link
+                                  to={`/instructor/assessments/${assessment.id}/analytics`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-violet-500/20 border border-slate-600/50 hover:border-violet-500/40 text-slate-300 hover:text-violet-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                                >
+                                  <FaChartBar className="w-3 h-3" /> Analytics
+                                </Link>
+                              )}
+                              <button
+                                onClick={() => openPaperModal(assessment)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-amber-500/20 border border-slate-600/50 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer"
+                              >
+                                <FaFilePdf className="w-3 h-3" /> Paper
+                              </button>
+                              {!assessment.is_executed && (
+                                <Link
+                                  to={`/instructor/assessments/${assessment.id}/preview`}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700/60 hover:bg-sky-500/20 border border-slate-600/50 hover:border-sky-500/40 text-slate-300 hover:text-sky-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                                >
+                                  <FaBinoculars className="w-3 h-3" /> Preview
+                                </Link>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
 
             {/* Mobile Cards */}
             <div className="lg:hidden space-y-4">
               {filteredAssessments.map((assessment) => (
-                <Card key={assessment.id} className="shadow-md hover:shadow-lg transition-all duration-200 border-0">
-                  <CardContent className="p-5">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-900 mb-1">{assessment.title}</h3>
-                        <p className="text-sm text-gray-600">
+                <div
+                  key={assessment.id}
+                  className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 p-5"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                        <FaClipboardList className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-slate-200 truncate">{assessment.title}</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">
                           Created: {new Date(assessment.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${assessment.is_executed
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                        }`}>
-                        {assessment.is_executed ? "Executed" : "Draft"}
-                      </span>
                     </div>
+                    <div className="ml-3 flex-shrink-0">
+                      {assessment.is_executed ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                          Executed
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
+                          Draft
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <Link to={`/instructor/assessments/${assessment.id}`} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition">
-                        <FaEye /> View
-                      </Link>
-                      <Link to={`/instructor/assessments/${assessment.id}/enroll`} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition">
-                        <FaUserPlus /> Enroll
-                      </Link>
-                      {!assessment.is_executed && (
-                        <>
-                          <Link to={`/instructor/assessments/${assessment.id}/edit`} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition">
-                            <FaEdit /> Edit
-                          </Link>
-                          <button onClick={() => handleDeleteAssessment(assessment.id, assessment.title)} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition">
-                            <FaTrash /> Delete
-                          </button>
-                          <Link to={`/instructor/assessments/${assessment.id}/preview`} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition col-span-2">
-                            <FaBinoculars /> Preview
-                          </Link>
-                        </>
-                      )}
-                      {assessment.is_executed && (
-                        <Link to={`/instructor/assessments/${assessment.id}/analytics`} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition">
-                          <FaChartBar /> Analytics
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <Link
+                      to={`/instructor/assessments/${assessment.id}`}
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-indigo-500/20 border border-slate-600/50 hover:border-indigo-500/40 text-slate-300 hover:text-indigo-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                    >
+                      <FaEye className="w-3.5 h-3.5" /> View
+                    </Link>
+                    <Link
+                      to={`/instructor/assessments/${assessment.id}/enroll`}
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-emerald-500/20 border border-slate-600/50 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                    >
+                      <FaUserPlus className="w-3.5 h-3.5" /> Enroll
+                    </Link>
+                    {!assessment.is_executed && (
+                      <>
+                        <Link
+                          to={`/instructor/assessments/${assessment.id}/edit`}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-violet-500/20 border border-slate-600/50 hover:border-violet-500/40 text-slate-300 hover:text-violet-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                        >
+                          <FaEdit className="w-3.5 h-3.5" /> Edit
                         </Link>
-                      )}
-                      <button onClick={() => openPaperModal(assessment)} className="flex items-center justify-center gap-2 px-4 py-2.5 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition col-span-2">
-                        <FaFilePdf /> Physical Paper
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
+                        <button
+                          onClick={() => handleDeleteAssessment(assessment.id, assessment.title)}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium transition-all duration-200 active:scale-95 cursor-pointer"
+                        >
+                          <FaTrash className="w-3.5 h-3.5" /> Delete
+                        </button>
+                        <Link
+                          to={`/instructor/assessments/${assessment.id}/preview`}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-sky-500/20 border border-slate-600/50 hover:border-sky-500/40 text-slate-300 hover:text-sky-300 rounded-xl font-medium transition-all duration-200 cursor-pointer col-span-2"
+                        >
+                          <FaBinoculars className="w-3.5 h-3.5" /> Preview
+                        </Link>
+                      </>
+                    )}
+                    {assessment.is_executed && (
+                      <Link
+                        to={`/instructor/assessments/${assessment.id}/analytics`}
+                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-violet-500/20 border border-slate-600/50 hover:border-violet-500/40 text-slate-300 hover:text-violet-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                      >
+                        <FaChartBar className="w-3.5 h-3.5" /> Analytics
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => openPaperModal(assessment)}
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-amber-500/20 border border-slate-600/50 hover:border-amber-500/40 text-slate-300 hover:text-amber-300 rounded-xl font-medium transition-all duration-200 active:scale-95 cursor-pointer col-span-2"
+                    >
+                      <FaFilePdf className="w-3.5 h-3.5" /> Physical Paper
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           </>

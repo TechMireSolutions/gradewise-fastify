@@ -82,31 +82,55 @@ export async function createAssessmentService(
   });
 }
 
+// ─── Mappers ──────────────────────────────────────────────────────────────────
+
+function mapBlock(b: QuestionBlock) {
+  return {
+    id: b.id,
+    assessment_id: b.assessmentId,
+    question_type: b.questionType,
+    question_count: b.questionCount,
+    duration_per_question: b.durationPerQuestion,
+    num_options: b.numOptions,
+    num_first_side: b.leftCount,
+    num_second_side: b.rightCount,
+    positive_marks: b.positiveMarks,
+    negative_marks: b.negativeMarks,
+    created_by: b.createdBy,
+    created_at: b.createdAt,
+  };
+}
+
+function mapAssessment(a: Assessment) {
+  return {
+    id: a.id,
+    title: a.title,
+    prompt: a.prompt,
+    external_links: a.externalLinks,
+    instructor_id: a.instructorId,
+    is_executed: a.isExecuted,
+    created_at: a.createdAt,
+    updated_at: a.updatedAt,
+  };
+}
+
 // ─── Read ─────────────────────────────────────────────────────────────────────
 
 export async function getInstructorAssessmentsService(instructorId: number) {
   const rows = await db
-    .select({
-      id: assessments.id,
-      title: assessments.title,
-      prompt: assessments.prompt,
-      externalLinks: assessments.externalLinks,
-      isExecuted: assessments.isExecuted,
-      createdAt: assessments.createdAt,
-      updatedAt: assessments.updatedAt,
-    })
+    .select()
     .from(assessments)
     .where(eq(assessments.instructorId, instructorId))
     .orderBy(sql`${assessments.createdAt} DESC`);
 
-  return rows;
+  return rows.map(mapAssessment);
 }
 
 export async function getAssessmentService(
   assessmentId: number,
   userId: number,
   role: string
-): Promise<Assessment & { blocks: QuestionBlock[]; enrolledCount: number }> {
+) {
   const result = await db
     .select()
     .from(assessments)
@@ -116,16 +140,13 @@ export async function getAssessmentService(
   const assessment = result[0];
   if (!assessment) throw new NotFoundError("Assessment");
 
-  const isAdmin = role === "admin" || role === "super_admin";
   const isInstructor = role === "instructor";
   const isStudent = role === "student";
 
-  // Instructors can only view their own assessments (admins can view all)
   if (isInstructor && assessment.instructorId !== userId) {
     throw new ForbiddenError("Access denied to this assessment");
   }
 
-  // Students must be enrolled to view an assessment
   if (isStudent) {
     const enrollment = await db
       .select({ id: enrollments.id })
@@ -137,17 +158,22 @@ export async function getAssessmentService(
     }
   }
 
-  const blocks = await db
-    .select()
-    .from(questionBlocks)
-    .where(eq(questionBlocks.assessmentId, assessmentId));
+  const [blocks, countResult, linkedResources] = await Promise.all([
+    db.select().from(questionBlocks).where(eq(questionBlocks.assessmentId, assessmentId)),
+    db.select({ count: sql<number>`count(*)` }).from(enrollments).where(eq(enrollments.assessmentId, assessmentId)),
+    db
+      .select({ id: resources.id, name: resources.name, url: resources.url, fileType: resources.fileType, contentType: resources.contentType, createdAt: resources.createdAt })
+      .from(assessmentResources)
+      .innerJoin(resources, eq(assessmentResources.resourceId, resources.id))
+      .where(eq(assessmentResources.assessmentId, assessmentId)),
+  ]);
 
-  const countResult = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(enrollments)
-    .where(eq(enrollments.assessmentId, assessmentId));
-
-  return { ...assessment, blocks, enrolledCount: countResult[0]?.count ?? 0 };
+  return {
+    ...mapAssessment(assessment),
+    question_blocks: blocks.map(mapBlock),
+    enrolled_count: countResult[0]?.count ?? 0,
+    resources: linkedResources.map((r) => ({ ...r, created_at: r.createdAt, file_type: r.fileType, content_type: r.contentType })),
+  };
 }
 
 // ─── Update ───────────────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ import useAuthStore from "@/features/auth/store.js";
 import { Card, CardContent } from "../components/ui/Card.jsx";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
-import { FaLock, FaCheckCircle, FaArrowLeft, FaKey } from "react-icons/fa";
+import { FaLock, FaCheckCircle, FaArrowLeft, FaKey, FaExclamationTriangle, FaShieldAlt } from "react-icons/fa";
 import { setNewPasswordSchema } from "../scheema/passwordSchemas.js";
 
 function SetNewPassword() {
@@ -32,20 +32,19 @@ function SetNewPassword() {
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-try {
-  setNewPasswordSchema.parse(formData);
-  setErrors({});
-} catch (err) {
-  const fieldErrors = {};
-  err.errors.forEach((e) => {
-    fieldErrors[e.path[0]] = e.message;
-  });
-  setErrors(fieldErrors);
-  return;
-}
+    try {
+      setNewPasswordSchema.parse(formData);
+      setErrors({});
+    } catch (err) {
+      const fieldErrors = {};
+      err.errors.forEach((e) => {
+        fieldErrors[e.path[0]] = e.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
 
     setLoading(true);
 
@@ -70,132 +69,142 @@ try {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-        <Card className="w-full max-w-md shadow-2xl border-2 border-gray-200 rounded-2xl sm:rounded-3xl overflow-hidden">
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 sm:p-8">
-            <div className="text-center">
-              <div className="bg-white/20 backdrop-blur-sm w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <FaKey className="text-3xl sm:text-4xl" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Set New Password</h2>
-              <p className="text-green-100 text-sm sm:text-base">Enter your new password below</p>
-            </div>
-          </div>
-
-          <CardContent className="p-6 sm:p-8">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label htmlFor="newPassword" className="block text-sm font-bold text-gray-700 mb-2">
-                  New Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaLock className="text-gray-400" />
-                  </div>
-                  <input
-                    type="password"
-                    id="newPassword"
-                    name="newPassword"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all duration-200 ${
-                      errors.newPassword 
-                        ? "border-red-500 focus:ring-red-200" 
-                        : "border-gray-300 focus:border-green-500 focus:ring-green-200"
-                    }`}
-                    placeholder="Enter new password"
-                    required
-                  />
-                </div>
-                {errors.newPassword && (
-                  <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                    <span>⚠️</span>
-                    {errors.newPassword}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 mb-2">
-                  Confirm Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaCheckCircle className="text-gray-400" />
-                  </div>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-4 transition-all duration-200 ${
-                      errors.confirmPassword 
-                        ? "border-red-500 focus:ring-red-200" 
-                        : "border-gray-300 focus:border-green-500 focus:ring-green-200"
-                    }`}
-                    placeholder="Confirm new password"
-                    required
-                  />
-                </div>
-                {errors.confirmPassword && (
-                  <p className="text-red-600 text-sm mt-2 flex items-center gap-1">
-                    <span>⚠️</span>
-                    {errors.confirmPassword}
-                  </p>
-                )}
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                <p className="text-xs text-gray-700 leading-relaxed">
-                  <strong>🔒 Password Requirements:</strong><br/>
-                  • At least 8 characters long<br/>
-                  • Include uppercase letters<br/>
-                  • Include numbers
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 sm:py-4 px-6 rounded-xl hover:from-green-700 hover:to-blue-700 transition-all duration-200 font-bold text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <LoadingSpinner size="sm" color="white" type="dots" />
-                    <span>Setting New Password...</span>
-                  </>
-                ) : (
-                  <>
-                    <FaCheckCircle />
-                    <span>Set New Password</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            <div className="mt-6 pt-6 border-t-2 border-gray-200 space-y-3 text-center">
-              <Link 
-                to="/login" 
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-bold hover:underline transition-colors"
-              >
-                <FaArrowLeft />
-                <span>Back to Login</span>
-              </Link>
-              <div>
-                <Link 
-                  to="/forgot-password" 
-                  className="text-sm text-gray-600 hover:text-blue-600 font-semibold hover:underline transition-colors"
-                >
-                  Request a new reset link
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
+      <div className="relative w-full max-w-md">
+        {/* Form card */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+          {/* Brand header */}
+          <div className="mb-8 text-center">
+            <div className="flex items-center justify-center mb-5">
+              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <FaKey className="text-white text-2xl" />
+              </div>
+            </div>
+            <h1 className="text-2xl font-bold text-white tracking-tight mb-2">Set New Password</h1>
+            <p className="text-slate-400 text-sm">Enter your new password below to complete the reset</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* New Password field */}
+            <div>
+              <label htmlFor="newPassword" className="block text-slate-400 text-sm font-medium mb-1.5">
+                New Password
+              </label>
+              <div className="relative">
+                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <input
+                  type="password"
+                  id="newPassword"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-800/60 backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                    errors.newPassword
+                      ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
+                      : "border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500/30"
+                  }`}
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+              {errors.newPassword && (
+                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
+                  <FaExclamationTriangle className="shrink-0" />
+                  {errors.newPassword}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-slate-400 text-sm font-medium mb-1.5">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <FaCheckCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-800/60 backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                    errors.confirmPassword
+                      ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
+                      : "border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500/30"
+                  }`}
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
+                  <FaExclamationTriangle className="shrink-0" />
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            {/* Password requirements hint */}
+            <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4">
+              <div className="flex items-start gap-3">
+                <FaShieldAlt className="text-indigo-400 text-sm mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Password Requirements</p>
+                  <ul className="space-y-1">
+                    <li className="text-xs text-slate-400 leading-relaxed">At least 8 characters long</li>
+                    <li className="text-xs text-slate-400 leading-relaxed">Include uppercase letters</li>
+                    <li className="text-xs text-slate-400 leading-relaxed">Include numbers</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            >
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" color="white" type="dots" />
+                  <span>Setting New Password...</span>
+                </>
+              ) : (
+                <>
+                  <FaCheckCircle />
+                  <span>Set New Password</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer links */}
+          <div className="mt-6 pt-6 border-t border-slate-700/50 flex flex-col items-center gap-3">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
+            >
+              <FaArrowLeft className="text-xs" />
+              <span>Back to Login</span>
+            </Link>
+            <Link
+              to="/forgot-password"
+              className="text-slate-500 hover:text-slate-400 text-xs font-medium transition-colors duration-150 cursor-pointer"
+            >
+              Request a new reset link
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <Modal
         isOpen={modal.isOpen}

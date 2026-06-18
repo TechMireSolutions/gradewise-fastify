@@ -24,7 +24,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
     confirmPassword: "",
     role: "student",
   });
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, type: "", title: "", message: "" });
 
@@ -121,17 +121,16 @@ const handleEnroll = async (e) => {
   }
 };
 
-  const inputClass = "w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all";
-  const labelClass = "block text-sm font-bold text-gray-700 mb-2";
+  const inputClass =
+    "w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30";
+  const labelClass = "block text-slate-400 text-sm font-medium mb-1.5";
 
   const formContent = mode === "register" ? (
     <form onSubmit={handleRegister} className={compact ? "space-y-4" : "space-y-5"}>
       <div>
         <label className={labelClass}>Full Name</label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaUser className="text-gray-400" />
-          </div>
+          <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
           <input
             name="name"
             value={formData.name}
@@ -142,12 +141,11 @@ const handleEnroll = async (e) => {
           />
         </div>
       </div>
+
       <div>
         <label className={labelClass}>Email</label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaEnvelope className="text-gray-400" />
-          </div>
+          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
           <input
             name="email"
             type="email"
@@ -164,18 +162,16 @@ const handleEnroll = async (e) => {
         <div>
           <label className={labelClass}>User Role</label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaUserShield className="text-gray-400" />
-            </div>
+            <FaUserShield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className={`${inputClass} appearance-none`}
+              className={`${inputClass} appearance-none cursor-pointer`}
             >
-              <option value="student">Student</option>
-              <option value="instructor">Instructor</option>
-              <option value="admin">Admin</option>
+              <option value="student" className="bg-slate-800 text-slate-200">Student</option>
+              <option value="instructor" className="bg-slate-800 text-slate-200">Instructor</option>
+              <option value="admin" className="bg-slate-800 text-slate-200">Admin</option>
             </select>
           </div>
         </div>
@@ -184,9 +180,7 @@ const handleEnroll = async (e) => {
       <div>
         <label className={labelClass}>Password</label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaLock className="text-gray-400" />
-          </div>
+          <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
           <input
             name="password"
             type="password"
@@ -198,12 +192,11 @@ const handleEnroll = async (e) => {
           />
         </div>
       </div>
+
       <div>
         <label className={labelClass}>Confirm Password</label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaLock className="text-gray-400" />
-          </div>
+          <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
           <input
             name="confirmPassword"
             type="password"
@@ -215,11 +208,12 @@ const handleEnroll = async (e) => {
           />
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-700/50">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-400 transition-all"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
         >
           <FaArrowLeft />
           Cancel
@@ -227,7 +221,7 @@ const handleEnroll = async (e) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold disabled:opacity-50 hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? (
             <>
@@ -248,9 +242,7 @@ const handleEnroll = async (e) => {
       <div>
         <label className={labelClass}>User Email</label>
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <FaEnvelope className="text-gray-400" />
-          </div>
+          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
           <input
             name="email"
             type="email"
@@ -262,11 +254,12 @@ const handleEnroll = async (e) => {
           />
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
+
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-700/50">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 text-gray-700 bg-white border-2 border-gray-300 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-400 transition-all"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
         >
           <FaArrowLeft />
           Cancel
@@ -274,7 +267,7 @@ const handleEnroll = async (e) => {
         <button
           type="submit"
           disabled={enrollLoading}
-          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold disabled:opacity-50 hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg"
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {enrollLoading ? (
             <>
@@ -295,16 +288,60 @@ const handleEnroll = async (e) => {
   // Standalone page layout
   if (!compact) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
-        <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+        {/* Ambient blobs */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+
+        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          {/* Page header */}
           <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Add New User</h1>
-            <p className="text-gray-600 text-sm sm:text-base">Register a new user or enroll an existing one</p>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <FaUserPlus className="text-white text-lg" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">User Management</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Add New User</h1>
+              </div>
+            </div>
+            <p className="text-slate-400 leading-relaxed">
+              Register a new user or enroll an existing one into an assessment.
+            </p>
           </div>
-          <div className="bg-white rounded-2xl shadow-2xl border-2 border-gray-200 p-6 sm:p-8">
-            {formContent}
+
+          {/* Card */}
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
+            {/* Card header */}
+            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">
+                  {mode === "register" ? "Register User" : "Enroll Existing User"}
+                </h2>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+                  mode === "register"
+                    ? "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20"
+                    : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                }`}>
+                  {mode === "register" ? (
+                    <><FaUser className="text-xs" /> New User</>
+                  ) : (
+                    <><FaUserGraduate className="text-xs" /> Existing User</>
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* Card body */}
+            <div className="p-6 sm:p-8">
+              {formContent}
+            </div>
           </div>
         </div>
+
         <Modal
           isOpen={modal.isOpen}
           onClose={() => setModal({ ...modal, isOpen: false })}
@@ -324,7 +361,7 @@ const handleEnroll = async (e) => {
         <div className="mb-4 -mt-2">
           <button
             onClick={() => setMode((m) => (m === "enroll" ? "register" : "enroll"))}
-            className="text-xs text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors"
+            className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
           >
             {mode === "enroll" ? "→ Register new user instead" : "→ Enroll existing instead"}
           </button>

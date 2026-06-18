@@ -7,21 +7,21 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
   };
 
   const colorClasses = {
-    blue: "border-blue-600",
-    green: "border-green-600",
-    red: "border-red-600",
-    gray: "border-gray-600",
+    blue: "border-indigo-500",
+    green: "border-emerald-500",
+    red: "border-red-500",
+    gray: "border-slate-400",
     white: "border-white",
-    purple: "border-purple-600",
+    purple: "border-violet-500",
   };
 
   const gradientColors = {
-    blue: "from-blue-600 to-purple-600",
-    green: "from-green-600 to-emerald-600",
-    red: "from-red-600 to-pink-600",
-    gray: "from-gray-600 to-gray-800",
-    white: "from-white to-gray-100",
-    purple: "from-purple-600 to-pink-600",
+    blue: "from-indigo-500 to-violet-600",
+    green: "from-emerald-500 to-teal-600",
+    red: "from-red-500 to-rose-600",
+    gray: "from-slate-500 to-slate-700",
+    white: "from-white to-slate-200",
+    purple: "from-violet-500 to-purple-600",
   };
 
   // Modern circular spinner with gradient
@@ -30,7 +30,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
       <div className="flex justify-center items-center" role="status" aria-label="Loading">
         <div className="relative">
           <div
-            className={`${sizeClasses[size]} rounded-full border-4 border-gray-200`}
+            className={`${sizeClasses[size]} rounded-full border-4 border-slate-700/60`}
           ></div>
           <div
             className={`absolute top-0 left-0 ${sizeClasses[size]} rounded-full border-4 ${colorClasses[color]} border-t-transparent animate-spin`}
@@ -67,12 +67,12 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     };
 
     const dotColor = {
-      blue: "bg-blue-600",
-      green: "bg-green-600",
-      red: "bg-red-600",
-      gray: "bg-gray-600",
+      blue: "bg-indigo-500",
+      green: "bg-emerald-500",
+      red: "bg-red-500",
+      gray: "bg-slate-400",
       white: "bg-white",
-      purple: "bg-purple-600",
+      purple: "bg-violet-500",
     };
 
     return (
@@ -96,19 +96,19 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
   // Pulse loader
   if (type === "pulse") {
     const pulseColor = {
-      blue: "bg-blue-600",
-      green: "bg-green-600",
-      red: "bg-red-600",
-      gray: "bg-gray-600",
+      blue: "bg-indigo-500",
+      green: "bg-emerald-500",
+      red: "bg-red-500",
+      gray: "bg-slate-400",
       white: "bg-white",
-      purple: "bg-purple-600",
+      purple: "bg-violet-500",
     };
 
     return (
       <div className="flex justify-center items-center" role="status" aria-label="Loading">
         <div className="relative">
           <div
-            className={`${sizeClasses[size]} ${pulseColor[color]} rounded-full animate-ping opacity-75`}
+            className={`${sizeClasses[size]} ${pulseColor[color]} rounded-full animate-ping opacity-40`}
           ></div>
           <div
             className={`absolute top-0 left-0 ${sizeClasses[size]} ${pulseColor[color]} rounded-full`}
@@ -135,12 +135,12 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     };
 
     const barColor = {
-      blue: "bg-blue-600",
-      green: "bg-green-600",
-      red: "bg-red-600",
-      gray: "bg-gray-600",
+      blue: "bg-indigo-500",
+      green: "bg-emerald-500",
+      red: "bg-red-500",
+      gray: "bg-slate-400",
       white: "bg-white",
-      purple: "bg-purple-600",
+      purple: "bg-violet-500",
     };
 
     return (
@@ -170,7 +170,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     <div className="flex justify-center items-center">
       <div className="relative">
         <div
-          className={`${sizeClasses[size]} rounded-full border-4 border-gray-200`}
+          className={`${sizeClasses[size]} rounded-full border-4 border-slate-700/60`}
         ></div>
         <div
           className={`absolute top-0 left-0 ${sizeClasses[size]} rounded-full border-4 ${colorClasses[color]} border-t-transparent animate-spin`}

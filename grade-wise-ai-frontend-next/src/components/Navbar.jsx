@@ -66,11 +66,11 @@ function Navbar() {
         ];
       case "instructor":
         return [
-          { name: "Dashboard",       href: "/instructor/dashboard",          icon: <FaTachometerAlt className="w-4 h-4" /> },
-          { name: "My Assessments",  href: "/instructor/assessments",        icon: <FaClipboardList className="w-4 h-4" /> },
-          { name: "Create Assessment", href: "/instructor/assessments/create", icon: <FaPlus className="w-4 h-4" /> },
-          { name: "Manage Students", href: "/instructor/students",           icon: <FaUserGraduate className="w-4 h-4" /> },
-          { name: "Resources",       href: "/instructor/resources",          icon: <FaBook className="w-4 h-4" /> },
+          { name: "Dashboard",         href: "/instructor/dashboard",            icon: <FaTachometerAlt className="w-4 h-4" /> },
+          { name: "My Assessments",    href: "/instructor/assessments",          icon: <FaClipboardList className="w-4 h-4" /> },
+          { name: "Create Assessment", href: "/instructor/assessments/create",   icon: <FaPlus className="w-4 h-4" /> },
+          { name: "Manage Students",   href: "/instructor/students",             icon: <FaUserGraduate className="w-4 h-4" /> },
+          { name: "Resources",         href: "/instructor/resources",            icon: <FaBook className="w-4 h-4" /> },
           profileLink,
         ];
       case "student":
@@ -103,7 +103,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="shadow-xl border-b-2 border-slate-700 sticky top-0 z-50 backdrop-blur-sm bg-slate-900/95 transition-colors duration-200">
+    <nav className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 transition-colors duration-200">
       <div className="w-full px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-16">
 
@@ -111,13 +111,13 @@ function Navbar() {
           <div className="flex items-center flex-shrink-0">
             <Link
               href="/"
-              className="flex items-center space-x-2 group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-1"
+              className="flex items-center space-x-2.5 group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900"
               onClick={closeMobileMenu}
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300 shadow-md">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-indigo-500/25">
                 <FaBook className="text-white text-sm" />
               </div>
-              <span className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent whitespace-nowrap tracking-tight">
                 Gradewise AI
               </span>
             </Link>
@@ -125,16 +125,16 @@ function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1 flex-1 justify-end">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-0.5">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
                   aria-current={isActiveLink(link.href) ? "page" : undefined}
-                  className={`flex items-center gap-1.5 px-2 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-out whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-1 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 ${
                     isActiveLink(link.href)
-                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg"
-                      : "text-slate-300 hover:text-violet-400 hover:bg-violet-950/30"
+                      ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/30"
+                      : "text-slate-400 hover:text-white hover:bg-slate-700/60"
                   }`}
                 >
                   {link.icon}
@@ -145,21 +145,21 @@ function Navbar() {
 
             {/* User info + Logout */}
             {user && (
-              <div className="flex items-center space-x-1 pl-2 ml-1 border-l-2 border-slate-700">
-                <div className="flex items-center space-x-1 bg-gradient-to-r from-violet-950/40 to-indigo-950/40 px-2 py-1 rounded-lg border border-violet-800">
-                  <div className="text-violet-400 text-base">
+              <div className="flex items-center space-x-2 pl-3 ml-1 border-l border-slate-700/50">
+                <div className="flex items-center gap-2 bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 px-3 py-1.5 rounded-xl">
+                  <div className="text-indigo-400 text-sm">
                     <UserRoleIcon />
                   </div>
-                  <div className="hidden xl:block ml-1">
-                    <div className="text-xs font-bold text-slate-100 leading-tight">{user.name}</div>
-                    <div className="text-xs text-violet-400 font-medium leading-tight">
+                  <div className="hidden xl:block">
+                    <div className="text-xs font-semibold text-slate-200 leading-tight">{user.name}</div>
+                    <div className="text-xs text-slate-500 leading-tight">
                       {ROLE_LABELS[user.role] ?? user.role}
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-rose-600 to-rose-700 text-white px-2 py-1.5 rounded-lg text-sm font-semibold hover:from-rose-700 hover:to-rose-800 transition-all duration-200 ease-out shadow-md hover:shadow-lg whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-1 cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 cursor-pointer"
                 >
                   <FaSignOutAlt />
                   <span className="hidden xl:inline">Logout</span>
@@ -174,15 +174,15 @@ function Navbar() {
               onClick={handleMobileMenuToggle}
               aria-label="Toggle mobile menu"
               aria-expanded={isMobileMenuOpen}
-              className="p-2 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-violet-950/30 transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer"
+              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <span className="sr-only">Open menu</span>
               {isMobileMenuOpen ? (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}
@@ -192,21 +192,21 @@ function Navbar() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t-2 border-slate-700 bg-gradient-to-br from-slate-900 to-violet-950/10 shadow-inner">
-            <div className="px-2 pt-3 pb-4 space-y-2">
+          <div className="lg:hidden border-t border-slate-800/60 bg-slate-900/95 backdrop-blur-md">
+            <div className="px-2 pt-3 pb-4 space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.name}
                   href={link.href}
                   onClick={closeMobileMenu}
                   aria-current={isActiveLink(link.href) ? "page" : undefined}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200 ease-out min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                     isActiveLink(link.href)
-                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg"
-                      : "text-slate-300 hover:bg-slate-800 hover:shadow-md hover:text-violet-400"
+                      ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25"
+                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                   }`}
                 >
-                  <span className={isActiveLink(link.href) ? "text-white" : "text-violet-400"}>
+                  <span className={isActiveLink(link.href) ? "text-white" : "text-indigo-400"}>
                     {link.icon}
                   </span>
                   <span>{link.name}</span>
@@ -215,17 +215,17 @@ function Navbar() {
 
               {user && (
                 <>
-                  <div className="border-t-2 border-slate-700 my-3" />
-                  <div className="px-2">
-                    <div className="bg-gradient-to-r from-violet-950/40 to-indigo-950/40 rounded-2xl p-4 mb-3 border-2 border-violet-800 shadow-md">
+                  <div className="border-t border-slate-700/50 my-2" />
+                  <div className="px-1 space-y-2 pt-1">
+                    <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
                       <div className="flex items-center space-x-3">
-                        <div className="text-2xl text-violet-400 bg-slate-800 p-2.5 rounded-xl shadow-sm">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 text-white text-base flex-shrink-0">
                           <UserRoleIcon />
                         </div>
-                        <div>
-                          <div className="font-bold text-slate-100 text-base leading-tight">{user.name}</div>
-                          <div className="text-sm text-slate-400">{user.email}</div>
-                          <div className="inline-flex items-center gap-1 text-xs text-white bg-violet-600 px-2 py-1 rounded-full mt-1 font-semibold">
+                        <div className="min-w-0">
+                          <div className="font-semibold text-white text-sm leading-tight truncate">{user.name}</div>
+                          <div className="text-xs text-slate-400 truncate mt-0.5">{user.email}</div>
+                          <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
                             {ROLE_LABELS[user.role] ?? user.role}
                           </div>
                         </div>
@@ -234,7 +234,7 @@ function Navbar() {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full px-4 py-3 bg-gradient-to-r from-rose-600 to-rose-700 text-white rounded-xl font-bold hover:from-rose-700 hover:to-rose-800 transition-all duration-200 ease-out shadow-lg hover:shadow-xl flex items-center justify-center gap-2 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-1 cursor-pointer"
+                      className="w-full px-4 py-3 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 cursor-pointer"
                     >
                       <FaSignOutAlt className="w-4 h-4" />
                       Logout

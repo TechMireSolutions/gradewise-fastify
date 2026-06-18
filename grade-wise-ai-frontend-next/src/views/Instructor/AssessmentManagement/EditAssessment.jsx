@@ -6,6 +6,8 @@ import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { validateAssessmentForm, validateFiles } from "../../../scheema/editAssessmentSchemas.js";
+import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFileUpload, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
+import { FiCheckCircle } from "react-icons/fi";
 
 function EditAssessment() {
   const { id } = useParams();
@@ -13,7 +15,7 @@ function EditAssessment() {
   const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
   const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
- 
+
 
   useEffect(() => {
     fetchAllResources();
@@ -149,7 +151,7 @@ function EditAssessment() {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    
+
     // Validate files using Zod
     const validation = validateFiles(files);
     if (!validation.success) {
@@ -157,7 +159,7 @@ function EditAssessment() {
       e.target.value = ''; // Clear the input
       return;
     }
-    
+
     setNewFiles(files);
   };
 
@@ -186,38 +188,25 @@ function EditAssessment() {
     }
 
     setIsProcessing(true);
-    
-    const assessmentData = new FormData();
 
-    console.log("DEBUG: Frontend EditAssessment - Title before append:", formData.title, "Trimmed:", formData.title.trim());
-
-    assessmentData.append("title", formData.title.trim());
-
-    if (formData.prompt?.trim()) {
-      assessmentData.append("prompt", formData.prompt.trim());
-    }
-
-    assessmentData.append("externalLinks", JSON.stringify(formData.externalLinks.filter(l => l.trim())));
-    
-    if (questionBlocksTouched) {
-      assessmentData.append("question_blocks", JSON.stringify(questionBlocks.map(b => ({
-        question_type: b.question_type,
-        question_count: b.question_count,
-        duration_per_question: b.duration_per_question,
-        num_options: b.question_type === "multiple_choice" ? b.num_options : null,
-        positive_marks: b.positive_marks || 1,
-        negative_marks: b.negative_marks || 0,
-      }))));
-    }
-    
-    assessmentData.append("selected_resources", JSON.stringify(selectedResources));
-    newFiles.forEach(f => assessmentData.append("new_files", f));
-    
-
-    console.log("DEBUG: Frontend EditAssessment - FormData contents:");
-    for (let [key, value] of assessmentData.entries()) {
-      console.log(`  ${key}: ${value}`);
-    }
+    const assessmentData = {
+      title: formData.title.trim(),
+      ...(formData.prompt?.trim() && { prompt: formData.prompt.trim() }),
+      externalLinks: formData.externalLinks.filter(l => l.trim()),
+      selectedResources,
+      ...(questionBlocksTouched && {
+        questionBlocks: questionBlocks.map(b => ({
+          questionType: b.question_type,
+          questionCount: Number(b.question_count),
+          durationPerQuestion: Number(b.duration_per_question),
+          numOptions: b.question_type === "multiple_choice" ? (Number(b.num_options) || 4) : 4,
+          leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
+          rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
+          positiveMarks: Number(b.positive_marks) || 1,
+          negativeMarks: Number(b.negative_marks) || 0,
+        })),
+      }),
+    };
 
     try {
       await updateAssessment(parseInt(id), assessmentData);
@@ -233,32 +222,47 @@ function EditAssessment() {
 
   if (loading || !currentAssessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col justify-center items-center">
-        <LoadingSpinner size="lg" type="spinner" color="blue" />
-        <span className="mt-4 text-gray-600 font-medium">Loading assessment details...</span>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col justify-center items-center">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+        <div className="relative flex flex-col items-center justify-center py-32 gap-4">
+          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+            <LoadingSpinner size="lg" type="spinner" color="blue" />
+          </div>
+          <p className="text-slate-400 text-sm">Loading assessment details...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <Card className="shadow-lg border-0">
-            <CardContent className="p-8">
-              <div className="text-center">
-                <div className="text-7xl mb-6">⚠️</div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">Error</h1>
-                <p className="text-gray-600 mb-8">{error}</p>
-                <button
-                  onClick={() => navigate("/instructor/assessments")}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
-                >
-                  ← Back to Assessments
-                </button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-8">
+            <div className="text-center">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6 mx-auto">
+                <FaExclamationTriangle className="text-red-400 text-3xl" />
               </div>
-            </CardContent>
-          </Card>
+              <h1 className="text-3xl font-bold text-white mb-4">Error</h1>
+              <p className="text-slate-400 mb-8">{error}</p>
+              <button
+                onClick={() => navigate("/instructor/assessments")}
+                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+              >
+                <FaArrowLeft />
+                Back to Assessments
+              </button>
+            </div>
+          </div>
         </div>
         <Modal
           isOpen={modal.isOpen}
@@ -273,26 +277,46 @@ function EditAssessment() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      {/* Ambient blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
+
+      <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header Section */}
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-5">
             <button
               onClick={() => navigate("/instructor/assessments")}
-              className="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1 transition-colors duration-200"
+              className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
             >
-              ← Back
+              <FaArrowLeft className="text-xs" />
+              Back to Assessments
             </button>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Edit Assessment</h1>
-          <p className="text-gray-600">Update your assessment details and configuration</p>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 w-fit">
+              <FaClipboardList className="text-white text-lg" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Assessment Management</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Edit Assessment</h1>
+            </div>
+          </div>
+          <p className="text-slate-400 leading-relaxed ml-0 sm:ml-14">Update your assessment details and configuration</p>
+
           {currentAssessment.is_executed && (
-            <div className="mt-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 flex items-start gap-3">
-              <span className="text-2xl">⚠️</span>
+            <div className="mt-5 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
+              <div className="p-1.5 rounded-lg bg-amber-500/20 mt-0.5 flex-shrink-0">
+                <FaExclamationTriangle className="text-amber-400 text-sm" />
+              </div>
               <div>
-                <p className="font-semibold text-yellow-900">Assessment Executed</p>
-                <p className="text-sm text-yellow-800">This assessment has been executed and cannot be modified.</p>
+                <p className="font-semibold text-amber-300 text-sm">Assessment Already Executed</p>
+                <p className="text-xs text-amber-400/80 mt-0.5">This assessment has been executed and cannot be modified.</p>
               </div>
             </div>
           )}
@@ -300,309 +324,357 @@ function EditAssessment() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Assessment Details Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-0">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-t-lg">
-              <h2 className="text-xl font-semibold">📝 Assessment Details</h2>
-            </CardHeader>
-            <CardContent className="p-6 sm:p-8">
-              <div className="space-y-6">
-                {/* Title Input */}
-                <div>
-                  <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Assessment Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    id="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    placeholder="e.g., Data Structures Final Exam"
-                    disabled={currentAssessment.is_executed}
-                  />
-                </div>
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+            {/* Card Header */}
+            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20">
+                <FaClipboardList className="text-indigo-400 text-sm" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Assessment Details</h2>
+            </div>
 
-                {/* Prompt Textarea */}
-                
-                <div>
-                  <label htmlFor="prompt" className="block text-sm font-semibold text-gray-700 mb-2">
-                    AI Prompt <span className="text-gray-500 font-normal">(Optional if using resources or links)</span>
-                  </label>
-                  <textarea
-                    name="prompt"
-                    id="prompt"
-                    value={formData.prompt}
-                    onChange={handleInputChange}
-                    rows={5}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    placeholder="Provide a detailed prompt for question generation..."
-                    disabled={currentAssessment.is_executed}
-                  />
-                </div>
+            <div className="p-6 sm:p-8 space-y-6">
+              {/* Title Input */}
+              <div>
+                <label htmlFor="title" className="block text-slate-400 text-sm font-medium mb-1.5">
+                  Assessment Title <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  id="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="e.g., Data Structures Final Exam"
+                  disabled={currentAssessment.is_executed}
+                />
+              </div>
 
-                {/* External Links */}
-                <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-100">
-                  <label className="block text-sm font-semibold text-gray-700 mb-4">🔗 External Links</label>
-                  <div className="space-y-3">
-                    {formData.externalLinks.map((link, index) => (
-                      <div key={index} className="flex items-center gap-2">
+              {/* Prompt Textarea */}
+              <div>
+                <label htmlFor="prompt" className="block text-slate-400 text-sm font-medium mb-1.5">
+                  AI Prompt <span className="text-slate-500 font-normal">(Optional if using resources or links)</span>
+                </label>
+                <textarea
+                  name="prompt"
+                  id="prompt"
+                  value={formData.prompt}
+                  onChange={handleInputChange}
+                  rows={5}
+                  className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="Provide a detailed prompt for question generation..."
+                  disabled={currentAssessment.is_executed}
+                />
+              </div>
+
+              {/* External Links */}
+              <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <FaLink className="text-indigo-400 text-sm" />
+                  <label className="text-slate-300 text-sm font-semibold">External Links</label>
+                </div>
+                <div className="space-y-3">
+                  {formData.externalLinks.map((link, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <FaLink className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
                         <input
                           type="url"
                           value={link}
                           onChange={(e) => handleLinkChange(index, e.target.value)}
                           placeholder="https://example.com/resource"
-                          className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          disabled={currentAssessment.is_executed}
-                        />
-                        {formData.externalLinks.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeExternalLink(index)}
-                            className="px-4 py-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled={currentAssessment.is_executed}
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addExternalLink}
-                    className="mt-4 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={currentAssessment.is_executed}
-                  >
-                    + Add Link
-                  </button>
-                </div>
-
-                {/* Resources Section */}
-                <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-100">
-                  <label className="block text-sm font-semibold text-gray-700 mb-4">📚 Resources</label>
-                  <div className="space-y-6">
-                    {/* Upload Files */}
-                    <div>
-                      <label htmlFor="new_files" className="block text-sm font-medium text-gray-700 mb-2">
-                        Upload New Files
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="file"
-                          id="new_files"
-                          multiple
-                          accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
-                          onChange={handleFileChange}
-                          className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-blue-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
                           disabled={currentAssessment.is_executed}
                         />
                       </div>
-                      {newFiles.length > 0 && (
-                        <div className="mt-3 bg-white rounded-lg p-3 border border-gray-200">
-                          <p className="text-xs font-semibold text-gray-600 mb-2">Selected Files:</p>
-                          <ul className="space-y-1">
-                            {newFiles.map((file, index) => (
-                              <li key={index} className="text-sm text-gray-700 flex items-center gap-2">
-                                <span className="text-blue-600">📄</span>
-                                {file.name}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                      {formData.externalLinks.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeExternalLink(index)}
+                          className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/15 border border-transparent hover:border-red-500/20 transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={currentAssessment.is_executed}
+                        >
+                          <FaTimes />
+                        </button>
                       )}
                     </div>
-
-                    {/* Existing Resources */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Existing Resources</label>
-                      {resourcesLoading ? (
-                        <div className="flex justify-center py-8">
-                          <LoadingSpinner size="sm" type="dots" color="blue" />
-                        </div>
-                      ) : resources.length > 0 ? (
-                        <div className="space-y-2 max-h-64 overflow-y-auto border-2 border-gray-200 rounded-lg p-4 bg-white">
-                          {resources.map((resource) => (
-                            <div key={resource.id} className="flex items-center p-2 hover:bg-gray-50 rounded-md transition-colors duration-150">
-                              <input
-                                type="checkbox"
-                                id={`resource-${resource.id}`}
-                                checked={selectedResources.includes(resource.id)}
-                                onChange={() => handleResourceToggle(resource.id)}
-                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={currentAssessment.is_executed}
-                              />
-                              <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm text-gray-700 cursor-pointer flex-1">
-                                <span className="font-medium">{resource.name}</span>
-                                <span className="text-gray-500 ml-2">({resource.content_type})</span>
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 bg-white border-2 border-dashed border-gray-200 rounded-lg">
-                          <p className="text-gray-500">No resources available</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  ))}
                 </div>
+                <button
+                  type="button"
+                  onClick={addExternalLink}
+                  className="mt-4 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentAssessment.is_executed}
+                >
+                  <FaPlus className="text-xs" />
+                  Add Link
+                </button>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Question Blocks Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 border-0">
-            <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-lg">
-              <h2 className="text-xl font-semibold">❓ Question Configuration</h2>
-</CardHeader>
-<CardContent className="p-6 sm:p-8">
-<div className="space-y-6">
-{questionBlocks.map((block, index) => (
-<div key={index} className="p-6 border-2 border-gray-200 rounded-xl bg-gradient-to-br from-white to-gray-50 hover:border-blue-300 transition-all duration-300">
-<div className="flex justify-between items-center mb-6">
-<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-<span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Block {index + 1}</span>
-</h3>
-{questionBlocks.length > 1 && (
-<button
-type="button"
-onClick={() => removeQuestionBlock(index)}
-className="text-red-600 hover:text-red-800 font-medium hover:bg-red-50 px-3 py-1 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-disabled={currentAssessment.is_executed}
->
-🗑️ Remove
-</button>
-)}
-</div>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-<div>
-<label className="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
-<select
-value={block.question_type}
-onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
-className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
-disabled={currentAssessment.is_executed}
->
-<option value="multiple_choice">Multiple Choice</option>
-<option value="short_answer">Short Answer</option>
-<option value="true_false">True/False</option>
-</select>
-</div>
-<div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Question Count</label>
-                    <input
-                      type="number"
-                      value={block.question_count}
-                      onChange={(e) => handleBlockChange(index, "question_count", e.target.value)}
-                      min="1"
-                      placeholder="e.g. 5"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      disabled={currentAssessment.is_executed}
-                    />
-                  </div>
-
+              {/* Resources Section */}
+              <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5">
+                <div className="flex items-center gap-2 mb-5">
+                  <FaBook className="text-indigo-400 text-sm" />
+                  <label className="text-slate-300 text-sm font-semibold">Resources</label>
+                </div>
+                <div className="space-y-6">
+                  {/* Upload Files */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Duration (seconds)</label>
-                    <input
-                      type="number"
-                      value={block.duration_per_question}
-                      onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
-                      min="30"
-                      placeholder="e.g. 120"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      disabled={currentAssessment.is_executed}
-                    />
-                  </div>
-
-                  {block.question_type === "multiple_choice" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Number of Options</label>
+                    <label htmlFor="new_files" className="block text-slate-400 text-sm font-medium mb-2">
+                      Upload New Files
+                    </label>
+                    <div className="relative">
                       <input
-                        type="number"
-                        value={block.num_options}
-                        onChange={(e) => handleBlockChange(index, "num_options", e.target.value)}
-                        min="2"
-                        max="6"
-                        placeholder="2 to 6"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        type="file"
+                        id="new_files"
+                        multiple
+                        accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
+                        onChange={handleFileChange}
+                        className="w-full bg-slate-800/60 border border-dashed border-slate-600/60 hover:border-indigo-500/50 rounded-xl px-4 py-4 text-slate-400 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/15 file:text-indigo-400 hover:file:bg-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled={currentAssessment.is_executed}
                       />
                     </div>
-                  )}
+                    {newFiles.length > 0 && (
+                      <div className="mt-3 bg-slate-900/50 rounded-xl p-3 border border-slate-700/40">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Selected Files</p>
+                        <ul className="space-y-1.5">
+                          {newFiles.map((file, index) => (
+                            <li key={index} className="text-sm text-slate-300 flex items-center gap-2">
+                              <FaFile className="text-indigo-400 text-xs flex-shrink-0" />
+                              {file.name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
 
+                  {/* Existing Resources */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Negative Marks</label>
-                    <input
-                      type="number"
-                      value={block.negative_marks || ""}
-                      onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
-                      min="0"
-                      step="0.1"
-                      placeholder="e.g. 0.25"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 hover:border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      disabled={currentAssessment.is_executed}
-                    />
+                    <label className="block text-slate-400 text-sm font-medium mb-2">Select Existing Resources</label>
+                    {resourcesLoading ? (
+                      <div className="flex justify-center py-8">
+                        <LoadingSpinner size="sm" type="dots" color="blue" />
+                      </div>
+                    ) : resources.length > 0 ? (
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto bg-slate-900/40 border border-slate-700/40 rounded-xl p-3">
+                        {resources.map((resource) => (
+                          <div
+                            key={resource.id}
+                            className="flex items-center p-2.5 hover:bg-indigo-500/5 rounded-lg transition-colors duration-150 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              id={`resource-${resource.id}`}
+                              checked={selectedResources.includes(resource.id)}
+                              onChange={() => handleResourceToggle(resource.id)}
+                              className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                              disabled={currentAssessment.is_executed}
+                            />
+                            <label
+                              htmlFor={`resource-${resource.id}`}
+                              className="ml-3 text-sm text-slate-300 cursor-pointer flex-1 flex items-center gap-2"
+                            >
+                              <span className="font-medium">{resource.name}</span>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-700/60 text-slate-400 border border-slate-600/40">
+                                {resource.content_type}
+                              </span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-slate-700/50 rounded-xl bg-slate-900/30">
+                        <FaBook className="text-slate-600 text-2xl mb-2" />
+                        <p className="text-slate-500 text-sm">No resources available</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Question Blocks Card */}
+          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+            {/* Card Header */}
+            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
+                <FaQuestionCircle className="text-violet-400 text-sm" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Question Configuration</h2>
+            </div>
+
+            <div className="p-6 sm:p-8">
+              <div className="space-y-5">
+                {questionBlocks.map((block, index) => (
+                  <div
+                    key={index}
+                    className="bg-slate-800/60 rounded-xl border border-slate-700/40 hover:border-indigo-500/30 p-5 transition-all duration-200"
+                  >
+                    <div className="flex justify-between items-center mb-5">
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                          Block {index + 1}
+                        </span>
+                        <h3 className="text-base font-semibold text-slate-200">
+                          {block.question_type === "multiple_choice" && "Multiple Choice"}
+                          {block.question_type === "short_answer" && "Short Answer"}
+                          {block.question_type === "true_false" && "True / False"}
+                        </h3>
+                      </div>
+                      {questionBlocks.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeQuestionBlock(index)}
+                          className="px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={currentAssessment.is_executed}
+                        >
+                          <FaTrash className="text-xs" />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Question Type */}
+                      <div>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Type</label>
+                        <select
+                          value={block.question_type}
+                          onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
+                          className="w-full appearance-none bg-slate-800/60 border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={currentAssessment.is_executed}
+                        >
+                          <option value="multiple_choice">Multiple Choice</option>
+                          <option value="short_answer">Short Answer</option>
+                          <option value="true_false">True/False</option>
+                        </select>
+                      </div>
+
+                      {/* Question Count */}
+                      <div>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Count</label>
+                        <input
+                          type="number"
+                          value={block.question_count}
+                          onChange={(e) => handleBlockChange(index, "question_count", e.target.value)}
+                          min="1"
+                          placeholder="e.g. 5"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={currentAssessment.is_executed}
+                        />
+                      </div>
+
+                      {/* Duration */}
+                      <div>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Duration (seconds)</label>
+                        <input
+                          type="number"
+                          value={block.duration_per_question}
+                          onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
+                          min="30"
+                          placeholder="e.g. 120"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={currentAssessment.is_executed}
+                        />
+                      </div>
+
+                      {/* Number of Options (MCQ only) */}
+                      {block.question_type === "multiple_choice" && (
+                        <div>
+                          <label className="block text-slate-400 text-sm font-medium mb-1.5">Number of Options</label>
+                          <input
+                            type="number"
+                            value={block.num_options}
+                            onChange={(e) => handleBlockChange(index, "num_options", e.target.value)}
+                            min="2"
+                            max="6"
+                            placeholder="2 to 6"
+                            className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={currentAssessment.is_executed}
+                          />
+                        </div>
+                      )}
+
+                      {/* Negative Marks */}
+                      <div>
+                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Negative Marks</label>
+                        <input
+                          type="number"
+                          value={block.negative_marks || ""}
+                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
+                          min="0"
+                          step="0.1"
+                          placeholder="e.g. 0.25"
+                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={currentAssessment.is_executed}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add Block Button */}
+                <button
+                  type="button"
+                  onClick={addQuestionBlock}
+                  className="w-full py-3 bg-slate-800/40 border border-dashed border-slate-600/60 hover:border-indigo-500/40 hover:bg-indigo-500/5 text-slate-400 hover:text-indigo-300 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentAssessment.is_executed}
+                >
+                  <FaPlus className="text-xs" />
+                  Add Question Block
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={addQuestionBlock}
-              className="w-full py-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 rounded-lg hover:from-blue-100 hover:to-indigo-100 transition-all duration-200 font-semibold border-2 border-dashed border-blue-300 hover:border-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={currentAssessment.is_executed}
+              onClick={() => navigate("/instructor/assessments")}
+              className="px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isProcessing}
             >
-              + Add Question Block
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || isProcessing || currentAssessment.is_executed}
+            >
+              {isProcessing ? (
+                <>
+                  <LoadingSpinner size="sm" color="white" type="gradient" />
+                  <span>Processing...</span>
+                </>
+              ) : loading ? (
+                <>
+                  <LoadingSpinner size="sm" color="white" type="gradient" />
+                  <span>Updating...</span>
+                </>
+              ) : (
+                <>
+                  <FaSave />
+                  <span>Update Assessment</span>
+                </>
+              )}
             </button>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
-        <button
-          type="button"
-          onClick={() => navigate("/instructor/assessments")}
-          className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 font-medium order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isProcessing}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-semibold shadow-md hover:shadow-lg order-1 sm:order-2"
-          disabled={loading || isProcessing || currentAssessment.is_executed}
-        >
-          {isProcessing ? (
-            <>
-              <LoadingSpinner size="sm" color="white" type="gradient" />
-              <span className="ml-2">Processing...</span>
-            </>
-          ) : loading ? (
-            <>
-              <LoadingSpinner size="sm" color="white" type="gradient" />
-              <span className="ml-2">Updating...</span>
-            </>
-          ) : (
-            <>
-              <span>✨ Update Assessment</span>
-            </>
-          )}
-        </button>
+        </form>
       </div>
-    </form>
-  </div>
 
-  <Modal
-    isOpen={modal.isOpen}
-    onClose={() => setModal({ ...modal, isOpen: false })}
-    type={modal.type}
-    title={modal.title}
-  >
-    {modal.message}
-  </Modal>
-</div>
-);
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        type={modal.type}
+        title={modal.title}
+      >
+        {modal.message}
+      </Modal>
+    </div>
+  );
 }
 export default EditAssessment;

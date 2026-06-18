@@ -52,17 +52,32 @@ function VerifyEmail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white p-8 sm:p-10 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md text-center border-2 border-gray-200">
-            <div className="bg-gradient-to-br from-blue-100 to-purple-100 w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaEnvelope className="text-4xl sm:text-5xl text-blue-600" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+
+        <div className="relative w-full max-w-md bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl text-center">
+          <div className="mb-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-4 mx-auto">
+              <FaEnvelope className="text-white text-2xl" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6">Email Verification</h2>
-            <div className="space-y-4">
-              <LoadingSpinner size="lg" color="blue" type="dots" />
-              <p className="text-gray-600 font-semibold">Verifying your email...</p>
-              <p className="text-sm text-gray-500">Please wait a moment</p>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                Email Verification
+              </span>
+            </h1>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex flex-col items-center justify-center py-6 gap-4">
+              <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                <LoadingSpinner size="lg" type="dots" color="blue" />
+              </div>
+              <p className="text-slate-300 font-semibold">Verifying your email...</p>
+              <p className="text-slate-500 text-sm">Please wait a moment</p>
             </div>
           </div>
         </div>
@@ -71,90 +86,115 @@ function VerifyEmail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col">
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white p-8 sm:p-10 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-md text-center border-2 border-gray-200">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-8">Email Verification</h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
+      </div>
 
-          {isSuccess ? (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-green-100 to-emerald-100 w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                <FaCheckCircle className="text-5xl sm:text-6xl text-green-600 animate-bounce" />
+      <div className="relative w-full max-w-md bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl text-center">
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-4 mx-auto">
+            <FaEnvelope className="text-white text-2xl" />
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+              Email Verification
+            </span>
+          </h1>
+        </div>
+
+        {isSuccess ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-center">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+                <FaCheckCircle className="text-white text-3xl" />
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-green-600">Verification Successful!</h3>
-              <p className="text-gray-600 leading-relaxed">{result.message}</p>
+            </div>
 
-              {result.user && (
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 sm:p-5">
-                  <p className="text-green-800 text-sm sm:text-base">
-                    <strong className="text-lg">Welcome {result.user.name}! 🎉</strong>
-                    <br />
-                    Your account is verified and ready to use.
-                  </p>
-                </div>
-              )}
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Verification Successful!</h2>
+              <p className="text-slate-300 leading-relaxed text-sm">{result.message}</p>
+            </div>
 
-              {result.status === "already_used" && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4 sm:p-5">
-                  <p className="text-blue-800 text-sm sm:text-base">
-                    <strong>✨ Good news!</strong> This verification link was already used successfully. Your account is active.
-                  </p>
-                </div>
-              )}
+            {result.user && (
+              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4">
+                <p className="text-emerald-400 text-sm font-semibold mb-1">
+                  Welcome, {result.user.name}!
+                </p>
+                <p className="text-slate-400 text-xs">
+                  Your account is verified and ready to use.
+                </p>
+              </div>
+            )}
 
+            {result.status === "already_used" && (
+              <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4">
+                <p className="text-indigo-400 text-sm font-semibold mb-1">Good news!</p>
+                <p className="text-slate-400 text-xs">
+                  This verification link was already used successfully. Your account is active.
+                </p>
+              </div>
+            )}
+
+            <Link
+              to="/login"
+              className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+            >
+              <span>Go to Login</span>
+              <FaArrowRight />
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex items-center justify-center">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25">
+                <FaTimesCircle className="text-white text-3xl" />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Verification Failed</h2>
+              <p className="text-slate-300 leading-relaxed text-sm">{result?.message || "An unknown error occurred."}</p>
+            </div>
+
+            <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 text-left">
+              <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-3">
+                What to try
+              </p>
+              <ul className="text-slate-400 text-sm space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 mt-0.5">&#8226;</span>
+                  <span>Check if you have a newer verification email</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 mt-0.5">&#8226;</span>
+                  <span>Try signing up again if needed</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400 mt-0.5">&#8226;</span>
+                  <span>Contact support if the issue persists</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/login"
-                className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 sm:py-4 px-6 sm:px-8 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Go to Login</span>
-                <FaArrowRight />
+                Try Login
+              </Link>
+              <Link
+                to="/signup"
+                className="px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
+              >
+                Sign Up Again
               </Link>
             </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-br from-red-100 to-pink-100 w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto shadow-lg">
-                <FaTimesCircle className="text-5xl sm:text-6xl text-red-600" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-red-600">Verification Failed</h3>
-              <p className="text-gray-600 leading-relaxed">{result?.message || "An unknown error occurred."}</p>
-
-              <div className="bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-xl p-4 sm:p-5 text-left">
-                <p className="text-gray-800 text-sm font-bold mb-3">
-                  🔧 What to try:
-                </p>
-                <ul className="text-gray-700 text-sm space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>Check if you have a newer verification email</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>Try signing up again if needed</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>Contact support if the issue persists</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link
-                  to="/login"
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 font-bold shadow-lg"
-                >
-                  Try Login
-                </Link>
-                <Link
-                  to="/signup"
-                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white py-3 px-6 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 font-bold shadow-lg"
-                >
-                  Sign Up Again
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
