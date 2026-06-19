@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { FILE_CONSTANTS } from "./fileSchemas.js";
+import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 // Constants
 export const ASSESSMENT_CONSTANTS = {
@@ -124,12 +125,12 @@ export const validateAssessmentForm = (formData) => {
     assessmentFormSchema.parse(formData);
     return { success: true };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errorMessages = error.errors.map(err => {
-        const path = err.path.join('.');
-        return `${path ? path + ': ' : ''}${err.message}`;
-      }).join('\n');
-      return { success: false, error: errorMessages };
+    const fieldErrors = parseZodFieldErrors(error);
+    if (fieldErrors) {
+      const errorMessages = Object.entries(fieldErrors)
+        .map(([path, message]) => `${path}: ${message}`)
+        .join("\n");
+      return { success: false, error: errorMessages, fieldErrors };
     }
     return { success: false, error: "Validation failed" };
   }
@@ -140,8 +141,10 @@ export const validateQuestionBlock = (block) => {
     questionBlockSchema.parse(block);
     return { success: true };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+    const fieldErrors = parseZodFieldErrors(error);
+    if (fieldErrors) {
+      const firstError = Object.values(fieldErrors)[0];
+      return { success: false, error: firstError };
     }
     return { success: false, error: "Question block validation failed" };
   }
@@ -158,8 +161,9 @@ export const validateFiles = (files) => {
     fileObjects.forEach(file => fileValidationSchema.parse(file));
     return { success: true, data: files };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+    const fieldErrors = parseZodFieldErrors(error);
+    if (fieldErrors) {
+      return { success: false, error: Object.values(fieldErrors)[0] };
     }
     return { success: false, error: "File validation failed" };
   }

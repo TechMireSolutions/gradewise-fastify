@@ -353,10 +353,10 @@ Follow this workflow:
 ### Step 1: Analyze User Requirements
 
 Extract key information from user request:
-- **Product type**: SaaS / EdTech platform (assessment management, analytics dashboards, admin panels)
-- **Target audience**: Educational institutions — instructors, students, admins; desktop-primary with mobile support
-- **Style keywords**: professional, dark mode, slate/indigo/violet/emerald palette, gradient backgrounds
-- **Stack**: React 19 + Next.js 16 (App Router) + Tailwind CSS v4 (this project's stack)
+- **Product type**: Entertainment (social, video, music, gaming), Tool (scanner, editor, converter), Productivity (task manager, notes, calendar), or hybrid
+- **Target audience**: C-end consumer users; consider age group, usage context (commute, leisure, work)
+- **Style keywords**: playful, vibrant, minimal, dark mode, content-first, immersive, etc.
+- **Stack**: React Native (this project's only tech stack)
 
 ### Step 2: Generate Design System (REQUIRED)
 
@@ -436,12 +436,12 @@ python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n
 | App interface a11y | `web` | `--domain web "accessibilityLabel touch safe-areas"` |
 | AI prompt / CSS keywords | `prompt` | `--domain prompt "minimalism"` |
 
-### Step 4: Stack Guidelines (React/Next.js)
+### Step 4: Stack Guidelines (React Native)
 
-Get React/Next.js implementation-specific best practices:
+Get React Native implementation-specific best practices:
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react
+python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack react-native
 ```
 
 ---
@@ -503,7 +503,7 @@ python3 skills/ui-ux-pro-max/scripts/search.py "search loading animation" --doma
 ### Step 4: Stack Guidelines
 
 ```bash
-python3 skills/ui-ux-pro-max/scripts/search.py "performance suspense bundle splitting" --stack react
+python3 skills/ui-ux-pro-max/scripts/search.py "list performance navigation" --stack react-native
 ```
 
 **Then:** Synthesize design system + detailed searches and implement the design.

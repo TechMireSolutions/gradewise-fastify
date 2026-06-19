@@ -8,6 +8,7 @@ import {
   type ProviderType,
   type PurposeType,
 } from "./constants.js";
+import { decryptCommaSeparatedKeys, decryptSecret } from "../utils/crypto.js";
 
 export type { ProviderType, PurposeType } from "./constants.js";
 
@@ -91,11 +92,12 @@ async function buildProviders(purpose: PurposeType): Promise<ProviderInstance[]>
 
   for (const providerType of SUPPORTED_PROVIDERS) {
     const providerKey = providerType.toUpperCase();
-    const keysRaw =
+    const keysRaw = decryptCommaSeparatedKeys(
       configs[buildConfigKey(purpose, providerType, "KEYS")] ??
       configs[`${purposeKey}_AI_KEYS`] ??
       process.env[buildConfigKey(purpose, providerType, "KEYS")] ??
-      "";
+      ""
+    );
 
     const modelName =
       configs[buildConfigKey(purpose, providerType, "MODEL")] ??
@@ -108,7 +110,7 @@ async function buildProviders(purpose: PurposeType): Promise<ProviderInstance[]>
       .filter(Boolean);
 
     for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]!;
+      const key = decryptSecret(keys[i]!);
       try {
         instances.push({
           id: `${purpose}-${providerType}-${i}`,

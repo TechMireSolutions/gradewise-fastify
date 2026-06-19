@@ -1,17 +1,21 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
-import { createAssessmentSchema } from "../../../scheema/assessmentSchemas.js";
+import { createAssessmentSchema } from "../../../schemas/assessmentSchemas.js";
 import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
+import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
+import useModal from "../../../hooks/useModal.js";
 
 function CreateAssessment() {
   const navigate = useNavigate();
   const { createAssessment, loading } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
-  const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
+    const { modal, showModal, closeModal } = useModal();
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -124,12 +128,7 @@ function CreateAssessment() {
     });
 
     if (!validationResult.success) {
-      setModal({
-        isOpen: true,
-        type: "error",
-        title: "Validation Error",
-        message: validationResult.error.issues?.[0]?.message || "Invalid data",
-      });
+      showModal("error", "Validation Error", validationResult.error.issues?.[0]?.message || "Invalid data");
       return;
     }
 
@@ -153,49 +152,35 @@ function CreateAssessment() {
     try {
       await createAssessment(payload);
 
-      setModal({
-        isOpen: true,
-        type: "success",
-        title: "Success",
-        message: "Assessment created successfully!",
-      });
+      showModal("success", "Success", "Assessment created successfully!");
 
       setTimeout(() => {
         navigate("/instructor/assessments");
       }, 1500);
     } catch (err) {
-      setModal({
-        isOpen: true,
-        type: "error",
-        title: "Error",
-        message: err.message || "Failed to create assessment",
-      });
+      showModal("error", "Error", err.message || "Failed to create assessment");
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className={page}>
       {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+      <AmbientBackground />
 
       <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header Section */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Instructor Portal</p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">Create New Assessment</h1>
-            <p className="text-slate-400 leading-relaxed">Design a comprehensive assessment with customizable question blocks</p>
+            <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-2")}>Instructor Portal</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2">Create New Assessment</h1>
+            <p className={cn("text-muted-foreground", "leading-relaxed")}>Design a comprehensive assessment with customizable question blocks</p>
           </div>
           <button
             type="button"
             onClick={() => navigate("/instructor/assessments")}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer self-start sm:self-auto"
+            className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "self-start", "sm:self-auto")}
           >
             <FiArrowLeft className="text-base" />
             Back to Assessments
@@ -204,18 +189,18 @@ function CreateAssessment() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Assessment Details Card */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
+            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
                 <FiFileText className="text-white text-base" />
               </div>
-              <h2 className="text-xl font-bold text-white">Assessment Details</h2>
+              <h2 className="text-xl font-bold text-foreground">Assessment Details</h2>
             </div>
             <div className="p-6 sm:p-8">
               <div className="space-y-6">
                 {/* Title Input */}
                 <div>
-                  <label htmlFor="title" className="block text-slate-400 text-sm font-medium mb-1.5">
+                  <label htmlFor="title" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                     Assessment Title <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -224,7 +209,7 @@ function CreateAssessment() {
                     id="title"
                     value={formData.title}
                     onChange={handleInputChange}
-                    className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                    className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                     placeholder="e.g., Data Structures Final Exam"
                     required
                   />
@@ -232,8 +217,8 @@ function CreateAssessment() {
 
                 {/* Prompt Textarea */}
                 <div>
-                  <label htmlFor="prompt" className="block text-slate-400 text-sm font-medium mb-1.5">
-                    Prompt <span className="text-slate-500 font-normal">(Optional if using resources or links)</span>
+                  <label htmlFor="prompt" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                    Prompt <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using resources or links)</span>
                   </label>
                   <textarea
                     name="prompt"
@@ -241,16 +226,16 @@ function CreateAssessment() {
                     value={formData.prompt}
                     onChange={handleInputChange}
                     rows={5}
-                    className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
+                    className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "resize-none")}
                     placeholder="Provide a detailed prompt for question generation. Describe the topics, difficulty level, and any specific requirements..."
                   />
                 </div>
 
                 {/* Resources Section */}
-                <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
+                <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <FiBook className="text-indigo-400 text-sm" />
-                    <label className="block text-slate-400 text-sm font-medium">Select Existing Resources</label>
+                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>Select Existing Resources</label>
                     {selectedResources.length > 0 && (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
                         {selectedResources.length} selected
@@ -269,7 +254,7 @@ function CreateAssessment() {
                           className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
                             selectedResources.includes(resource.id)
                               ? "bg-indigo-500/10 border-indigo-500/30"
-                              : "bg-slate-900/30 border-slate-700/40 hover:bg-indigo-500/5 hover:border-indigo-500/20"
+                              : "bg-slate-900/30 border-border hover:bg-indigo-500/5 hover:border-indigo-500/20"
                           }`}
                           onClick={() => !isProcessing && handleResourceToggle(resource.id)}
                         >
@@ -282,8 +267,8 @@ function CreateAssessment() {
                             disabled={isProcessing}
                           />
                           <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
-                            <span className="font-medium text-slate-200">{resource.name}</span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-700/60 text-slate-400 border border-slate-600/40">{resource.content_type}</span>
+                            <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
+                            <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.content_type}</span>
                           </label>
                         </div>
                       ))}
@@ -293,29 +278,29 @@ function CreateAssessment() {
                       <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-3">
                         <FiBook className="text-indigo-400 text-lg" />
                       </div>
-                      <p className="text-slate-400 text-sm">No resources available.</p>
-                      <p className="text-slate-500 text-xs mt-1">Upload them from the Resources page.</p>
+                      <p className={cn("text-muted-foreground", "text-sm")}>No resources available.</p>
+                      <p className={cn("text-muted-foreground", "text-xs", "mt-1")}>Upload them from the Resources page.</p>
                     </div>
                   )}
                 </div>
 
                 {/* External Links */}
-                <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
+                <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <FiLink className="text-indigo-400 text-sm" />
-                    <label className="block text-slate-400 text-sm font-medium">External Links</label>
+                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>External Links</label>
                   </div>
                   <div className="space-y-3">
                     {formData.externalLinks.map((link, index) => (
                       <div key={index} className="flex items-center gap-2">
                         <div className="relative flex-1">
-                          <FiLink className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
+                          <FiLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
                           <input
                             type="url"
                             value={link}
                             onChange={(e) => handleLinkChange(index, e.target.value)}
                             placeholder="https://example.com/resource"
-                            className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                             disabled={isProcessing}
                           />
                         </div>
@@ -335,7 +320,7 @@ function CreateAssessment() {
                   <button
                     type="button"
                     onClick={addExternalLink}
-                    className="mt-4 inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
+                    className={cn("mt-4", "inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
                     disabled={isProcessing}
                   >
                     <FiPlus className="text-base" />
@@ -347,26 +332,26 @@ function CreateAssessment() {
           </div>
 
           {/* Question Blocks Card */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
+            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
                 <FiList className="text-white text-base" />
               </div>
-              <h2 className="text-xl font-bold text-white">Question Configuration</h2>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-400 border border-slate-600/40 ml-auto">
+              <h2 className="text-xl font-bold text-foreground">Question Configuration</h2>
+              <span className={cn("inline-flex", "items-center", "gap-1.5", "px-2.5", "py-1", "rounded-full", "text-xs", "font-semibold", "bg-btn-secondary", "text-muted-foreground", "border", "border-border", "ml-auto")}>
                 {questionBlocks.length} {questionBlocks.length === 1 ? "Block" : "Blocks"}
               </span>
             </div>
             <div className="p-6 sm:p-8">
               <div className="space-y-5">
                 {questionBlocks.map((block, index) => (
-                  <div key={index} className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5 hover:border-indigo-500/25 transition-all duration-200">
+                  <div key={index} className="bg-input rounded-xl border border-border p-5 hover:border-indigo-500/25 transition-all duration-200">
                     <div className="flex justify-between items-center mb-5">
                       <div className="flex items-center gap-3">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
                           Block {index + 1}
                         </span>
-                        <h3 className="text-base font-semibold text-slate-200">
+                        <h3 className={cn("text-base", "font-semibold", "text-secondary-foreground")}>
                           {block.questionType === "multiple_choice" ? "Multiple Choice" : "True / False"}
                         </h3>
                       </div>
@@ -384,11 +369,11 @@ function CreateAssessment() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Type</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
                         <select
                           value={block.questionType}
                           onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
                           disabled={isProcessing}
                         >
                           <option value="multiple_choice">Multiple Choice</option>
@@ -397,28 +382,28 @@ function CreateAssessment() {
                       </div>
 
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Count</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Count</label>
                         <input
                           type="number"
                           value={block.questionCount}
                           onChange={(e) => handleBlockChange(index, "questionCount", e.target.value)}
                           min="1"
                           placeholder="e.g. 5"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           required
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Duration (seconds)</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Duration (seconds)</label>
                         <input
                           type="number"
                           value={block.durationPerQuestion}
                           onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
                           min="30"
                           placeholder="e.g. 120"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           required
                           disabled={isProcessing}
                         />
@@ -426,7 +411,7 @@ function CreateAssessment() {
 
                       {block.questionType === "multiple_choice" && (
                         <div>
-                          <label className="block text-slate-400 text-sm font-medium mb-1.5">Number of Options</label>
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Number of Options</label>
                           <input
                             type="number"
                             value={block.numOptions}
@@ -434,7 +419,7 @@ function CreateAssessment() {
                             min="2"
                             max="6"
                             placeholder="2 to 6"
-                            className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                             required
                             disabled={isProcessing}
                           />
@@ -442,7 +427,7 @@ function CreateAssessment() {
                       )}
 
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Positive Marks</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
                         <input
                           type="number"
                           value={block.positiveMarks || ""}
@@ -450,13 +435,13 @@ function CreateAssessment() {
                           min="0"
                           step="0.1"
                           placeholder="e.g. 1"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Negative Marks</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
                         <input
                           type="number"
                           value={block.negativeMarks || ""}
@@ -464,7 +449,7 @@ function CreateAssessment() {
                           min="0"
                           step="0.1"
                           placeholder="e.g. 0.25"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />
                       </div>
@@ -475,7 +460,7 @@ function CreateAssessment() {
                 <button
                   type="button"
                   onClick={addQuestionBlock}
-                  className="w-full py-3.5 flex items-center justify-center gap-2 bg-slate-800/40 hover:bg-indigo-500/10 border-2 border-dashed border-slate-600/60 hover:border-indigo-500/40 text-slate-400 hover:text-indigo-400 rounded-xl font-semibold text-sm transition-all duration-200 cursor-pointer"
+                  className={cn("w-full", "py-3.5", "flex", "items-center", "justify-center", "gap-2", "bg-card/60", "hover:bg-indigo-500/10", "border-2", "border-dashed", "border-border", "hover:border-indigo-500/40", "text-muted-foreground", "hover:text-indigo-400", "rounded-xl", "font-semibold", "text-sm", "transition-all", "duration-200", "cursor-pointer")}
                   disabled={isProcessing}
                 >
                   <FiPlus className="text-base" />
@@ -490,7 +475,7 @@ function CreateAssessment() {
             <button
               type="button"
               onClick={() => navigate("/instructor/assessments")}
-              className="px-6 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer order-2 sm:order-1"
+              className={cn("px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1")}
               disabled={isProcessing}
             >
               Cancel
@@ -523,7 +508,7 @@ function CreateAssessment() {
 
       <Modal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
+        onClose={closeModal}
         type={modal.type}
         title={modal.title}
       >

@@ -1,20 +1,19 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardInteractive, page } from "@/lib/ui.js";
 import { Link } from "react-router-dom"
 import { FaHome, FaArrowLeft, FaQuestionCircle, FaBookOpen } from "react-icons/fa"
+import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 
 function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col">
+    <div className={cn(page, "flex", "flex-col")}>
 
       {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+      <AmbientBackground />
 
       {/* Centered Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12 sm:py-16 relative">
-        <div className="max-w-lg w-full bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+        <div className={cn("max-w-lg", "w-full", card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
           <div className="pt-10 sm:pt-12 pb-12 sm:pb-16 px-6 sm:px-8 text-center">
 
             {/* Icon with gradient background */}
@@ -31,12 +30,12 @@ function NotFound() {
               <h1 className="text-7xl sm:text-8xl font-extrabold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent mb-4">
                 404
               </h1>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Page Not Found</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">Page Not Found</h2>
               <div className="w-20 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-600 mx-auto rounded-full"></div>
             </div>
 
             {/* Description */}
-            <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-md mx-auto mb-10">
+            <p className={cn("text-secondary-foreground", "text-base", "sm:text-lg", "leading-relaxed", "max-w-md", "mx-auto", "mb-10")}>
               Oops! The page you're looking for doesn't exist or has been moved to a different location.
             </p>
 
@@ -52,7 +51,7 @@ function NotFound() {
 
               <button
                 onClick={() => window.history.back()}
-                className="group flex items-center justify-center gap-3 w-full px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
+                className={cn("group", "flex", "items-center", "justify-center", "gap-3", "w-full", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
               >
                 <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
                 <span>Go Back</span>
@@ -60,7 +59,7 @@ function NotFound() {
             </div>
 
             {/* Help Section */}
-            <div className="mt-10 pt-6 border-t border-slate-700/50">
+            <div className="mt-10 pt-6 border-t border-border">
               <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-4 py-2 rounded-xl">
                 <FaQuestionCircle />
                 <p className="text-sm font-semibold">
@@ -71,7 +70,7 @@ function NotFound() {
 
             {/* Additional Info */}
             <div className="mt-6">
-              <p className="text-xs text-slate-500">
+              <p className={cn("text-xs", "text-muted-foreground")}>
                 Error Code: 404 | Page Not Found
               </p>
             </div>

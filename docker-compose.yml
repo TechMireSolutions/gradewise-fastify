@@ -1,0 +1,108 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gradewise-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gradewise
+    ports:
+      - "5432:5432"
+    volumes:
+      - gradewise_pg_data:/var/lib/postgresql/data
+      - ./grade-wise-ai-backend-fastify/drizzle/init-pgvector.sql:/docker-entrypoint-initdb.d/01-pgvector.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gradewise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: gradewise-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: gradewise-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - gradewise_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./grade-wise-ai-backend-fastify
+      dockerfile: Dockerfile
+    container_name: gradewise-api
+    env_file:
+      - ./grade-wise-ai-backend-fastify/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/gradewise
+      REDIS_URL: redis://redis:6379
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: gradewise
+      FRONTEND_URL: http://localhost:3000
+      USE_ASYNC_JOBS: "true"
+    ports:
+      - "5005:5005"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["node", "dist/index.js"]
+
+  worker:
+    build:
+      context: ./grade-wise-ai-backend-fastify
+      dockerfile: Dockerfile
+    container_name: gradewise-worker
+    env_file:
+      - ./grade-wise-ai-backend-fastify/.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/gradewise
+      REDIS_URL: redis://redis:6379
+      USE_ASYNC_JOBS: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["node", "dist/worker.js"]
+
+  web:
+    build:
+      context: ./grade-wise-ai-frontend-next
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5005
+    container_name: gradewise-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:5005
+
+volumes:
+  gradewise_pg_data:
+  gradewise_minio_data:

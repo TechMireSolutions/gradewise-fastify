@@ -118,7 +118,7 @@ function Modal({
           aria-modal={isConfirmModal ? "true" : undefined}
           aria-labelledby="modal-title"
           className={`
-            bg-slate-900/95 backdrop-blur-md border border-slate-700/50 border-l-4 ${styles.borderAccent}
+            bg-card backdrop-blur-md border border-border border-l-4 ${styles.borderAccent}
             rounded-2xl shadow-2xl
             transform transition-all duration-300 ease-out
             ${isClosing
@@ -130,7 +130,7 @@ function Modal({
           {/* Close Button — 44×44px touch target */}
           <button
             onClick={handleClose}
-            className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-slate-400 hover:text-white transition-all duration-150 hover:scale-110 active:scale-95 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer"
+            className={cn("absolute", "top-2", "right-2", "w-11", "h-11", "flex", "items-center", "justify-center", "rounded-lg", "bg-surface-elevated", "hover:opacity-80", "text-muted-foreground", "hover:text-foreground", "transition-all", "duration-150", "hover:scale-110", "active:scale-95", "z-10", "focus-visible:outline-none", "focus-visible:ring-2", "focus-visible:ring-violet-500", "cursor-pointer")}
             aria-label="Close notification"
           >
             <FaTimes className="w-3.5 h-3.5" />
@@ -143,7 +143,7 @@ function Modal({
               <div
                 className={`
                   flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl ${styles.iconBg}
-                  flex items-center justify-center text-white text-xl sm:text-2xl font-bold
+                  flex items-center justify-center text-foreground text-xl sm:text-2xl font-bold
                 `}
               >
                 {styles.icon}
@@ -157,7 +157,7 @@ function Modal({
                 >
                   {title}
                 </h3>
-                <div className="text-sm sm:text-base text-slate-300 leading-relaxed">
+                <div className={cn("text-sm", "sm:text-base", "text-secondary-foreground", "leading-relaxed")}>
                   {children}
                 </div>
               </div>
@@ -165,10 +165,10 @@ function Modal({
 
             {/* ACTION BUTTONS (ONLY FOR CONFIRM MODALS) */}
             {isConfirmModal && (
-              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-5 pt-4 border-t border-slate-700/50">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-5 pt-4 border-t border-border">
                 <button
                   onClick={handleClose}
-                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white text-sm font-medium transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground text-sm font-medium transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer"
                 >
                   {cancelText}
                 </button>
@@ -190,7 +190,7 @@ function Modal({
 
             {/* PROGRESS BAR (ONLY FOR AUTO-CLOSE MODALS) */}
             {!isConfirmModal && (
-              <div className="mt-4 h-1 bg-slate-700/60 rounded-full overflow-hidden">
+              <div className="mt-4 h-1 bg-btn-secondary rounded-full overflow-hidden">
                 <div
                   className={`h-full ${styles.progressBg} transition-all duration-100 ease-linear rounded-full`}
                   style={{ width: `${progress}%` }}

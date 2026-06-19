@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn.js";
+import { tableHead } from "@/lib/ui.js";
 import {
   FaUsers,
   FaCheckCircle,
@@ -11,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { getRoleBadgeColor, getRoleAvatarBg, formatRole } from "../../utils/roleDisplay.js";
 import { formatDate } from "../../utils/formatDate.js";
+import EmptyState from "../ui/EmptyState.jsx";
 
 function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onDelete, canDelete }) {
   const isSelf = userData.id === currentUserId;
@@ -55,7 +58,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onDelete(userData.id, userData.name)}
           aria-label={`Delete user ${userData.name}`}
-          className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-150 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className={cn("p-2", "rounded-lg", "text-muted-foreground", "hover:text-red-400", "hover:bg-red-500/10", "border", "border-transparent", "hover:border-red-500/20", "transition-all", "duration-150", "cursor-pointer", "min-w-[44px]", "min-h-[44px]", "flex", "items-center", "justify-center")}
         >
           <FaTrash className="w-3.5 h-3.5" />
         </button>
@@ -66,13 +69,11 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
 
 function EmptyUsersState() {
   return (
-    <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
-        <FaUsers className="w-8 h-8 text-indigo-400" />
-      </div>
-      <h3 className="text-2xl font-bold text-white mb-2">No users yet</h3>
-      <p className="text-slate-400 max-w-sm">No users have been registered on this platform.</p>
-    </div>
+    <EmptyState
+      icon={FaUsers}
+      title="No users yet"
+      description="No users have been registered on this platform."
+    />
   );
 }
 
@@ -93,12 +94,12 @@ export default function UserManagementTable({
       <div className="overflow-x-auto hidden lg:block">
         <table className="min-w-full">
           <thead>
-            <tr className="bg-slate-800/60">
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">User</th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Role</th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Status</th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Joined</th>
-              <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">Actions</th>
+            <tr className={tableHead}>
+              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>User</th>
+              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Role</th>
+              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Status</th>
+              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Joined</th>
+              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700/30">
@@ -110,8 +111,8 @@ export default function UserManagementTable({
                       {userData.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-slate-200">{userData.name}</div>
-                      <div className="text-xs text-slate-500">{userData.email}</div>
+                      <div className={cn("text-sm", "font-semibold", "text-secondary-foreground")}>{userData.name}</div>
+                      <div className={cn("text-xs", "text-muted-foreground")}>{userData.email}</div>
                     </div>
                   </div>
                 </td>
@@ -130,9 +131,9 @@ export default function UserManagementTable({
                     {userData.verified ? "Verified" : "Pending"}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-400">
+                <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="text-slate-500" />
+                    <FaCalendarAlt className={"text-muted-foreground"} />
                     {formatDate(userData.created_at)}
                   </div>
                 </td>
@@ -160,8 +161,8 @@ export default function UserManagementTable({
                 {userData.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-slate-200">{userData.name}</h3>
-                <p className="text-xs text-slate-500 truncate mb-2">{userData.email}</p>
+                <h3 className={cn("font-semibold", "text-secondary-foreground")}>{userData.name}</h3>
+                <p className={cn("text-xs", "text-muted-foreground", "truncate", "mb-2")}>{userData.email}</p>
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${getRoleBadgeColor(userData.role)}`}>
                   {formatRole(userData.role)}
                 </span>
@@ -188,7 +189,7 @@ export function UserStatsGrid({ stats, totalUsers }) {
     { value: stats.admin, label: "Admins", icon: FaCrown, gradient: "from-red-500 to-rose-600", border: "border-red-500/30", bg: "from-red-500/20 to-rose-500/20" },
     { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, gradient: "from-violet-500 to-purple-600", border: "border-violet-500/30", bg: "from-violet-500/20 to-purple-500/20" },
     { value: stats.student, label: "Students", icon: FaUserGraduate, gradient: "from-emerald-500 to-teal-600", border: "border-emerald-500/30", bg: "from-emerald-500/20 to-teal-500/20" },
-    { value: stats.verified, label: "Verified", icon: FaCheckCircle, gradient: "from-sky-500 to-blue-600", border: "border-sky-500/30", bg: "from-sky-500/20 to-blue-500/20" },
+    { value: stats.verified, label: "Verified", icon: FaCheckCircle, gradient: "from-sky-500 to-blue-600", border: "border-sky-500/30", bg: "from-sky-500/20 to-sky-50 dark:to-sky-950/300/20" },
   ];
 
   return (
@@ -197,8 +198,8 @@ export function UserStatsGrid({ stats, totalUsers }) {
         <div key={label} className={`bg-gradient-to-br ${bg} backdrop-blur-sm border ${border} rounded-xl p-3 sm:p-4`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-slate-400 text-xs sm:text-sm font-medium mb-1">{label}</p>
-              <p className="text-xl sm:text-2xl font-bold text-white">{value}</p>
+              <p className={cn("text-muted-foreground", "text-xs", "sm:text-sm", "font-medium", "mb-1")}>{label}</p>
+              <p className="text-xl sm:text-2xl font-bold text-foreground">{value}</p>
             </div>
             <div className={`p-2.5 rounded-xl bg-gradient-to-br ${gradient} shadow-lg text-white`}>
               <Icon className="w-4 h-4 sm:w-5 sm:h-5" />

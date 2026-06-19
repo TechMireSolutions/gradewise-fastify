@@ -1,6 +1,10 @@
+import { cn } from "@/lib/cn.js";
+import { focusRing, page } from "@/lib/ui.js";
 import { Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "./AmbientBackground.jsx";
+import MainLandmark from "./MainLandmark.jsx";
+import ThemeToggle from "@/components/ThemeToggle.jsx";
 
 export default function AuthPageLayout({
   children,
@@ -9,20 +13,26 @@ export default function AuthPageLayout({
   maxWidth = "max-w-md",
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
+    <div className={cn(page, "flex", "items-center", "justify-center", "px-4", "py-12")}>
       <AmbientBackground />
-      <div className={`relative w-full ${maxWidth}`}>
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+      <MainLandmark className={`relative w-full ${maxWidth}`}>
         <div className="mb-6">
           <Link
             to={backTo}
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors duration-150 group"
+            className={cn(
+              "group inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-accent",
+              focusRing
+            )}
           >
-            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform duration-150" />
-            <span className="text-sm font-medium">{backLabel}</span>
+            <FaArrowLeft className="transition-transform duration-150 group-hover:-translate-x-1" aria-hidden="true" />
+            <span>{backLabel}</span>
           </Link>
         </div>
         {children}
-      </div>
+      </MainLandmark>
     </div>
   );
 }

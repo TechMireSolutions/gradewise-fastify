@@ -1,14 +1,19 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import Modal from "../../components/ui/Modal";
+import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaArrowLeft, FaUserGraduate, FaUserShield } from "react-icons/fa";
 import {
   registerStudentSchema,
   enrollStudentSchema,
-} from "../../scheema/studentSchemas.js";
+} from "../../schemas/studentSchemas.js";
+import useModal from "../../hooks/useModal.js";
+import { parseZodFieldErrors } from "../../utils/parseZodFieldErrors.js";
 
 
 function AddUser({ assessmentId, onStudentAdded, compact = false }) {
@@ -26,18 +31,18 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, type: "", title: "", message: "" });
+  const { modal, showModal: openModal, closeModal } = useModal();
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const showModal = (type, title, message, redirect = false) => {
-    setModal({ isOpen: true, type, title, message });
+    openModal(type, title, message);
 
     if (type === "success" && redirect) {
       setTimeout(() => {
-        setModal({ isOpen: false });
+        closeModal();
         if (currentUser?.role === 'super_admin') {
           navigate("/super-admin/dashboard");
         } else if (currentUser?.role === 'admin') {
@@ -64,10 +69,11 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
     try {
       registerStudentSchema.parse(formData);
     } catch (err) {
+      const fieldErrors = parseZodFieldErrors(err);
       showModal(
         "error",
         "Invalid Input",
-        err.errors?.[0]?.message || "Invalid form data"
+        fieldErrors ? Object.values(fieldErrors)[0] : "Invalid form data"
       );
       return;
     }
@@ -97,40 +103,40 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
     }
   };
 
-const handleEnroll = async (e) => {
-  console.log("Enroll calling.....")
-  e.preventDefault();
-  try {
-    enrollStudentSchema.parse({ email: formData.email });
-  } catch (err) {
-    showModal(
-      "error",
-      "Invalid Input",
-      err.errors?.[0]?.message || "Invalid email"
-    );
-    return;
-  }
+  const handleEnroll = async (e) => {
+    e.preventDefault();
+    try {
+      enrollStudentSchema.parse({ email: formData.email });
+    } catch (err) {
+      const fieldErrors = parseZodFieldErrors(err);
+      showModal(
+        "error",
+        "Invalid Input",
+        fieldErrors ? Object.values(fieldErrors)[0] : "Invalid email"
+      );
+      return;
+    }
 
-  try {
-    await enrollStudent(assessmentId, formData.email.trim());
-    showModal("success", "Success", "User enrolled successfully!");
-    setFormData((prev) => ({ ...prev, email: "" }));
-    onStudentAdded?.();
-  } catch (err) {
-    showModal("error", "Error", err.message || "Enrollment failed");
-  }
-};
+    try {
+      await enrollStudent(assessmentId, formData.email.trim());
+      showModal("success", "Success", "User enrolled successfully!");
+      setFormData((prev) => ({ ...prev, email: "" }));
+      onStudentAdded?.();
+    } catch (err) {
+      showModal("error", "Error", err.message || "Enrollment failed");
+    }
+  };
 
   const inputClass =
-    "w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30";
-  const labelClass = "block text-slate-400 text-sm font-medium mb-1.5";
+    "w-full bg-input backdrop-blur-sm border border-border hover:border-accent/40 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30";
+  const labelClass = "block text-muted-foreground text-sm font-medium mb-1.5";
 
   const formContent = mode === "register" ? (
     <form onSubmit={handleRegister} className={compact ? "space-y-4" : "space-y-5"}>
       <div>
         <label className={labelClass}>Full Name</label>
         <div className="relative">
-          <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+          <FaUser className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
             name="name"
             value={formData.name}
@@ -145,7 +151,7 @@ const handleEnroll = async (e) => {
       <div>
         <label className={labelClass}>Email</label>
         <div className="relative">
-          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+          <FaEnvelope className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
             name="email"
             type="email"
@@ -162,16 +168,16 @@ const handleEnroll = async (e) => {
         <div>
           <label className={labelClass}>User Role</label>
           <div className="relative">
-            <FaUserShield className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+            <FaUserShield className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
             <select
               name="role"
               value={formData.role}
               onChange={handleChange}
               className={`${inputClass} appearance-none cursor-pointer`}
             >
-              <option value="student" className="bg-slate-800 text-slate-200">Student</option>
-              <option value="instructor" className="bg-slate-800 text-slate-200">Instructor</option>
-              <option value="admin" className="bg-slate-800 text-slate-200">Admin</option>
+              <option value="student" className={cn("bg-slate-800", "text-secondary-foreground")}>Student</option>
+              <option value="instructor" className={cn("bg-slate-800", "text-secondary-foreground")}>Instructor</option>
+              <option value="admin" className={cn("bg-slate-800", "text-secondary-foreground")}>Admin</option>
             </select>
           </div>
         </div>
@@ -180,7 +186,7 @@ const handleEnroll = async (e) => {
       <div>
         <label className={labelClass}>Password</label>
         <div className="relative">
-          <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+          <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
             name="password"
             type="password"
@@ -196,7 +202,7 @@ const handleEnroll = async (e) => {
       <div>
         <label className={labelClass}>Confirm Password</label>
         <div className="relative">
-          <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+          <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
             name="confirmPassword"
             type="password"
@@ -209,11 +215,11 @@ const handleEnroll = async (e) => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-700/50">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
+          className={cn("inline-flex", "items-center", "justify-center", "gap-2", "px-5", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
         >
           <FaArrowLeft />
           Cancel
@@ -242,7 +248,7 @@ const handleEnroll = async (e) => {
       <div>
         <label className={labelClass}>User Email</label>
         <div className="relative">
-          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+          <FaEnvelope className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
             name="email"
             type="email"
@@ -255,11 +261,11 @@ const handleEnroll = async (e) => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-700/50">
+      <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
+          className={cn("inline-flex", "items-center", "justify-center", "gap-2", "px-5", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
         >
           <FaArrowLeft />
           Cancel
@@ -288,13 +294,8 @@ const handleEnroll = async (e) => {
   // Standalone page layout
   if (!compact) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
-        {/* Ambient blobs */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-        </div>
+      <div className={page}>
+        <AmbientBackground />
 
         <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           {/* Page header */}
@@ -304,21 +305,21 @@ const handleEnroll = async (e) => {
                 <FaUserPlus className="text-white text-lg" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">User Management</p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Add New User</h1>
+                <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>User Management</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Add New User</h1>
               </div>
             </div>
-            <p className="text-slate-400 leading-relaxed">
+            <p className={cn("text-muted-foreground", "leading-relaxed")}>
               Register a new user or enroll an existing one into an assessment.
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
+          <div className={cn(card, cardInteractive, "shadow-2xl")}>
             {/* Card header */}
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl">
+            <div className={cardHeader}>
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-foreground">
                   {mode === "register" ? "Register User" : "Enroll Existing User"}
                 </h2>
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
@@ -344,7 +345,7 @@ const handleEnroll = async (e) => {
 
         <Modal
           isOpen={modal.isOpen}
-          onClose={() => setModal({ ...modal, isOpen: false })}
+          onClose={closeModal}
           type={modal.type}
           title={modal.title}
         >
@@ -370,7 +371,7 @@ const handleEnroll = async (e) => {
       {formContent}
       <Modal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
+        onClose={closeModal}
         type={modal.type}
         title={modal.title}
       >

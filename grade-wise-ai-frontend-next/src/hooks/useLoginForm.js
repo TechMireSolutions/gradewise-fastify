@@ -6,7 +6,7 @@ import useAuthStore from "@/features/auth/store.js";
 import useRecaptchaInit from "./useRecaptchaInit.js";
 import useModal from "./useModal.js";
 import { getCaptchaToken } from "../config/captcha.js";
-import { loginSchema } from "../scheema/authSchemas.js";
+import { loginSchema } from "../schemas/authSchemas.js";
 import { redirectByRole } from "../utils/redirectByRole.js";
 
 export default function useLoginForm({

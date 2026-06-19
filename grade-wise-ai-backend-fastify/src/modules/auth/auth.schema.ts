@@ -18,9 +18,7 @@ export const LoginSchema = z.object({
 });
 
 export const GoogleAuthSchema = z.object({
-  name: z.string().min(1),
-  email,
-  uid: z.string().min(1),
+  idToken: z.string().min(1),
 });
 
 export const RegisterStudentSchema = z.object({

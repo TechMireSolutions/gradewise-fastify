@@ -1,303 +1,162 @@
 ---
 trigger: always_on
 glob: "grade-wise-ai-backend-fastify/**/*.ts"
-description: "Backend development guidelines for the Fastify v5 + TypeScript + Drizzle ORM stack: imports, DB patterns, error handling, auth, AI SDK, and response conventions."
+description: "Fastify v5 + TypeScript + Drizzle ORM backend: structure, cookie auth, Redis, BullMQ, AI SDK, and DB patterns."
 ---
 
 # Backend Rules — grade-wise-ai-backend-fastify
 
-**Stack**: Node.js 22 · Fastify v5 · TypeScript 6 (strict) · Drizzle ORM 0.45 · PostgreSQL (postgres.js) · Zod v4 · Vercel AI SDK v6
+> **Mandatory:** `standards_rules.md` Policies 1–5.
 
-## Current Package Versions (as of last audit)
-
-| Package | Version | Notes |
-|---------|---------|-------|
-| typescript | 6.0.3 | Strict mode; verified compiles cleanly at v6 |
-| ai (Vercel AI SDK) | 6.0.207 | |
-| @ai-sdk/google / openai / anthropic / groq / mistral | 3.0.83–3.0.85 | |
-| fastify | 5.8.5 | |
-| drizzle-orm | 0.45.2 | |
-| bcrypt | 6.0.0 | API unchanged: `hash(pwd, rounds)` / `compare(plain, hash)` |
-| dotenv | 17.4.2 | Loaded via `import "dotenv/config"` — no API changes |
-| nodemailer | 9.0.0 | API unchanged: `createTransport` / `sendMail` |
-| pdf-parse | 2.4.5 | Still loaded via CJS `require()` — ESM interop only |
-| pdfkit | 0.19.1 | |
-| sharp | 0.35.1 | |
-| @types/node | 22.x | **Intentionally pinned to Node.js 22** — do not bump to 25+ while server runtime is Node 22 |
-
----
+**Stack:** Node ≥22 · Fastify 5 · TypeScript 6 (strict) · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 6 · Vitest
 
 ## Module System & Imports
 
-- TypeScript compiled with `"moduleResolution": "NodeNext"` — all local imports **must** end in `.js` even though the source files are `.ts`.
-  - ✓ `import { db } from "../../db/index.js"`
-  - ✗ `import { db } from "../../db/index"`
-- ESM only — no `require()`. Exception: CJS packages (e.g. `pdf-parse`) must be loaded via `createRequire(import.meta.url)`.
-- `strict: true` in tsconfig — no `any`, no implicit returns, no unchecked index access.
-  - Use `Record<string, unknown>` when object shape is unpredictable.
-  - Cast AI-parsed objects with `String(obj["field"])` / `Array.isArray(obj["field"])` rather than direct property access.
-- Verify packages exist in `package.json` before importing. Never guess a package name.
-
----
+- `"moduleResolution": "NodeNext"` — local imports **must** end in `.js`.
+- ESM only. Exception: CJS-only packages via `createRequire(import.meta.url)`.
+- `strict: true` — no `any`, guard indexed access.
 
 ## Project Structure
 
 ```
 src/
-  app.ts              # Fastify app factory — registers plugins then routes
-  index.ts            # Entry point — validates env, starts server
-  db/
-    index.ts          # postgres.js client + drizzle instance
-    schema.ts         # All Drizzle table definitions, enums, inferred types
-  ai/
-    providers.ts      # Multi-provider rotation with cooldown, 1-min config cache
-    generate.ts       # generateContent() / generatePdfContent() wrappers
-  plugins/
-    jwt.ts            # @fastify/jwt setup + app.authenticate decorator
-    rateLimit.ts      # @fastify/rate-limit global config
-  hooks/
-    authenticate.ts   # preHandler: verifies JWT, populates request.user
-    authorize.ts      # preHandler factory: authorize("admin", "instructor")
-  modules/
-    auth/             # signup, login, google-auth, user management
-    assessments/      # CRUD, enrollment, preview, physical paper
-    resources/        # file upload, chunking, resource management
-    config/           # AI provider key management (super_admin)
-    student-assessments/  # start, submit, get submission details
-    analytics/        # instructor-analytics, student-analytics
-  utils/
-    errors.ts         # AppError hierarchy
-    pdf.ts            # PDFKit physical paper generator
+  app.ts              # Fastify factory — plugins + routes
+  index.ts            # Env validation + listen (PORT 5005)
+  worker.ts           # BullMQ worker entry
+  health.ts           # Health check aggregation
+  db/                 # postgres client + Drizzle schema
+  ai/                 # providers, generate, build-model, constants
+  plugins/            # cookie, cors, helmet, jwt, rate-limit, multipart
+  hooks/              # authenticate, authorize
+  lib/redis.ts        # Redis client singleton
+  queue/              # BullMQ queue + worker
+  services/storage.ts # S3/MinIO upload scaffold
+  modules/<name>/     # index.ts, *.service.ts, *.schema.ts
+  constants/roles.ts
+  schemas/common.ts
+  utils/              # errors, auth-cookie, crypto, captcha, pdf
+drizzle/              # Migrations + init-pgvector.sql
 ```
 
----
+## Plugin Registration Order
+
+```
+helmet → cors → cookie → rate-limit → multipart → jwt
+```
 
 ## Fastify Conventions
 
-### Plugin Registration
-- Every plugin file must export a default function wrapped with `fastify-plugin` (breaks encapsulation so decorators/hooks are visible app-wide).
-  ```typescript
-  import fp from "fastify-plugin";
-  export default fp(async function (app) { ... });
-  ```
-- Module route files export a plain `async function` (NOT wrapped in `fp`) — they run in their own scope, which is correct for route isolation.
-
-### Route Files (`modules/<name>/index.ts`)
+### Routes
 ```typescript
-export default async function routes(app: FastifyInstance) {
-  app.post("/path", {
-    preHandler: [app.authenticate, authorize("instructor")],
-    schema: { body: MyZodSchema },
-  }, handler);
-}
+app.post("/path", {
+  preHandler: [authenticate, authorize("instructor")],
+  schema: { body: MyZodSchema, params: IdParamSchema },
+}, async (request, reply) => {
+  const data = await myService(request.body);
+  return reply.send({ success: true, data });
+});
 ```
-- Always specify `schema` for request body and params — Zod schemas are applied via `fastify-type-provider-zod`.
-- Rate-limit specific routes by adding `config: { rateLimit: { max, timeWindow } }` to the route options.
 
 ### Error Handling
-- Throw typed `AppError` subclasses from service layer:
-  ```typescript
-  throw new NotFoundError("Assessment");    // 404
-  throw new ForbiddenError("Access denied"); // 403
-  throw new ConflictError("Already exists"); // 409
-  ```
-- The global error handler in `app.ts` converts them to `{ success: false, message }`. Controllers never call `reply.code().send()` for errors — only throw.
-- Every route handler is `async` — Fastify catches unhandled promise rejections automatically. No manual try-catch needed in route handlers; put try-catch in services only when you want to recover gracefully (e.g. AI generation fallback).
+- Services throw `AppError` subclasses.
+- Global handler returns `{ success: false, message }`.
+- Route try/catch via `toHttpError()` when needed.
 
-### Response Format
-All successful responses use:
+### Response Envelope
 ```typescript
-reply.send({ success: true, message: "...", data: { ... } });
+reply.send({ success: true, message?: "...", data: { ... } });
 ```
-Never return raw objects without the `success` envelope.
 
----
+## Auth (cookie-based)
+
+- Cookie name: `gradewise_token` (httpOnly, secure in production).
+- Set via `setAuthCookie(reply, token)` on login/signup/google-auth.
+- Clear via `clearAuthCookie(reply)` on logout.
+- `@fastify/jwt` reads cookie + Authorization header.
+- **`/api/auth/me`** — return current user; **`/api/auth/logout`** — clear session.
+- **Do not** return `token` in JSON responses.
+
+### Google OAuth
+```typescript
+// Body: { idToken: string }
+// Verify with verifyGoogleIdToken() in utils/crypto.ts
+// Requires FIREBASE_PROJECT_ID or GOOGLE_CLIENT_ID
+```
+
+### Role guards
+```typescript
+preHandler: [authenticate, authorize("admin", "super_admin")]
+// request.user: { id, email, role }
+```
 
 ## Database (Drizzle ORM)
 
-### Query Patterns
-```typescript
-// Select with filter
-const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
-const user = rows[0]; // always check for undefined
+- PostgreSQL only · pgvector extension for future embeddings.
+- Multi-table writes → `db.transaction()`.
+- `numeric` columns → `string` — use `Number()` for math.
+- **Production:** `npm run db:generate` + commit + `npm run db:migrate`.
+- **Local dev:** `npm run db:push` acceptable.
 
-// Insert and return
-const [created] = await db.insert(users).values({ ... }).returning();
-if (!created) throw new AppError("CREATE_FAILED", "...", 500);
+## Async Assessment Generation
 
-// Update
-await db.update(users).set({ name }).where(eq(users.id, id));
+When `USE_ASYNC_JOBS=true` and `REDIS_URL` set:
 
-// Aggregate (always guard for undefined)
-const countResult = await db.select({ count: sql<number>`count(*)` }).from(enrollments)...;
-const count = countResult[0]?.count ?? 0;
-```
+1. `startAssessmentService` enqueues BullMQ job → returns `{ status: "generating" }`.
+2. Worker runs `generateQuestionsForAttempt()` in `modules/student-assessments/generation.ts`.
+3. Client polls `GET /api/taking/assessments/:assessmentId/attempts/:attemptId/status`.
 
-### Transactions
-Use `db.transaction()` for any operation that writes to multiple tables:
-```typescript
-const result = await db.transaction(async (trx) => {
-  const [assessment] = await trx.insert(assessments).values(...).returning();
-  await trx.insert(questionBlocks).values(...);
-  return assessment;
-});
-```
+Run worker: `npm run dev:worker` or `docker compose up worker`.
 
-### Conflict Handling
-```typescript
-await db.insert(enrollments).values({ ... }).onConflictDoNothing();
-```
-
-### No Raw SQL in Features
-- All queries go through Drizzle schema imports. Never write raw `sql` strings for table operations.
-- `sql` template tag is allowed only for aggregate functions (`sql<number>\`count(*)\``) and ORDER BY expressions.
-- No multi-DB abstraction layer — this backend targets PostgreSQL exclusively.
-
-### Schema Rules
-- Enums are defined in `schema.ts` via `pgEnum` and imported in services via the schema object.
-- Inferred types (`typeof table.$inferSelect`) are used throughout — never write manual interface types that duplicate table structure.
-- `numeric` columns (marks, scores) are stored as `string` in Drizzle. Use `Number(row.positiveMarks)` when doing math.
-
----
-
-## Authentication & Authorization
+## AI SDK v6
 
 ```typescript
-// Protect a route with JWT
-preHandler: [app.authenticate]
-
-// Protect and restrict by role
-preHandler: [app.authenticate, authorize("admin", "super_admin")]
+const text = await generateContent(prompt, { maxOutputTokens: 4096, temperature: 0.7 });
 ```
+- Use **`maxOutputTokens`** (not `maxTokens`).
+- Never instantiate providers in services — use `generateContent` + rotation.
+- AI keys encrypted in `system_configs` when `ENCRYPTION_KEY` set.
+- After key changes: `invalidateConfigCache()`.
 
-- `request.user` is typed as `{ id: number; email: string; role: string }` after `app.authenticate`.
-- `authorize()` is a factory that returns a `preHandler` function — pass role strings as spread args.
-- JWT payload: `{ id, email, role }`. Do not store sensitive data in JWT.
-- JWT secret must be set via `JWT_SECRET` env var. The startup check in `index.ts` blocks launch if it's missing or uses the default in production.
+## Redis & Rate Limiting
 
----
+- `REDIS_URL` enables Redis-backed `@fastify/rate-limit` and BullMQ.
+- Without Redis: in-memory rate limit only (single instance).
 
-## Zod v4 Validation
+## Object Storage
 
-- Schema files live in each module: `modules/<name>/<name>.schema.ts`.
-- Use `fastify-type-provider-zod` to register schemas on routes — this gives full TypeScript inference on `request.body`.
-- Zod v4 syntax changes from v3:
-  - `z.string().min(1)` still works.
-  - Discriminated unions: `z.discriminatedUnion("type", [...])` is unchanged.
-  - `z.infer<typeof Schema>` works the same.
-  - No breaking changes to core validation API for our usage.
+- `services/storage.ts` — S3-compatible (MinIO in docker-compose).
+- Set `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`.
 
----
+## Health Check
 
-## AI SDK v6 (Vercel AI SDK)
+`GET /api/health` returns DB status, Redis ping, and feature flags.
 
-### API
-```typescript
-import { generateText } from "ai";
-const { text } = await generateText({
-  model: aiModel,
-  prompt: "...",
-  system: "...",
-  maxOutputTokens: 4096,   // NOT maxTokens — renamed in v6
-  temperature: 0.7,
-});
-```
-- The parameter is **`maxOutputTokens`** (v6 rename from `maxTokens` in v5). Always use this name.
+## Shared Backend Utilities
 
-### Provider Rotation
-- Never instantiate AI SDK providers directly in services. Always use:
-  ```typescript
-  import { generateContent } from "../../ai/generate.js";
-  const text = await generateContent(prompt, { maxOutputTokens: 4096, temperature: 0.7 });
-  ```
-- `generateContent` uses `callWithRotation("text", ...)` which round-robins keys, puts them on 60s cooldown on 429/503/529, and reads from DB with a 1-minute TTL cache.
-- After any key change call `invalidateConfigCache()` from `src/ai/providers.ts`.
+| Path | Purpose |
+|------|---------|
+| `utils/auth-cookie.ts` | Cookie set/clear |
+| `utils/crypto.ts` | Encrypt/decrypt keys, verify Google idToken |
+| `constants/roles.ts` | Role arrays |
+| `schemas/common.ts` | Param Zod schemas |
+| `modules/assessments/question-generation.ts` | AI prompt + parse |
+| `modules/student-assessments/generation.ts` | Question generation |
+| `queue/index.ts` | BullMQ enqueue/worker |
 
-### Providers & Config Keys
-Keys are stored in `system_configs` table with keys following the pattern:
-- `TEXT_GEMINI_KEYS`, `TEXT_GROQ_KEYS`, `TEXT_OPENAI_KEYS`, `TEXT_CLAUDE_KEYS`, `TEXT_MISTRAL_KEYS`, `TEXT_DEEPSEEK_KEYS`
-- `PDF_GEMINI_KEYS`, `PDF_OPENAI_KEYS`, etc.
-- Model overrides: `TEXT_GEMINI_MODEL`, `PDF_OPENAI_MODEL`, etc.
+## Testing
 
----
-
-## Error Hierarchy
-
-```typescript
-// src/utils/errors.ts
-throw new NotFoundError("Assessment");         // 404: "Assessment not found"
-throw new UnauthorizedError();                 // 401
-throw new ForbiddenError("Access denied");     // 403
-throw new ConflictError("Email already used"); // 409
-throw new ValidationError("Invalid input");    // 422
-throw new ServiceUnavailableError("AI");       // 503
-throw new AppError("MY_CODE", "message", 500); // custom
-```
-
----
-
-## Environment Variables
-
-Required at startup (validated in `index.ts`):
-- `DATABASE_URL` — postgres.js connection string
-- `JWT_SECRET` — must not be the default value in production
-
-Optional:
-- `JWT_EXPIRES_IN` — default `"24h"`
-- `NODE_ENV` — `"development"` enables Drizzle query logging and auto-verifies emails
-- `PORT` — default `3000`
-
----
+- Vitest: `npm test` · config: `vitest.config.ts`
+- Place tests alongside source: `*.test.ts`
+- CI runs tests on every push
 
 ## Code Style
 
-- Controllers are thin — they extract params from `request`, call a service function, and send the response. No business logic in route handlers.
-- Services own business logic and DB access. One service per module.
-- No `console.log` in production paths — use `console.error` for error logging only.
-- No hardcoded mock data or test seeds in production code.
-- All destructive operations (delete assessment, delete key) must verify ownership/role before executing.
+- Thin routes, fat services.
+- No `console.log` in production; `console.error` for failures.
+- Destructive ops verify ownership/role first.
 
----
+## Dependency Policy
 
-## Dependency Maintenance Policy
-
-**Always keep dependencies at the latest stable version.** Run `npm outdated` before any major feature work and upgrade anything flagged.
-
-### Upgrade Decision Matrix
-| Semver change | Action |
-|---------------|--------|
-| Patch (x.y.**Z**) | Upgrade immediately — always safe |
-| Minor (x.**Y**.z) | Upgrade immediately — backwards-compatible by spec |
-| Major (**X**.y.z) | Check release notes + verify call-sites, then upgrade |
-
-### Upgrade Steps
-```bash
-# 1. Identify outdated packages
-npm outdated
-
-# 2. Upgrade all safe packages
-npm install pkg1@latest pkg2@latest ...
-
-# 3. Type-check after any TypeScript or types upgrade
-npx tsc --noEmit
-
-# 4. Verify no regressions
-npm outdated   # should be empty (except intentional pins)
-npm audit
-```
-
-### Intentional Version Pins
-| Package | Pinned to | Reason |
-|---------|-----------|--------|
-| `@types/node` | `^22.x` | Must match the Node.js 22 runtime — using Node 25 types adds API definitions that don't exist at runtime, creating false type safety |
-
-### Known Transitive Vulnerabilities (accepted, cannot self-fix)
-| Package | Vulnerability | Why unfixable |
-|---------|--------------|---------------|
-| `drizzle-kit` → internal `esbuild ≤0.28.0` | Dev-server SSRF + Deno binary integrity (high) | `npm audit fix --force` downgrades drizzle-kit to 0.19.1 — catastrophic. Dev-time only, not in production. Awaiting drizzle-kit internal esbuild update. |
-
-### Rules for AI Agents
-- When adding a **new dependency**, always use the latest stable version — never an old pinned version.
-- Never use `--legacy-peer-deps` as a workaround; resolve the actual conflict.
-- After any dependency change, run `npm outdated` and `npx tsc --noEmit` to confirm no regressions.
-- `uuid` was removed — it is not used in the codebase. Use `crypto.randomBytes()` for tokens instead.
+- Latest stable (`npm outdated` before major work).
+- Removed: `sharp`, `@fastify/static` (unused).
+- Added: `@fastify/cookie`, `bullmq`, `ioredis`, `google-auth-library`, `@aws-sdk/client-s3`, `vitest`.

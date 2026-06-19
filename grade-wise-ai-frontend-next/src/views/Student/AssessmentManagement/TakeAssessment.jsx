@@ -1,9 +1,12 @@
+import { cn } from "@/lib/cn.js";
+import { btn, card, cardHeader, chip, examBar, focusRing, panel, select, textarea } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import toast from "react-hot-toast";
+import useModal from "../../../hooks/useModal.js";
 import {
   FaClock,
   FaQuestionCircle,
@@ -33,7 +36,7 @@ function TakeAssessment() {
   } = useStudentAssessmentStore();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [modal, setModal] = useState({ isOpen: false, type: "", title: "", message: "" });
+    const { modal, showModal, closeModal } = useModal();
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRTL, setIsRTL] = useState(false);
@@ -56,12 +59,7 @@ function TakeAssessment() {
     setIsSubmitting(true);
     try {
       await submitAssessment(assessmentId);
-      setModal({
-        isOpen: true,
-        type: "success",
-        title: "Submitted!",
-        message: "Your assessment has been submitted successfully."
-      });
+      showModal("success", "Submitted!", "Your assessment has been submitted successfully.");
       toast.success("Submitted successfully!");
     } catch (err) {
       toast.error(err.message || "Submission failed");
@@ -114,7 +112,7 @@ function TakeAssessment() {
 
   useEffect(() => {
     if (error) {
-      setModal({ isOpen: true, type: "error", title: "Error", message: error });
+      showModal("error", "Error", error);
       clearError();
     }
   }, [error, clearError]);
@@ -134,48 +132,56 @@ function TakeAssessment() {
 
   if (loading && !hasStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center p-4">
-        <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+      <div className="flex min-h-screen items-center justify-center p-4" role="status" aria-live="polite">
+        <div className="flex flex-col items-center justify-center gap-4 py-32">
+          <div className="rounded-full border border-indigo-500/20 bg-indigo-500/10 p-4">
             <LoadingSpinner size="lg" type="spinner" color="blue" />
           </div>
-          <p className="text-white text-xl font-bold">Loading Assessment...</p>
-          <p className="text-slate-400 text-sm">Please wait while we prepare your exam</p>
+          <p className="text-xl font-bold text-foreground">Loading Assessment...</p>
+          <p className="text-sm text-muted-foreground">Please wait while we prepare your exam</p>
         </div>
       </div>
     );
   }
 
+  const optionBase =
+    "rounded-xl border p-4 text-left text-sm font-medium transition-all duration-200 active:scale-[0.98] motion-reduce:active:scale-100";
+  const optionIdle =
+    "border-border bg-input text-secondary-foreground hover:border-accent/40 hover:bg-surface-elevated";
+  const optionSelected =
+    "border-indigo-500/50 bg-indigo-500/15 text-indigo-800 shadow-lg shadow-indigo-500/10 dark:text-indigo-300";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" dir={isRTL ? "rtl" : "ltr"}>
+    <div className="min-h-screen" dir={isRTL ? "rtl" : "ltr"}>
 
       {/* START SCREEN */}
       {!hasStarted && (
         <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+          <div className={cn("w-full", "max-w-2xl", card, "shadow-2xl", "overflow-hidden", "animate-fade-in")}>
             {/* Card Header */}
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 text-center">
+            <div className={cn(cardHeader, "text-center")}>
               <div className="flex justify-center mb-4">
                 <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
                   <FaGraduationCap className="text-white text-2xl" />
                 </div>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Welcome to Your Assessment</h1>
-              <p className="text-slate-400 text-sm mt-1">Select your preferred language and begin</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Welcome to Your Assessment</h1>
+              <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>Select your preferred language and begin</p>
             </div>
 
             <div className="p-6 sm:p-8 space-y-6">
               {/* Language Select */}
               <div>
-                <label className="block text-slate-400 text-sm font-medium mb-1.5 flex items-center gap-2">
-                  <FaLanguage className="text-indigo-400" />
+                <label htmlFor="exam-language" className={cn("mb-1.5", "flex", "items-center", "gap-2", "text-sm", "font-medium", "text-muted-foreground")}>
+                  <FaLanguage className="text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
                   Select Language
                 </label>
                 <div className="relative">
                   <select
+                    id="exam-language"
                     value={selectedLanguage}
                     onChange={(e) => setSelectedLanguage(e.target.value)}
-                    className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer"
+                    className={cn(select, focusRing)}
                   >
                     <option value="en">English</option>
                     <option value="ur">Urdu</option>
@@ -186,12 +192,12 @@ function TakeAssessment() {
               </div>
 
               {/* Instructions */}
-              <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5">
-                <h3 className="text-sm font-semibold text-slate-200 mb-3 flex items-center gap-2">
-                  <FaFileAlt className="text-indigo-400" />
+              <div className={panel}>
+                <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-secondary-foreground">
+                  <FaFileAlt className="text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
                   Instructions
                 </h3>
-                <ul className="text-sm text-slate-400 space-y-2 leading-relaxed">
+                <ul className={cn("text-sm", "text-muted-foreground", "space-y-2", "leading-relaxed")}>
                   <li className="flex items-start gap-2">
                     <span className="text-indigo-400 mt-0.5">•</span>
                     Read each question carefully before answering
@@ -213,9 +219,11 @@ function TakeAssessment() {
 
               {/* Start Button */}
               <button
+                type="button"
                 onClick={handleStart}
                 disabled={loading}
-                className="w-full py-3.5 px-5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                aria-busy={loading}
+                className={cn(btn.primary, "w-full", "py-3.5")}
               >
                 {loading ? (
                   <>
@@ -238,31 +246,47 @@ function TakeAssessment() {
       {hasStarted && !isSubmitted && currentQuestion && (
         <div className="min-h-screen flex flex-col">
           {/* Top Status Bar */}
-          <div className="bg-slate-900/90 backdrop-blur-md border-b border-slate-700/50 shadow-2xl sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className={examBar} role="region" aria-label="Exam progress">
+            <div className="mx-auto max-w-7xl px-3 py-3 sm:px-6 sm:py-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 {/* Left: Question progress + answered count */}
                 <div className="flex items-center gap-3">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-                    <FaQuestionCircle className="text-xs" />
+                  <div
+                    className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/15 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400"
+                    aria-label={`Question ${currentQuestionIndex + 1} of ${assessmentQuestions.length}`}
+                  >
+                    <FaQuestionCircle className="text-xs" aria-hidden="true" />
                     Q {currentQuestionIndex + 1}/{assessmentQuestions.length}
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                    <FaCheckCircle className="text-xs" />
+                  <div
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
+                    aria-label={`${answeredCount} questions answered`}
+                  >
+                    <FaCheckCircle className="text-xs" aria-hidden="true" />
                     {answeredCount} Answered
                   </div>
                 </div>
                 {/* Right: Timers */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200 ${
-                    questionTimeLeft <= 5
-                      ? "bg-red-500/20 text-red-400 border-red-500/30 animate-pulse"
-                      : "bg-amber-500/15 text-amber-400 border-amber-500/20"
-                  }`}>
-                    <FaClock className="text-xs" />
+                  <div
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold sm:px-4 motion-reduce:animate-none",
+                      questionTimeLeft <= 5
+                        ? "animate-pulse border-red-500/30 bg-red-500/15 text-red-700 dark:text-red-400"
+                        : "border-amber-500/20 bg-amber-500/15 text-amber-800 dark:text-amber-400"
+                    )}
+                    role="timer"
+                    aria-live="polite"
+                    aria-label={`Time remaining for this question: ${formatTime(questionTimeLeft)}`}
+                  >
+                    <FaClock className="text-xs" aria-hidden="true" />
                     {formatTime(questionTimeLeft)}
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-semibold bg-slate-700/60 text-slate-400 border border-slate-600/40">
+                  <div
+                    className={cn(chip, "rounded-full px-3 sm:px-4")}
+                    role="timer"
+                    aria-label={`Total time remaining: ${formatTime(timeRemaining)}`}
+                  >
                     <FaClock className="text-xs" />
                     Total: {formatTime(timeRemaining)}
                   </div>
@@ -274,15 +298,15 @@ function TakeAssessment() {
           {/* Question Card */}
           <div className="flex-1 flex items-center justify-center p-3 sm:p-6">
             <div className="w-full max-w-4xl">
-              <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200 animate-slide-in">
+              <div className={cn(card, "animate-fade-in", "overflow-hidden", "shadow-2xl", "transition-all", "duration-200", "hover:border-indigo-500/30")}>
                 {/* Question Header */}
-                <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 text-center">
+                <div className={cn(cardHeader, "text-center")}>
                   <div className="flex items-center justify-center gap-2">
                     <div className="p-1.5 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600">
                       <FaQuestionCircle className="text-white text-sm" />
                     </div>
-                    <h2 className="text-lg font-bold text-white">
-                      Question {currentQuestionIndex + 1} <span className="text-slate-500 font-normal">of {assessmentQuestions.length}</span>
+                    <h2 className="text-lg font-bold text-foreground">
+                      Question {currentQuestionIndex + 1} <span className={cn("text-muted-foreground", "font-normal")}>of {assessmentQuestions.length}</span>
                     </h2>
                   </div>
                 </div>
@@ -290,19 +314,19 @@ function TakeAssessment() {
                 {/* Question Content */}
                 <div className="p-4 sm:p-6 lg:p-8 space-y-6 animate-fade-in">
                   {/* Question Text */}
-                  <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5 sm:p-6 text-center">
-                    <p className="text-lg sm:text-xl font-semibold leading-relaxed text-slate-200">
+                  <div className={cn(panel, "text-center")}>
+                    <p className="text-lg font-semibold leading-relaxed text-secondary-foreground sm:text-xl">
                       {currentQuestion.question_text}
                     </p>
                   </div>
 
                   {/* Marks Display */}
                   <div className="flex justify-center gap-3">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/15 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
                       +{currentQuestion.positive_marks || 1} marks
                     </span>
                     {currentQuestion.negative_marks > 0 && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/20">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/20 bg-red-500/15 px-3 py-1.5 text-xs font-semibold text-red-700 dark:text-red-400">
                         -{currentQuestion.negative_marks} marks
                       </span>
                     )}
@@ -314,14 +338,20 @@ function TakeAssessment() {
                       {currentQuestion.options?.map((opt, i) => (
                         <button
                           key={i}
+                          type="button"
                           onClick={() => handleAnswer(currentQuestion.id, opt)}
-                          className={`p-4 sm:p-5 rounded-xl text-sm font-medium text-left transition-all duration-200 border active:scale-95 cursor-pointer ${
-                            currentQuestion.answer === opt
-                              ? "bg-indigo-500/20 border-indigo-500/50 text-indigo-300 shadow-lg shadow-indigo-500/10"
-                              : "bg-slate-800/60 border-slate-700/40 hover:border-slate-600 hover:bg-slate-700/60 text-slate-300"
-                          }`}
+                          aria-pressed={currentQuestion.answer === opt}
+                          aria-label={`Option ${String.fromCharCode(65 + i)}: ${opt}`}
+                          className={cn(
+                            optionBase,
+                            focusRing,
+                            "sm:p-5",
+                            currentQuestion.answer === opt ? optionSelected : optionIdle
+                          )}
                         >
-                          <span className="font-bold text-indigo-400 mr-2">{String.fromCharCode(65 + i)}.</span>
+                          <span className="mr-2 font-bold text-indigo-600 dark:text-indigo-400" aria-hidden="true">
+                            {String.fromCharCode(65 + i)}.
+                          </span>
                           {opt}
                         </button>
                       ))}
@@ -334,14 +364,19 @@ function TakeAssessment() {
                       {["True", "False"].map((val) => (
                         <button
                           key={val}
+                          type="button"
                           onClick={() => handleAnswer(currentQuestion.id, val === "True")}
-                          className={`py-8 sm:py-10 rounded-2xl text-xl sm:text-2xl font-bold transition-all duration-200 border-2 active:scale-95 cursor-pointer ${
+                          aria-pressed={currentQuestion.answer === (val === "True")}
+                          aria-label={`Answer: ${val}`}
+                          className={cn(
+                            "cursor-pointer rounded-2xl border-2 py-8 text-xl font-bold transition-all duration-200 active:scale-[0.98] motion-reduce:active:scale-100 sm:py-10 sm:text-2xl",
+                            focusRing,
                             currentQuestion.answer === (val === "True")
                               ? val === "True"
-                                ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10"
-                                : "bg-red-500/20 border-red-500/40 text-red-300 shadow-lg shadow-red-500/10"
-                              : "bg-slate-800/60 border-slate-700/40 hover:border-slate-600 hover:bg-slate-700/60 text-slate-300"
-                          }`}
+                                ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-800 shadow-lg shadow-emerald-500/10 dark:text-emerald-300"
+                                : "border-red-500/40 bg-red-500/15 text-red-800 shadow-lg shadow-red-500/10 dark:text-red-300"
+                              : "border-border bg-input text-secondary-foreground hover:border-accent/40 hover:bg-surface-elevated"
+                          )}
                         >
                           {val === "True" ? "True" : "False"}
                         </button>
@@ -352,31 +387,37 @@ function TakeAssessment() {
                   {/* Short Answer */}
                   {currentQuestion.question_type === "short_answer" && (
                     <textarea
+                      id="short-answer"
                       value={currentQuestion.answer || ""}
                       onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
                       placeholder="Type your answer here..."
                       rows={6}
-                      className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
+                      aria-label="Short answer response"
+                      className={cn(textarea, focusRing)}
                     />
                   )}
                 </div>
 
                 {/* Navigation Footer */}
-                <div className="px-6 py-4 border-t border-slate-700/50 bg-slate-800/60 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className={cn(cardHeader, "flex flex-col items-center justify-between gap-3 sm:flex-row")}>
                   <button
+                    type="button"
                     onClick={goPrevious}
                     disabled={currentQuestionIndex === 0}
-                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Go to previous question"
+                    className={cn(chip, "w-full", "px-4", "py-2.5", "sm:w-auto")}
                   >
-                    <FaArrowLeft />
+                    <FaArrowLeft aria-hidden="true" />
                     <span>Previous</span>
                   </button>
 
                   {currentQuestionIndex === assessmentQuestions.length - 1 ? (
                     <button
+                      type="button"
                       onClick={handleSubmit}
                       disabled={isSubmitting}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      aria-busy={isSubmitting}
+                      className={cn(btn.success, "w-full", "sm:w-auto")}
                     >
                       {isSubmitting ? (
                         <>
@@ -392,8 +433,10 @@ function TakeAssessment() {
                     </button>
                   ) : (
                     <button
+                      type="button"
                       onClick={goNext}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
+                      aria-label="Go to next question"
+                      className={cn(btn.primary, "w-full", "sm:w-auto")}
                     >
                       <span>Next Question</span>
                       <FaArrowRight />
@@ -409,20 +452,21 @@ function TakeAssessment() {
       {/* SUCCESS SCREEN */}
       {isSubmitted && (
         <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="w-full max-w-xl bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-8 sm:p-10 text-center animate-fade-in">
+          <div className={cn("w-full", "max-w-xl", card, "shadow-2xl", "p-8", "sm:p-10", "text-center", "animate-fade-in")}>
             <div className="flex justify-center mb-6">
               <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
                 <FaCheckCircle className="text-white text-4xl" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">Assessment Submitted!</h1>
-            <p className="text-slate-400 leading-relaxed mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-3 tracking-tight">Assessment Submitted!</h1>
+            <p className={cn("text-muted-foreground", "leading-relaxed", "mb-8")}>
               Your exam has been recorded successfully.<br />
               Redirecting you to the dashboard in a few seconds...
             </p>
             <button
+              type="button"
               onClick={() => navigate("/student/dashboard")}
-              className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
+              className={cn(btn.primary)}
             >
               Go to Dashboard Now
             </button>
@@ -434,18 +478,19 @@ function TakeAssessment() {
       <Modal
         isOpen={modal.isOpen}
         onClose={() => {
-          setModal({ ...modal, isOpen: false });
+          closeModal();
           if (modal.type === "success") navigate("/student/dashboard");
         }}
         type={modal.type}
         title={modal.title}
       >
         <div className="text-center p-4">
-          <p className="text-slate-300 text-base mb-6">{modal.message}</p>
+          <p className={cn("text-secondary-foreground", "text-base", "mb-6")}>{modal.message}</p>
           {modal.type === "success" && (
             <button
+              type="button"
               onClick={() => navigate("/student/dashboard")}
-              className="w-full py-3 px-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-emerald-500/30 transition-all duration-200 active:scale-95 cursor-pointer"
+              className={cn(btn.success, "w-full")}
             >
               Back to Dashboard
             </button>
@@ -453,35 +498,7 @@ function TakeAssessment() {
         </div>
       </Modal>
 
-      {/* Animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes slide-in {
-          from {
-            opacity: 0;
-            transform: translateX(${isRTL ? "-100%" : "100%"}) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-          }
-        }
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slide-in {
-          animation: slide-in 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .animate-fade-in {
-          animation: fade-in 0.6s ease-out;
-        }
-      ` }} />
+      {/* Animations — global utilities respect prefers-reduced-motion */}
     </div>
   );
 }

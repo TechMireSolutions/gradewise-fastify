@@ -2,6 +2,7 @@ import { db, systemConfigs } from "../../db/index.js";
 import { eq } from "drizzle-orm";
 import { invalidateConfigCache } from "../../ai/providers.js";
 import { buildLanguageModel } from "../../ai/build-model.js";
+import { encryptSecret, decryptSecret } from "../../utils/crypto.js";
 import {
   AI_DEFAULT_MODELS,
   buildConfigKey,
@@ -70,12 +71,12 @@ export async function addAiKeys(
 
   const existingKeys = existing[0]?.configValue
     ?.split(",")
-    .map((k) => k.trim())
+    .map((k) => decryptSecret(k.trim()))
     .filter(Boolean) ?? [];
 
   const merged = Array.from(new Set([...existingKeys, ...keys]));
   const added = merged.length - existingKeys.length;
-  const newValue = merged.join(",");
+  const newValue = merged.map((key) => encryptSecret(key)).join(",");
 
   if (existing.length > 0) {
     await db

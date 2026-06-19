@@ -1,10 +1,12 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardInteractive } from "@/lib/ui.js";
 import Link from "next/link";
 import { FaEye, FaEdit } from "react-icons/fa";
 
 function AssessmentHeader({ assessmentId }) {
   return (
     <div className="mb-6 sm:mb-8">
-      <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
+      <div className={cn(card, cardInteractive, "shadow-2xl")}>
         <div className="px-6 py-6 sm:px-8 sm:py-7">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex-1">
@@ -12,11 +14,11 @@ function AssessmentHeader({ assessmentId }) {
                 <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
                   <FaEye className="text-white text-lg" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight">
                   Assessment Preview
                 </h1>
               </div>
-              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+              <p className={cn("text-muted-foreground", "text-sm", "sm:text-base", "leading-relaxed")}>
                 See exactly how the AI will interpret your setup and what students will experience
               </p>
             </div>

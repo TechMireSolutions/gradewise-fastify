@@ -1,13 +1,16 @@
+import { cn } from "@/lib/cn.js";
+import { statCard } from "@/lib/ui.js";
+
 export default function StatCard({ label, value, icon: Icon, cardClass, iconClass }) {
   return (
-    <div className={`rounded-2xl p-5 border border-slate-700/40 shadow-lg ${cardClass}`}>
-      <div className="flex items-center justify-between">
+    <div className={cn(statCard, cardClass ?? "bg-card")}>
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-slate-400 text-sm font-medium mb-1">{label}</p>
-          <p className="text-2xl font-bold text-white">{value}</p>
+          <p className="mb-1 text-sm font-medium text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
         </div>
         {Icon && (
-          <div className={`p-3 rounded-xl ${iconClass}`}>
+          <div className={cn("rounded-xl p-3", iconClass)}>
             <Icon className="text-xl" />
           </div>
         )}
@@ -17,5 +20,5 @@ export default function StatCard({ label, value, icon: Icon, cardClass, iconClas
 }
 
 export function StatCardGrid({ children, columns = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" }) {
-  return <div className={`grid ${columns} gap-4 mb-8`}>{children}</div>;
+  return <div className={cn("grid gap-4 mb-8", columns)}>{children}</div>;
 }

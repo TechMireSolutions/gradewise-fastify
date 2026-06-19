@@ -17,10 +17,10 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
     <div className="space-y-3 sm:space-y-4">
       {/* Institute Name */}
       <div className="group">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-secondary-foreground mb-2">
           {t("instituteName")}
         </label>
-        <div className="flex items-center gap-3 sm:gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 rounded-xl border-2 border-blue-200 hover:border-blue-400 transition-all duration-200 focus-within:border-blue-500 focus-within:shadow-lg">
+        <div className="flex items-center gap-3 sm:gap-4 bg-gradient-to-r from-indigo-50 dark:from-indigo-950/30 to-indigo-50 p-3 sm:p-4 rounded-xl border-2 border-indigo-500/20 dark:border-indigo-500/30 hover:border-blue-400 transition-all duration-200 focus-within:border-blue-500 focus-within:shadow-lg">
           <div className="bg-blue-600 text-white p-2 rounded-lg">
             <FaUniversity className="text-lg sm:text-xl" />
           </div>
@@ -37,7 +37,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
 
       {/* Teacher Name */}
       <div className="group">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-secondary-foreground mb-2">
           {t("teacherName")}
         </label>
         <div className="flex items-center gap-3 sm:gap-4 bg-gradient-to-r from-green-50 to-emerald-50 p-3 sm:p-4 rounded-xl border-2 border-green-200 hover:border-green-400 transition-all duration-200 focus-within:border-green-500 focus-within:shadow-lg">
@@ -57,7 +57,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
 
       {/* Subject Name */}
       <div className="group">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-secondary-foreground mb-2">
           {t("subjectName")}
         </label>
         <div className="flex items-center gap-3 sm:gap-4 bg-gradient-to-r from-purple-50 to-pink-50 p-3 sm:p-4 rounded-xl border-2 border-purple-200 hover:border-purple-400 transition-all duration-200 focus-within:border-purple-500 focus-within:shadow-lg">
@@ -78,7 +78,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
       {/* Date and Time */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-secondary-foreground mb-2">
             {t("paperDate")}
           </label>
           <div className="flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 p-3 sm:p-4 rounded-xl border-2 border-orange-200 hover:border-orange-400 transition-all duration-200 focus-within:border-orange-500 focus-within:shadow-lg">
@@ -96,7 +96,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
         </div>
 
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-secondary-foreground mb-2">
             {t("paperTime")}
           </label>
           <div className="flex items-center gap-3 bg-gradient-to-r from-red-50 to-pink-50 p-3 sm:p-4 rounded-xl border-2 border-red-200 hover:border-red-400 transition-all duration-200 focus-within:border-red-500 focus-within:shadow-lg">
@@ -117,7 +117,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
       {/* Duration and Total Marks */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-secondary-foreground mb-2">
             {t("paperDuration") || "Paper Duration"}
           </label>
           <div className="flex items-center gap-3 bg-gradient-to-r from-teal-50 to-cyan-50 p-3 sm:p-4 rounded-xl border-2 border-teal-200 hover:border-teal-400 transition-all duration-200 focus-within:border-teal-500 focus-within:shadow-lg">
@@ -136,7 +136,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
         </div>
 
         <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-secondary-foreground mb-2">
             {t("totalMarks") || "Total Marks"}
           </label>
           <div className="flex items-center gap-3 bg-gradient-to-r from-violet-50 to-purple-50 p-3 sm:p-4 rounded-xl border-2 border-violet-200 hover:border-violet-400 transition-all duration-200 focus-within:border-violet-500 focus-within:shadow-lg">
@@ -158,7 +158,7 @@ const PaperFormFields = ({ form, onChange, language = "en" }) => {
 
       {/* Notes */}
       <div className="group">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-secondary-foreground mb-2">
           {t("notes")}
         </label>
         <div className="flex items-start gap-3 sm:gap-4 bg-gradient-to-r from-yellow-50 to-amber-50 p-3 sm:p-4 rounded-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all duration-200 focus-within:border-yellow-500 focus-within:shadow-lg">

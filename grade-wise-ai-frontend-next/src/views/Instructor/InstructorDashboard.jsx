@@ -1,11 +1,16 @@
+import { cn } from "@/lib/cn.js";
+import { btn, card, cardHeader, cardInteractive, iconBadge, page, tableHead, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
-import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
+import LoadingState from "../../components/ui/LoadingState.jsx";
+import EmptyState from "../../components/ui/EmptyState.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
+import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import {
   FaEye,
   FaEdit,
@@ -25,13 +30,14 @@ import {
 
 // Physical Paper Modal
 import PhysicalPaperModal from "../../components/PhysicalPaperModal.jsx";
+import useModal from "../../hooks/useModal.js";
 
 function InstructorDashboard() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { assessments, getInstructorAssessments } = useAssessmentStore();
   const { overview, loading, getInstructorOverview } = useInstructorAnalyticsStore();
-  const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
+  const { modal, showModal, closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState({
     isOpen: false,
@@ -57,7 +63,7 @@ function InstructorDashboard() {
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
         const errorMessage = error.response?.data?.message || error.message || "Failed to fetch dashboard data.";
-        setModal({ isOpen: true, type: "error", title: "Error", message: errorMessage });
+        showModal("error", "Error", errorMessage);
         if (error.response?.status === 403 || error.message === "No authentication token found") {
           router.push("/login");
         }
@@ -69,10 +75,6 @@ function InstructorDashboard() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const showModal = (type, title, message) => {
-    setModal({ isOpen: true, type, title, message });
-  };
 
   const openPaperModal = (assessment) => {
     setPaperModal({
@@ -88,7 +90,7 @@ function InstructorDashboard() {
       description: "Add a new assessment",
       icon: <FaPen className="w-7 h-7" />,
       link: "/instructor/assessments/create",
-      color: "bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700",
+      color: "bg-gradient-to-br from-indigo-50 dark:from-indigo-950/300 to-blue-600 hover:from-blue-600 hover:to-blue-700",
       shadow: "shadow-blue-200",
     },
     {
@@ -132,7 +134,7 @@ function InstructorDashboard() {
       icon: <FaClipboardList className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4 sm:p-5",
       iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25",
-      valueClass: "text-2xl sm:text-3xl font-bold text-white leading-none",
+      valueClass: "text-2xl sm:text-3xl font-bold text-foreground leading-none",
     },
     {
       value: overview.resources || 0,
@@ -140,7 +142,7 @@ function InstructorDashboard() {
       icon: <FaBook className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 sm:p-5",
       iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25",
-      valueClass: "text-2xl sm:text-3xl font-bold text-white leading-none",
+      valueClass: "text-2xl sm:text-3xl font-bold text-foreground leading-none",
     },
     {
       value: overview.executedAssessments || 0,
@@ -148,60 +150,38 @@ function InstructorDashboard() {
       icon: <FaChartBar className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-amber-500/30 rounded-xl p-4 sm:p-5",
       iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25",
-      valueClass: "text-2xl sm:text-3xl font-bold text-white leading-none",
+      valueClass: "text-2xl sm:text-3xl font-bold text-foreground leading-none",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className={page}>
       {/* Ambient background blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+      <AmbientBackground />
 
       <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Welcome Section */}
-        <div className="mb-8 sm:mb-10">
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
-            <div className="relative p-6 sm:p-8 lg:p-10">
-              {/* Decorative gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-violet-500/5 to-transparent pointer-events-none" />
-              <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Instructor Portal</p>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
-                    Welcome Back, {user?.name}!
-                  </h1>
-                  <p className="text-slate-300 leading-relaxed text-sm sm:text-base max-w-xl">
-                    Manage your assessments, track student progress, and create engaging learning experiences.
-                  </p>
-                </div>
-                <div className="hidden sm:flex flex-col items-center justify-center bg-slate-800/60 border border-slate-700/40 rounded-2xl p-5 min-w-[120px]">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-3">
-                    <FaCalendarAlt className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-xs font-semibold text-slate-400 text-center">
-                    {new Date().toLocaleDateString("en-US", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </p>
-                </div>
+        <WelcomeBanner
+          eyebrow="Instructor Portal"
+          title={`Welcome back, ${user?.name}!`}
+          description="Manage assessments, track student progress, and create engaging learning experiences."
+          aside={
+            <div className={cn("hidden", "sm:flex", "flex-col", "items-center", card, "p-5", "min-w-[120px]")}>
+              <div className={cn(iconBadge, "mb-3", "p-2.5")}>
+                <FaCalendarAlt className="w-6 h-6 text-white" />
               </div>
+              <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "text-center")}>
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </p>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {isLoading || loading ? (
-          <div className="flex flex-col items-center justify-center py-32 gap-4">
-            <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-              <LoadingSpinner size="lg" type="spinner" color="blue" />
-            </div>
-            <p className="text-slate-400 text-sm">Loading dashboard data...</p>
-          </div>
+          <LoadingState message="Loading dashboard data..." />
         ) : (
           <>
             {/* Stats */}
@@ -211,7 +191,7 @@ function InstructorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className={stat.valueClass}>{stat.value}</div>
-                      <div className="text-xs text-slate-400 mt-1">{stat.label}</div>
+                      <div className={cn("text-xs", "text-muted-foreground", "mt-1")}>{stat.label}</div>
                     </div>
                     <div className={stat.iconClass}>
                       {stat.icon}
@@ -222,9 +202,9 @@ function InstructorDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 mb-8 sm:mb-10">
-              <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl">
-                <h2 className="text-xl font-bold text-white flex items-center gap-3">
+            <div className={cn(card, cardInteractive, "shadow-2xl", "mb-8", "sm:mb-10")}>
+              <div className={cardHeader}>
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
                     <FaSchool className="w-4 h-4 text-white" />
                   </div>
@@ -251,10 +231,10 @@ function InstructorDashboard() {
             </div>
 
             {/* Recent Assessments */}
-            <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
-              <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl">
+            <div className={cn(card, cardInteractive, "shadow-2xl")}>
+              <div className={cardHeader}>
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                  <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/25">
                       <FaClipboardList className="w-4 h-4 text-white" />
                     </div>
@@ -271,57 +251,52 @@ function InstructorDashboard() {
               </div>
               <div className="p-4 sm:p-6 lg:p-8">
                 {!assessments || assessments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
-                      <FaPen className="w-8 h-8 text-indigo-400" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">No Assessments Yet</h3>
-                    <p className="text-slate-400 max-w-sm mb-8">
-                      Create your first assessment to start evaluating your students&apos; progress and performance.
-                    </p>
-                    <Link
-                      href="/instructor/assessments/create"
-                      className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
-                    >
-                      <FaPen />
-                      Create Your First Assessment
-                    </Link>
-                  </div>
+                  <EmptyState
+                    icon={FaPen}
+                    title="No assessments yet"
+                    description="Create your first assessment to start evaluating your students' progress and performance."
+                    action={
+                      <Link href="/instructor/assessments/create" className={cn(btn.primary)}>
+                        <FaPen aria-hidden="true" />
+                        Create your first assessment
+                      </Link>
+                    }
+                  />
                 ) : (
                   <>
                     {/* Desktop Table */}
-                    <div className="hidden lg:block bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-hidden">
+                    <div className={cn("hidden", "lg:block", card, "overflow-hidden")}>
                       <table className="min-w-full">
-                        <thead className="bg-slate-800/60">
+                        <thead className={tableHead}>
                           <tr>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                            <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
                               Assessment Title
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                            <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
                               Created On
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                            <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
                               Status
                             </th>
-                            <th className="px-6 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-700/50">
+                            <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
                               Actions
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-700/30">
+                        <tbody className="divide-y divide-border">
                           {assessments.slice(0, 5).map((assessment) => (
-                            <tr key={assessment.id} className="hover:bg-indigo-500/5 transition-colors duration-150">
-                              <td className="px-6 py-4 text-sm text-slate-300">
+                            <tr key={assessment.id} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors", "duration-150")}>
+                              <td className={cn("px-6", "py-4", "text-sm", "text-secondary-foreground")}>
                                 <div className="flex items-center gap-3">
                                   <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 flex-shrink-0">
                                     <FaClipboardList className="w-4 h-4 text-indigo-400" />
                                   </div>
-                                  <span className="font-semibold text-slate-200">{assessment.title}</span>
+                                  <span className={cn("font-semibold", "text-secondary-foreground")}>{assessment.title}</span>
                                 </div>
                               </td>
-                              <td className="px-6 py-4 text-sm text-slate-300">
-                                <div className="flex items-center gap-2 text-slate-400">
-                                  <FaCalendarAlt className="text-slate-500 text-xs" />
+                              <td className={cn("px-6", "py-4", "text-sm", "text-secondary-foreground")}>
+                                <div className={cn("flex", "items-center", "gap-2", "text-muted-foreground")}>
+                                  <FaCalendarAlt className={cn("text-muted-foreground", "text-xs")} />
                                   {new Date(assessment.created_at).toLocaleDateString("en-US", {
                                     year: "numeric",
                                     month: "short",
@@ -415,7 +390,7 @@ function InstructorDashboard() {
                       {assessments.slice(0, 5).map((assessment) => (
                         <div
                           key={assessment.id}
-                          className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
+                          className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
                         >
                           <div className="flex items-start justify-between mb-4 gap-3">
                             <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -423,10 +398,10 @@ function InstructorDashboard() {
                                 <FaClipboardList className="w-4 h-4 text-indigo-400" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-200 mb-1 break-words">
+                                <h3 className={cn("text-sm", "sm:text-base", "font-semibold", "text-secondary-foreground", "mb-1", "break-words")}>
                                   {assessment.title}
                                 </h3>
-                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <div className={cn("flex", "items-center", "gap-2", "text-xs", "text-muted-foreground")}>
                                   <FaCalendarAlt />
                                   {new Date(assessment.created_at).toLocaleDateString("en-US", {
                                     month: "short",
@@ -530,7 +505,7 @@ function InstructorDashboard() {
       {/* Error/Success Modal */}
       <Modal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
+        onClose={closeModal}
         type={modal.type}
         title={modal.title}
       >

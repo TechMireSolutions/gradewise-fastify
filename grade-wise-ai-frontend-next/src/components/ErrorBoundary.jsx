@@ -1,4 +1,9 @@
+"use client";
+
+import { cn } from "@/lib/cn.js";
+import { btn, card, iconBadge, page } from "@/lib/ui.js";
 import { Component } from "react";
+import Link from "next/link";
 import { FaExclamationTriangle, FaSync, FaHome } from "react-icons/fa";
 
 class ErrorBoundary extends Component {
@@ -17,75 +22,46 @@ class ErrorBoundary extends Component {
     window.location.reload();
   };
 
-  handleGoHome = () => {
-    window.location.href = "/";
-  };
-
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 p-4">
-          <div className="text-center p-6 sm:p-8 lg:p-10 bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-lg w-full border-2 border-red-200">
-            {/* Error Icon */}
-            <div className="bg-gradient-to-br from-red-100 to-orange-100 w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <FaExclamationTriangle className="text-4xl sm:text-5xl text-red-600 animate-pulse" />
+        <div className={cn(page, "flex", "items-center", "justify-center", "p-4", "min-h-screen")}>
+          <div className={cn(card, "max-w-lg", "w-full", "p-8", "sm:p-10", "text-center", "shadow-2xl")}>
+            <div className={cn(iconBadge, "mx-auto", "mb-6", "w-16", "h-16", "bg-gradient-to-br", "from-red-500", "to-rose-600")}>
+              <FaExclamationTriangle className="text-2xl" aria-hidden="true" />
             </div>
 
-            {/* Title */}
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-red-600 mb-4">
-              Oops! Something went wrong
-            </h2>
-
-            {/* Description */}
-            <p className="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed">
-              We're sorry for the inconvenience. An unexpected error occurred. 
-              Please try refreshing the page or return to the homepage.
+            <h1 className="text-2xl font-bold text-foreground mb-3">Something went wrong</h1>
+            <p className={cn("text-muted-foreground", "text-sm", "mb-6", "leading-relaxed")}>
+              An unexpected error occurred. Try refreshing the page or return to the homepage.
             </p>
 
-            {/* Error Details Box */}
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4 mb-6 text-left">
-              <p className="text-xs sm:text-sm text-gray-700 font-mono break-words">
-                <strong className="text-red-600">Error:</strong> {this.state.error?.message || "Unknown error"}
+            <div className={cn(card, "p-4", "mb-6", "text-left", "shadow-none")}>
+              <p className={cn("text-xs", "text-secondary-foreground", "font-mono", "break-words")}>
+                <span className="font-semibold text-red-500 dark:text-red-400">Error: </span>
+                {this.state.error?.message || "Unknown error"}
               </p>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <button
-                onClick={this.handleRefresh}
-                className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-base sm:text-lg font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                <FaSync />
-                <span>Refresh Page</span>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button type="button" onClick={this.handleRefresh} className={cn(btn.primary)}>
+                <FaSync aria-hidden="true" />
+                Refresh page
               </button>
-
-              <button
-                onClick={this.handleGoHome}
-                className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-white border-2 border-gray-300 text-gray-700 text-base sm:text-lg font-bold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                <FaHome />
-                <span>Go Home</span>
-              </button>
+              <Link href="/" className={cn(btn.secondary)}>
+                <FaHome aria-hidden="true" />
+                Go home
+              </Link>
             </div>
 
-            {/* Additional Help */}
-            <div className="mt-8 pt-6 border-t-2 border-gray-200">
-              <p className="text-xs sm:text-sm text-gray-500">
-                If this problem persists, please contact support or try again later.
-              </p>
-            </div>
-
-            {/* Technical Details (Collapsible - Optional) */}
-            {import.meta.env.DEV && this.state.errorInfo && (
-              <details className="mt-6 text-left">
-                <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-blue-600 transition-colors">
-                  🔍 Show Technical Details (Dev Mode)
+            {process.env.NODE_ENV === "development" && this.state.errorInfo && (
+              <details className="mt-8 text-left">
+                <summary className={cn("cursor-pointer", "text-sm", "font-medium", "text-secondary-foreground")}>
+                  Technical details (development)
                 </summary>
-                <div className="mt-3 bg-gray-900 text-gray-100 rounded-lg p-4 overflow-auto max-h-48 text-xs font-mono">
-                  <pre className="whitespace-pre-wrap break-words">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
-                </div>
+                <pre className={cn("mt-3", card, "p-4", "overflow-auto", "max-h-48", "text-xs", "font-mono", "text-muted-foreground", "shadow-none")}>
+                  {this.state.errorInfo.componentStack}
+                </pre>
               </details>
             )}
           </div>

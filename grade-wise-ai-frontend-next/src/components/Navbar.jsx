@@ -1,9 +1,12 @@
 "use client";
 
+import { cn } from "@/lib/cn.js";
+import { card, headingGradient, nav } from "@/lib/ui.js";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
+import ThemeToggle from "@/components/ThemeToggle.jsx";
 import {
   FaHome,
   FaUser,
@@ -96,14 +99,14 @@ function Navbar() {
   const handleMobileMenuToggle = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     closeMobileMenu();
     router.push("/");
   };
 
   return (
-    <nav className="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/60 transition-colors duration-200">
+    <nav className={cn(nav, "transition-colors", "duration-200")}>
       <div className="w-full px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-16">
 
@@ -114,10 +117,10 @@ function Navbar() {
               className="flex items-center space-x-2.5 group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900"
               onClick={closeMobileMenu}
             >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-indigo-500/25">
-                <FaBook className="text-white text-sm" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-teal-500/25">
+                <FaGraduationCap className="text-white text-sm" />
               </div>
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent whitespace-nowrap tracking-tight">
+              <span className={cn("text-lg", "sm:text-xl", "font-bold", headingGradient, "whitespace-nowrap", "tracking-tight")}>
                 Gradewise AI
               </span>
             </Link>
@@ -131,10 +134,10 @@ function Navbar() {
                   key={link.name}
                   href={link.href}
                   aria-current={isActiveLink(link.href) ? "page" : undefined}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                     isActiveLink(link.href)
-                      ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/30"
-                      : "text-slate-400 hover:text-white hover:bg-slate-700/60"
+                      ? "bg-gradient-to-r from-teal-500 to-indigo-600 text-white shadow-lg shadow-teal-500/25"
+                      : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated"
                   }`}
                 >
                   {link.icon}
@@ -143,16 +146,17 @@ function Navbar() {
               ))}
             </div>
 
-            {/* User info + Logout */}
+            <ThemeToggle className="ml-2" />
+
             {user && (
-              <div className="flex items-center space-x-2 pl-3 ml-1 border-l border-slate-700/50">
-                <div className="flex items-center gap-2 bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 px-3 py-1.5 rounded-xl">
-                  <div className="text-indigo-400 text-sm">
+              <div className="flex items-center space-x-2 pl-3 ml-1 border-l border-border">
+                <div className={cn("flex", "items-center", "gap-2", "card", "px-3", "py-1.5", "rounded-xl", "shadow-none")}>
+                  <div className="text-indigo-500 dark:text-indigo-400 text-sm">
                     <UserRoleIcon />
                   </div>
                   <div className="hidden xl:block">
-                    <div className="text-xs font-semibold text-slate-200 leading-tight">{user.name}</div>
-                    <div className="text-xs text-slate-500 leading-tight">
+                    <div className={cn("text-xs", "font-semibold", "text-foreground", "leading-tight")}>{user.name}</div>
+                    <div className={cn("text-xs", "text-muted-foreground", "leading-tight")}>
                       {ROLE_LABELS[user.role] ?? user.role}
                     </div>
                   </div>
@@ -168,13 +172,13 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile: hamburger */}
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={handleMobileMenuToggle}
               aria-label="Toggle mobile menu"
               aria-expanded={isMobileMenuOpen}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className={cn("p-2", "rounded-xl", "text-muted-foreground", "hover:text-foreground", "hover:bg-surface-elevated", "transition-all", "duration-150", "focus-visible:outline-none", "focus-visible:ring-2", "focus-visible:ring-teal-500", "cursor-pointer", "min-h-[44px]", "min-w-[44px]", "flex", "items-center", "justify-center")}
             >
               <span className="sr-only">Open menu</span>
               {isMobileMenuOpen ? (
@@ -192,7 +196,7 @@ function Navbar() {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-800/60 bg-slate-900/95 backdrop-blur-md">
+          <div className="lg:hidden border-t border-border bg-nav backdrop-blur-md">
             <div className="px-2 pt-3 pb-4 space-y-1">
               {navLinks.map((link) => (
                 <Link
@@ -200,10 +204,10 @@ function Navbar() {
                   href={link.href}
                   onClick={closeMobileMenu}
                   aria-current={isActiveLink(link.href) ? "page" : undefined}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                     isActiveLink(link.href)
-                      ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-500/25"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                      ? "bg-gradient-to-r from-teal-500 to-indigo-600 text-white shadow-lg shadow-teal-500/25"
+                      : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated"
                   }`}
                 >
                   <span className={isActiveLink(link.href) ? "text-white" : "text-indigo-400"}>
@@ -215,16 +219,16 @@ function Navbar() {
 
               {user && (
                 <>
-                  <div className="border-t border-slate-700/50 my-2" />
+                  <div className="border-t border-border my-2" />
                   <div className="px-1 space-y-2 pt-1">
-                    <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-xl p-4">
+                    <div className={cn(card, "p-4", "shadow-none")}>
                       <div className="flex items-center space-x-3">
-                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 text-white text-base flex-shrink-0">
+                        <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-600 shadow-lg shadow-teal-500/25 text-white text-base flex-shrink-0">
                           <UserRoleIcon />
                         </div>
                         <div className="min-w-0">
-                          <div className="font-semibold text-white text-sm leading-tight truncate">{user.name}</div>
-                          <div className="text-xs text-slate-400 truncate mt-0.5">{user.email}</div>
+                          <div className={cn("font-semibold", "text-foreground", "text-sm", "leading-tight", "truncate")}>{user.name}</div>
+                          <div className={cn("text-xs", "text-muted-foreground", "truncate", "mt-0.5")}>{user.email}</div>
                           <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
                             {ROLE_LABELS[user.role] ?? user.role}
                           </div>

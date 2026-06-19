@@ -10,6 +10,7 @@ import {
   UnauthorizedError,
 } from "../../utils/errors.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../../utils/email.js";
+import { verifyGoogleIdToken } from "../../utils/crypto.js";
 
 const isDev = process.env["NODE_ENV"] === "development";
 
@@ -91,28 +92,27 @@ export async function signupService(input: {
 // ─── Google Auth ──────────────────────────────────────────────────────────────
 
 export async function googleAuthService(input: {
-  name: string;
-  email: string;
-  uid: string;
+  idToken: string;
 }): Promise<User> {
-  let user = await findUserByEmail(input.email);
+  const verified = await verifyGoogleIdToken(input.idToken);
+  let user = await findUserByEmail(verified.email);
   if (!user) {
     const existing = await db
       .select()
       .from(users)
-      .where(eq(users.uid, input.uid))
+      .where(eq(users.uid, verified.uid))
       .limit(1);
     if (existing[0]) throw new ConflictError("GOOGLE_ACCOUNT_LINKED");
 
     const [created] = await db
       .insert(users)
       .values({
-        name: input.name,
-        email: input.email.toLowerCase().trim(),
+        name: verified.name,
+        email: verified.email.toLowerCase().trim(),
         role: "student",
         verified: true,
         provider: "google",
-        uid: input.uid,
+        uid: verified.uid,
       })
       .returning();
 

@@ -74,12 +74,27 @@ Each assessment is composed of one or more typed blocks. Every block is fully co
 4. Submit → backend constructs the AI prompt and stores it.
 
 ### Assessment Lifecycle & Business Rules
-- **Edit / Delete**: only allowed if **no student has started an attempt** yet.
+- **Edit / Delete**: only allowed if **no student has started an attempt** yet (`is_executed === false`).
 - **View Prompt**: show the AI prompt constructed from resources + block config.
 - **Preview as Student**: instructor runs a live demo of the assessment experience.
 - **Manage Enrollment**: add or remove students after creation.
 - **View Analytics & Results**: per-student and per-question breakdown including Q&A pairs and full stats.
 - **Generate Physical Paper**: produce a printable version with answer key.
+
+### Async Question Generation (infrastructure)
+
+When `USE_ASYNC_JOBS=true` and Redis is available:
+
+1. Student calls **start** → backend creates attempt, enqueues BullMQ job, returns `{ status: "generating" }`.
+2. Worker generates questions via `modules/student-assessments/generation.ts`.
+3. Frontend polls **`GET /api/taking/assessments/:assessmentId/attempts/:attemptId/status`** until `{ status: "ready" }`.
+4. Without async mode, generation runs synchronously in the start request (legacy behavior).
+
+### Session & Auth (platform)
+
+- All roles authenticate via **httpOnly cookie** (`gradewise_token`) — not JWT in browser storage.
+- Google sign-in: frontend sends Firebase **idToken**; backend verifies before creating session.
+- Protected frontend routes: Next.js `middleware.js` + `ProtectedRoute` + `GET /api/auth/me`.
 
 ---
 
@@ -181,4 +196,4 @@ Managed at `/super-admin/api-config`:
 - **SOLID + SRP**: every module/controller/component has one responsibility.
 - **Mobile-first responsive**: all pages must work on mobile before scaling up.
 - **Role-gate every route**: `ProtectedRoute` with `requiredRole` on every protected page.
-- No business logic inside React components — extract to `src/utils/` (frontend) or `helper/` (backend).
+- No business logic inside React components — extract to `src/utils/` or `src/hooks/` (frontend) or `src/modules/*/`.service.ts` (backend).

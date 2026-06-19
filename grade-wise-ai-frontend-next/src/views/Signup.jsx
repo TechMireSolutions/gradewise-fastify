@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn.js";
+import { btn, card, headingGradient } from "@/lib/ui.js";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -9,7 +11,7 @@ import { getCaptchaToken } from "../config/captcha.js";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaGoogle, FaGraduationCap, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 import { redirectByRole } from "../utils/redirectByRole.js";
 import useRecaptchaInit from "../hooks/useRecaptchaInit.js";
-import { signupSchema } from "../scheema/authSchemas.js";
+import { signupSchema } from "../schemas/authSchemas.js";
 import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 function Signup() {
@@ -73,29 +75,28 @@ function Signup() {
 
   return (
     <AuthPageLayout backLabel="Back to Home">
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+        <div className={cn(card, "p-8", "shadow-2xl")}>
           {/* Logo / brand header */}
           <div className="mb-8 text-center">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex items-center justify-center mx-auto mb-4">
               <FaGraduationCap className="text-white text-2xl" />
             </div>
-            <h1 className="text-3xl font-bold text-white tracking-tight mb-1">
+            <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">
               Create Account
             </h1>
-            <p className="text-slate-400 text-sm">
+            <p className={cn("text-muted-foreground", "text-sm")}>
               Join{" "}
-              <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent font-semibold">
-                Gradewise AI
-              </span>{" "}
+              <span className={headingGradient}>Gradewise AI</span>{" "}
               as a student
             </p>
           </div>
 
           {/* Google Signup */}
           <button
+            type="button"
             onClick={handleGoogleSignup}
             disabled={googleLoading || loading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 min-h-[44px] bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500/60 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mb-6 shadow-lg"
+            className={cn(btn.google, "mb-6", "shadow-lg")}
           >
             {googleLoading ? (
               <LoadingSpinner size="sm" type="dots" color="purple" />
@@ -110,10 +111,10 @@ function Signup() {
           {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700/50" />
+              <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center">
-              <span className="px-4 bg-slate-800/50 text-slate-500 text-xs font-semibold uppercase tracking-widest">
+              <span className={cn("px-4", "bg-card", "text-muted-foreground", "text-xs", "font-semibold", "uppercase", "tracking-widest")}>
                 Or continue with email
               </span>
             </div>
@@ -123,11 +124,11 @@ function Signup() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name */}
             <div>
-              <label htmlFor="name" className="block text-slate-400 text-sm font-medium mb-1.5">
+              <label htmlFor="name" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                 Full Name
               </label>
               <div className="relative">
-                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <FaUser className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
                 <input
                   id="name"
                   name="name"
@@ -135,10 +136,10 @@ function Signup() {
                   autoComplete="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/60 backdrop-blur-sm border hover:border-slate-600 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                  className={`w-full bg-input backdrop-blur-sm border hover:border-accent/40 rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.name
                       ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/30"
+                      : "border-border focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="Enter your full name"
                 />
@@ -153,11 +154,11 @@ function Signup() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-slate-400 text-sm font-medium mb-1.5">
+              <label htmlFor="email" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                 Email Address
               </label>
               <div className="relative">
-                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <FaEnvelope className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
                 <input
                   id="email"
                   name="email"
@@ -165,10 +166,10 @@ function Signup() {
                   autoComplete="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/60 backdrop-blur-sm border hover:border-slate-600 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                  className={`w-full bg-input backdrop-blur-sm border hover:border-accent/40 rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.email
                       ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/30"
+                      : "border-border focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="Enter your email address"
                 />
@@ -183,11 +184,11 @@ function Signup() {
 
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-slate-400 text-sm font-medium mb-1.5">
+              <label htmlFor="password" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                 Password
               </label>
               <div className="relative">
-                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
                 <input
                   id="password"
                   name="password"
@@ -195,10 +196,10 @@ function Signup() {
                   autoComplete="new-password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/60 backdrop-blur-sm border hover:border-slate-600 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                  className={`w-full bg-input backdrop-blur-sm border hover:border-accent/40 rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.password
                       ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-slate-700/60 focus:border-indigo-500 focus:ring-indigo-500/30"
+                      : "border-border focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="Create a strong password"
                 />
@@ -209,7 +210,7 @@ function Signup() {
                   {errors.password}
                 </p>
               )}
-              <p className="mt-2 text-xs text-slate-400 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-3 py-2 flex items-start gap-1.5">
+              <p className={cn("mt-2", "text-xs", "text-muted-foreground", "bg-indigo-500/10", "border", "border-indigo-500/20", "rounded-lg", "px-3", "py-2", "flex", "items-start", "gap-1.5")}>
                 <FaInfoCircle className="flex-shrink-0 mt-0.5 text-indigo-400" />
                 Must be at least 8 characters with uppercase, lowercase, and number
               </p>
@@ -235,7 +236,7 @@ function Signup() {
           {/* Footer */}
           <div className="mt-6 space-y-4">
             <div className="text-center">
-              <p className="text-sm text-slate-400">
+              <p className={cn("text-sm", "text-muted-foreground")}>
                 Already have an account?{" "}
                 <Link
                   to="/login"
@@ -246,9 +247,9 @@ function Signup() {
               </p>
             </div>
 
-            <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4">
-              <p className="text-xs text-slate-400 leading-relaxed">
-                <span className="text-slate-300 font-medium">Note:</span> By creating an account, you agree to our Terms of Service and Privacy Policy.
+            <div className="bg-input rounded-xl border border-border p-4">
+              <p className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>
+                <span className={cn("text-secondary-foreground", "font-medium")}>Note:</span> By creating an account, you agree to our Terms of Service and Privacy Policy.
                 All new accounts are created with{" "}
                 <span className="text-indigo-400 font-medium">Student role</span> by default.
               </p>

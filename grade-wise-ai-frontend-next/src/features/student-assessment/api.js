@@ -7,6 +7,9 @@ import apiClient from "@/lib/apiClient.js";
 export const startAssessmentApi = (assessmentId, payload) =>
   apiClient.post(`/taking/assessments/${assessmentId}/start`, payload);
 
+export const getAssessmentStatusApi = (assessmentId, attemptId) =>
+  apiClient.get(`/taking/assessments/${assessmentId}/attempts/${attemptId}/status`);
+
 export const submitAssessmentApi = (assessmentId, payload) =>
   apiClient.post(`/taking/assessments/${assessmentId}/submit`, payload);
 

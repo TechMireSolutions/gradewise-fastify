@@ -10,26 +10,7 @@ metadata:
 
 # UI Styling Skill
 
-Comprehensive skill for creating beautiful, accessible user interfaces combining Tailwind CSS utility styling and canvas-based visual design systems.
-
-## Project Context (GradeWise AI)
-
-This project does **NOT** use shadcn/ui or Radix UI. It uses custom UI primitives:
-- `src/components/ui/Card.jsx` — Card, CardHeader, CardContent
-- `src/components/ui/Modal.jsx` — generic modal
-- `src/components/ui/LoadingSpinner.jsx` — size/type/color props
-
-When adding new UI components to GradeWise, extend these primitives or create new files in `src/components/ui/`. Do not install shadcn/ui.
-
-**Stack**: React 19 + Next.js 16 (App Router) + Tailwind CSS v4 (no config file — CSS-native via `@import "tailwindcss"`)
-
-**Icons**: `lucide-react` or `react-icons/fa`. No emojis in structural UI.
-
-**Dark mode**: `html.dark` class — always provide `dark:` variants on all colored elements.
-
-**Palette**: slate · indigo · violet · emerald with gradient backgrounds. No plain red/blue/green.
-
----
+Comprehensive skill for creating beautiful, accessible user interfaces combining shadcn/ui components, Tailwind CSS utility styling, and canvas-based visual design systems.
 
 ## Reference
 

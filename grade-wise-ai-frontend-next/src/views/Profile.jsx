@@ -1,5 +1,8 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
+import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 import {
   FaUser,
   FaEnvelope,
@@ -47,7 +50,7 @@ const ROLE_THEME = {
 const DEFAULT_THEME = {
   gradient:     "from-slate-500 to-slate-600",
   darkGradient: "dark:from-slate-600 dark:to-slate-700",
-  badge:        "bg-slate-700/60 text-slate-400 border border-slate-600/40",
+  badge:        "bg-btn-secondary text-muted-foreground border border-border",
   label:        "User",
   Icon:         FaUser,
 };
@@ -73,14 +76,10 @@ function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className={page}>
 
       {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+      <AmbientBackground />
 
       <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
@@ -88,16 +87,16 @@ function Profile() {
           <>
             {/* ── Hero ────────────────────────────────────────── */}
             <div className="mb-8 sm:mb-10">
-              <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-6 sm:p-8">
+              <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8")}>
                 <div className="flex items-center gap-4">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                    <RoleIcon className="text-white text-xl" />
+                    <RoleIcon className="text-foreground text-xl" />
                   </div>
                   <div>
-                    <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                    <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
                       My Profile
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">
+                    <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>
                       Manage your account information and settings.
                     </p>
                   </div>
@@ -109,17 +108,17 @@ function Profile() {
 
               {/* ── Profile card ─────────────────────────────── */}
               <div className="lg:col-span-1">
-                <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+                <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
 
                   {/* Avatar area */}
-                  <div className="px-6 py-8 text-center border-b border-slate-700/50 bg-slate-800/60">
+                  <div className="px-6 py-8 text-center border-b border-border bg-input">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 shadow-lg">
                       <RoleIcon className="text-4xl text-indigo-400" />
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-1 leading-tight">
+                    <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 leading-tight">
                       {user.name}
                     </h2>
-                    <p className="text-slate-400 text-sm break-all leading-relaxed">
+                    <p className={cn("text-muted-foreground", "text-sm", "break-all", "leading-relaxed")}>
                       {user.email}
                     </p>
                   </div>
@@ -134,7 +133,7 @@ function Profile() {
                       </span>
 
                       {/* Verified indicator */}
-                      <div className="w-full pt-4 border-t border-slate-700/50">
+                      <div className="w-full pt-4 border-t border-border">
                         <div className="flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
                           <FaCheckCircle className="text-emerald-400 text-base flex-shrink-0" />
                           <span className="text-sm font-semibold text-emerald-400">
@@ -149,11 +148,11 @@ function Profile() {
 
               {/* ── Details card ─────────────────────────────── */}
               <div className="lg:col-span-2">
-                <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
+                <div className={cn(card, cardInteractive, "shadow-2xl")}>
 
                   {/* Card header */}
-                  <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl">
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                  <div className={cardHeader}>
+                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                       <FaUser className="text-indigo-400" />
                       Account Information
                     </h3>
@@ -167,14 +166,14 @@ function Profile() {
 
                         {/* Full Name */}
                         <div>
-                          <label className="block text-slate-400 text-sm font-medium mb-1.5">
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                             <span className="flex items-center gap-2">
-                              <FaUser className="text-slate-500 text-xs" />
+                              <FaUser className={cn("text-muted-foreground", "text-xs")} />
                               Full Name
                             </span>
                           </label>
-                          <div className="bg-slate-800/60 border border-slate-700/60 px-4 py-3 rounded-xl">
-                            <p className="text-slate-200 font-semibold text-sm">
+                          <div className="bg-input border border-border px-4 py-3 rounded-xl">
+                            <p className={cn("text-secondary-foreground", "font-semibold", "text-sm")}>
                               {user.name}
                             </p>
                           </div>
@@ -182,14 +181,14 @@ function Profile() {
 
                         {/* Email */}
                         <div>
-                          <label className="block text-slate-400 text-sm font-medium mb-1.5">
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                             <span className="flex items-center gap-2">
-                              <FaEnvelope className="text-slate-500 text-xs" />
+                              <FaEnvelope className={cn("text-muted-foreground", "text-xs")} />
                               Email Address
                             </span>
                           </label>
-                          <div className="bg-slate-800/60 border border-slate-700/60 px-4 py-3 rounded-xl break-all">
-                            <p className="text-slate-200 font-semibold text-sm">
+                          <div className="bg-input border border-border px-4 py-3 rounded-xl break-all">
+                            <p className={cn("text-secondary-foreground", "font-semibold", "text-sm")}>
                               {user.email}
                             </p>
                           </div>
@@ -197,13 +196,13 @@ function Profile() {
 
                         {/* Role */}
                         <div>
-                          <label className="block text-slate-400 text-sm font-medium mb-1.5">
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                             <span className="flex items-center gap-2">
-                              <FaShieldAlt className="text-slate-500 text-xs" />
+                              <FaShieldAlt className={cn("text-muted-foreground", "text-xs")} />
                               Role
                             </span>
                           </label>
-                          <div className="bg-slate-800/60 border border-slate-700/60 px-4 py-3 rounded-xl">
+                          <div className="bg-input border border-border px-4 py-3 rounded-xl">
                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${theme.badge}`}>
                               <RoleIcon className="text-xs" />
                               {theme.label}
@@ -213,13 +212,13 @@ function Profile() {
 
                         {/* Account Status */}
                         <div>
-                          <label className="block text-slate-400 text-sm font-medium mb-1.5">
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                             <span className="flex items-center gap-2">
-                              <FaCheckCircle className="text-slate-500 text-xs" />
+                              <FaCheckCircle className={cn("text-muted-foreground", "text-xs")} />
                               Account Status
                             </span>
                           </label>
-                          <div className="bg-slate-800/60 border border-slate-700/60 px-4 py-3 rounded-xl">
+                          <div className="bg-input border border-border px-4 py-3 rounded-xl">
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
                               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
                               Active
@@ -229,8 +228,8 @@ function Profile() {
                       </div>
 
                       {/* ── Quick Actions ─────────────────────── */}
-                      <div className="pt-6 border-t border-slate-700/50">
-                        <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                      <div className="pt-6 border-t border-border">
+                        <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
                           <FaTachometerAlt className="text-indigo-400" />
                           Quick Actions
                         </h4>
@@ -244,7 +243,7 @@ function Profile() {
                           </Link>
                           <button
                             onClick={handleChangePassword}
-                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer min-h-[44px]"
+                            className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "min-h-[44px]")}
                           >
                             <FaKey />
                             <span>Change Password</span>
@@ -265,10 +264,10 @@ function Profile() {
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6">
               <FaShieldAlt className="text-4xl text-red-400" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">
+            <h3 className="text-2xl font-bold text-foreground mb-2">
               Access Denied
             </h3>
-            <p className="text-slate-400 max-w-sm mb-8 text-sm sm:text-base">
+            <p className={cn("text-muted-foreground", "max-w-sm", "mb-8", "text-sm", "sm:text-base")}>
               Please log in to view your profile.
             </p>
             <Link

@@ -1,9 +1,5 @@
 import apiClient from "@/lib/apiClient.js";
 
-/* =========================
-   Auth
-========================= */
-
 export const loginApi = (credentials) =>
   apiClient.post("/auth/login", credentials);
 
@@ -13,6 +9,12 @@ export const signupApi = (data) =>
 export const googleAuthApi = (payload) =>
   apiClient.post("/auth/google-auth", payload);
 
+export const logoutApi = () =>
+  apiClient.post("/auth/logout");
+
+export const meApi = () =>
+  apiClient.get("/auth/me");
+
 export const verifyEmailApi = (token) =>
   apiClient.get(`/auth/verify/${token}`);
 
@@ -21,10 +23,6 @@ export const forgotPasswordApi = (data) =>
 
 export const changePasswordApi = (data) =>
   apiClient.post("/auth/change-password", data);
-
-/* =========================
-   Admin / Instructor
-========================= */
 
 export const registerStudentApi = (data) =>
   apiClient.post("/auth/register-student", data);

@@ -1,8 +1,12 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardHeader, cardInteractive, iconBadgeTeal, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
+import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
 import {
   FaClipboardList,
   FaCheckCircle,
@@ -71,12 +75,12 @@ const getAssessmentStatus = (assessment) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center">
+      <div className={cn(page, "flex", "items-center", "justify-center")}>
         <div className="flex flex-col items-center justify-center py-32 gap-4">
           <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
             <LoadingSpinner size="lg" type="spinner" color="blue" />
           </div>
-          <p className="text-slate-400 text-sm">Loading your dashboard...</p>
+          <p className={cn("text-muted-foreground", "text-sm")}>Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -107,41 +111,26 @@ const getAssessmentStatus = (assessment) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className={page}>
       {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+      <AmbientBackground />
 
       <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-        {/* Welcome Header */}
-        <div className="mb-8 sm:mb-10">
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Student Portal</p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2 flex items-center gap-3">
-                  <FaGraduationCap className="text-indigo-400" />
-                  Welcome back, {user?.name || "Student"}!
-                </h1>
-                <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-                  Your personalized learning dashboard — track progress, complete assessments, and achieve excellence.
-                </p>
+        <WelcomeBanner
+          eyebrow="Student Portal"
+          title={`Welcome back, ${user?.name || "Student"}!`}
+          description="Your personalized learning dashboard — track progress, complete assessments, and achieve excellence."
+          icon={FaGraduationCap}
+          aside={
+            <div className={cn("hidden", "sm:block", card, "p-5", "text-center")}>
+              <div className={cn(iconBadgeTeal, "inline-flex", "mb-2", "p-3")}>
+                <FaTrophy className="w-6 h-6 text-white" />
               </div>
-              <div className="hidden sm:block flex-shrink-0">
-                <div className="bg-slate-800/60 border border-slate-700/40 rounded-2xl p-5 text-center">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25 inline-flex mb-2">
-                    <FaTrophy className="w-6 h-6 text-white" />
-                  </div>
-                  <p className="text-xs font-semibold text-slate-300 mt-2">Keep Going!</p>
-                </div>
-              </div>
+              <p className={cn("text-xs", "font-semibold", "text-secondary-foreground", "mt-2")}>Keep going!</p>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
@@ -149,8 +138,8 @@ const getAssessmentStatus = (assessment) => {
             <div key={index} className={stat.cardClass}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-slate-400 mt-0.5 mb-1">{stat.label}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-white leading-none">{stat.value}</p>
+                  <p className={cn("text-xs", "text-muted-foreground", "mt-0.5", "mb-1")}>{stat.label}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground leading-none">{stat.value}</p>
                 </div>
                 <div className={stat.iconClass}>
                   {stat.icon}
@@ -162,7 +151,7 @@ const getAssessmentStatus = (assessment) => {
 
         {/* Analytics CTA */}
         <div className="mb-8 sm:mb-10">
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div className="flex items-start gap-4">
@@ -170,9 +159,9 @@ const getAssessmentStatus = (assessment) => {
                     <FaChartLine className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Performance Insights</p>
-                    <h3 className="text-xl font-bold text-white mb-2">Track Your Progress</h3>
-                    <p className="text-slate-400 text-sm leading-relaxed max-w-lg">
+                    <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>Performance Insights</p>
+                    <h3 className="text-xl font-bold text-foreground mb-2">Track Your Progress</h3>
+                    <p className={cn("text-muted-foreground", "text-sm", "leading-relaxed", "max-w-lg")}>
                       View detailed performance analytics, strengths, weaknesses, and personalized improvement recommendations.
                     </p>
                   </div>
@@ -195,12 +184,12 @@ const getAssessmentStatus = (assessment) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
 
           {/* Available Assessments */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl flex items-center gap-3">
+          <div className={cn(card, cardInteractive, "shadow-2xl")}>
+            <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
                 <FaBook className="w-4 h-4 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-white">Available Assessments</h2>
+              <h2 className="text-xl font-bold text-foreground">Available Assessments</h2>
             </div>
             <div className="p-4 sm:p-6">
               {analytics?.enrolled_assessments?.length > 0 ? (
@@ -210,7 +199,7 @@ const getAssessmentStatus = (assessment) => {
                     return (
                       <div
                         key={assessment.id}
-                        className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
+                        className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
                       >
                         <div className="flex items-start gap-3 mb-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
@@ -221,11 +210,11 @@ const getAssessmentStatus = (assessment) => {
                             {status.status === "completed" ? <FaCheckCircle className="w-4 h-4 text-white" /> : <FaClipboardList className="w-4 h-4 text-white" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-base text-slate-200 mb-1">
+                            <h3 className={cn("font-semibold", "text-base", "text-secondary-foreground", "mb-1")}>
                               {assessment.title || "Untitled"}
                             </h3>
                             {assessment.prompt && (
-                              <p className="text-xs text-slate-400 line-clamp-2 mb-2 leading-relaxed">
+                              <p className={cn("text-xs", "text-muted-foreground", "line-clamp-2", "mb-2", "leading-relaxed")}>
                                 {assessment.prompt}
                               </p>
                             )}
@@ -241,7 +230,7 @@ const getAssessmentStatus = (assessment) => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-700/50">
+                        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-border">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
                             status.status === "completed"
                               ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
@@ -269,24 +258,24 @@ const getAssessmentStatus = (assessment) => {
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
                     <FaBook className="w-8 h-8 text-indigo-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">No assessments yet</h3>
-                  <p className="text-slate-400 text-sm max-w-xs">Check back later for new assessments assigned by your instructor.</p>
+                  <h3 className="text-lg font-bold text-foreground mb-2">No assessments yet</h3>
+                  <p className={cn("text-muted-foreground", "text-sm", "max-w-xs")}>Check back later for new assessments assigned by your instructor.</p>
                 </div>
               )}
             </div>
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl flex items-center gap-3">
+          <div className={cn(card, cardInteractive, "shadow-2xl")}>
+            <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
                 <FaCheckCircle className="w-4 h-4 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-white">Recent Activity</h2>
+              <h2 className="text-xl font-bold text-foreground">Recent Activity</h2>
             </div>
             <div className="p-4 sm:p-6">
               {analytics?.recent_performance?.length > 0 ? (
-                <div className="divide-y divide-slate-700/30">
+                <div className="divide-y divide-border">
                   {analytics.recent_performance.slice(0, 5).map((attempt) => (
                     <div
                       key={attempt.assessment_id}
@@ -296,10 +285,10 @@ const getAssessmentStatus = (assessment) => {
                         <FaCheckCircle className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-slate-200 mb-1 truncate">
+                        <p className={cn("font-semibold", "text-sm", "text-secondary-foreground", "mb-1", "truncate")}>
                           {attempt.title || "Untitled Assessment"}
                         </p>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <div className={cn("flex", "items-center", "gap-1.5", "text-xs", "text-muted-foreground")}>
                           <FaCalendarAlt className="w-3 h-3" />
                           <span>Completed on {formatDate(attempt.date)}</span>
                         </div>
@@ -312,8 +301,8 @@ const getAssessmentStatus = (assessment) => {
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center mb-6">
                     <FaCheckCircle className="w-8 h-8 text-emerald-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">No recent activity</h3>
-                  <p className="text-slate-400 text-sm max-w-xs">Complete your first assessment to see it here.</p>
+                  <h3 className="text-lg font-bold text-foreground mb-2">No recent activity</h3>
+                  <p className={cn("text-muted-foreground", "text-sm", "max-w-xs")}>Complete your first assessment to see it here.</p>
                 </div>
               )}
             </div>
@@ -321,38 +310,38 @@ const getAssessmentStatus = (assessment) => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200">
-          <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 rounded-t-2xl flex items-center gap-3">
+        <div className={cn(card, cardInteractive, "shadow-2xl")}>
+          <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25">
               <FaTrophy className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-white">Quick Actions</h2>
+            <h2 className="text-xl font-bold text-foreground">Quick Actions</h2>
           </div>
           <div className="p-4 sm:p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <Link
                 to="/profile"
-                className="flex items-center p-5 sm:p-6 bg-slate-800/60 border border-slate-700/40 rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 group"
+                className="flex items-center p-5 sm:p-6 bg-input border border-border rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 group"
               >
                 <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
                   <FaUser className="w-5 h-5 text-white" />
                 </div>
                 <div className="ml-4 sm:ml-5">
-                  <p className="font-semibold text-base text-slate-200 mb-0.5 group-hover:text-white transition-colors duration-150">Update Profile</p>
-                  <p className="text-xs text-slate-500">Manage your personal information</p>
+                  <p className={cn("font-semibold", "text-base", "text-secondary-foreground", "mb-0.5", "group-hover:text-foreground", "transition-colors", "duration-150")}>Update Profile</p>
+                  <p className={cn("text-xs", "text-muted-foreground")}>Manage your personal information</p>
                 </div>
               </Link>
 
               <button
                 onClick={fetchOverview}
-                className="flex items-center p-5 sm:p-6 bg-slate-800/60 border border-slate-700/40 rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 text-left group cursor-pointer w-full"
+                className="flex items-center p-5 sm:p-6 bg-input border border-border rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 text-left group cursor-pointer w-full"
               >
                 <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
                   <FaSync className="w-5 h-5 text-white" />
                 </div>
                 <div className="ml-4 sm:ml-5">
-                  <p className="font-semibold text-base text-slate-200 mb-0.5 group-hover:text-white transition-colors duration-150">Refresh Dashboard</p>
-                  <p className="text-xs text-slate-500">Update with latest data</p>
+                  <p className={cn("font-semibold", "text-base", "text-secondary-foreground", "mb-0.5", "group-hover:text-foreground", "transition-colors", "duration-150")}>Refresh Dashboard</p>
+                  <p className={cn("text-xs", "text-muted-foreground")}>Update with latest data</p>
                 </div>
               </button>
             </div>

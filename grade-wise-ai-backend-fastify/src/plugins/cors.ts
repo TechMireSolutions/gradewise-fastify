@@ -8,8 +8,10 @@ export default fp(async function corsPlugin(app: FastifyInstance) {
     .map((o) => o.trim())
     .filter(Boolean);
 
+  const isProd = process.env["NODE_ENV"] === "production";
+
   await app.register(cors, {
-    origin: origins.length > 0 ? origins : true,
+    origin: origins.length > 0 ? origins : isProd ? false : ["http://localhost:3000"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

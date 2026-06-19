@@ -1,63 +1,125 @@
 ---
 trigger: always_on
 glob: "**/*"
-description: "High-level project overview: repository structure, commands, backend/frontend quick-ref, and domain model pointer."
+description: "Project overview — stack, repo layout, commands, routes, infrastructure, and pointers to specialized rule files."
 ---
 
 # Gradewise AI — Project Overview
 
+## Rule Map (read the right file)
+
+| File | Scope |
+|------|--------|
+| **`standards_rules.md`** | **Policies 1–5: deps, structure, naming, DRY, security/infra/testing** |
+| `domain_rules.md` | RBAC, assessments, multilingual, XAI, business rules |
+| `backend_rules.md` | Fastify · TypeScript · Drizzle · Redis · BullMQ · AI SDK |
+| `frontend_rules.md` | Next.js · React · Zustand · TanStack Query · cookie auth |
+| `ui.md` | Tailwind v4 · typography · accessibility · interactions |
+| `workflow_rules.md` | Verification gates · commit checklist |
+| `antigravity_rules.md` | Google Antigravity SDK agent design (not app code) |
+
+See also **`MIGRATION.md`** for modernization changelog.
+
 ## What This App Is
+
 Grade Wise AI is an **intelligent assessment platform** for educational institutions. It automates question generation, evaluation, and explainable feedback using LLM APIs (Gemini, OpenAI, Claude, Groq, Mistral, DeepSeek).
 
-**Full domain model → see `domain_rules.md`** (roles, assessment system, question blocks, physical paper, multilingual/RTL, XAI feedback).
+**Domain detail → `domain_rules.md`**
 
-## Role Hierarchy (quick ref)
+## Role Hierarchy
+
 `super_admin` → `admin` → `instructor` → `student`
-- **super_admin**: user management + AI API key configuration
-- **admin**: user/role management + platform analytics + custom question types
-- **instructor**: resource upload + assessment creation + student enrollment
-- **student**: take assessments + view XAI feedback + track progress
+
+| Role | Primary capabilities |
+|------|---------------------|
+| **super_admin** | User management + AI API key configuration |
+| **admin** | User/role management + platform oversight |
+| **instructor** | Resources, assessments, enrollment, analytics |
+| **student** | Take assessments, XAI feedback, progress history |
 
 ## Repository Structure
-- **Backend**: `grade-wise-ai-backend-v2/` — Node.js · Express · ESM
-- **Frontend**: `grade-wise-ai-frontend-next/` — React 19 · Next.js · Tailwind CSS v4 · Zustand
+
+| Component | Path | Stack |
+|-----------|------|-------|
+| **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
+| **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
+| **Infra** | `docker-compose.yml` | Postgres (pgvector) · Redis · MinIO · api · worker · web |
+| **CI** | `.github/workflows/ci.yml` | typecheck · build · test · lint · e2e |
+
+> **Deprecated:** `grade-wise-ai-backend-v2/` (Express) — never reference in new work.
 
 ## Commands
-| Target | Command | Purpose |
-|--------|---------|---------|
-| Frontend | `npm run dev -- --webpack` | Dev server (Next.js) |
-| Frontend | `npm run build` | Production build |
-| Frontend | `npm run lint` | ESLint check |
-| Frontend | `npm run start` | Start production server |
-| Backend | `npm run dev` | Dev server (nodemon) |
-| Backend | `npm start` | Production start |
-| Backend | `node --check index.js` | Syntax validation |
+
+### Infrastructure
+
+```bash
+docker compose up -d postgres redis minio
+```
+
+### Backend (`grade-wise-ai-backend-fastify/`)
+
+| Target | Command |
+|--------|---------|
+| Dev API | `npm run dev` → http://localhost:5005 |
+| Dev worker | `npm run dev:worker` (when `USE_ASYNC_JOBS=true`) |
+| Typecheck | `npm run typecheck` |
+| Build | `npm run build` |
+| Unit tests | `npm test` |
+| DB push (local) | `npm run db:push` |
+| DB migrate (prod) | `npm run db:migrate` |
+| DB seed | `npm run db:seed` |
+
+### Frontend (`grade-wise-ai-frontend-next/`)
+
+| Target | Command |
+|--------|---------|
+| Dev | `npm run dev` → http://localhost:3000 |
+| Build | `npm run build` |
+| Lint | `npm run lint` |
+| E2E smoke | `npm run test:e2e` |
+| Prod | `npm run start` |
+
+**Env:** copy `.env.example` → `.env` (backend) and `.env.local` (frontend).
+
+### Required backend env (beyond JWT + DATABASE_URL)
+
+| Variable | Purpose |
+|----------|---------|
+| `ENCRYPTION_KEY` | Encrypt AI keys at rest |
+| `FIREBASE_PROJECT_ID` | Verify Google idToken |
+| `REDIS_URL` | Rate limit + BullMQ (optional locally) |
+| `USE_ASYNC_JOBS` | Background question generation |
+| `S3_*` | MinIO/S3 object storage (optional) |
 
 ## Key Routes
+
 | Path | Role | Purpose |
 |------|------|---------|
-| `/super-admin/dashboard` | super_admin | User management |
-| `/super-admin/api-config` | super_admin | AI provider key management |
-| `/admin/dashboard` | admin | Platform admin hub |
-| `/instructor/dashboard` | instructor | Assessment workspace |
-| `/instructor/resources` | instructor | Resource library |
-| `/instructor/assessments` | instructor | Assessment list |
-| `/instructor/assessments/create` | instructor | New assessment |
-| `/instructor/assessments/[id]/edit` | instructor | Edit assessment config |
-| `/instructor/assessments/[id]/enroll` | instructor | Manage student enrollment |
-| `/instructor/assessments/[id]/analytics` | instructor | Assessment analytics |
-| `/instructor/assessments/[id]/preview` | instructor | Preview assessment |
-| `/student/dashboard` | student | Student portal |
+| `/login` · `/signup` · `/forgot-password` · `/verify-email` | public | Auth |
+| `/super-admin/dashboard` · `/super-admin/api-config` | super_admin | Users + AI keys |
+| `/admin/dashboard` | admin | Platform admin |
+| `/instructor/dashboard` · `/instructor/resources` · `/instructor/students` | instructor | Workspace |
+| `/instructor/assessments/*` | instructor | CRUD, enroll, analytics, preview |
+| `/student/dashboard` · `/student/analytics` | student | Portal + history |
 | `/student/assessments/[assessmentId]/take` | student | Live exam (ExamLayout) |
-| `/student/analytics` | student | Performance history |
+| `/profile` | authenticated | Profile edit |
 
-## Backend (quick ref → full detail in `backend_rules.md`)
-- ESM imports with `.js` extension on all local files.
-- PostgreSQL placeholders (`$1`, `$2`) in every query — `DB/db.js` translates to SQLite/MySQL at runtime.
-- `try-catch` in every controller → `{ success: false, message: "..." }` on errors.
+## API Prefixes (backend)
 
-## Frontend (quick ref → full detail in `frontend_rules.md`)
-- Next.js dynamic routing & layout wrapper system (`RootLayout`, `DashboardLayout`, `ExamLayout`).
-- Zustand for global state (`src/store/`). No Redux.
-- Zod schemas in `src/scheema/` + `react-hook-form` for all forms.
-- Tailwind v4, curated palettes, `44×44px` touch targets, WCAG contrast ≥ 4.5:1.
+| Prefix | Module |
+|--------|--------|
+| `/api/auth` | Auth, `/me`, `/logout`, user management |
+| `/api/assessments` | Assessment CRUD, enrollment, preview, physical paper |
+| `/api/resources` | Resource upload & management |
+| `/api/config` | AI provider keys (super_admin) |
+| `/api/taking` | Student start/submit/status |
+| `/api/instructor-analytics` | Instructor analytics |
+| `/api/student-analytics` | Student performance analytics |
+| `/api/health` | DB + Redis + feature flags |
+
+## Quick Pointers
+
+- **Backend:** cookie auth · async AI via BullMQ · encrypted AI keys · thin routes · fat services.
+- **Frontend:** httpOnly cookie session · `middleware.js` + `ProtectedRoute` · TanStack Query provider · `schemas/` for Zod.
+- **Styling:** `ui.md` + slate/indigo/violet/emerald palette.
+- **Before commit:** `workflow_rules.md`.

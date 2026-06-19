@@ -1,17 +1,20 @@
 "use client";
 
+import { cn } from "@/lib/cn.js";
+import { page } from "@/lib/ui.js";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
 import useHydrated from "@/hooks/useHydrated";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 
 export default function ExamLayout({ children }) {
   const { language } = useStudentAssessmentStore();
   const hydrated = useHydrated();
 
-  // Handle SSR hydration safety
   if (!hydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingSpinner size="lg" type="spinner" color="blue" />
       </div>
     );
@@ -20,8 +23,8 @@ export default function ExamLayout({ children }) {
   const isRTL = ["ur", "ar", "fa"].includes(language);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-slate-100" dir={isRTL ? "rtl" : "ltr"}>
+    <MainLandmark className={cn(page, "min-h-screen")} dir={isRTL ? "rtl" : "ltr"}>
       {children}
-    </main>
+    </MainLandmark>
   );
 }

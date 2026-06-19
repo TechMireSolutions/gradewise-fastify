@@ -5,9 +5,14 @@ import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
 import { toHttpError } from "../../utils/errors.js";
 import {
+  AssessmentIdParamSchema,
+  SubmissionIdParamSchema,
+} from "../../schemas/common.js";
+import {
   startAssessmentService,
   submitAssessmentService,
   getSubmissionDetailsService,
+  getAssessmentGenerationStatusService,
 } from "./student-assessments.service.js";
 
 export default async function studentAssessmentsModule(app: FastifyInstance) {
@@ -17,7 +22,7 @@ export default async function studentAssessmentsModule(app: FastifyInstance) {
   f.post("/assessments/:assessmentId/start", {
     preHandler: [authenticate, authorize("student")],
     schema: {
-      params: z.object({ assessmentId: z.coerce.number().int().positive() }),
+      params: AssessmentIdParamSchema,
       body: z.object({ language: z.string().optional().default("en") }),
     },
   }, async (request, reply) => {
@@ -39,7 +44,7 @@ export default async function studentAssessmentsModule(app: FastifyInstance) {
   f.post("/assessments/:assessmentId/submit", {
     preHandler: [authenticate, authorize("student")],
     schema: {
-      params: z.object({ assessmentId: z.coerce.number().int().positive() }),
+      params: AssessmentIdParamSchema,
       body: z.object({
         attemptId: z.number().int().positive(),
         answers: z.array(
@@ -66,10 +71,33 @@ export default async function studentAssessmentsModule(app: FastifyInstance) {
     }
   });
 
+  // GET /api/taking/assessments/:assessmentId/attempts/:attemptId/status
+  f.get("/assessments/:assessmentId/attempts/:attemptId/status", {
+    preHandler: [authenticate, authorize("student")],
+    schema: {
+      params: AssessmentIdParamSchema.extend({
+        attemptId: z.coerce.number().int().positive(),
+      }),
+    },
+  }, async (request, reply) => {
+    try {
+      const user = request.user as { id: number };
+      const data = await getAssessmentGenerationStatusService(
+        user.id,
+        request.params.assessmentId,
+        request.params.attemptId
+      );
+      return reply.send({ success: true, data });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
   // GET /api/taking/submissions/:submissionId
   f.get("/submissions/:submissionId", {
     preHandler: [authenticate],
-    schema: { params: z.object({ submissionId: z.coerce.number().int().positive() }) },
+    schema: { params: SubmissionIdParamSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };

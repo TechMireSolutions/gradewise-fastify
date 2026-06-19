@@ -1,59 +1,183 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
-/* Global dark mode base */
-html {
-  transition: background-color 200ms ease-out, color 200ms ease-out;
+/* ── Theme tokens (light default, .dark overrides) ── */
+:root {
+  color-scheme: light;
+
+  --app-bg: #f1f5f9;
+  --app-surface: rgb(255 255 255 / 0.85);
+  --app-surface-elevated: rgb(255 255 255 / 0.95);
+  --app-card: rgb(255 255 255 / 0.78);
+  --app-card-header: rgb(248 250 252 / 0.95);
+  --app-border: rgb(148 163 184 / 0.45);
+  --app-text: #0f172a;
+  --app-text-secondary: #334155;
+  --app-text-muted: #64748b;
+  --app-text-subtle: #94a3b8;
+  --app-nav: rgb(255 255 255 / 0.88);
+  --app-input: rgb(255 255 255 / 0.9);
+  --app-btn-secondary: rgb(241 245 249 / 0.9);
+  --app-accent: #14b8a6;
+  --app-eyebrow: #0d9488;
+  --app-toast-bg: rgb(255 255 255 / 0.96);
+  --app-toast-border: rgb(148 163 184 / 0.45);
+  --grid-line: rgb(100 116 139 / 0.08);
+  --blob-teal: rgb(20 184 166 / 0.12);
+  --blob-indigo: rgb(99 102 241 / 0.1);
+  --blob-sky: rgb(56 189 248 / 0.1);
+  --shadow-accent: rgb(99 102 241 / 0.12);
 }
-html.dark {
-  background-color: rgb(2 6 23);   /* slate-950 */
-  color: rgb(248 250 252);          /* slate-50 */
+
+.dark {
   color-scheme: dark;
+
+  --app-bg: #0a0f1e;
+  --app-surface: rgb(15 23 42 / 0.55);
+  --app-surface-elevated: rgb(15 23 42 / 0.72);
+  --app-card: rgb(15 23 42 / 0.55);
+  --app-card-header: rgb(15 23 42 / 0.65);
+  --app-border: rgb(51 65 85 / 0.45);
+  --app-text: #f8fafc;
+  --app-text-secondary: #e2e8f0;
+  --app-text-muted: #94a3b8;
+  --app-text-subtle: #64748b;
+  --app-nav: rgb(10 15 30 / 0.82);
+  --app-input: rgb(15 23 42 / 0.65);
+  --app-btn-secondary: rgb(51 65 85 / 0.45);
+  --app-accent: #2dd4bf;
+  --app-eyebrow: #2dd4bf;
+  --app-toast-bg: rgb(15 23 42 / 0.95);
+  --app-toast-border: rgb(51 65 85 / 0.5);
+  --grid-line: rgb(148 163 184 / 0.04);
+  --blob-teal: rgb(20 184 166 / 0.1);
+  --blob-indigo: rgb(99 102 241 / 0.12);
+  --blob-sky: rgb(56 189 248 / 0.08);
+  --shadow-accent: rgb(99 102 241 / 0.12);
+}
+
+@theme inline {
+  --font-sans: var(--font-outfit), "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--app-bg);
+  --color-foreground: var(--app-text);
+  --color-muted-foreground: var(--app-text-muted);
+  --color-secondary-foreground: var(--app-text-secondary);
+  --color-subtle-foreground: var(--app-text-subtle);
+  --color-card: var(--app-card);
+  --color-card-header: var(--app-card-header);
+  --color-border: var(--app-border);
+  --color-input: var(--app-input);
+  --color-nav: var(--app-nav);
+  --color-surface: var(--app-surface);
+  --color-surface-elevated: var(--app-surface-elevated);
+  --color-btn-secondary: var(--app-btn-secondary);
+  --color-accent: var(--app-accent);
+  --color-eyebrow: var(--app-eyebrow);
+  --color-toast: var(--app-toast-bg);
+  --color-toast-border: var(--app-toast-border);
+
+  --color-edu-navy: #0a0f1e;
+  --color-edu-teal: #14b8a6;
+  --color-edu-sky: #38bdf8;
+  --color-edu-gold: #fbbf24;
+
+  --animate-blob: blob 7s infinite;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-gradient: gradient 3s linear infinite;
+  --animate-fade-in: fade-in 0.6s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 200ms ease-out, color 200ms ease-out;
 }
 
 body {
-  font-family: 'Outfit', 'Inter', 'Roboto', sans-serif;
   min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Animation keyframes (Home.jsx: blobs, float icons, gradient text, fade-in) ── */
 @keyframes blob {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(30px, -50px) scale(1.1); }
-  66%       { transform: translate(-20px, 20px) scale(0.9); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
 }
+
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-20px); }
+  50% { transform: translateY(-20px); }
 }
+
 @keyframes gradient {
   0%, 100% { background-position: 0% 50%; }
-  50%      { background-position: 100% 50%; }
+  50% { background-position: 100% 50%; }
 }
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-blob         { animation: blob 7s infinite; }
-.animate-float        { animation: float 3s ease-in-out infinite; }
-.animate-gradient     { background-size: 200% auto; animation: gradient 3s linear infinite; }
-.animate-fade-in      { animation: fade-in 0.6s ease-out; }
-.animation-delay-2000 { animation-delay: 2s; }
-.animation-delay-4000 { animation-delay: 4s; }
-
-@keyframes slideInRight {
+@keyframes slide-in-right {
   from { transform: translateX(100%); opacity: 0; }
-  to   { transform: translateX(0);    opacity: 1; }
+  to { transform: translateX(0); opacity: 1; }
 }
-.animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
+
+.animate-gradient {
+  background-size: 200% auto;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+@media (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(100 116 139 / 0.45) transparent;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  html { transition: none; }
+  html {
+    scroll-behavior: auto;
+    transition: none;
+  }
+
   .animate-blob,
   .animate-float,
   .animate-gradient,
   .animate-fade-in,
-  .animate-slide-in-right { animation: none; }
+  .animate-slide-in-right,
+  .animate-spin,
+  .animate-pulse,
+  .animate-bounce,
+  .animate-ping {
+    animation: none !important;
+  }
+
+  .motion-reduce\:transform-none {
+    transform: none !important;
+  }
 }
 
+@utility safe-area-x {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+@utility safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

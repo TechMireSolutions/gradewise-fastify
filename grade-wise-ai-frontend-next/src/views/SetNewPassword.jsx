@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn.js";
+import { card } from "@/lib/ui.js";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -6,7 +8,7 @@ import Modal from "../components/ui/Modal.jsx";
 import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
 import useModal from "../hooks/useModal.js";
 import { FaLock, FaCheckCircle, FaArrowLeft, FaKey, FaExclamationTriangle, FaShieldAlt } from "react-icons/fa";
-import { setNewPasswordSchema } from "../scheema/passwordSchemas.js";
+import { setNewPasswordSchema } from "../schemas/passwordSchemas.js";
 import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 function SetNewPassword() {
@@ -67,7 +69,7 @@ function SetNewPassword() {
 
   return (
     <AuthPageLayout backLabel="Back to Login" backTo="/login">
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+        <div className={cn(card, "p-8", "shadow-2xl")}>
           {/* Brand header */}
           <div className="mb-8 text-center">
             <div className="flex items-center justify-center mb-5">
@@ -75,28 +77,28 @@ function SetNewPassword() {
                 <FaKey className="text-white text-2xl" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight mb-2">Set New Password</h1>
-            <p className="text-slate-400 text-sm">Enter your new password below to complete the reset</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Set New Password</h1>
+            <p className={cn("text-muted-foreground", "text-sm")}>Enter your new password below to complete the reset</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* New Password field */}
             <div>
-              <label htmlFor="newPassword" className="block text-slate-400 text-sm font-medium mb-1.5">
+              <label htmlFor="newPassword" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                 New Password
               </label>
               <div className="relative">
-                <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
                 <input
                   type="password"
                   id="newPassword"
                   name="newPassword"
                   value={formData.newPassword}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/60 backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                  className={`w-full bg-input backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.newPassword
                       ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500/30"
+                      : "border-border hover:border-accent/40 focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="Enter new password"
                   required
@@ -112,21 +114,21 @@ function SetNewPassword() {
 
             {/* Confirm Password field */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-slate-400 text-sm font-medium mb-1.5">
+              <label htmlFor="confirmPassword" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                 Confirm Password
               </label>
               <div className="relative">
-                <FaCheckCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none" />
+                <FaCheckCircle className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
                 <input
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full bg-slate-800/60 backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
+                  className={`w-full bg-input backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
                     errors.confirmPassword
                       ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 focus:ring-indigo-500/30"
+                      : "border-border hover:border-accent/40 focus:border-indigo-500 focus:ring-indigo-500/30"
                   }`}
                   placeholder="Confirm new password"
                   required
@@ -141,15 +143,15 @@ function SetNewPassword() {
             </div>
 
             {/* Password requirements hint */}
-            <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4">
+            <div className="bg-input rounded-xl border border-border p-4">
               <div className="flex items-start gap-3">
                 <FaShieldAlt className="text-indigo-400 text-sm mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Password Requirements</p>
+                  <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1.5")}>Password Requirements</p>
                   <ul className="space-y-1">
-                    <li className="text-xs text-slate-400 leading-relaxed">At least 8 characters long</li>
-                    <li className="text-xs text-slate-400 leading-relaxed">Include uppercase letters</li>
-                    <li className="text-xs text-slate-400 leading-relaxed">Include numbers</li>
+                    <li className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>At least 8 characters long</li>
+                    <li className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>Include uppercase letters</li>
+                    <li className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>Include numbers</li>
                   </ul>
                 </div>
               </div>
@@ -176,7 +178,7 @@ function SetNewPassword() {
           </form>
 
           {/* Footer links */}
-          <div className="mt-6 pt-6 border-t border-slate-700/50 flex flex-col items-center gap-3">
+          <div className="mt-6 pt-6 border-t border-border flex flex-col items-center gap-3">
             <Link
               to="/login"
               className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
@@ -186,7 +188,7 @@ function SetNewPassword() {
             </Link>
             <Link
               to="/forgot-password"
-              className="text-slate-500 hover:text-slate-400 text-xs font-medium transition-colors duration-150 cursor-pointer"
+              className={cn("text-muted-foreground", "hover:text-muted-foreground", "text-xs", "font-medium", "transition-colors", "duration-150", "cursor-pointer")}
             >
               Request a new reset link
             </Link>

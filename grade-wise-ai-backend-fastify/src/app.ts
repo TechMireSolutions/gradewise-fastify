@@ -5,9 +5,11 @@ import fp from "fastify-plugin";
 // Plugins
 import corsPlugin from "./plugins/cors.js";
 import helmetPlugin from "./plugins/helmet.js";
+import cookiePlugin from "./plugins/cookie.js";
 import jwtPlugin from "./plugins/jwt.js";
 import rateLimitPlugin from "./plugins/rate-limit.js";
 import multipartPlugin from "./plugins/multipart.js";
+import { getHealthStatus } from "./health.js";
 
 // Modules
 import authModule from "./modules/auth/index.js";
@@ -48,9 +50,10 @@ export function buildApp() {
     return reply.code(404).send({ success: false, message: "Route not found" });
   });
 
-  // Register plugins (order matters: helmet → cors → rate-limit → multipart → jwt)
+  // Register plugins (order matters: helmet → cors → cookie → rate-limit → multipart → jwt)
   app.register(helmetPlugin);
   app.register(corsPlugin);
+  app.register(cookiePlugin);
   app.register(rateLimitPlugin);
   app.register(multipartPlugin);
   app.register(jwtPlugin);
@@ -62,10 +65,11 @@ export function buildApp() {
     status: "live",
   }));
 
-  app.get("/api/health", async () => ({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-  }));
+  app.get("/api/health", async (_request, reply) => {
+    const health = await getHealthStatus();
+    const statusCode = health.status === "ok" ? 200 : 503;
+    return reply.code(statusCode).send(health);
+  });
 
   // API routes
   app.register(authModule, { prefix: "/api/auth" });

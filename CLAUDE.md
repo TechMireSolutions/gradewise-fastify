@@ -1,76 +1,130 @@
-# Gradwise AI - Onboarding & Conventions
+# Gradewise AI — Onboarding & Conventions
 
-This file outlines the workspace structure, build/run commands, coding guidelines, and the rules/skills configuration for Gradwise AI.
-
----
-
-## 📂 Repository Structure
-
-- **Backend Component**: `grade-wise-ai-backend-v2/` (Node.js, Express, ESM Modules)
-- **Frontend Component**: `grade-wise-ai-frontend-next/` (React 19, Next.js 16 App Router, Tailwind CSS v4, Zustand)
+Workspace guide for humans and AI agents (Cursor, Antigravity, Claude Code).
 
 ---
 
-## 🤖 Agent Rules & Skills Architecture
+## Repository Structure
 
-This project is configured with localized guidelines and custom agent skills to ensure consistency when code is modified by AI agents (e.g. Gemini/Antigravity or Claude Code).
+| Component | Path | Stack |
+|-----------|------|-------|
+| **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
+| **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
+| **Infra** | `docker-compose.yml` | Postgres (pgvector) · Redis · MinIO |
+| **CI** | `.github/workflows/ci.yml` | Automated quality gates |
 
-### 1. Workspace Rules
-Rules are grouped into context-specific markdown files with trigger conditions:
-- **Antigravity rules**: Located in [.agent/rules/](file:///c:/Users/Hassan/Desktop/Gradwise-zohair/.agent/rules/)
-- **Claude rules**: Mirrored in [.claude/rules/](file:///c:/Users/Hassan/Desktop/Gradwise-zohair/.claude/rules/)
-- **Cursor rules**: Maintained at [.cursorrules](file:///c:/Users/Hassan/Desktop/Gradwise-zohair/.cursorrules)
+> **Not in use:** `grade-wise-ai-backend-v2/` (legacy Express).
 
-*Files:*
-- `domain_rules.md`: **Full application domain model** — RBAC roles, assessment system, question block types, physical paper generation, multilingual/RTL support, XAI feedback, AI provider configuration, business rules. Read this when building or modifying any feature.
-- `antigravity_rules.md`: Connection parameters, model details, agent design, connection lifecycles, hooks.
-- `backend_rules.md`: Node/Express, ESM import syntax (extensions), database translation, controller error patterns.
-- `frontend_rules.md`: React 19, Zustand stores, Zod schemas with react-hook-form, routing, lazy loading, multilingual/RTL, assessment-specific component patterns.
-- `project_rules.md`: Repository structure, commands, role hierarchy quick-ref, key routes table.
-- `ui.md`: Front-End typography, harmonious HSL palettes, transitions, minimum hit areas.
-- `workflow_rules.md`: No placeholders rule, build check instructions, code cleanliness.
-
-### 2. Local Custom Skills
-Specialized skills are installed locally inside the workspace to extend agent capabilities:
-- **Antigravity skills**: Located in [.agent/skills/](file:///c:/Users/Hassan/Desktop/Gradwise-zohair/.agent/skills/)
-- **Claude skills**: Mirrored in [.claude/skills/](file:///c:/Users/Hassan/Desktop/Gradwise-zohair/.claude/skills/)
-
-*Active Skills:*
-- `ui-ux-pro-max`: Premium UI design guidelines and styling patterns.
-- `ui-styling`: Custom style and design specifications.
-- `design`: Logo and media assets generator.
-- `design-system`: Token configurations.
-- `slides`: Dynamic HTML presentation layout generation.
-- `banner-design`: Website hero and social media creative banner generator.
-- `brand`: Messaging standards and brand compliance.
-- `google-antigravity-sdk`: Agent orchestrator and connection helper (Antigravity only).
+See **`MIGRATION.md`** for the full modernization changelog.
 
 ---
 
-## 🚀 Commands
+## Agent Rules Architecture
 
-### Backend (`grade-wise-ai-backend-v2`)
-- **Run dev server**: `npm run dev` (Runs nodemon index.js)
-- **Start server**: `npm start` (Runs node index.js)
-- **Syntax check**: `node --check index.js`
+Rules are **grouped by concern** and **mirrored** across agent platforms:
 
-### Frontend (`grade-wise-ai-frontend-next`)
-- **Run dev server**: `npm run dev -- --webpack` (Launches Next.js in Webpack mode)
-- **Build production app**: `npm run build`
-- **Start production server**: `npm run start`
-- **Run linter**: `npm run lint`
+| Location | Platform |
+|----------|----------|
+| `.agent/rules/` | Antigravity / Cursor agent |
+| `.claude/rules/` | Claude Code |
+| `.cursorrules` | Cursor quick index |
+
+### Rule Files
+
+| File | Contents |
+|------|----------|
+| **`standards_rules.md`** | **Policies 1–5: deps, structure, naming, DRY, security/infra/testing** |
+| `project_rules.md` | Overview, Docker, CI, commands, routes, env |
+| `domain_rules.md` | RBAC, assessments, multilingual, XAI |
+| `backend_rules.md` | Fastify, Drizzle, cookie auth, BullMQ, Redis, AI SDK |
+| `frontend_rules.md` | Next.js, middleware, TanStack Query, cookie auth |
+| `ui.md` | Tailwind v4, typography, a11y |
+| `workflow_rules.md` | Verification gates, commit checklist |
+| `antigravity_rules.md` | AGY SDK agents only |
+
+### Skills (local)
+
+Mirrored in `.agent/skills/` and `.claude/skills/`:
+
+| Skill | Purpose |
+|-------|---------|
+| **gradewise-backend** | Fastify, Drizzle, Redis, BullMQ, cookie auth, AI SDK |
+| **gradewise-frontend** | Next.js, middleware, TanStack Query, Zustand, Playwright |
+| **gradewise-domain** | RBAC, assessments, async generation, XAI |
+| **google-antigravity-sdk** | Antigravity orchestration (not app code) |
+| **ui-ux-pro-max** | UI/UX design intelligence |
+| **ui-styling** | Tailwind, component styling |
+| **design** · **design-system** · **brand** · **slides** · **banner-design** | Visual assets |
 
 ---
 
-## 💡 Coding Guidelines & Conventions
+## Commands
 
-### Backend (Node/Express/ESM)
-- **Module Imports**: ESM syntax only. Local imports **must** include the `.js` extension (e.g. `import pool from "./DB/db.js"`).
-- **Database Access**: Write standard queries with Postgres placeholders (`$1`, `$2`). The custom database wrapper in `DB/db.js` translates them dynamically to SQLite or MySQL depending on the environment. Do not write dialect-specific code in controllers.
-- **Error Handling**: Standardize error reporting via try-catch and return structured `{ success: false, message: ... }` JSON payloads.
+### Infrastructure
 
-### Frontend (React/Next.js/Tailwind v4)
-- **State Management**: Use Zustand stores for global components state. Do not introduce Redux.
-- **Form Validation**: Define schemas using Zod under `src/scheema/` and validate using React Hook Form.
-- **Dynamic Client Components**: Legacy pages and components using browser globals/Zustand storage persist layers must be imported dynamically with `ssr: false`.
-- **Styling**: Standard Tailwind CSS v4. No raw emojis in controls, minimum `44x44px` touch hit area, Outfit/Inter/Roboto fonts.
+```bash
+docker compose up -d postgres redis minio
+```
+
+### Backend
+
+```bash
+npm run dev          # API — http://localhost:5005
+npm run dev:worker   # BullMQ worker (USE_ASYNC_JOBS=true)
+npm run typecheck
+npm run build
+npm test             # Vitest
+npm run db:push      # local schema
+npm run db:migrate   # production migrations
+npm run db:seed
+```
+
+### Frontend
+
+```bash
+npm run dev          # http://localhost:3000
+npm run build
+npm run lint
+npm run test:e2e     # Playwright smoke
+npm run start
+```
+
+**Env:** `.env.example` → `.env` (backend) · `.env.local` (frontend)
+
+**Backend env highlights:** `JWT_SECRET`, `ENCRYPTION_KEY`, `FIREBASE_PROJECT_ID`, `REDIS_URL`, `USE_ASYNC_JOBS`
+
+---
+
+## Key Conventions
+
+### Backend
+
+- ESM + `.js` import suffixes · strict TypeScript
+- **Cookie auth** — `setAuthCookie` / `clearAuthCookie`; no JWT in JSON
+- Google OAuth: verify `{ idToken }` server-side
+- Async AI: BullMQ + `npm run dev:worker`
+- AI keys encrypted when `ENCRYPTION_KEY` set
+- Services throw `AppError`; routes stay thin
+
+### Frontend
+
+- **httpOnly cookie session** — `withCredentials: true`; no token in localStorage
+- `middleware.js` + `ProtectedRoute` + `/auth/me`
+- State: TanStack Query (server) + Zustand (UI/auth user)
+- Zod in `src/schemas/` (renamed from `scheema/`)
+- Google: Firebase popup → `getIdToken()` → backend
+
+### Before Commit
+
+```bash
+cd grade-wise-ai-backend-fastify && npm run typecheck && npm run build && npm test
+cd grade-wise-ai-frontend-next && npm run build && npm run lint
+```
+
+See `workflow_rules.md` for full checklist.
+
+---
+
+## Conflict Resolution
+
+Previous rules referenced Express v2, `scheema/`, JWT in localStorage, and root `src/store/`. All superseded by current mirrored rules and **`MIGRATION.md`**.

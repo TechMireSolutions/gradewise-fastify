@@ -28,9 +28,10 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
   if (type === "spinner" || !type) {
     return (
       <div className="flex justify-center items-center" role="status" aria-label="Loading">
+        <span className="sr-only">Loading</span>
         <div className="relative">
           <div
-            className={`${sizeClasses[size]} rounded-full border-4 border-slate-700/60`}
+            className={`${sizeClasses[size]} rounded-full border-4 border-border`}
           ></div>
           <div
             className={`absolute top-0 left-0 ${sizeClasses[size]} rounded-full border-4 ${colorClasses[color]} border-t-transparent animate-spin`}
@@ -44,6 +45,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
   if (type === "gradient") {
     return (
       <div className="flex justify-center items-center" role="status" aria-label="Loading">
+        <span className="sr-only">Loading</span>
         <div className="relative">
           <div
             className={`${sizeClasses[size]} rounded-full bg-gradient-to-r ${gradientColors[color]} animate-spin`}
@@ -106,6 +108,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
 
     return (
       <div className="flex justify-center items-center" role="status" aria-label="Loading">
+        <span className="sr-only">Loading</span>
         <div className="relative">
           <div
             className={`${sizeClasses[size]} ${pulseColor[color]} rounded-full animate-ping opacity-40`}
@@ -170,7 +173,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     <div className="flex justify-center items-center">
       <div className="relative">
         <div
-          className={`${sizeClasses[size]} rounded-full border-4 border-slate-700/60`}
+          className={`${sizeClasses[size]} rounded-full border-4 border-border`}
         ></div>
         <div
           className={`absolute top-0 left-0 ${sizeClasses[size]} rounded-full border-4 ${colorClasses[color]} border-t-transparent animate-spin`}

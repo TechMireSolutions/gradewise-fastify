@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   startAssessmentApi,
+  getAssessmentStatusApi,
   submitAssessmentApi,
   printAssessmentApi,
   getSubmissionDetailsApi,
@@ -33,7 +34,24 @@ const useStudentAssessmentStore = create((set, get) => ({
         throw new Error(response.data.message);
       }
 
-      const { questions, duration, attemptId } = response.data.data;
+      let { questions, duration, attemptId, status } = response.data.data;
+
+      if (status === "generating" && attemptId) {
+        for (let i = 0; i < 60; i += 1) {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          const statusResponse = await getAssessmentStatusApi(assessmentId, attemptId);
+          const payload = statusResponse.data.data;
+          if (payload.status === "ready") {
+            questions = payload.questions;
+            status = "pending";
+            break;
+          }
+        }
+      }
+
+      if (!questions?.length) {
+        throw new Error("Questions are still being generated. Please try again shortly.");
+      }
 
       const parsedQuestions = mapQuestionsWithParsedOptions(questions).map((q) => ({
         ...q,

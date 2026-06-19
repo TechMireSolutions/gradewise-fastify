@@ -1,18 +1,22 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
-import { validateAssessmentForm, validateFiles } from "../../../scheema/editAssessmentSchemas.js";
+import { validateAssessmentForm, validateFiles } from "../../../schemas/editAssessmentSchemas.js";
 import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
+import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
+import useModal from "../../../hooks/useModal.js";
 
 function EditAssessment() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
-  const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
+    const { modal, showModal, closeModal } = useModal();
 
 
   useEffect(() => {
@@ -71,7 +75,6 @@ function EditAssessment() {
           ? currentAssessment.resources.map(r => r.id).filter(id => id && !isNaN(id))
           : []
       );
-      console.log(`🔍 Loaded selectedResources:`, currentAssessment.resources?.map(r => r.id));
     }
   }, [currentAssessment]);
 
@@ -153,7 +156,7 @@ function EditAssessment() {
     // Validate files using Zod
     const validation = validateFiles(files);
     if (!validation.success) {
-      setModal({ isOpen: true, type: "error", title: "File Validation Error", message: validation.error });
+      showModal("error", "File Validation Error", validation.error);
       e.target.value = ''; // Clear the input
       return;
     }
@@ -181,7 +184,7 @@ function EditAssessment() {
     });
 
     if (!validation.success) {
-      setModal({ isOpen: true, type: "error", title: "Validation Error", message: validation.error });
+      showModal("error", "Validation Error", validation.error);
       return;
     }
 
@@ -208,11 +211,11 @@ function EditAssessment() {
 
     try {
       await updateAssessment(parseInt(id), assessmentData);
-      setModal({ isOpen: true, type: "success", title: "Success!", message: "Assessment updated!" });
+      showModal("success", "Success!", "Assessment updated!");
       setTimeout(() => navigate("/instructor/assessments"), 1500);
     } catch (err) {
       console.error("DEBUG: Frontend EditAssessment - Update error:", err);
-      setModal({ isOpen: true, type: "error", title: "Error", message: err.message || "Update failed" });
+      showModal("error", "Error", err.message || "Update failed");
     } finally {
       setIsProcessing(false);
     }
@@ -220,17 +223,13 @@ function EditAssessment() {
 
   if (loading || !currentAssessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex flex-col justify-center items-center">
-        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-        </div>
+      <div className={cn(page, "flex", "flex-col", "justify-center", "items-center")}>
+        <AmbientBackground />
         <div className="relative flex flex-col items-center justify-center py-32 gap-4">
           <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
             <LoadingSpinner size="lg" type="spinner" color="blue" />
           </div>
-          <p className="text-slate-400 text-sm">Loading assessment details...</p>
+          <p className={cn("text-muted-foreground", "text-sm")}>Loading assessment details...</p>
         </div>
       </div>
     );
@@ -238,20 +237,16 @@ function EditAssessment() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
-        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-        </div>
+      <div className={page}>
+        <AmbientBackground />
         <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-8">
+          <div className={cn(card, "shadow-2xl", "p-8")}>
             <div className="text-center">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6 mx-auto">
                 <FaExclamationTriangle className="text-red-400 text-3xl" />
               </div>
-              <h1 className="text-3xl font-bold text-white mb-4">Error</h1>
-              <p className="text-slate-400 mb-8">{error}</p>
+              <h1 className="text-3xl font-bold text-foreground mb-4">Error</h1>
+              <p className={cn("text-muted-foreground", "mb-8")}>{error}</p>
               <button
                 onClick={() => navigate("/instructor/assessments")}
                 className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
@@ -264,7 +259,7 @@ function EditAssessment() {
         </div>
         <Modal
           isOpen={modal.isOpen}
-          onClose={() => setModal({ ...modal, isOpen: false })}
+          onClose={closeModal}
           type={modal.type}
           title={modal.title}
         >
@@ -275,13 +270,9 @@ function EditAssessment() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className={page}>
       {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+      <AmbientBackground />
 
       <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header Section */}
@@ -301,11 +292,11 @@ function EditAssessment() {
               <FaClipboardList className="text-white text-lg" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Assessment Management</p>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Edit Assessment</h1>
+              <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>Assessment Management</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Edit Assessment</h1>
             </div>
           </div>
-          <p className="text-slate-400 leading-relaxed ml-0 sm:ml-14">Update your assessment details and configuration</p>
+          <p className={cn("text-muted-foreground", "leading-relaxed", "ml-0", "sm:ml-14")}>Update your assessment details and configuration</p>
 
           {currentAssessment.is_executed && (
             <div className="mt-5 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
@@ -322,19 +313,19 @@ function EditAssessment() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Assessment Details Card */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
             {/* Card Header */}
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
               <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20">
                 <FaClipboardList className="text-indigo-400 text-sm" />
               </div>
-              <h2 className="text-xl font-bold text-white">Assessment Details</h2>
+              <h2 className="text-xl font-bold text-foreground">Assessment Details</h2>
             </div>
 
             <div className="p-6 sm:p-8 space-y-6">
               {/* Title Input */}
               <div>
-                <label htmlFor="title" className="block text-slate-400 text-sm font-medium mb-1.5">
+                <label htmlFor="title" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
                   Assessment Title <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -343,7 +334,7 @@ function EditAssessment() {
                   id="title"
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                   placeholder="e.g., Data Structures Final Exam"
                   disabled={currentAssessment.is_executed}
                 />
@@ -351,8 +342,8 @@ function EditAssessment() {
 
               {/* Prompt Textarea */}
               <div>
-                <label htmlFor="prompt" className="block text-slate-400 text-sm font-medium mb-1.5">
-                  AI Prompt <span className="text-slate-500 font-normal">(Optional if using resources or links)</span>
+                <label htmlFor="prompt" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                  AI Prompt <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using resources or links)</span>
                 </label>
                 <textarea
                   name="prompt"
@@ -360,29 +351,29 @@ function EditAssessment() {
                   value={formData.prompt}
                   onChange={handleInputChange}
                   rows={5}
-                  className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "resize-none", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                   placeholder="Provide a detailed prompt for question generation..."
                   disabled={currentAssessment.is_executed}
                 />
               </div>
 
               {/* External Links */}
-              <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5">
+              <div className="bg-input rounded-xl border border-border p-5">
                 <div className="flex items-center gap-2 mb-4">
                   <FaLink className="text-indigo-400 text-sm" />
-                  <label className="text-slate-300 text-sm font-semibold">External Links</label>
+                  <label className={cn("text-secondary-foreground", "text-sm", "font-semibold")}>External Links</label>
                 </div>
                 <div className="space-y-3">
                   {formData.externalLinks.map((link, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="relative flex-1">
-                        <FaLink className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm" />
+                        <FaLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
                         <input
                           type="url"
                           value={link}
                           onChange={(e) => handleLinkChange(index, e.target.value)}
                           placeholder="https://example.com/resource"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />
                       </div>
@@ -402,7 +393,7 @@ function EditAssessment() {
                 <button
                   type="button"
                   onClick={addExternalLink}
-                  className="mt-4 px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={cn("mt-4", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "gap-2", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                   disabled={currentAssessment.is_executed}
                 >
                   <FaPlus className="text-xs" />
@@ -411,15 +402,15 @@ function EditAssessment() {
               </div>
 
               {/* Resources Section */}
-              <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-5">
+              <div className="bg-input rounded-xl border border-border p-5">
                 <div className="flex items-center gap-2 mb-5">
                   <FaBook className="text-indigo-400 text-sm" />
-                  <label className="text-slate-300 text-sm font-semibold">Resources</label>
+                  <label className={cn("text-secondary-foreground", "text-sm", "font-semibold")}>Resources</label>
                 </div>
                 <div className="space-y-6">
                   {/* Upload Files */}
                   <div>
-                    <label htmlFor="new_files" className="block text-slate-400 text-sm font-medium mb-2">
+                    <label htmlFor="new_files" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-2")}>
                       Upload New Files
                     </label>
                     <div className="relative">
@@ -429,16 +420,16 @@ function EditAssessment() {
                         multiple
                         accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
                         onChange={handleFileChange}
-                        className="w-full bg-slate-800/60 border border-dashed border-slate-600/60 hover:border-indigo-500/50 rounded-xl px-4 py-4 text-slate-400 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/15 file:text-indigo-400 hover:file:bg-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={cn("w-full", "bg-input", "border", "border-dashed", "border-border", "hover:border-indigo-500/50", "rounded-xl", "px-4", "py-4", "text-muted-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "file:mr-4", "file:py-1.5", "file:px-3", "file:rounded-lg", "file:border-0", "file:text-xs", "file:font-semibold", "file:bg-indigo-500/15", "file:text-indigo-400", "hover:file:bg-indigo-500/25", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                         disabled={currentAssessment.is_executed}
                       />
                     </div>
                     {newFiles.length > 0 && (
-                      <div className="mt-3 bg-slate-900/50 rounded-xl p-3 border border-slate-700/40">
-                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Selected Files</p>
+                      <div className="mt-3 bg-card rounded-xl p-3 border border-border">
+                        <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-2")}>Selected Files</p>
                         <ul className="space-y-1.5">
                           {newFiles.map((file, index) => (
-                            <li key={index} className="text-sm text-slate-300 flex items-center gap-2">
+                            <li key={index} className={cn("text-sm", "text-secondary-foreground", "flex", "items-center", "gap-2")}>
                               <FaFile className="text-indigo-400 text-xs flex-shrink-0" />
                               {file.name}
                             </li>
@@ -450,13 +441,13 @@ function EditAssessment() {
 
                   {/* Existing Resources */}
                   <div>
-                    <label className="block text-slate-400 text-sm font-medium mb-2">Select Existing Resources</label>
+                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-2")}>Select Existing Resources</label>
                     {resourcesLoading ? (
                       <div className="flex justify-center py-8">
                         <LoadingSpinner size="sm" type="dots" color="blue" />
                       </div>
                     ) : resources.length > 0 ? (
-                      <div className="space-y-1.5 max-h-64 overflow-y-auto bg-slate-900/40 border border-slate-700/40 rounded-xl p-3">
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto bg-slate-900/40 border border-border rounded-xl p-3">
                         {resources.map((resource) => (
                           <div
                             key={resource.id}
@@ -472,10 +463,10 @@ function EditAssessment() {
                             />
                             <label
                               htmlFor={`resource-${resource.id}`}
-                              className="ml-3 text-sm text-slate-300 cursor-pointer flex-1 flex items-center gap-2"
+                              className={cn("ml-3", "text-sm", "text-secondary-foreground", "cursor-pointer", "flex-1", "flex", "items-center", "gap-2")}
                             >
                               <span className="font-medium">{resource.name}</span>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-slate-700/60 text-slate-400 border border-slate-600/40">
+                              <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>
                                 {resource.content_type}
                               </span>
                             </label>
@@ -483,9 +474,9 @@ function EditAssessment() {
                         ))}
                       </div>
                     ) : (
-                      <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-slate-700/50 rounded-xl bg-slate-900/30">
+                      <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-border rounded-xl bg-slate-900/30">
                         <FaBook className="text-slate-600 text-2xl mb-2" />
-                        <p className="text-slate-500 text-sm">No resources available</p>
+                        <p className={cn("text-muted-foreground", "text-sm")}>No resources available</p>
                       </div>
                     )}
                   </div>
@@ -495,13 +486,13 @@ function EditAssessment() {
           </div>
 
           {/* Question Blocks Card */}
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl hover:border-indigo-500/30 transition-all duration-200 overflow-hidden">
+          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
             {/* Card Header */}
-            <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 flex items-center gap-3">
+            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
               <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
                 <FaQuestionCircle className="text-violet-400 text-sm" />
               </div>
-              <h2 className="text-xl font-bold text-white">Question Configuration</h2>
+              <h2 className="text-xl font-bold text-foreground">Question Configuration</h2>
             </div>
 
             <div className="p-6 sm:p-8">
@@ -509,14 +500,14 @@ function EditAssessment() {
                 {questionBlocks.map((block, index) => (
                   <div
                     key={index}
-                    className="bg-slate-800/60 rounded-xl border border-slate-700/40 hover:border-indigo-500/30 p-5 transition-all duration-200"
+                    className="bg-input rounded-xl border border-border hover:border-indigo-500/30 p-5 transition-all duration-200"
                   >
                     <div className="flex justify-between items-center mb-5">
                       <div className="flex items-center gap-3">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
                           Block {index + 1}
                         </span>
-                        <h3 className="text-base font-semibold text-slate-200">
+                        <h3 className={cn("text-base", "font-semibold", "text-secondary-foreground")}>
                           {block.question_type === "multiple_choice" && "Multiple Choice"}
                           {block.question_type === "short_answer" && "Short Answer"}
                           {block.question_type === "true_false" && "True / False"}
@@ -538,11 +529,11 @@ function EditAssessment() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Question Type */}
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Type</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
                         <select
                           value={block.question_type}
                           onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
-                          className="w-full appearance-none bg-slate-800/60 border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          className={cn("w-full", "appearance-none", "bg-input", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         >
                           <option value="multiple_choice">Multiple Choice</option>
@@ -553,28 +544,28 @@ function EditAssessment() {
 
                       {/* Question Count */}
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Question Count</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Count</label>
                         <input
                           type="number"
                           value={block.question_count}
                           onChange={(e) => handleBlockChange(index, "question_count", e.target.value)}
                           min="1"
                           placeholder="e.g. 5"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />
                       </div>
 
                       {/* Duration */}
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Duration (seconds)</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Duration (seconds)</label>
                         <input
                           type="number"
                           value={block.duration_per_question}
                           onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
                           min="30"
                           placeholder="e.g. 120"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />
                       </div>
@@ -582,7 +573,7 @@ function EditAssessment() {
                       {/* Number of Options (MCQ only) */}
                       {block.question_type === "multiple_choice" && (
                         <div>
-                          <label className="block text-slate-400 text-sm font-medium mb-1.5">Number of Options</label>
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Number of Options</label>
                           <input
                             type="number"
                             value={block.num_options}
@@ -590,7 +581,7 @@ function EditAssessment() {
                             min="2"
                             max="6"
                             placeholder="2 to 6"
-                            className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                             disabled={currentAssessment.is_executed}
                           />
                         </div>
@@ -598,7 +589,7 @@ function EditAssessment() {
 
                       {/* Negative Marks */}
                       <div>
-                        <label className="block text-slate-400 text-sm font-medium mb-1.5">Negative Marks</label>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
                         <input
                           type="number"
                           value={block.negative_marks || ""}
@@ -606,7 +597,7 @@ function EditAssessment() {
                           min="0"
                           step="0.1"
                           placeholder="e.g. 0.25"
-                          className="w-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/60 hover:border-slate-600 focus:border-indigo-500 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-500 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />
                       </div>
@@ -618,7 +609,7 @@ function EditAssessment() {
                 <button
                   type="button"
                   onClick={addQuestionBlock}
-                  className="w-full py-3 bg-slate-800/40 border border-dashed border-slate-600/60 hover:border-indigo-500/40 hover:bg-indigo-500/5 text-slate-400 hover:text-indigo-300 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={cn("w-full", "py-3", "bg-card/60", "border", "border-dashed", "border-border", "hover:border-indigo-500/40", "hover:bg-indigo-500/5", "text-muted-foreground", "hover:text-indigo-300", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "justify-center", "gap-2", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                   disabled={currentAssessment.is_executed}
                 >
                   <FaPlus className="text-xs" />
@@ -633,7 +624,7 @@ function EditAssessment() {
             <button
               type="button"
               onClick={() => navigate("/instructor/assessments")}
-              className="px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer order-2 sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1", "disabled:opacity-50", "disabled:cursor-not-allowed")}
               disabled={isProcessing}
             >
               Cancel
@@ -666,7 +657,7 @@ function EditAssessment() {
 
       <Modal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
+        onClose={closeModal}
         type={modal.type}
         title={modal.title}
       >

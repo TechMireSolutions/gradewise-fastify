@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn.js";
+import { card, page } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Modal from "../../components/ui/Modal.jsx";
 import PageLoader from "../../components/ui/PageLoader.jsx";
@@ -26,32 +28,32 @@ function AdminDashboard() {
   if (loading) return <PageLoader message="Loading users..." />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className={page}>
       <AmbientBackground />
 
       <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="mb-8 sm:mb-10">
-          <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10 hover:border-indigo-500/30 transition-all duration-200">
+          <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8", "lg:p-10", "hover:border-indigo-500/30", "transition-all", "duration-200")}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Admin Portal</p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2 sm:mb-3 flex items-center gap-3">
+                <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-2")}>Admin Portal</p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2 sm:mb-3 flex items-center gap-3">
                   <span className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 text-white">
                     <FaCrown className="w-5 h-5" />
                   </span>
                   Admin Dashboard
                 </h1>
-                <p className="text-slate-300 leading-relaxed text-sm sm:text-base">
+                <p className={cn("text-secondary-foreground", "leading-relaxed", "text-sm", "sm:text-base")}>
                   Welcome back, <span className="text-indigo-400 font-semibold">{user?.name}</span>! Manage your platform and oversee all operations.
                 </p>
               </div>
               <div className="hidden sm:block">
-                <div className="bg-slate-800/60 backdrop-blur-sm border border-slate-700/40 rounded-xl p-4 lg:p-6 text-center">
+                <div className="bg-input backdrop-blur-sm border border-border rounded-xl p-4 lg:p-6 text-center">
                   <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 inline-flex items-center justify-center mb-3">
                     <FaUsers className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
                   </div>
-                  <p className="text-xl sm:text-2xl font-bold text-white leading-none">{users.length}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">Total Users</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">{users.length}</p>
+                  <p className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>Total Users</p>
                 </div>
               </div>
             </div>
@@ -60,12 +62,12 @@ function AdminDashboard() {
 
         <UserStatsGrid stats={stats} totalUsers={users.length} />
 
-        <div className="bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200">
-          <div className="px-6 py-4 border-b border-slate-700/50 bg-slate-800/60">
+        <div className={cn(card, "shadow-2xl", "overflow-hidden", "hover:border-indigo-500/30", "transition-all", "duration-200")}>
+          <div className="px-6 py-4 border-b border-border bg-input">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Management</p>
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>Management</p>
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                   <FaUsers className="text-indigo-400" />
                   All Users
                 </h2>

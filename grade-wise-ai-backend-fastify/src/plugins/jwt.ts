@@ -1,6 +1,7 @@
 import fp from "fastify-plugin";
 import fastifyJwt from "@fastify/jwt";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { AUTH_COOKIE_NAME } from "../utils/auth-cookie.js";
 
 declare module "@fastify/jwt" {
   interface FastifyJWT {
@@ -18,6 +19,10 @@ export default fp(async function jwtPlugin(app: FastifyInstance) {
     secret: process.env["JWT_SECRET"],
     sign: {
       expiresIn: process.env["JWT_EXPIRES_IN"] ?? "24h",
+    },
+    cookie: {
+      cookieName: AUTH_COOKIE_NAME,
+      signed: false,
     },
   });
 

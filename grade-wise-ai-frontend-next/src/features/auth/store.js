@@ -14,70 +14,56 @@ import {
   fetchUsersApi,
   changeUserRoleApi,
   deleteUserApi,
+  logoutApi,
+  meApi,
 } from "./api.js";
 
 const useAuthStore = create(
   persist(
-    (set) => ({
-      token: null,
+    (set, get) => ({
       user: null,
 
-      /* =========================
-         Login
-      ========================= */
+      setUser: (user) => set({ user }),
+
+      fetchMe: async () => {
+        const response = await meApi();
+        set({ user: response.data.user });
+        return response.data.user;
+      },
 
       login: async (credentials) => {
         try {
           const response = await loginApi(credentials);
-          const { token, user } = response.data;
-          set({ token, user });
-          localStorage.setItem("token", token);
-          return user;
+          set({ user: response.data.user });
+          return response.data.user;
         } catch (error) {
           throw error.response?.data || error;
         }
       },
-
-      /* =========================
-         Google Auth
-      ========================= */
 
       googleAuth: async () => {
         try {
           const result = await signInWithPopup(auth, googleProvider);
-          const firebaseUser = result.user;
-
-          const response = await googleAuthApi({
-            name: firebaseUser.displayName,
-            email: firebaseUser.email,
-            uid: firebaseUser.uid,
-          });
-
-          const { token, user } = response.data;
-          set({ token, user });
-          localStorage.setItem("token", token);
-          return user;
+          const idToken = await result.user.getIdToken();
+          const response = await googleAuthApi({ idToken });
+          set({ user: response.data.user });
+          return response.data.user;
         } catch (error) {
           throw error.response?.data || error;
         }
       },
 
-      /* =========================
-         Signup
-      ========================= */
-
       signup: async (data) => {
         try {
           const response = await signupApi(data);
+          if (response.data.user) {
+            set({ user: response.data.user });
+          }
           return response.data;
         } catch (error) {
           throw error.response?.data || error;
         }
       },
-
-      /* =========================
-         Student Registration
-      ========================= */
 
       registerStudent: async (studentData) => {
         try {
@@ -89,10 +75,6 @@ const useAuthStore = create(
           throw error.response?.data || error;
         }
       },
-
-      /* =========================
-         Email / Password
-      ========================= */
 
       verifyEmail: async (token) => {
         try {
@@ -126,10 +108,6 @@ const useAuthStore = create(
         }
       },
 
-      /* =========================
-         Admin
-      ========================= */
-
       getUsers: async () => {
         try {
           const response = await fetchUsersApi();
@@ -157,18 +135,20 @@ const useAuthStore = create(
         }
       },
 
-      /* =========================
-         Logout
-      ========================= */
-
-      logout: () => {
-        localStorage.removeItem("token");
-        set({ token: null, user: null });
+      logout: async () => {
+        try {
+          await logoutApi();
+        } finally {
+          set({ user: null });
+        }
       },
+
+      isAuthenticated: () => Boolean(get().user?.role),
     }),
     {
       name: "auth-storage",
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ user: state.user }),
     }
   )
 );

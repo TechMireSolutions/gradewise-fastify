@@ -4,21 +4,21 @@ import {
   assessmentAttempts,
   generatedQuestions,
   studentAnswers,
-  questionBlocks,
   enrollments,
-  resources,
-  resourceChunks,
-  assessmentResources,
   type GeneratedQuestion,
 } from "../../db/schema.js";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { AppError, NotFoundError, ForbiddenError } from "../../utils/errors.js";
-import { generateContent, mapLanguageCode } from "../../ai/generate.js";
+import { enqueueAssessmentGeneration } from "../../queue/index.js";
 import {
-  gatherAssessmentContext,
-  buildBlockPrompt,
-  parseQuestionsFromAI,
-} from "../assessments/question-generation.js";
+  generateQuestionsForAttempt,
+  getAttemptQuestions,
+  countAttemptQuestions,
+  sanitizeQuestion,
+} from "./generation.js";
+
+const useAsyncJobs = () =>
+  process.env["USE_ASYNC_JOBS"] === "true" && Boolean(process.env["REDIS_URL"]);
 
 // ─── Start assessment ─────────────────────────────────────────────────────────
 
@@ -27,7 +27,6 @@ export async function startAssessmentService(
   assessmentId: number,
   language = "en"
 ) {
-  // Verify enrollment
   const enrollment = await db
     .select()
     .from(enrollments)
@@ -38,7 +37,6 @@ export async function startAssessmentService(
     throw new ForbiddenError("You are not enrolled in this assessment.");
   }
 
-  // Recovery: return existing pending attempt
   const pending = await db
     .select()
     .from(assessmentAttempts)
@@ -52,21 +50,39 @@ export async function startAssessmentService(
     .limit(1);
 
   if (pending[0]) {
-    const existingQuestions = await db
-      .select()
-      .from(generatedQuestions)
-      .where(eq(generatedQuestions.attemptId, pending[0].id))
-      .orderBy(generatedQuestions.questionOrder);
+    const questionCount = await countAttemptQuestions(pending[0].id);
+    if (questionCount > 0) {
+      return {
+        attemptId: pending[0].id,
+        questions: await getAttemptQuestions(pending[0].id),
+        status: "pending",
+        language,
+      };
+    }
+
+    if (useAsyncJobs()) {
+      return {
+        attemptId: pending[0].id,
+        questions: [],
+        status: "generating",
+        language,
+      };
+    }
+
+    await generateQuestionsForAttempt({
+      attemptId: pending[0].id,
+      assessmentId,
+      language,
+    });
 
     return {
       attemptId: pending[0].id,
-      questions: existingQuestions.map(sanitizeQuestion),
+      questions: await getAttemptQuestions(pending[0].id),
       status: "pending",
       language,
     };
   }
 
-  // Create new attempt
   const [attempt] = await db
     .insert(assessmentAttempts)
     .values({ assessmentId, studentId, language, status: "pending" })
@@ -74,30 +90,6 @@ export async function startAssessmentService(
 
   if (!attempt) throw new AppError("CREATE_FAILED", "Failed to start assessment", 500);
 
-  // Get question blocks
-  let blocks = await db
-    .select()
-    .from(questionBlocks)
-    .where(eq(questionBlocks.assessmentId, assessmentId));
-
-  // Default block if none configured
-  if (blocks.length === 0) {
-    const [defaultBlock] = await db
-      .insert(questionBlocks)
-      .values({
-        assessmentId,
-        questionType: "multiple_choice",
-        questionCount: 10,
-        durationPerQuestion: 60,
-        numOptions: 4,
-        positiveMarks: "1",
-        negativeMarks: "0.25",
-      })
-      .returning();
-    if (defaultBlock) blocks = [defaultBlock];
-  }
-
-  // Gather context
   const assessment = await db
     .select()
     .from(assessments)
@@ -105,61 +97,66 @@ export async function startAssessmentService(
     .limit(1);
   if (!assessment[0]) throw new NotFoundError("Assessment");
 
-  const context = await gatherAssessmentContext(assessmentId);
-  const langLabel = mapLanguageCode(language);
-  const instructorPrompt = assessment[0].prompt ?? "";
+  if (useAsyncJobs()) {
+    const queued = await enqueueAssessmentGeneration({
+      attemptId: attempt.id,
+      assessmentId,
+      studentId,
+      language,
+    });
 
-  // Generate questions for each block
-  const allQuestions: GeneratedQuestion[] = [];
-  let orderIndex = 0;
-
-  for (const block of blocks) {
-    const prompt = buildBlockPrompt(block, instructorPrompt, context, langLabel);
-
-    let parsed: Array<Record<string, unknown>> = [];
-    try {
-      const raw = await generateContent(prompt, { maxOutputTokens: 4096, temperature: 0.7 });
-      parsed = (parseQuestionsFromAI(raw, block.questionType) as Array<Record<string, unknown>>);
-    } catch {
-      parsed = [];
-    }
-
-    // Ensure we have the right count (pad or trim)
-    while (parsed.length < block.questionCount) {
-      parsed.push(createFallbackQuestion(block.questionType, parsed.length + 1));
-    }
-    parsed = parsed.slice(0, block.questionCount);
-
-    for (const q of parsed) {
-      const [saved] = await db
-        .insert(generatedQuestions)
-        .values({
-          attemptId: attempt.id,
-          questionOrder: orderIndex++,
-          questionType: block.questionType,
-          questionText: String(q["question_text"] ?? q["questionText"] ?? "Question unavailable"),
-          options: Array.isArray(q["options"]) ? (q["options"] as string[]) : null,
-          correctAnswer: String(q["correct_answer"] ?? q["correctAnswer"] ?? ""),
-          positiveMarks: block.positiveMarks,
-          negativeMarks: block.negativeMarks,
-          durationPerQuestion: block.durationPerQuestion,
-        })
-        .returning();
-      if (saved) allQuestions.push(saved);
+    if (queued) {
+      return {
+        attemptId: attempt.id,
+        questions: [],
+        status: "generating",
+        language,
+      };
     }
   }
 
-  // Mark assessment as executed
-  await db
-    .update(assessments)
-    .set({ isExecuted: true, updatedAt: new Date() })
-    .where(eq(assessments.id, assessmentId));
+  await generateQuestionsForAttempt({
+    attemptId: attempt.id,
+    assessmentId,
+    language,
+  });
 
   return {
     attemptId: attempt.id,
-    questions: allQuestions.map(sanitizeQuestion),
+    questions: await getAttemptQuestions(attempt.id),
     status: "pending",
     language,
+  };
+}
+
+export async function getAssessmentGenerationStatusService(
+  studentId: number,
+  assessmentId: number,
+  attemptId: number
+) {
+  const attempt = await db
+    .select()
+    .from(assessmentAttempts)
+    .where(
+      and(
+        eq(assessmentAttempts.id, attemptId),
+        eq(assessmentAttempts.studentId, studentId),
+        eq(assessmentAttempts.assessmentId, assessmentId)
+      )
+    )
+    .limit(1);
+
+  if (!attempt[0]) throw new NotFoundError("Attempt");
+
+  const questionCount = await countAttemptQuestions(attemptId);
+  if (questionCount === 0) {
+    return { attemptId, status: "generating", questions: [] as ReturnType<typeof sanitizeQuestion>[] };
+  }
+
+  return {
+    attemptId,
+    status: "ready",
+    questions: await getAttemptQuestions(attemptId),
   };
 }
 
@@ -188,7 +185,6 @@ export async function submitAssessmentService(
     throw new AppError("ALREADY_SUBMITTED", "This attempt has already been submitted", 400);
   }
 
-  // Load generated questions
   const questions = await db
     .select()
     .from(generatedQuestions)
@@ -200,7 +196,7 @@ export async function submitAssessmentService(
 
   const questionMap = new Map(questions.map((q) => [q.id, q]));
   let totalScore = 0;
-  const savedAnswers = [];
+  const answerRows: Array<typeof studentAnswers.$inferInsert> = [];
 
   for (const { questionId, answer } of answers) {
     const question = questionMap.get(questionId);
@@ -215,36 +211,33 @@ export async function submitAssessmentService(
 
     totalScore += score;
 
-    const [saved] = await db
-      .insert(studentAnswers)
-      .values({
-        attemptId,
-        questionId,
-        studentAnswer: answer,
-        isCorrect,
-        score: String(score),
-      })
-      .returning();
-
-    if (saved) savedAnswers.push(saved);
+    answerRows.push({
+      attemptId,
+      questionId,
+      studentAnswer: answer,
+      isCorrect,
+      score: String(score),
+    });
   }
 
-  // Finalize attempt
-  const [completed] = await db
+  if (answerRows.length > 0) {
+    await db.insert(studentAnswers).values(answerRows);
+  }
+
+  await db
     .update(assessmentAttempts)
     .set({
       status: "completed",
       completedAt: new Date(),
       score: String(Math.max(0, totalScore)),
     })
-    .where(eq(assessmentAttempts.id, attemptId))
-    .returning();
+    .where(eq(assessmentAttempts.id, attemptId));
 
   return {
     attemptId,
     score: Math.max(0, totalScore),
     totalQuestions: questions.length,
-    correctAnswers: savedAnswers.filter((a) => a.isCorrect).length,
+    correctAnswers: answerRows.filter((a) => a.isCorrect).length,
     status: "completed",
   };
 }
@@ -309,28 +302,12 @@ export async function getSubmissionDetailsService(
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function sanitizeQuestion(q: GeneratedQuestion) {
-  return {
-    id: q.id,
-    questionOrder: q.questionOrder,
-    questionType: q.questionType,
-    questionText: q.questionText,
-    options: q.options,
-    durationPerQuestion: q.durationPerQuestion,
-    positiveMarks: q.positiveMarks,
-    negativeMarks: q.negativeMarks,
-    // correctAnswer is intentionally omitted for students
-  };
-}
-
 function evaluateAnswer(question: GeneratedQuestion, studentAnswer: string): boolean {
   const correct = question.correctAnswer.trim().toLowerCase();
   const given = studentAnswer.trim().toLowerCase();
 
-  // Exact match always wins
   if (correct === given) return true;
 
-  // For true/false: normalise synonyms
   if (question.questionType === "true_false") {
     const trueSynonyms = ["true", "yes", "correct", "right"];
     const falseSynonyms = ["false", "no", "incorrect", "wrong"];
@@ -341,23 +318,9 @@ function evaluateAnswer(question: GeneratedQuestion, studentAnswer: string): boo
     return givenIsFalse;
   }
 
-  // For multiple choice: accept if student answered the option letter (A/B/C/D) and
-  // the correct answer contains that option text (or starts with it).
-  // We do NOT allow partial text matching to prevent false positives.
   if (question.questionType === "multiple_choice") {
-    // Student may submit option letter ("a", "b") or full option text — only exact match
     return false;
   }
 
-  // For short answer: exact match only (AI grading should handle nuance upstream)
   return false;
-}
-
-function createFallbackQuestion(questionType: string, index: number) {
-  return {
-    question_text: `Question ${index} (generation failed)`,
-    question_type: questionType,
-    options: questionType === "multiple_choice" ? ["Option A", "Option B", "Option C", "Option D"] : undefined,
-    correct_answer: questionType === "true_false" ? "True" : "N/A",
-  };
 }

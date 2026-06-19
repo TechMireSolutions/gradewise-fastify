@@ -1,3 +1,5 @@
+import { cn } from "@/lib/cn.js";
+import { btn, card } from "@/lib/ui.js";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -32,7 +34,7 @@ function Login() {
 
   return (
     <AuthPageLayout backLabel="Back to Home">
-      <div className="w-full bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+      <div className={cn(card, "p-8", "shadow-2xl")}>
         <AuthCardHeader
           icon={FaUserCircle}
           title="Welcome Back"
@@ -42,7 +44,7 @@ function Login() {
         <button
           onClick={handleGoogleLogin}
           disabled={googleLoading || loading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 hover:border-slate-500/70 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 min-h-[44px] mb-6"
+          className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
         >
           {googleLoading ? (
             <LoadingSpinner size="sm" type="dots" color="blue" />
@@ -56,10 +58,10 @@ function Login() {
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-700/50" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="px-4 bg-slate-800/50 text-slate-500 font-semibold uppercase tracking-widest">
+            <span className={cn("px-4", "bg-card", "text-muted-foreground", "font-semibold", "uppercase", "tracking-widest")}>
               Or continue with email
             </span>
           </div>
@@ -72,15 +74,15 @@ function Login() {
 
         <div className="mt-6 space-y-4">
           <div className="text-center">
-            <p className="text-sm text-slate-400">
+            <p className={cn("text-sm", "text-muted-foreground")}>
               Don&apos;t have an account?{" "}
-              <Link to="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors duration-150 cursor-pointer">
+              <Link to="/signup" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-150 cursor-pointer">
                 Create one here
               </Link>
             </p>
           </div>
-          <div className="text-center pt-4 border-t border-slate-700/50">
-            <Link to="/forgot-password" className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer">
+          <div className="text-center pt-4 border-t border-border">
+            <Link to="/forgot-password" className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors duration-150 cursor-pointer">
               Forgot your password?
             </Link>
           </div>

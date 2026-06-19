@@ -164,10 +164,10 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
               /* ── LANGUAGE SELECTION ── */
               <div className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  <h3 className="text-2xl font-bold text-foreground mb-2">
                     {t("selectLanguage")}
                   </h3>
-                  <p className="text-gray-600">{t("selectLanguageDesc")}</p>
+                  <p className="text-muted-foreground">{t("selectLanguageDesc")}</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -175,10 +175,10 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                     <button
                       key={lang.value}
                       onClick={() => handleLanguageSelect(lang.value)}
-                      className="p-6 rounded-2xl border-3 transition-all duration-300 border-gray-300 hover:border-indigo-400 hover:bg-gray-50 flex items-center justify-center gap-3 active:scale-95"
+                      className="p-6 rounded-2xl border-3 transition-all duration-300 border-border hover:border-indigo-400 hover:bg-card/60 flex items-center justify-center gap-3 active:scale-95"
                     >
                       <span className="text-4xl">{lang.label.split(" ")[0]}</span>
-                      <span className="text-xl font-bold text-gray-800">
+                      <span className="text-xl font-bold text-foreground">
                         {lang.label.split(" ").slice(1).join(" ")}
                       </span>
                     </button>
@@ -200,8 +200,8 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                   <div className="flex items-center gap-3">
                     <FaGlobe className="text-2xl text-indigo-600" />
                     <div>
-                      <p className="text-sm text-gray-600">{t("selectLanguage")}</p>
-                      <p className="text-lg font-bold text-gray-800">
+                      <p className="text-sm text-muted-foreground">{t("selectLanguage")}</p>
+                      <p className="text-lg font-bold text-foreground">
                         {LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage)?.label}
                       </p>
                     </div>
@@ -211,11 +211,11 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                 <PaperFormFields form={form} onChange={handleChange} language={selectedLanguage} />
                 <FormattingOptions form={form} onChange={handleChange} language={selectedLanguage} />
 
-                <div className="flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 border-t-2 border-gray-200">
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 border-t-2 border-border">
                   <button
                     onClick={handleClose}
                     disabled={loading}
-                    className="px-6 py-3 w-full sm:w-auto border-2 border-gray-300 hover:border-gray-400 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                    className="px-6 py-3 w-full sm:w-auto border-2 border-border hover:border-gray-400 rounded-xl font-bold text-secondary-foreground hover:bg-card/60 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                   >
                     {t("cancel")}
                   </button>

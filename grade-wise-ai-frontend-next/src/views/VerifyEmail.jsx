@@ -1,8 +1,11 @@
+import { cn } from "@/lib/cn.js";
+import { card, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import { FaCheckCircle, FaTimesCircle, FaEnvelope, FaArrowRight } from "react-icons/fa";
+import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 
 function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -52,19 +55,15 @@ function VerifyEmail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
-        <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-          <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-          <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-        </div>
+      <div className={cn(page, "flex", "items-center", "justify-center", "px-4", "py-12")}>
+        <AmbientBackground />
 
-        <div className="relative w-full max-w-md bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl text-center">
+        <div className={cn("relative", "w-full", "max-w-md", card, "p-8", "shadow-2xl", "text-center")}>
           <div className="mb-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-4 mx-auto">
               <FaEnvelope className="text-white text-2xl" />
             </div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
               <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
                 Email Verification
               </span>
@@ -76,8 +75,8 @@ function VerifyEmail() {
               <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
                 <LoadingSpinner size="lg" type="dots" color="blue" />
               </div>
-              <p className="text-slate-300 font-semibold">Verifying your email...</p>
-              <p className="text-slate-500 text-sm">Please wait a moment</p>
+              <p className={cn("text-secondary-foreground", "font-semibold")}>Verifying your email...</p>
+              <p className={cn("text-muted-foreground", "text-sm")}>Please wait a moment</p>
             </div>
           </div>
         </div>
@@ -86,19 +85,15 @@ function VerifyEmail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
+    <div className={cn(page, "flex", "items-center", "justify-center", "px-4", "py-12")}>
+      <AmbientBackground />
 
-      <div className="relative w-full max-w-md bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl text-center">
+      <div className={cn("relative", "w-full", "max-w-md", card, "p-8", "shadow-2xl", "text-center")}>
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-4 mx-auto">
             <FaEnvelope className="text-white text-2xl" />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">
             <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
               Email Verification
             </span>
@@ -114,8 +109,8 @@ function VerifyEmail() {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Verification Successful!</h2>
-              <p className="text-slate-300 leading-relaxed text-sm">{result.message}</p>
+              <h2 className="text-xl font-bold text-foreground mb-2">Verification Successful!</h2>
+              <p className={cn("text-secondary-foreground", "leading-relaxed", "text-sm")}>{result.message}</p>
             </div>
 
             {result.user && (
@@ -123,7 +118,7 @@ function VerifyEmail() {
                 <p className="text-emerald-400 text-sm font-semibold mb-1">
                   Welcome, {result.user.name}!
                 </p>
-                <p className="text-slate-400 text-xs">
+                <p className={cn("text-muted-foreground", "text-xs")}>
                   Your account is verified and ready to use.
                 </p>
               </div>
@@ -132,7 +127,7 @@ function VerifyEmail() {
             {result.status === "already_used" && (
               <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4">
                 <p className="text-indigo-400 text-sm font-semibold mb-1">Good news!</p>
-                <p className="text-slate-400 text-xs">
+                <p className={cn("text-muted-foreground", "text-xs")}>
                   This verification link was already used successfully. Your account is active.
                 </p>
               </div>
@@ -155,15 +150,15 @@ function VerifyEmail() {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Verification Failed</h2>
-              <p className="text-slate-300 leading-relaxed text-sm">{result?.message || "An unknown error occurred."}</p>
+              <h2 className="text-xl font-bold text-foreground mb-2">Verification Failed</h2>
+              <p className={cn("text-secondary-foreground", "leading-relaxed", "text-sm")}>{result?.message || "An unknown error occurred."}</p>
             </div>
 
-            <div className="bg-slate-800/60 rounded-xl border border-slate-700/40 p-4 text-left">
-              <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-3">
+            <div className="bg-input rounded-xl border border-border p-4 text-left">
+              <p className={cn("text-muted-foreground", "text-xs", "font-semibold", "uppercase", "tracking-widest", "mb-3")}>
                 What to try
               </p>
-              <ul className="text-slate-400 text-sm space-y-2">
+              <ul className={cn("text-muted-foreground", "text-sm", "space-y-2")}>
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400 mt-0.5">&#8226;</span>
                   <span>Check if you have a newer verification email</span>
@@ -188,7 +183,7 @@ function VerifyEmail() {
               </Link>
               <Link
                 to="/signup"
-                className="px-4 py-2.5 bg-slate-700/60 hover:bg-slate-700 border border-slate-600/50 text-slate-300 hover:text-white rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
+                className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "inline-flex", "items-center", "justify-center", "gap-2", "cursor-pointer")}
               >
                 Sign Up Again
               </Link>

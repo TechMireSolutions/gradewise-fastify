@@ -1,22 +1,27 @@
+import { cn } from "@/lib/cn.js";
+import { card, cardGlow, cardHeader, cardInteractive } from "@/lib/ui.js";
 
-function Card({ children, className = "", hover = false }) {
+function Card({ children, className = "", hover = false, glow = false }) {
   return (
     <div
-      className={`bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl shadow-2xl ${
-        hover ? "hover:border-indigo-500/30 transition-all duration-200" : ""
-      } ${className}`}
+      className={cn(
+        card,
+        hover && cardInteractive,
+        glow && cardGlow,
+        className
+      )}
     >
       {children}
     </div>
-  )
+  );
 }
 
 function CardHeader({ children, className = "" }) {
-  return <div className={`px-6 py-4 border-b border-slate-700/50 bg-slate-800/60 ${className}`}>{children}</div>
+  return <div className={cn(cardHeader, className)}>{children}</div>;
 }
 
 function CardContent({ children, className = "" }) {
-  return <div className={`p-6 ${className}`}>{children}</div>
+  return <div className={cn("p-6", className)}>{children}</div>;
 }
 
-export { Card, CardHeader, CardContent }
+export { Card, CardHeader, CardContent };

@@ -17,6 +17,10 @@ import {
 } from "./resources.service.js";
 
 import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
+import {
+  AssessmentIdParamSchema,
+  ResourceIdParamSchema,
+} from "../../schemas/common.js";
 
 const ALLOWED_MIMETYPES = new Set([
   "application/pdf",
@@ -105,7 +109,7 @@ export default async function resourcesModule(app: FastifyInstance) {
   // GET /api/resources/assessments/:assessmentId
   f.get("/assessments/:assessmentId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: z.object({ assessmentId: z.coerce.number().int().positive() }) },
+    schema: { params: AssessmentIdParamSchema },
   }, async (request, reply) => {
     try {
       const data = await getAssessmentResourcesService(request.params.assessmentId);
@@ -119,7 +123,7 @@ export default async function resourcesModule(app: FastifyInstance) {
   // GET /api/resources/:resourceId
   f.get("/:resourceId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: z.object({ resourceId: z.coerce.number().int().positive() }) },
+    schema: { params: ResourceIdParamSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };
@@ -135,7 +139,7 @@ export default async function resourcesModule(app: FastifyInstance) {
   f.put("/:resourceId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({ resourceId: z.coerce.number().int().positive() }),
+      params: ResourceIdParamSchema,
       body: z.object({
         name: z.string().optional(),
         visibility: z.enum(["private", "public"]).optional(),
@@ -155,7 +159,7 @@ export default async function resourcesModule(app: FastifyInstance) {
   // DELETE /api/resources/:resourceId
   f.delete("/:resourceId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: z.object({ resourceId: z.coerce.number().int().positive() }) },
+    schema: { params: ResourceIdParamSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };
@@ -171,8 +175,7 @@ export default async function resourcesModule(app: FastifyInstance) {
   f.post("/:resourceId/assessments/:assessmentId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({
-        resourceId: z.coerce.number().int().positive(),
+      params: ResourceIdParamSchema.extend({
         assessmentId: z.coerce.number().int().positive(),
       }),
     },
@@ -190,8 +193,7 @@ export default async function resourcesModule(app: FastifyInstance) {
   f.delete("/:resourceId/assessments/:assessmentId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({
-        resourceId: z.coerce.number().int().positive(),
+      params: ResourceIdParamSchema.extend({
         assessmentId: z.coerce.number().int().positive(),
       }),
     },

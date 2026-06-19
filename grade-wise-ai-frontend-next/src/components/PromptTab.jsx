@@ -12,9 +12,9 @@ function PromptTab({ assessment, copied, onCopy }) {
             <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
               <FaFileAlt className="text-white text-sm" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Exact Prompt Sent to AI Model</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground">Exact Prompt Sent to AI Model</h2>
           </div>
-          <p className="text-slate-400 text-sm leading-relaxed">
+          <p className={cn("text-muted-foreground", "text-sm", "leading-relaxed")}>
             This is the <strong className="text-indigo-400 font-semibold">100% identical prompt</strong> used by Gradewise-AI.<br className="hidden sm:block" />
             Copy and paste it into ChatGPT, Gemini, Grok, or Claude —{" "}
             <strong className="text-emerald-400 font-semibold">same result guaranteed</strong>.
@@ -42,14 +42,14 @@ function PromptTab({ assessment, copied, onCopy }) {
         </button>
       </div>
 
-      <div className="bg-slate-950/80 backdrop-blur-sm border border-slate-700/60 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-800/60">
+      <div className="bg-slate-950/80 backdrop-blur-sm border border-border rounded-2xl overflow-hidden shadow-2xl">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-input">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-red-500/70" />
             <div className="w-3 h-3 rounded-full bg-amber-500/70" />
             <div className="w-3 h-3 rounded-full bg-emerald-500/70" />
           </div>
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest">AI Prompt</span>
+          <span className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest")}>AI Prompt</span>
           <div className="w-16" />
         </div>
         <div className="p-4 sm:p-6 lg:p-7 overflow-hidden">

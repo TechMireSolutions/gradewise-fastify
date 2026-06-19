@@ -24,6 +24,7 @@ import {
 } from "./assessments.service.js";
 
 import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
+import { IdParamSchema, IdStudentIdParamSchema } from "../../schemas/common.js";
 
 export default async function assessmentsModule(app: FastifyInstance) {
   const f = app.withTypeProvider<ZodTypeProvider>();
@@ -60,7 +61,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   // GET /api/assessments/:id
   f.get("/:id", {
     preHandler: [authenticate],
-    schema: { params: z.object({ id: z.coerce.number().int().positive() }) },
+    schema: { params: IdParamSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };
@@ -76,7 +77,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   f.put("/:id", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({ id: z.coerce.number().int().positive() }),
+      params: IdParamSchema,
       body: UpdateAssessmentSchema,
     },
   }, async (request, reply) => {
@@ -93,7 +94,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   // DELETE /api/assessments/:id
   f.delete("/:id", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: z.object({ id: z.coerce.number().int().positive() }) },
+    schema: { params: IdParamSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };
@@ -109,7 +110,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   f.post("/:id/enroll", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({ id: z.coerce.number().int().positive() }),
+      params: IdParamSchema,
       body: EnrollStudentSchema,
     },
   }, async (request, reply) => {
@@ -126,12 +127,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   // DELETE /api/assessments/:id/enroll/:studentId
   f.delete("/:id/enroll/:studentId", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: {
-      params: z.object({
-        id: z.coerce.number().int().positive(),
-        studentId: z.coerce.number().int().positive(),
-      }),
-    },
+    schema: { params: IdStudentIdParamSchema },
   }, async (request, reply) => {
     try {
       await unenrollStudentService(request.params.id, request.params.studentId);
@@ -145,7 +141,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   // GET /api/assessments/:id/enrolled-students
   f.get("/:id/enrolled-students", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: z.object({ id: z.coerce.number().int().positive() }) },
+    schema: { params: IdParamSchema },
   }, async (request, reply) => {
     try {
       const data = await getEnrolledStudentsService(request.params.id);
@@ -160,7 +156,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   f.get("/:id/preview-questions", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({ id: z.coerce.number().int().positive() }),
+      params: IdParamSchema,
       querystring: z.object({ language: z.string().optional().default("en") }),
     },
   }, async (request, reply) => {
@@ -177,7 +173,7 @@ export default async function assessmentsModule(app: FastifyInstance) {
   f.post("/:id/print", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: {
-      params: z.object({ id: z.coerce.number().int().positive() }),
+      params: IdParamSchema,
       body: PhysicalPaperSchema,
     },
   }, async (request, reply) => {

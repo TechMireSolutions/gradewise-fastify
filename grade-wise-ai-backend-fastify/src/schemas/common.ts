@@ -27,3 +27,11 @@ export const SubmissionIdParamSchema = z.object({
 export const ResetIdParamSchema = z.object({
   resetId: z.string().min(1),
 });
+
+export const IdStudentIdParamSchema = IdParamSchema.extend({
+  studentId: z.coerce.number().int().positive(),
+});
+
+export const VerifyTokenParamSchema = z.object({
+  token: z.string().min(1),
+});

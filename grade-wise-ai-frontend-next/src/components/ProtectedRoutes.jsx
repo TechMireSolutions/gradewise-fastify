@@ -1,59 +1,67 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useHydrated from "../hooks/useHydrated.js";
 import LoadingSpinner from "./ui/LoadingSpinner.jsx";
 
-/**
- * A component that protects routes based on user authentication and role.
- * If the user is not authenticated, they are redirected to the login page.
- * If the user is authenticated but does not have an allowed role, they are redirected to the home page.
- * @param {Object} props - The component props.
- * @param {string|string[]} props.requiredRole - The role(s) that are allowed to access this route.
- * @param {React.ReactNode} props.children - The child components to render if access is granted.
- */
 function ProtectedRoute({ requiredRole, children }) {
-  const { token, user } = useAuthStore();
+  const { user, fetchMe } = useAuthStore();
   const router = useRouter();
   const hydrated = useHydrated();
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (hydrated) {
-      if (!token || !user || !user.role) {
-        router.replace("/login");
-      } else if (requiredRole) {
-        const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-        if (!roles.includes(user.role)) {
-          router.replace("/");
-        }
-      }
-    }
-  }, [hydrated, token, user, requiredRole, router]);
+    if (!hydrated) return;
 
-  // Render loading while hydration occurs
-  if (!hydrated) {
+    let cancelled = false;
+
+    const verifySession = async () => {
+      try {
+        const currentUser = user ?? (await fetchMe());
+        if (cancelled) return;
+
+        if (!currentUser?.role) {
+          router.replace("/login");
+          return;
+        }
+
+        if (requiredRole) {
+          const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+          if (!roles.includes(currentUser.role)) {
+            router.replace("/");
+          }
+        }
+      } catch {
+        if (!cancelled) router.replace("/login");
+      } finally {
+        if (!cancelled) setChecking(false);
+      }
+    };
+
+    verifySession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, user, requiredRole, router, fetchMe]);
+
+  if (!hydrated || checking) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <LoadingSpinner size="lg" type="spinner" color="blue" />
       </div>
     );
   }
 
-  // Pre-hydration checks fail, return null (handled by useEffect redirect)
-  if (!token || !user || !user.role) {
-    return null;
-  }
+  if (!user?.role) return null;
 
   if (requiredRole) {
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-    if (!roles.includes(user.role)) {
-      return null;
-    }
+    if (!roles.includes(user.role)) return null;
   }
 
-  // If authenticated and authorized, render the child components
   return children;
 }
 

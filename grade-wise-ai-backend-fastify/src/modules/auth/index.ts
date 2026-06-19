@@ -1,12 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
 import { ADMIN_ROLES, INSTRUCTOR_ROLES } from "../../constants/roles.js";
-import { UserIdParamSchema } from "../../schemas/common.js";
+import { UserIdParamSchema, VerifyTokenParamSchema } from "../../schemas/common.js";
 import { verifyCaptcha } from "../../utils/captcha.js";
 import { toHttpError } from "../../utils/errors.js";
+import { setAuthCookie, clearAuthCookie } from "../../utils/auth-cookie.js";
+import { findUserById } from "./auth.service.js";
 import {
   SignupSchema,
   LoginSchema,
@@ -40,12 +41,12 @@ export default async function authModule(app: FastifyInstance) {
       await verifyCaptcha(request.body.captchaToken);
       const { user, emailSent } = await signupService(request.body);
       const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role });
+      setAuthCookie(reply, token);
       return reply.code(201).send({
         success: true,
         message: emailSent
           ? "Account created. Check your email to verify."
           : "Account created successfully.",
-        token,
         user: { id: user.id, name: user.name, email: user.email, role: user.role, verified: user.verified },
       });
     } catch (err) {
@@ -62,10 +63,10 @@ export default async function authModule(app: FastifyInstance) {
       await verifyCaptcha(request.body.captchaToken);
       const user = await loginService(request.body);
       const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role });
+      setAuthCookie(reply, token);
       return reply.send({
         success: true,
         message: "Login successful",
-        token,
         user: {
           id: user.id,
           name: user.name,
@@ -89,10 +90,10 @@ export default async function authModule(app: FastifyInstance) {
     try {
       const user = await googleAuthService(request.body);
       const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role });
+      setAuthCookie(reply, token);
       return reply.send({
         success: true,
         message: "Google authentication successful",
-        token,
         user: { id: user.id, name: user.name, email: user.email, role: user.role, verified: user.verified },
       });
     } catch (err) {
@@ -101,8 +102,39 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
+  f.post("/logout", async (_request, reply) => {
+    clearAuthCookie(reply);
+    return reply.send({ success: true, message: "Logged out successfully." });
+  });
+
+  f.get("/me", {
+    preHandler: [authenticate],
+  }, async (request, reply) => {
+    try {
+      const jwtUser = request.user as { id: number };
+      const user = await findUserById(jwtUser.id);
+      if (!user) {
+        return reply.code(404).send({ success: false, message: "User not found" });
+      }
+      return reply.send({
+        success: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          verified: user.verified,
+          provider: user.provider,
+        },
+      });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
   f.get("/verify/:token", {
-    schema: { params: z.object({ token: z.string() }) },
+    schema: { params: VerifyTokenParamSchema },
   }, async (request, reply) => {
     try {
       const result = await verifyEmailService(request.params.token);
