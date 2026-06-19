@@ -1,13 +1,15 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createGroq } from "@ai-sdk/groq";
-import { createMistral } from "@ai-sdk/mistral";
 import type { LanguageModel } from "ai";
 import { db, systemConfigs } from "../db/index.js";
+import { buildLanguageModel } from "./build-model.js";
+import {
+  AI_DEFAULT_MODELS,
+  buildConfigKey,
+  PROVIDER_TYPES,
+  type ProviderType,
+  type PurposeType,
+} from "./constants.js";
 
-export type ProviderType = "gemini" | "groq" | "openai" | "claude" | "mistral" | "deepseek";
-export type PurposeType = "text" | "pdf";
+export type { ProviderType, PurposeType } from "./constants.js";
 
 export interface ProviderInstance {
   id: string;
@@ -19,14 +21,7 @@ export interface ProviderInstance {
 
 // ─── Default models per provider ─────────────────────────────────────────────
 
-const DEFAULT_MODELS: Record<ProviderType, string> = {
-  gemini: "gemini-2.5-flash",
-  groq: "llama-3.3-70b-versatile",
-  openai: "gpt-4o-mini",
-  claude: "claude-sonnet-4-6",
-  mistral: "mistral-small-latest",
-  deepseek: "deepseek-chat",
-};
+const DEFAULT_MODELS = AI_DEFAULT_MODELS;
 
 // ─── Rotation & cooldown state ────────────────────────────────────────────────
 
@@ -56,47 +51,10 @@ function pickNext(providers: ProviderInstance[], purpose: PurposeType): Provider
   return available[idx] ?? null;
 }
 
-// ─── Key prefix → provider detection ─────────────────────────────────────────
-
-function detectProvider(key: string): ProviderType | null {
-  if (key.startsWith("sk-ant-")) return "claude";
-  if (key.startsWith("gsk_")) return "groq";
-  if (key.startsWith("AIza") || key.startsWith("AQ.")) return "gemini";
-  if (key.startsWith("sk-proj-") || key.startsWith("sk-svcacct-")) return "openai";
-  if (/^[0-9a-f]{32}$/i.test(key)) return "mistral";
-  if (key.startsWith("sk-")) return "openai";
-  return null;
-}
-
 // ─── Build a LanguageModel instance for a provider + key + model ──────────────
 
 function buildModel(type: ProviderType, key: string, modelName: string): LanguageModel {
-  switch (type) {
-    case "gemini": {
-      const g = createGoogleGenerativeAI({ apiKey: key });
-      return g(modelName);
-    }
-    case "openai": {
-      const o = createOpenAI({ apiKey: key });
-      return o(modelName);
-    }
-    case "claude": {
-      const a = createAnthropic({ apiKey: key });
-      return a(modelName);
-    }
-    case "groq": {
-      const gr = createGroq({ apiKey: key });
-      return gr(modelName);
-    }
-    case "mistral": {
-      const m = createMistral({ apiKey: key });
-      return m(modelName);
-    }
-    case "deepseek": {
-      const ds = createOpenAI({ apiKey: key, baseURL: "https://api.deepseek.com/v1" });
-      return ds(modelName);
-    }
-  }
+  return buildLanguageModel(type, key, modelName);
 }
 
 // ─── Load providers from DB system_configs ────────────────────────────────────
@@ -124,14 +82,7 @@ export function invalidateConfigCache(): void {
   cacheExpiry = 0;
 }
 
-const SUPPORTED_PROVIDERS: ProviderType[] = [
-  "gemini",
-  "groq",
-  "openai",
-  "claude",
-  "mistral",
-  "deepseek",
-];
+const SUPPORTED_PROVIDERS = PROVIDER_TYPES;
 
 async function buildProviders(purpose: PurposeType): Promise<ProviderInstance[]> {
   const configs = await getConfigs();
@@ -141,14 +92,14 @@ async function buildProviders(purpose: PurposeType): Promise<ProviderInstance[]>
   for (const providerType of SUPPORTED_PROVIDERS) {
     const providerKey = providerType.toUpperCase();
     const keysRaw =
-      configs[`${purposeKey}_${providerKey}_KEYS`] ??
+      configs[buildConfigKey(purpose, providerType, "KEYS")] ??
       configs[`${purposeKey}_AI_KEYS`] ??
-      process.env[`${purposeKey}_${providerKey}_KEYS`] ??
+      process.env[buildConfigKey(purpose, providerType, "KEYS")] ??
       "";
 
     const modelName =
-      configs[`${purposeKey}_${providerKey}_MODEL`] ??
-      process.env[`${purposeKey}_${providerKey}_MODEL`] ??
+      configs[buildConfigKey(purpose, providerType, "MODEL")] ??
+      process.env[buildConfigKey(purpose, providerType, "MODEL")] ??
       DEFAULT_MODELS[providerType];
 
     const keys = keysRaw

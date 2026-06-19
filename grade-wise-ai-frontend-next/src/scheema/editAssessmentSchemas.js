@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FILE_CONSTANTS } from "./fileSchemas.js";
 
 // Constants
 export const ASSESSMENT_CONSTANTS = {
@@ -16,19 +17,8 @@ export const ASSESSMENT_CONSTANTS = {
   MAX_MARKS: 100,
   QUESTION_TYPES: ['multiple_choice', 'short_answer', 'true_false'],
   MAX_EXTERNAL_LINKS: 10,
-  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-  ALLOWED_FILE_TYPES: [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'image/jpeg',
-    'image/jpg',
-    'image/png',
-    'image/webp'
-  ]
+  MAX_FILE_SIZE: FILE_CONSTANTS.MAX_FILE_SIZE,
+  ALLOWED_FILE_TYPES: FILE_CONSTANTS.ALLOWED_FILE_TYPES,
 };
 
 // Question block schema

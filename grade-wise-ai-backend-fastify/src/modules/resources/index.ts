@@ -16,7 +16,7 @@ import {
   getAssessmentResourcesService,
 } from "./resources.service.js";
 
-const INSTRUCTOR_ROLES = ["instructor", "admin", "super_admin"] as const;
+import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
 
 const ALLOWED_MIMETYPES = new Set([
   "application/pdf",

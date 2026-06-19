@@ -2,12 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { validateAssessmentForm, validateFiles } from "../../../scheema/editAssessmentSchemas.js";
-import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFileUpload, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
-import { FiCheckCircle } from "react-icons/fi";
+import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
 
 function EditAssessment() {
   const { id } = useParams();

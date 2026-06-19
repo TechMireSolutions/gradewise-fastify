@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
-import { Card, CardContent } from "../components/ui/Card.jsx";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
+import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
+import useModal from "../hooks/useModal.js";
 import { FaEnvelope, FaPaperPlane, FaArrowLeft, FaLock, FaExclamationTriangle } from "react-icons/fa";
 import { resetPasswordSchema } from "../scheema/passwordSchemas.js";
+import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 function ResetPassword() {
   const navigate = useNavigate();
   const forgotPassword = useAuthStore((state) => state.forgotPassword);
@@ -15,11 +17,7 @@ function ResetPassword() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
-
-  const showModal = (type, title, message) => {
-    setModal({ isOpen: true, type, title, message });
-  };
+  const { modal, showModal, closeModal } = useModal();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,17 +31,16 @@ function ResetPassword() {
 
   const handleForgotSubmit = async (e) => {
     e.preventDefault();
-try {
-  resetPasswordSchema.parse(formData);
-  setErrors({});
-} catch (err) {
-  const fieldErrors = {};
-  err.errors.forEach((e) => {
-    fieldErrors[e.path[0]] = e.message;
-  });
-  setErrors(fieldErrors);
-  return;
-}
+    try {
+      resetPasswordSchema.parse(formData);
+      setErrors({});
+    } catch (error) {
+      const fieldErrors = parseZodFieldErrors(error);
+      if (fieldErrors) {
+        setErrors(fieldErrors);
+        return;
+      }
+    }
 
     setLoading(true);
 
@@ -70,16 +67,7 @@ try {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
-      {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        {/* Form card */}
+    <AuthPageLayout backLabel="Back to Login" backTo="/login">
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
           {/* Logo/brand header */}
           <div className="mb-8 text-center">
@@ -163,17 +151,11 @@ try {
             </div>
           </div>
         </div>
-      </div>
 
-      <Modal
-        isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
-        type={modal.type}
-        title={modal.title}
-      >
+      <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title}>
         {modal.message}
       </Modal>
-    </div>
+    </AuthPageLayout>
   );
 }
 

@@ -1,33 +1,20 @@
 import { db, systemConfigs } from "../../db/index.js";
 import { eq } from "drizzle-orm";
 import { invalidateConfigCache } from "../../ai/providers.js";
-import axios from "axios";
+import { buildLanguageModel } from "../../ai/build-model.js";
+import {
+  AI_DEFAULT_MODELS,
+  buildConfigKey,
+  PROVIDER_TYPES,
+  type ProviderType,
+  type PurposeType,
+} from "../../ai/constants.js";
 
-export type ProviderType = "gemini" | "groq" | "openai" | "claude" | "mistral" | "deepseek";
-export type PurposeType = "text" | "pdf";
-
-const SAFE_TEST_MODELS: Record<ProviderType, string> = {
-  gemini: "gemini-2.5-flash",
-  groq: "llama-3.3-70b-versatile",
-  openai: "gpt-4o-mini",
-  claude: "claude-sonnet-4-6",
-  mistral: "mistral-small-latest",
-  deepseek: "deepseek-chat",
-};
+export type { ProviderType, PurposeType };
 
 function maskKey(key: string): string {
   if (key.length <= 8) return "••••••••";
   return `${key.substring(0, 6)}••••${key.substring(key.length - 4)}`;
-}
-
-function detectProviderFromKey(key: string): ProviderType | null {
-  if (key.startsWith("sk-ant-")) return "claude";
-  if (key.startsWith("gsk_")) return "groq";
-  if (key.startsWith("AIza") || key.startsWith("AQ.")) return "gemini";
-  if (key.startsWith("sk-proj-") || key.startsWith("sk-svcacct-")) return "openai";
-  if (/^[0-9a-f]{32}$/i.test(key)) return "mistral";
-  if (key.startsWith("sk-")) return "openai";
-  return null;
 }
 
 export async function getAllConfigs(): Promise<Array<{ key: string; value: string | null }>> {
@@ -50,14 +37,13 @@ export async function getAiKeysSummary() {
     if (r.configKey && r.configValue) map[r.configKey] = r.configValue;
   }
 
-  const providers: ProviderType[] = ["gemini", "groq", "openai", "claude", "mistral", "deepseek"];
   const purposes: PurposeType[] = ["text", "pdf"];
 
-  return providers.map((provider) => ({
+  return PROVIDER_TYPES.map((provider) => ({
     provider,
     purposes: purposes.map((purpose) => {
-      const keysRaw = map[`${purpose.toUpperCase()}_${provider.toUpperCase()}_KEYS`] ?? "";
-      const model = map[`${purpose.toUpperCase()}_${provider.toUpperCase()}_MODEL`] ?? SAFE_TEST_MODELS[provider];
+      const keysRaw = map[buildConfigKey(purpose, provider, "KEYS")] ?? "";
+      const model = map[buildConfigKey(purpose, provider, "MODEL")] ?? AI_DEFAULT_MODELS[provider];
       const keys = keysRaw.split(",").map((k) => k.trim()).filter(Boolean);
       return {
         purpose,
@@ -75,7 +61,7 @@ export async function addAiKeys(
   purpose: PurposeType,
   keys: string[]
 ): Promise<{ added: number }> {
-  const configKey = `${purpose.toUpperCase()}_${provider.toUpperCase()}_KEYS`;
+  const configKey = buildConfigKey(purpose, provider, "KEYS");
   const existing = await db
     .select()
     .from(systemConfigs)
@@ -109,7 +95,7 @@ export async function setProviderModel(
   purpose: PurposeType,
   model: string
 ): Promise<void> {
-  const configKey = `${purpose.toUpperCase()}_${provider.toUpperCase()}_MODEL`;
+  const configKey = buildConfigKey(purpose, provider, "MODEL");
   const existing = await db
     .select()
     .from(systemConfigs)
@@ -133,7 +119,7 @@ export async function deleteAiKey(
   purpose: PurposeType,
   keyIndex: number
 ): Promise<void> {
-  const configKey = `${purpose.toUpperCase()}_${provider.toUpperCase()}_KEYS`;
+  const configKey = buildConfigKey(purpose, provider, "KEYS");
   const existing = await db
     .select()
     .from(systemConfigs)
@@ -157,35 +143,13 @@ export async function testAiKey(
   apiKey: string,
   model?: string
 ): Promise<{ success: boolean; model: string; latencyMs: number; error?: string }> {
-  const testModel = model ?? SAFE_TEST_MODELS[provider];
+  const testModel = model ?? AI_DEFAULT_MODELS[provider];
   const start = Date.now();
   const testPrompt = "Reply with exactly: OK";
 
   try {
-    // Use Vercel AI SDK to send a minimal generation request
     const { generateText } = await import("ai");
-    let aiModel;
-
-    if (provider === "gemini") {
-      const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
-      aiModel = createGoogleGenerativeAI({ apiKey })(testModel);
-    } else if (provider === "openai") {
-      const { createOpenAI } = await import("@ai-sdk/openai");
-      aiModel = createOpenAI({ apiKey })(testModel);
-    } else if (provider === "claude") {
-      const { createAnthropic } = await import("@ai-sdk/anthropic");
-      aiModel = createAnthropic({ apiKey })(testModel);
-    } else if (provider === "groq") {
-      const { createGroq } = await import("@ai-sdk/groq");
-      aiModel = createGroq({ apiKey })(testModel);
-    } else if (provider === "mistral") {
-      const { createMistral } = await import("@ai-sdk/mistral");
-      aiModel = createMistral({ apiKey })(testModel);
-    } else {
-      const { createOpenAI } = await import("@ai-sdk/openai");
-      aiModel = createOpenAI({ apiKey, baseURL: "https://api.deepseek.com/v1" })(testModel);
-    }
-
+    const aiModel = buildLanguageModel(provider, apiKey, testModel);
     await generateText({ model: aiModel, prompt: testPrompt, maxOutputTokens: 5 });
     return { success: true, model: testModel, latencyMs: Date.now() - start };
   } catch (err) {

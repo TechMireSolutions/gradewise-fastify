@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
-import { Card, CardHeader, CardContent } from "../components/ui/Card.jsx";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
+import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
+import useModal from "../hooks/useModal.js";
 import { getCaptchaToken } from "../config/captcha.js";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaGoogle, FaGraduationCap, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 import { redirectByRole } from "../utils/redirectByRole.js";
 import useRecaptchaInit from "../hooks/useRecaptchaInit.js";
-import { z } from "zod";
 import { signupSchema } from "../scheema/authSchemas.js";
+import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 function Signup() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function Signup() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, type: "info", title: "", message: "" });
+  const { modal, showModal, closeModal } = useModal();
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "dummy-key";
   useRecaptchaInit(siteKey);
@@ -28,10 +29,6 @@ function Signup() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const showModal = (type, title, message) => {
-    setModal({ isOpen: true, type, title, message });
   };
 
   const handleSubmit = async (e) => {
@@ -47,9 +44,8 @@ function Signup() {
       setFormData({ name: "", email: "", password: "" });
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors = {};
-        error.issues.forEach((err) => { fieldErrors[err.path[0]] = err.message; });
+      const fieldErrors = parseZodFieldErrors(error);
+      if (fieldErrors) {
         setErrors(fieldErrors);
       } else {
         const errorMessage = error.response?.data?.message || error.message || "Registration failed. Please try again.";
@@ -76,16 +72,7 @@ function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 flex items-center justify-center px-4 py-12">
-      {/* Ambient blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute top-1/2 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-32 right-1/3 w-72 h-72 bg-emerald-600/6 rounded-full blur-3xl animate-blob animation-delay-4000" />
-      </div>
-
-      <div className="relative w-full max-w-md">
-        {/* Form card */}
+    <AuthPageLayout backLabel="Back to Home">
         <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
           {/* Logo / brand header */}
           <div className="mb-8 text-center">
@@ -268,17 +255,11 @@ function Signup() {
             </div>
           </div>
         </div>
-      </div>
 
-      <Modal
-        isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
-        type={modal.type}
-        title={modal.title}
-      >
+      <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title}>
         {modal.message}
       </Modal>
-    </div>
+    </AuthPageLayout>
   );
 }
 

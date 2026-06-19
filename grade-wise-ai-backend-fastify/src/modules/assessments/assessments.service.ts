@@ -18,6 +18,11 @@ import { eq, and, inArray, sql } from "drizzle-orm";
 import { AppError, NotFoundError, ForbiddenError } from "../../utils/errors.js";
 import { generateContent, mapLanguageCode } from "../../ai/generate.js";
 import type { CreateAssessmentInput, UpdateAssessmentInput, PhysicalPaperInput } from "./assessments.schema.js";
+import {
+  gatherAssessmentContext,
+  buildBlockPrompt,
+  parseQuestionsFromAI,
+} from "./question-generation.js";
 import { generatePhysicalPaperPdf } from "../../utils/pdf.js";
 import { PassThrough } from "stream";
 
@@ -363,16 +368,7 @@ export async function previewQuestionsService(
     throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
   }
 
-  // Gather context
-  const linkedResources = await db
-    .select({ chunkText: resourceChunks.chunkText })
-    .from(assessmentResources)
-    .innerJoin(resources, eq(assessmentResources.resourceId, resources.id))
-    .innerJoin(resourceChunks, eq(resourceChunks.resourceId, resources.id))
-    .where(eq(assessmentResources.assessmentId, assessmentId))
-    .limit(20);
-
-  const context = linkedResources.map((r) => r.chunkText).join("\n\n");
+  const context = await gatherAssessmentContext(assessmentId);
   const langLabel = mapLanguageCode(language);
   const prompt = assessment[0].prompt ?? "";
 
@@ -387,6 +383,9 @@ export async function previewQuestionsService(
 
   return allQuestions;
 }
+
+// Re-export for backward compatibility
+export { parseQuestionsFromAI } from "./question-generation.js";
 
 // ─── Physical paper ───────────────────────────────────────────────────────────
 
@@ -428,47 +427,4 @@ export async function generatePhysicalPaperService(
     stream.on("error", reject);
     generatePhysicalPaperPdf({ ...options, questions: paperQuestions }, stream);
   });
-}
-
-// ─── AI prompt builder ────────────────────────────────────────────────────────
-
-function buildBlockPrompt(
-  block: QuestionBlock,
-  instructorPrompt: string,
-  context: string,
-  language: string
-): string {
-  const typeDescriptions: Record<string, string> = {
-    multiple_choice: `multiple choice questions, each with exactly ${block.numOptions ?? 4} options (A, B, C, D...)`,
-    short_answer: "short answer questions requiring 1-3 sentence answers",
-    true_false: "true/false questions",
-    matching: `matching questions with ${block.leftCount ?? 3} items on the left and ${block.rightCount ?? 4} options on the right`,
-  };
-
-  const typeDesc = typeDescriptions[block.questionType] ?? "questions";
-
-  return `Generate exactly ${block.questionCount} ${typeDesc} in ${language}.
-
-${instructorPrompt ? `Topic/Instructions: ${instructorPrompt}\n` : ""}
-${context ? `Reference Material:\n${context.substring(0, 3000)}\n` : ""}
-
-Return ONLY a valid JSON array. Each object must have:
-- "question_text": the question
-- "question_type": "${block.questionType}"
-${block.questionType === "multiple_choice" ? `- "options": array of ${block.numOptions ?? 4} strings\n- "correct_answer": the correct option text` : ""}
-${block.questionType === "true_false" ? '- "correct_answer": "True" or "False"' : ""}
-${block.questionType === "short_answer" ? '- "correct_answer": a model answer string' : ""}
-${block.questionType === "matching" ? `- "left_items": array of ${block.leftCount ?? 3} strings\n- "right_items": array of ${block.rightCount ?? 4} strings\n- "correct_answer": JSON string of match pairs` : ""}
-
-Do not include any text outside the JSON array.`;
-}
-
-export function parseQuestionsFromAI(raw: string, questionType: string): object[] {
-  try {
-    const jsonMatch = raw.match(/\[[\s\S]*\]/);
-    if (!jsonMatch?.[0]) return [];
-    return JSON.parse(jsonMatch[0]) as object[];
-  } catch {
-    return [];
-  }
 }

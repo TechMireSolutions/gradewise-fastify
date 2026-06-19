@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import { Card, CardHeader, CardContent } from "../../../components/ui/Card";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { createAssessmentSchema } from "../../../scheema/assessmentSchemas.js";
-import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiCheckSquare, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
+import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
 
 function CreateAssessment() {
   const navigate = useNavigate();

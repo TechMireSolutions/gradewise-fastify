@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Card, CardHeader, CardContent } from "../../components/ui/Card";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import {

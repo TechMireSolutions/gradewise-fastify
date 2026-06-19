@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
-import { Card, CardHeader, CardContent } from "../../components/ui/Card.jsx";
 import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import {

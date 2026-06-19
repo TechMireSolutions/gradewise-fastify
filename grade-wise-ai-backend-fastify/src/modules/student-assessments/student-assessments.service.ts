@@ -14,7 +14,11 @@ import {
 import { eq, and, sql } from "drizzle-orm";
 import { AppError, NotFoundError, ForbiddenError } from "../../utils/errors.js";
 import { generateContent, mapLanguageCode } from "../../ai/generate.js";
-import { parseQuestionsFromAI } from "../assessments/assessments.service.js";
+import {
+  gatherAssessmentContext,
+  buildBlockPrompt,
+  parseQuestionsFromAI,
+} from "../assessments/question-generation.js";
 
 // ─── Start assessment ─────────────────────────────────────────────────────────
 
@@ -101,15 +105,7 @@ export async function startAssessmentService(
     .limit(1);
   if (!assessment[0]) throw new NotFoundError("Assessment");
 
-  const chunks = await db
-    .select({ chunkText: resourceChunks.chunkText })
-    .from(assessmentResources)
-    .innerJoin(resources, eq(assessmentResources.resourceId, resources.id))
-    .innerJoin(resourceChunks, eq(resourceChunks.resourceId, resources.id))
-    .where(eq(assessmentResources.assessmentId, assessmentId))
-    .limit(20);
-
-  const context = chunks.map((c) => c.chunkText).join("\n\n");
+  const context = await gatherAssessmentContext(assessmentId);
   const langLabel = mapLanguageCode(language);
   const instructorPrompt = assessment[0].prompt ?? "";
 
@@ -118,7 +114,7 @@ export async function startAssessmentService(
   let orderIndex = 0;
 
   for (const block of blocks) {
-    const prompt = buildGenerationPrompt(block, instructorPrompt, context, langLabel);
+    const prompt = buildBlockPrompt(block, instructorPrompt, context, langLabel);
 
     let parsed: Array<Record<string, unknown>> = [];
     try {
@@ -364,26 +360,4 @@ function createFallbackQuestion(questionType: string, index: number) {
     options: questionType === "multiple_choice" ? ["Option A", "Option B", "Option C", "Option D"] : undefined,
     correct_answer: questionType === "true_false" ? "True" : "N/A",
   };
-}
-
-function buildGenerationPrompt(
-  block: any,
-  instructorPrompt: string,
-  context: string,
-  language: string
-): string {
-  const typeDescriptions: Record<string, string> = {
-    multiple_choice: `multiple choice questions, each with exactly ${block.numOptions ?? 4} options`,
-    short_answer: "short answer questions",
-    true_false: "true/false questions",
-    matching: "matching questions",
-  };
-
-  return `Generate exactly ${block.questionCount} ${typeDescriptions[block.questionType] ?? "questions"} in ${language}.
-
-${instructorPrompt ? `Topic/Instructions: ${instructorPrompt}\n` : ""}
-${context ? `Source Material:\n${context.substring(0, 3000)}\n` : ""}
-
-Return ONLY a valid JSON array with objects containing: "question_text", "question_type", "options" (for MCQ), "correct_answer".
-No markdown, no explanation, just the JSON array.`;
 }

@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom"
-import { Card, CardContent } from "../components/ui/Card.jsx"
 import { FaHome, FaArrowLeft, FaQuestionCircle, FaBookOpen } from "react-icons/fa"
 
 function NotFound() {

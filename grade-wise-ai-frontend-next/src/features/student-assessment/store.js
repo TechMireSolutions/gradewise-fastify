@@ -6,6 +6,7 @@ import {
   getSubmissionDetailsApi,
 } from "./api.js";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
+import { mapQuestionsWithParsedOptions } from "@/utils/parseQuestionOptions.js";
 
 const useStudentAssessmentStore = create((set, get) => ({
   assessmentQuestions: [],
@@ -34,26 +35,10 @@ const useStudentAssessmentStore = create((set, get) => ({
 
       const { questions, duration, attemptId } = response.data.data;
 
-      const parsedQuestions = questions.map((q) => {
-        let parsedOptions = null;
-
-        try {
-          parsedOptions =
-            q.options && typeof q.options === "string"
-              ? JSON.parse(q.options)
-              : q.options;
-
-          if (!Array.isArray(parsedOptions)) parsedOptions = null;
-        } catch {
-          parsedOptions = null;
-        }
-
-        return {
-          ...q,
-          answer: null,
-          options: parsedOptions,
-        };
-      });
+      const parsedQuestions = mapQuestionsWithParsedOptions(questions).map((q) => ({
+        ...q,
+        answer: null,
+      }));
 
       set({
         assessmentQuestions: parsedQuestions,

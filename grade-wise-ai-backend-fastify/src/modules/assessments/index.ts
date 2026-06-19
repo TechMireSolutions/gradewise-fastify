@@ -23,7 +23,7 @@ import {
   generatePhysicalPaperService,
 } from "./assessments.service.js";
 
-const INSTRUCTOR_ROLES = ["instructor", "admin", "super_admin"] as const;
+import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
 
 export default async function assessmentsModule(app: FastifyInstance) {
   const f = app.withTypeProvider<ZodTypeProvider>();

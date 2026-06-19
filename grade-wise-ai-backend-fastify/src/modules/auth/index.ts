@@ -3,6 +3,8 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
+import { ADMIN_ROLES, INSTRUCTOR_ROLES } from "../../constants/roles.js";
+import { UserIdParamSchema } from "../../schemas/common.js";
 import { verifyCaptcha } from "../../utils/captcha.js";
 import { toHttpError } from "../../utils/errors.js";
 import {
@@ -27,13 +29,9 @@ import {
   getAllUsers,
 } from "./auth.service.js";
 
-const SuccessResponse = z.object({ success: z.literal(true), message: z.string() });
-const ErrorResponse = z.object({ success: z.literal(false), message: z.string() });
-
 export default async function authModule(app: FastifyInstance) {
   const f = app.withTypeProvider<ZodTypeProvider>();
 
-  // POST /api/auth/signup
   f.post("/signup", {
     config: { rateLimit: { max: 10, timeWindow: "15 minutes" } },
     schema: { body: SignupSchema },
@@ -56,7 +54,6 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // POST /api/auth/login
   f.post("/login", {
     config: { rateLimit: { max: 10, timeWindow: "15 minutes" } },
     schema: { body: LoginSchema },
@@ -86,7 +83,6 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // POST /api/auth/google-auth
   f.post("/google-auth", {
     schema: { body: GoogleAuthSchema },
   }, async (request, reply) => {
@@ -105,7 +101,6 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // GET /api/auth/verify/:token
   f.get("/verify/:token", {
     schema: { params: z.object({ token: z.string() }) },
   }, async (request, reply) => {
@@ -118,17 +113,14 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // POST /api/auth/forgot-password
   f.post("/forgot-password", {
     config: { rateLimit: { max: 5, timeWindow: "15 minutes" } },
     schema: { body: ForgotPasswordSchema },
   }, async (request, reply) => {
-    // Always return 200 to prevent email enumeration
     await forgotPasswordService(request.body.email).catch(() => {});
     return reply.send({ success: true, message: "If that email exists, a reset link was sent." });
   });
 
-  // POST /api/auth/change-password
   f.post("/change-password", {
     schema: { body: ChangePasswordSchema },
   }, async (request, reply) => {
@@ -141,9 +133,8 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // POST /api/auth/register-student  [instructor, admin, super_admin]
   f.post("/register-student", {
-    preHandler: [authenticate, authorize("instructor", "admin", "super_admin")],
+    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
     schema: { body: RegisterStudentSchema },
   }, async (request, reply) => {
     try {
@@ -159,10 +150,9 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // GET /api/auth/users  [admin, super_admin]
   f.get("/users", {
-    preHandler: [authenticate, authorize("admin", "super_admin")],
-  }, async (request, reply) => {
+    preHandler: [authenticate, authorize(...ADMIN_ROLES)],
+  }, async (_request, reply) => {
     try {
       const allUsers = await getAllUsers();
       return reply.send({ success: true, users: allUsers });
@@ -172,9 +162,8 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // PUT /api/auth/change-role  [admin, super_admin]
   f.put("/change-role", {
-    preHandler: [authenticate, authorize("admin", "super_admin")],
+    preHandler: [authenticate, authorize(...ADMIN_ROLES)],
     schema: { body: ChangeRoleSchema },
   }, async (request, reply) => {
     try {
@@ -195,10 +184,9 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
-  // DELETE /api/auth/users/:userId  [super_admin]
   f.delete("/users/:userId", {
     preHandler: [authenticate, authorize("super_admin")],
-    schema: { params: z.object({ userId: z.coerce.number().int().positive() }) },
+    schema: { params: UserIdParamSchema },
   }, async (request, reply) => {
     try {
       await removeUserService(request.params.userId);

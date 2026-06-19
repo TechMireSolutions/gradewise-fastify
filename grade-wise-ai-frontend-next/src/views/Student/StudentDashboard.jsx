@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
-import { Card, CardHeader, CardContent } from "../../components/ui/Card";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import {
   FaClipboardList,
