@@ -27,7 +27,11 @@ src/
 │   ├── Providers.jsx       # TanStack Query QueryClientProvider
 │   ├── ui/ layout/ auth/ admin/ dashboard/
 ├── hooks/                  # useModal, useLoginForm, useUserManagement, useHydrated
-├── lib/apiClient.js        # axios with withCredentials
+├── lib/
+│   ├── apiClient.js        # axios with withCredentials
+│   ├── cn.js               # className merger
+│   └── ui.js               # Tailwind design-system tokens (btn, card, input…)
+├── features/theme/         # Zustand theme store + resolveTheme.js
 ├── schemas/                # Zod validation (NOT scheema/)
 ├── utils/                  # parseZodFieldErrors, formatDate, roleDisplay, translations
 ├── config/                 # firebase.js, captcha.js
@@ -121,9 +125,24 @@ When backend returns `{ status: "generating" }`:
 - `ProtectedRoute` shows spinner until session validated.
 - Never access `window` / `localStorage` for tokens at module top level.
 
-## Styling
+## Styling (pure Tailwind v4)
 
-See **`ui.md`**. Summary: Tailwind v4 · slate/indigo/violet/emerald · touch targets ≥ 44px.
+**Full spec:** `ui.md` · **Skill:** `gradewise-frontend` styling section
+
+| Need | Use |
+|------|-----|
+| Page wrapper | `PageShell` or `page` from `ui.js` |
+| Skip target | `MainLandmark` (`id="main-content"`) |
+| Buttons | `Button` or `btn.*` via `cn()` |
+| Form fields | `Input` / `Select` / `Textarea` / `Label` |
+| Cards | `Card`, `CardHeader` |
+| Action chips | `chip` + `chipTone.*` |
+| Theme toggle | `ThemeToggle` + `features/theme/store.js` |
+| Class merge | `cn()` from `lib/cn.js` only |
+
+- **No** custom CSS classes · **No** shadcn/ui · **No** hardcoded `slate-*` palettes
+- `globals.css` = tokens + animations only
+- New repeated patterns → add to `lib/ui.js`, not inline in views
 
 ## Testing
 

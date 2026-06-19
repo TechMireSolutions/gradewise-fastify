@@ -11,7 +11,7 @@
 | `domain_rules.md` | RBAC, assessments, multilingual, XAI, business logic |
 | `backend_rules.md` | `grade-wise-ai-backend-fastify/**/*.ts` |
 | `frontend_rules.md` | `grade-wise-ai-frontend-next/**` |
-| `ui.md` | Styling, typography, accessibility |
+| `ui.md` | Pure Tailwind v4 tokens, theme, a11y, `lib/ui.js` catalog |
 | `workflow_rules.md` | Before commit — build/lint/test gates |
 | `antigravity_rules.md` | Antigravity SDK agents only (not app code) |
 

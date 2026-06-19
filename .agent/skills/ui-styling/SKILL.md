@@ -8,6 +8,20 @@ metadata:
   version: "1.0.0"
 ---
 
+## ⚠️ Gradewise AI project override
+
+When working in **`grade-wise-ai-frontend-next/`**, **do not** use shadcn/ui, `@apply`, or custom CSS classes from this skill.
+
+Instead follow:
+
+1. **`.agent/rules/ui.md`** (or `.claude/rules/ui.md`) — canonical pure Tailwind spec
+2. **`gradewise-frontend` skill** — project patterns and examples
+3. **`src/lib/ui.js`** + **`src/components/ui/`** — design system primitives
+
+Use Tailwind v4 with `@theme inline` semantic tokens in `globals.css`. Compose with `cn()` + `ui.js` exports.
+
+---
+
 # UI Styling Skill
 
 Comprehensive skill for creating beautiful, accessible user interfaces combining shadcn/ui components, Tailwind CSS utility styling, and canvas-based visual design systems.
