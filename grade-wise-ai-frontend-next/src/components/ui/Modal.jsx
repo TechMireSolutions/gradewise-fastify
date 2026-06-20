@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
+import { cn } from "@/lib/cn";
 
 function Modal({
   isOpen,
