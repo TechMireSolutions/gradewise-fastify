@@ -43,7 +43,7 @@ Grade Wise AI is an **intelligent assessment platform** for educational institut
 |-----------|------|-------|
 | **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
 | **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
-| **Infra** | `docker-compose.yml` | PostgreSQL 17 (pgvector) · Redis 8 · MinIO · api · worker · web · Node 24 |
+| **Infra** | `docker-compose.yml` | PostgreSQL 18 (pgvector) · Redis 8 · MinIO · api · worker · web · Node 24 |
 | **CI** | `.github/workflows/ci.yml` | typecheck · build · test · lint · e2e |
 
 > **Deprecated:** `grade-wise-ai-backend-v2/` (Express) — never reference in new work.

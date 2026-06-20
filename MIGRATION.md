@@ -83,11 +83,11 @@ npm run dev
 ### Runtime & infrastructure
 
 - **Node.js** `22` → **`24` LTS** (`engines.node >=24.0.0`, Dockerfiles, CI)
-- **PostgreSQL** `pgvector/pgvector:pg16` → **`pg17`**
+- **PostgreSQL** `pgvector/pgvector:pg16` → **`pg18`**
 - **Redis** `redis:7-alpine` → **`redis:8-alpine`**
 - **GitHub Actions** `checkout@v4` / `setup-node@v4` → **`@v6`**
 
-> **Local Docker note:** Postgres major upgrade requires a fresh volume (`docker compose down -v`) or a manual `pg_upgrade` if you have existing data on pg16.
+> **Local Docker note:** Postgres major upgrade requires a fresh volume (`docker compose down -v`) or a manual `pg_upgrade` if you have existing data on an older major.
 
 ### npm updates
 
