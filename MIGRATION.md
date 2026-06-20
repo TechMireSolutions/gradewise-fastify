@@ -77,3 +77,20 @@ npm run dev
 1. **Login/signup responses no longer include `token`** — session is cookie-only
 2. **Google auth body** is now `{ idToken }` only (frontend updated)
 3. **Protected routes** require valid session cookie + `/auth/me` validation
+
+## Phase 5 — Stack & dependency refresh (2026-06)
+
+### Runtime & infrastructure
+
+- **Node.js** `22` → **`24` LTS** (`engines.node >=24.0.0`, Dockerfiles, CI)
+- **PostgreSQL** `pgvector/pgvector:pg16` → **`pg17`**
+- **Redis** `redis:7-alpine` → **`redis:8-alpine`**
+- **GitHub Actions** `checkout@v4` / `setup-node@v4` → **`@v6`**
+
+> **Local Docker note:** Postgres major upgrade requires a fresh volume (`docker compose down -v`) or a manual `pg_upgrade` if you have existing data on pg16.
+
+### npm updates
+
+**Frontend:** `@tanstack/react-query`, `@playwright/test`, `react-hook-form` (all other deps already latest).
+
+**Backend:** `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`, `bullmq`, `google-auth-library`, `ioredis`, `vitest`; `@types/node` pinned to **`^24.13.2`** (matches Node 24 runtime).

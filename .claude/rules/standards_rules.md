@@ -47,7 +47,7 @@ npm install && npm run build && npm run lint
 | Package | Rule |
 |---------|------|
 | `next` + `@next/eslint-plugin-next` | Pin **same exact version** (no caret drift) |
-| `engines.node` | `>=22.0.0` in both `package.json` files |
+| `engines.node` | `>=24.0.0` in both `package.json` files |
 | `@types/node` | Match active Node runtime major |
 
 ### Forbidden
