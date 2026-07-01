@@ -43,6 +43,12 @@ const useAuthStore = create(
 
       googleAuth: async () => {
         try {
+          if (!auth) {
+            throw {
+              message:
+                "Google sign-in is not configured. Please set up Firebase environment variables.",
+            };
+          }
           const result = await signInWithPopup(auth, googleProvider);
           const idToken = await result.user.getIdToken();
           const response = await googleAuthApi({ idToken });

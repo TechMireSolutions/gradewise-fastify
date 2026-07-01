@@ -72,15 +72,15 @@ npm install && npm run build && npm run lint
 
 ```
 gradewiseai/
-├── docker-compose.yml               # Postgres (pgvector), Redis, MinIO, api, worker, web
-├── .github/workflows/ci.yml         # CI gates
-├── MIGRATION.md                     # Modernization changelog
-├── grade-wise-ai-backend-fastify/ # API + worker
-├── grade-wise-ai-frontend-next/     # Web app
-├── .agent/rules/                    # Antigravity rules (mirrored)
-├── .claude/rules/                   # Claude rules (mirrored)
-├── .agent/skills/                   # Agent skills (mirrored)
-└── .cursorrules                     # Cursor index
+├── ecosystem.config.cjs          # PM2 — api + worker
+├── .github/workflows/ci.yml      # CI gates
+├── MIGRATION.md                  # Modernization changelog
+├── grade-wise-ai-backend-fastify/  # API + worker
+├── grade-wise-ai-frontend-next/  # Web app
+├── .agent/rules/                 # Antigravity rules (mirrored)
+├── .claude/rules/                # Claude rules (mirrored)
+├── .agent/skills/                # Agent skills (mirrored)
+└── .cursorrules                  # Cursor index
 ```
 
 ### Backend structure (`grade-wise-ai-backend-fastify/src/`)
@@ -318,8 +318,8 @@ e2e/                      # Playwright smoke tests
 ### Infrastructure
 
 ```bash
-docker compose up -d postgres redis minio   # local infra
-npm run dev:worker                            # BullMQ worker (backend)
+npm run dev:worker                  # BullMQ worker (backend, separate terminal)
+pm2 start ecosystem.config.cjs      # production: api + worker under PM2
 ```
 
 | Service | Env | Purpose |
@@ -346,7 +346,7 @@ CI defined in `.github/workflows/ci.yml`.
 
 - Prefer **`npm run db:generate`** + commit `drizzle/` + **`npm run db:migrate`** in production.
 - `db:push` OK for local dev only.
-- pgvector enabled via `drizzle/init-pgvector.sql` in Docker.
+- pgvector extension: run `CREATE EXTENSION IF NOT EXISTS vector;` on the target DB once.
 
 ---
 

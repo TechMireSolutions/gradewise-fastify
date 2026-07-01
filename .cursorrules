@@ -7,7 +7,7 @@
 | File | When to read |
 |------|--------------|
 | **`standards_rules.md`** | **Policies 1–5: deps · structure · naming · DRY · security/infra/testing** |
-| `project_rules.md` | Repo layout, Docker, CI, commands, routes, env |
+| `project_rules.md` | Repo layout, PM2, CI, commands, routes, env |
 | `domain_rules.md` | RBAC, assessments, multilingual, XAI, business logic |
 | `backend_rules.md` | `grade-wise-ai-backend-fastify/**/*.ts` |
 | `frontend_rules.md` | `grade-wise-ai-frontend-next/**` |
@@ -27,7 +27,7 @@ Paths: `.agent/rules/` · `.claude/rules/` · root `ANTIGRAVITY_RULES.md`
 |-----|------|-------|
 | Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
 | Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
-| Infra | `docker-compose.yml` | PostgreSQL 18 (pgvector) · Redis 8 · MinIO · api · worker · web · Node 24 |
+| Process manager | `ecosystem.config.cjs` | PM2 — api + worker |
 
 **Deprecated:** `grade-wise-ai-backend-v2/` (Express) — do not use.
 
@@ -36,16 +36,16 @@ Paths: `.agent/rules/` · `.claude/rules/` · root `ANTIGRAVITY_RULES.md`
 ## Commands
 
 ```bash
-# Infrastructure
-docker compose up -d postgres redis minio
+# Process manager (api + worker)
+pm2 start ecosystem.config.cjs
 
 # Frontend (port 3000)
 cd grade-wise-ai-frontend-next && npm run dev
 
-# Backend API (port 5005)
+# Backend API (port 5005) — dev mode
 cd grade-wise-ai-backend-fastify && npm run dev
 
-# Backend worker (when USE_ASYNC_JOBS=true)
+# Backend worker (when USE_ASYNC_JOBS=true) — dev mode
 cd grade-wise-ai-backend-fastify && npm run dev:worker
 ```
 

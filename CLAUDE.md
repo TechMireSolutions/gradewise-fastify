@@ -10,7 +10,7 @@ Workspace guide for humans and AI agents (Cursor, Antigravity, Claude Code).
 |-----------|------|-------|
 | **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
 | **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
-| **Infra** | `docker-compose.yml` | Postgres (pgvector) · Redis · MinIO |
+| **Process manager** | `ecosystem.config.cjs` | PM2 — api + worker |
 | **CI** | `.github/workflows/ci.yml` | Automated quality gates |
 
 > **Not in use:** `grade-wise-ai-backend-v2/` (legacy Express).
@@ -34,7 +34,7 @@ Rules are **grouped by concern** and **mirrored** across agent platforms:
 | File | Contents |
 |------|----------|
 | **`standards_rules.md`** | **Policies 1–5: deps, structure, naming, DRY, security/infra/testing** |
-| `project_rules.md` | Overview, Docker, CI, commands, routes, env |
+| `project_rules.md` | Overview, PM2, CI, commands, routes, env |
 | `domain_rules.md` | RBAC, assessments, multilingual, XAI |
 | `backend_rules.md` | Fastify, Drizzle, cookie auth, BullMQ, Redis, AI SDK |
 | `frontend_rules.md` | Next.js, middleware, TanStack Query, cookie auth |
@@ -60,10 +60,13 @@ Mirrored in `.agent/skills/` and `.claude/skills/`:
 
 ## Commands
 
-### Infrastructure
+### Process management (PM2)
 
 ```bash
-docker compose up -d postgres redis minio
+pm2 start ecosystem.config.cjs   # start api + worker
+pm2 save                          # persist across reboots
+pm2 startup                       # generate init script
+pm2 logs                          # tail logs
 ```
 
 ### Backend

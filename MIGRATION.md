@@ -4,8 +4,7 @@ This document summarizes infrastructure and architecture upgrades applied across
 
 ## Phase 0 — Foundation
 
-- **Docker Compose** (`docker-compose.yml`): Postgres (pgvector), Redis, MinIO, API, worker, web
-- **Dockerfiles** for backend and frontend (Next.js standalone)
+- **PM2 process manager** (`ecosystem.config.cjs`): api + worker
 - **GitHub Actions CI** (`.github/workflows/ci.yml`): typecheck, build, vitest, lint, Playwright smoke
 - **Vitest** backend tests (`npm test`)
 - **Playwright** frontend smoke tests (`npm run test:e2e`)
@@ -35,7 +34,7 @@ This document summarizes infrastructure and architecture upgrades applied across
 - **Batch answer inserts** on submit
 - **Redis-backed rate limiting** when `REDIS_URL` is set
 - **S3/MinIO storage scaffold** (`src/services/storage.ts`)
-- **pgvector** init SQL for Docker Postgres
+- **pgvector** init SQL (run on DB once: `CREATE EXTENSION IF NOT EXISTS vector;`)
 
 ## Phase 4 — Observability
 
@@ -44,12 +43,9 @@ This document summarizes infrastructure and architecture upgrades applied across
 ## Local development
 
 ```bash
-# Infrastructure
-docker compose up -d postgres redis minio
-
 # Backend
 cd grade-wise-ai-backend-fastify
-cp .env.example .env   # set JWT_SECRET, ENCRYPTION_KEY, FIREBASE_PROJECT_ID
+cp .env.example .env   # set JWT_SECRET, DATABASE_URL
 npm run db:push && npm run db:seed
 npm run dev
 npm run dev:worker     # separate terminal when USE_ASYNC_JOBS=true
@@ -58,6 +54,9 @@ npm run dev:worker     # separate terminal when USE_ASYNC_JOBS=true
 cd grade-wise-ai-frontend-next
 cp .env.example .env.local
 npm run dev
+
+# Production
+pm2 start ecosystem.config.cjs
 ```
 
 ## Required env updates
@@ -80,14 +79,14 @@ npm run dev
 
 ## Phase 5 — Stack & dependency refresh (2026-06)
 
-### Runtime & infrastructure
+### Runtime
 
-- **Node.js** `22` → **`24` LTS** (`engines.node >=24.0.0`, Dockerfiles, CI)
-- **PostgreSQL** `pgvector/pgvector:pg16` → **`pg18`**
+- **Node.js** `22` → **`24` LTS** (`engines.node >=24.0.0`, CI)
+- **PostgreSQL** upgraded to **`pg18`**
 - **Redis** `redis:7-alpine` → **`redis:8-alpine`**
 - **GitHub Actions** `checkout@v4` / `setup-node@v4` → **`@v6`**
 
-> **Local Docker note:** Postgres major upgrade requires a fresh volume (`docker compose down -v`) or a manual `pg_upgrade` if you have existing data on an older major.
+> **Postgres major upgrade note:** if you have existing data on an older major, run `pg_upgrade` or restore from a fresh dump.
 
 ### npm updates
 

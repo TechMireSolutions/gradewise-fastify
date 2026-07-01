@@ -105,7 +105,7 @@ When `USE_ASYNC_JOBS=true` and `REDIS_URL` set:
 2. Worker runs `generateQuestionsForAttempt()` in `modules/student-assessments/generation.ts`.
 3. Client polls `GET /api/taking/assessments/:assessmentId/attempts/:attemptId/status`.
 
-Run worker: `npm run dev:worker` or `docker compose up worker`.
+Run worker: `npm run dev:worker`.
 
 ## AI SDK v6
 
@@ -124,7 +124,7 @@ const text = await generateContent(prompt, { maxOutputTokens: 4096, temperature:
 
 ## Object Storage
 
-- `services/storage.ts` — S3-compatible (MinIO in docker-compose).
+- `services/storage.ts` — S3-compatible (MinIO or any S3 endpoint).
 - Set `S3_ENDPOINT`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_BUCKET`.
 
 ## Health Check

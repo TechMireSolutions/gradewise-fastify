@@ -96,7 +96,6 @@ grade-wise-ai-backend-fastify/src/
 ## Env & Infrastructure
 
 ```bash
-docker compose up -d postgres redis minio   # local infra
 cp .env.example .env
 ```
 
