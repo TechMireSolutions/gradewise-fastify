@@ -3,7 +3,7 @@ name: GradeWise AI Live Production Pipeline
 on:
   push:
     branches:
-      - main # Jab bhi main branch par push ya merge hoga, pipeline chal paregi
+      - main
 
 jobs:
   deploy:
@@ -19,13 +19,12 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
           script: |
+            set -e
             echo "🚀 Pipeline Triggered Successfully..."
-            
-            # Main Directory mein move karna
+
             cd /www/wwwroot/gradewiseai.techmiresolutions.com
-            
-            # Fresh code pull karna git se
             git pull origin main
 
             # ---------------------------------------------
@@ -33,20 +32,38 @@ jobs:
             # ---------------------------------------------
             echo "⚙️ Deploying Fastify Backend..."
             cd grade-wise-ai-backend-fastify
-            npx pnpm install
-            npx drizzle-kit push
-            npx pnpm run build
-            npx pm2 restart gradewise_backend || NODE_ENV=production npx pm2 start dist/index.js --name "gradewise_backend"
-            
+
+            # Env file guard: production loads .env.production first, then .env
+            [ -f .env ] || { echo "❌ ERROR: backend .env missing on server. Create it from .env.example first."; exit 1; }
+
+            npm ci
+            npm run build
+            npm run db:migrate || npx drizzle-kit push
+
+            npx pm2 restart gradewise-api || NODE_ENV=production npx pm2 start dist/index.js --name "gradewise-api"
+            cd ..
+
             # ---------------------------------------------
             # 2. FRONTEND DEPLOYMENT (Next.js)
             # ---------------------------------------------
             echo "📦 Deploying Next.js Frontend..."
-            cd ../grade-wise-ai-frontend-next
-            npx pnpm install
-            npx pnpm add react-router-dom # Missing router utility fallback
-            rm -rf .next
-            npx next build --webpack
-            npx pm2 restart gradewise_frontend || npx pm2 start npx --name "gradewise_frontend" -- pnpm next start -p 3000
+            cd grade-wise-ai-frontend-next
 
-            echo "✅ Everything is up-to-date and live!"
+            # Env file guard: NEXT_PUBLIC_API_URL etc. are baked in at build time
+            [ -f .env.production ] || [ -f .env.local ] || { echo "❌ ERROR: frontend .env.production/.env.local missing on server. Create it first."; exit 1; }
+
+            npm ci
+            rm -rf .next
+            npm run build
+
+            npx pm2 restart gradewise-frontend || NODE_ENV=production npx pm2 start node_modules/next/dist/bin/next --name "gradewise-frontend" -- start -p 3000
+            cd ..
+
+            # ---------------------------------------------
+            # 3. HEALTH CHECKS
+            # ---------------------------------------------
+            sleep 8
+            curl -fsS http://127.0.0.1:8000/api/health || { echo "❌ Backend health check FAILED"; exit 1; }
+            curl -fsS -o /dev/null http://127.0.0.1:3000 || { echo "❌ Frontend check FAILED"; exit 1; }
+
+            echo "✅ Deployment complete and healthy!"
