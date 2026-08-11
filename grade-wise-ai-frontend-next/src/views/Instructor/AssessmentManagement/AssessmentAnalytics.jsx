@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardInteractive, page, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
 import { FaList, FaTable, FaCalendarAlt, FaCheckCircle, FaEye, FaChartBar, FaArrowUp, FaUsers, FaExclamationTriangle } from "react-icons/fa";
@@ -9,7 +9,7 @@ import AmbientBackground from "../../../components/layout/AmbientBackground.jsx"
 
 function AssessmentAnalytics() {
   const { assessmentId } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const {
     loading,
     error,
@@ -152,7 +152,7 @@ function AssessmentAnalytics() {
                   {assessments.map((assessment) => (
                     <div
                       key={assessment.id}
-                      onClick={() => navigate(`/instructor/assessments/${assessment.id}/analytics`)}
+                      onClick={() => router.push(`/instructor/assessments/${assessment.id}/analytics`)}
                       className={`p-5 sm:p-6 rounded-xl border cursor-pointer transition-all duration-200 transform hover:-translate-y-0.5 ${assessment.id === Number(assessmentId)
                           ? "border-indigo-500/60 bg-indigo-500/10 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/30"
                           : "border-border bg-input hover:border-indigo-500/30 hover:bg-surface-elevated/40"

@@ -94,7 +94,7 @@ When `USE_ASYNC_JOBS=true` and Redis is available:
 
 - All roles authenticate via **httpOnly cookie** (`gradewise_token`) — not JWT in browser storage.
 - Google sign-in: frontend sends Firebase **idToken**; backend verifies before creating session.
-- Protected frontend routes: Next.js `middleware.js` + `ProtectedRoute` + `GET /api/auth/me`.
+- Protected frontend routes: Next.js `proxy.js` + `ProtectedRoute` + `GET /api/auth/me`.
 
 ---
 

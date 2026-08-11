@@ -18,7 +18,7 @@ Five mandatory policies for every change. Agents must apply all five before subm
 
 | Area | Location | Current stack |
 |------|----------|---------------|
-| Backend | `grade-wise-ai-backend-fastify/` | Node ≥22 · Fastify 5 · TS 6 · Drizzle · PostgreSQL (pgvector) · Redis · BullMQ · AI SDK 6 · Zod 4 · Vitest |
+| Backend | `grade-wise-ai-backend-fastify/` | Node ≥24 · Fastify 5 · TS 6 · Drizzle · PostgreSQL (pgvector) · Redis · BullMQ · AI SDK 6 · Zod 4 · Vitest |
 | Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query 5 · ESLint 10 · Zod 4 · Playwright |
 
 ### Upgrade cadence
@@ -108,7 +108,7 @@ modules/<domain>/
 drizzle/                  # Migrations + init-pgvector.sql
 ```
 
-**Module domains:** `auth`, `assessments`, `resources`, `config`, `student-assessments`, `instructor-analytics`, `student-analytics`
+**Module domains:** `auth`, `assessments`, `resources`, `config`, `student-assessments`, `instructor-analytics`, `student-analytics` (+ `analytics` shared query module used by both analytics modules)
 
 **Rules:**
 
@@ -124,7 +124,7 @@ drizzle/                  # Migrations + init-pgvector.sql
 app/                      # Next.js App Router — thin page shells
   loading.js, error.js, not-found.jsx
   (auth)/ (dashboard)/ (exam)/
-middleware.js             # Cookie-based route protection
+proxy.js                  # Cookie-based route protection (Next.js 16 proxy)
 features/<domain>/        # api.js + store.js
 views/                    # Page UI (react-router-dom mock OK during migration)
 components/
@@ -198,7 +198,7 @@ e2e/                      # Playwright smoke tests
 | Zod schemas | `<area>Schemas.js` | `authSchemas.js` under `schemas/` |
 | Shared field schemas | `fields.js`, `fileSchemas.js` | under `schemas/` |
 | Next.js pages | `page.jsx` | App Router convention |
-| Next.js middleware | `middleware.js` | root of `src/` |
+| Next.js proxy (middleware) | `proxy.js` | root of `src/` |
 
 ### Functions & handlers
 

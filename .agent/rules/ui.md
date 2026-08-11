@@ -35,7 +35,7 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 
 **Semantic colors (use these, not raw `slate-*` / `gray-*`):**
 
-`background` · `foreground` · `muted-foreground` · `secondary-foreground` · `subtle-foreground` · `card` · `card-header` · `border` · `input` · `nav` · `surface` · `surface-elevated` · `btn-secondary` · `accent` · `eyebrow` · `brand-navy` · `brand-teal` · `brand-sky` · `brand-gold`
+`background` · `foreground` · `muted-foreground` · `secondary-foreground` · `subtle-foreground` · `card` · `card-header` · `border` · `input` · `nav` · `surface` · `surface-elevated` · `btn-secondary` · `accent` · `eyebrow` · `edu-navy` · `edu-teal` · `edu-sky` · `edu-gold`
 
 ## `src/lib/ui.js` token catalog
 
@@ -46,8 +46,7 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 | `page` | Full-page gradient shell |
 | `pageInner` | Centered max-width content |
 | `card` / `cardInteractive` / `cardHeader` / `cardGlow` | Glass cards |
-| `panel` / `accentPanel` | Inset panels, highlights |
-| `statSurface.{indigo,emerald,amber}` | Dashboard stat card backgrounds |
+| `panel` | Inset panels, highlights |
 | `nav` | Sticky navbar |
 | `examBar` | Exam sticky header |
 | `gridPattern` | Ambient grid (via `AmbientBackground`) |
@@ -64,26 +63,23 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 
 | Token | Use for |
 |-------|---------|
-| `input` | Fields with left icon (`pl-11`) |
-| `inputPlain` | Fields without icon |
-| `select` / `textarea` / `fileInput` | Other controls |
+| `input` | Text fields (includes `pl-11` left-icon padding) |
+| `select` / `textarea` | Other controls |
 | `inputError` / `label` | Validation & labels |
 
 ### Actions
 
 | Token | Use for |
 |-------|---------|
-| `btn.primary` / `btn.secondary` / `btn.google` / `btn.success` / `btn.danger` | Buttons & link-buttons |
-| `chip` + `chipTone.{indigo,emerald,violet,amber,sky,danger}` | Table/row action chips |
-| `fab` | Floating action (scroll-to-top, etc.) |
+| `btn.primary` / `btn.secondary` / `btn.google` / `btn.success` | Buttons & link-buttons |
+| `chip` | Table/row action chips |
 | `focusRing` | Append to interactive elements |
 
 ### Icons & badges
 
 | Token | Use for |
 |-------|---------|
-| `iconBadge` / `iconBadgeTeal` / `iconBadgeEmerald` / `iconBadgeAmber` | Gradient icon containers |
-| `emptyStateIcon` | Empty-state hero icon wrap |
+| `iconBadge` / `iconBadgeTeal` | Gradient icon containers |
 
 ### Data display
 
@@ -98,13 +94,10 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 | Component | Wraps |
 |-----------|--------|
 | `Button` | `btn.*` variants (`primary`, `secondary`, `google`, `success`) |
-| `Input` | `input` / `inputPlain` + `hasIcon` prop |
-| `Select` / `Textarea` | `select` / `textarea` |
-| `Label` | `label` |
-| `Card` / `CardHeader` / `CardContent` | `card`, `cardHeader` |
-| `IconBadge` | `iconBadge*` variants |
+| `Input` | `input` + `inputError` via `error` prop |
+| `Card` / `CardHeader` / `CardContent` | `card`, `cardInteractive`, `cardGlow`, `cardHeader` |
 | `StatusBadge` | Semantic status pills |
-| `SearchField` / `EmptyState` / `LoadingState` | Lists & async UI |
+| `SearchField` / `EmptyState` / `LoadingState` / `LoadingSpinner` / `PageLoader` / `Modal` | Lists, async UI & overlays |
 
 ## Layout components (`src/components/layout/`)
 

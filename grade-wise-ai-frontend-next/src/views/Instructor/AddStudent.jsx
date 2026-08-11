@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -17,7 +17,7 @@ import { parseZodFieldErrors } from "../../utils/parseZodFieldErrors.js";
 
 
 function AddUser({ assessmentId, onStudentAdded, compact = false }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { enrollStudent, loading: enrollLoading } = useAssessmentStore();
   const { registerStudent, user: currentUser } = useAuthStore();
 
@@ -44,11 +44,11 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
       setTimeout(() => {
         closeModal();
         if (currentUser?.role === 'super_admin') {
-          navigate("/super-admin/dashboard");
+          router.push("/super-admin/dashboard");
         } else if (currentUser?.role === 'admin') {
-          navigate("/admin/dashboard");
+          router.push("/admin/dashboard");
         } else {
-          navigate("/instructor/dashboard");
+          router.push("/instructor/dashboard");
         }
       }, 1500);
     }
@@ -218,7 +218,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => router.back()}
           className={cn("inline-flex", "items-center", "justify-center", "gap-2", "px-5", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
         >
           <FaArrowLeft />
@@ -264,7 +264,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => router.back()}
           className={cn("inline-flex", "items-center", "justify-center", "gap-2", "px-5", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
         >
           <FaArrowLeft />

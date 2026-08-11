@@ -31,6 +31,15 @@ export async function getAllConfigs(): Promise<Array<{ key: string; value: strin
   }));
 }
 
+export async function getRawConfigValue(key: string): Promise<string | null> {
+  const [row] = await db
+    .select({ configValue: systemConfigs.configValue })
+    .from(systemConfigs)
+    .where(eq(systemConfigs.configKey, key))
+    .limit(1);
+  return row?.configValue ?? null;
+}
+
 export async function getAiKeysSummary() {
   const rows = await db.select().from(systemConfigs);
   const map: Record<string, string> = {};
@@ -49,7 +58,7 @@ export async function getAiKeysSummary() {
       return {
         purpose,
         keyCount: keys.length,
-        maskedKeys: keys.map(maskKey),
+        maskedKeys: keys.map((k) => maskKey(decryptSecret(k))),
         model,
         configured: keys.length > 0,
       };

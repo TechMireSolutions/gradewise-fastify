@@ -10,7 +10,7 @@ export const googleAuthApi = (payload) =>
   apiClient.post("/auth/google-auth", payload);
 
 export const logoutApi = () =>
-  apiClient.post("/auth/logout");
+  apiClient.post("/auth/logout", {});
 
 export const meApi = () =>
   apiClient.get("/auth/me");

@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { card, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner.jsx";
 import AssessmentHeader from "../../../components/AssessmentHeader.jsx";
@@ -32,7 +33,7 @@ function AssessmentPreview() {
     if (tab === "assessment" && assessment) {
       loadPreviewQuestions();
     }
-  }, [tab, assessment]);
+  }, [tab, assessment, loadPreviewQuestions]);
 
   const handleCopyPrompt = () => {
     if (!assessment) return;
@@ -68,7 +69,7 @@ function AssessmentPreview() {
           <h2 className="text-xl font-bold text-foreground mb-2">Unable to Load Assessment</h2>
           <p className={cn("text-muted-foreground", "mb-6")}>{error}</p>
           <Link
-            to="/instructor/assessments"
+            href="/instructor/assessments"
             className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
           >
             <FaArrowLeft />
@@ -137,7 +138,7 @@ function AssessmentPreview() {
         {/* Back Button */}
         <div className="mt-6 sm:mt-8 text-center">
           <Link
-            to="/instructor/assessments"
+            href="/instructor/assessments"
             className={cn("inline-flex", "items-center", "gap-2", "px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
           >
             <FaArrowLeft />

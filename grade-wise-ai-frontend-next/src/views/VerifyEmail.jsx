@@ -1,14 +1,15 @@
 import { cn } from "@/lib/cn.js";
 import { card, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import { FaCheckCircle, FaTimesCircle, FaEnvelope, FaArrowRight } from "react-icons/fa";
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 
 function VerifyEmail() {
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const verifyEmail = useAuthStore((state) => state.verifyEmail);
 
@@ -134,7 +135,7 @@ function VerifyEmail() {
             )}
 
             <Link
-              to="/login"
+              href="/login"
               className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
             >
               <span>Go to Login</span>
@@ -176,13 +177,13 @@ function VerifyEmail() {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                to="/login"
+                href="/login"
                 className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
               >
                 Try Login
               </Link>
               <Link
-                to="/signup"
+                href="/signup"
                 className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "inline-flex", "items-center", "justify-center", "gap-2", "cursor-pointer")}
               >
                 Sign Up Again

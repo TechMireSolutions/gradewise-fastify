@@ -2,7 +2,6 @@ import { create } from "zustand";
 import {
   fetchResourcesAPI,
   fetchAllResourcesAPI,
-  getResourceByIdAPI,
   uploadResourcesAPI,
   deleteResourceAPI,
 } from "./api.js";
@@ -17,7 +16,11 @@ const useResourceStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       const res = await fetchResourcesAPI();
-      set({ resources: res.data.data || [], loading: false });
+      
+      // Safe dynamic target array extraction flow
+      const extractedData = res.data?.data || res.data?.resources || (Array.isArray(res.data) ? res.data : []);
+      
+      set({ resources: extractedData, loading: false });
     } catch (err) {
       set({ error: err.message, loading: false });
     }
@@ -27,21 +30,12 @@ const useResourceStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       const res = await fetchAllResourcesAPI();
-      set({ resources: res.data.data || [], loading: false });
+      
+      const extractedData = res.data?.data || res.data?.resources || (Array.isArray(res.data) ? res.data : []);
+      
+      set({ resources: extractedData, loading: false });
     } catch (err) {
       set({ error: err.message, loading: false });
-    }
-  },
-
-  getResourceById: async (resourceId) => {
-    try {
-      set({ loading: true, error: null });
-      const res = await getResourceByIdAPI(resourceId);
-      set({ currentResource: res.data.data, loading: false });
-      return res.data.data;
-    } catch (err) {
-      set({ error: err.message, loading: false });
-      throw err;
     }
   },
 
@@ -49,9 +43,8 @@ const useResourceStore = create((set) => ({
     try {
       set({ loading: true, error: null });
       const res = await uploadResourcesAPI(files);
-
       set({ loading: false });
-      return res.data.resources || [];
+      return res.data?.resources || res.data?.data || [];
     } catch (err) {
       set({ loading: false });
       throw err;

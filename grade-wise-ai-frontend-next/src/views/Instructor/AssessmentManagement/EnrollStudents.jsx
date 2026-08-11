@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardHeader, cardInteractive, page, tableHead, tableRowHover } from "@/lib/ui.js";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
@@ -11,7 +11,8 @@ import AmbientBackground from "../../../components/layout/AmbientBackground.jsx"
 import useModal from "../../../hooks/useModal.js";
 
 function EnrollStudents() {
-  const { assessmentId } = useParams();
+  const params = useParams();
+  const assessmentId = params?.id;
   const { getEnrolledStudents, unenrollStudent, enrolledStudents, loading } = useAssessmentStore();
   const { modal, showModal, closeModal } = useModal();
 
@@ -124,12 +125,12 @@ function EnrollStudents() {
                       </thead>
                       <tbody className="divide-y divide-border">
                         {enrolledStudents.map((s) => (
-                          <tr key={s.id} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors", "duration-150")}>
-                            <td className={cn("px-6", "py-4", "text-sm", "font-medium", "text-secondary-foreground")}>{s.name}</td>
-                            <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>{s.email}</td>
+                          <tr key={s?.id} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors", "duration-150")}>
+                            <td className={cn("px-6", "py-4", "text-sm", "font-medium", "text-secondary-foreground")}>{s?.name}</td>
+                            <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>{s?.email}</td>
                             <td className="px-6 py-4 text-right">
                               <button
-                                onClick={() => handleUnenroll(s.id)}
+                                onClick={() => handleUnenroll(s?.id)}
                                 className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
                               >
                                 <FaUserMinus className="text-xs" />
@@ -145,19 +146,19 @@ function EnrollStudents() {
                   {/* Mobile Cards */}
                   <div className="lg:hidden space-y-3">
                     {enrolledStudents.map((s) => (
-                      <div key={s.id} className="bg-input border border-border rounded-xl p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200">
+                      <div key={s?.id} className="bg-input border border-border rounded-xl p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200">
                         <div className="flex justify-between items-start gap-3">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/20 flex items-center justify-center flex-shrink-0">
                               <FaUserGraduate className="text-indigo-400 text-sm" />
                             </div>
                             <div className="min-w-0">
-                              <p className={cn("font-semibold", "text-secondary-foreground", "text-sm", "truncate")}>{s.name}</p>
-                              <p className={cn("text-xs", "text-muted-foreground", "truncate")}>{s.email}</p>
+                              <p className={cn("font-semibold", "text-secondary-foreground", "text-sm", "truncate")}>{s?.name}</p>
+                              <p className={cn("text-xs", "text-muted-foreground", "truncate")}>{s?.email}</p>
                             </div>
                           </div>
                           <button
-                            onClick={() => handleUnenroll(s.id)}
+                            onClick={() => handleUnenroll(s?.id)}
                             className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer flex-shrink-0"
                           >
                             <FaUserMinus className="text-xs" />

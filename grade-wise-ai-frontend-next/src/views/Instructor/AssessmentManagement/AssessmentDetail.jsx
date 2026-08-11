@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardInteractive, page, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
@@ -15,7 +16,7 @@ import useModal from "../../../hooks/useModal.js";
 
 function AssessmentDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { currentAssessment, getAssessmentById, loading, error } = useAssessmentStore();
     const { modal, showModal, closeModal } = useModal();
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +34,7 @@ function AssessmentDetail() {
       try {
         if (!id || isNaN(parseInt(id))) {
           showModal("error", "Invalid Assessment", "Invalid assessment ID.");
-          navigate("/instructor/assessments");
+          router.push("/instructor/assessments");
           return;
         }
 
@@ -42,7 +43,7 @@ function AssessmentDetail() {
         const msg = error.response?.data?.message || error.message || "Failed to load assessment";
         showModal("error", "Error", msg);
 
-        if (error.response?.status === 404) navigate("/instructor/assessments");
+        if (error.response?.status === 404) router.push("/instructor/assessments");
       } finally {
         setIsLoading(false);
       }
@@ -90,7 +91,7 @@ function AssessmentDetail() {
                 The requested assessment could not be loaded. It may have been deleted or you don&apos;t have access to it.
               </p>
               <Link
-                to="/instructor/assessments"
+                href="/instructor/assessments"
                 className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
               >
                 <FaArrowLeft /> Back to Assessments
@@ -112,7 +113,7 @@ function AssessmentDetail() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <Link
-              to="/instructor/assessments"
+              href="/instructor/assessments"
               className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
             >
               <FaArrowLeft className="text-xs" /> Back to Assessments
@@ -153,14 +154,14 @@ function AssessmentDetail() {
               <div className="flex flex-wrap gap-2 shrink-0">
                 {!currentAssessment.is_executed && (
                   <Link
-                    to={`/instructor/assessments/${id}/edit`}
+                    href={`/instructor/assessments/${id}/edit`}
                     className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "gap-2")}
                   >
                     <FaEdit /> Edit
                   </Link>
                 )}
                 <Link
-                  to={`/instructor/assessments/${id}/enroll`}
+                  href={`/instructor/assessments/${id}/enroll`}
                   className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "gap-2")}
                 >
                   <FaUsers /> Enroll

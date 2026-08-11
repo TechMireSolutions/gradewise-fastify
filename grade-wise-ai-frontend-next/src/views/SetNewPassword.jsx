@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { card } from "@/lib/ui.js";
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
@@ -12,7 +13,7 @@ import { setNewPasswordSchema } from "../schemas/passwordSchemas.js";
 import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 function SetNewPassword() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { resetId } = useParams();
   const changePassword = useAuthStore((state) => state.changePassword);
 
@@ -54,7 +55,7 @@ function SetNewPassword() {
         "Password Reset",
         "Your password has been successfully reset. You can now log in with your new password."
       );
-      setTimeout(() => navigate("/login"), 3000);
+      setTimeout(() => router.push("/login"), 3000);
     } catch (error) {
       console.error("Password reset error:", error);
       showModal(
@@ -180,14 +181,14 @@ function SetNewPassword() {
           {/* Footer links */}
           <div className="mt-6 pt-6 border-t border-border flex flex-col items-center gap-3">
             <Link
-              to="/login"
+              href="/login"
               className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
             >
               <FaArrowLeft className="text-xs" />
               <span>Back to Login</span>
             </Link>
             <Link
-              to="/forgot-password"
+              href="/forgot-password"
               className={cn("text-muted-foreground", "hover:text-muted-foreground", "text-xs", "font-medium", "transition-colors", "duration-150", "cursor-pointer")}
             >
               Request a new reset link

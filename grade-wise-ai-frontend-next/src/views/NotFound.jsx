@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardInteractive, page } from "@/lib/ui.js";
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import { FaHome, FaArrowLeft, FaQuestionCircle, FaBookOpen } from "react-icons/fa"
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 
@@ -42,7 +42,7 @@ function NotFound() {
             {/* Action Buttons */}
             <div className="space-y-3 sm:space-y-4 max-w-xs mx-auto">
               <Link
-                to="/"
+                href="/"
                 className="group flex items-center justify-center gap-3 w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
               >
                 <FaHome className="group-hover:scale-110 transition-transform" />

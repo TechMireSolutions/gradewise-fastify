@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { db, users } from "../../db/index.js";
 import { eq, or } from "drizzle-orm";
@@ -89,12 +89,13 @@ export async function signupService(input: {
   return { user: newUser, emailSent };
 }
 
-// ─── Google Auth ──────────────────────────────────────────────────────────────
+// ─── Google Auth (Firebase Token Flow) ────────────────────────────────────────
 
 export async function googleAuthService(input: {
   idToken: string;
 }): Promise<User> {
   const verified = await verifyGoogleIdToken(input.idToken);
+
   let user = await findUserByEmail(verified.email);
   if (!user) {
     const existing = await db
@@ -252,7 +253,10 @@ export async function changeRoleService(userId: number, newRole: string, request
   return updated;
 }
 
-export async function removeUserService(userId: number): Promise<void> {
+export async function removeUserService(userId: number, requesterId: number): Promise<void> {
+  if (userId === requesterId) {
+    throw new AppError("SELF_DELETE", "Cannot delete your own account", 400);
+  }
   const result = await db.delete(users).where(eq(users.id, userId)).returning();
   if (result.length === 0) throw new NotFoundError("User");
 }

@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "react-router-dom": ["./src/lib/react-router-dom-mock.js"]
+      "@/*": ["./src/*"]
     }
   }
 }

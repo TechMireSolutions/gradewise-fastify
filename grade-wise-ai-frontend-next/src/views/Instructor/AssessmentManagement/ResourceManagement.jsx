@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
@@ -11,7 +11,7 @@ import AmbientBackground from "../../../components/layout/AmbientBackground.jsx"
 import useModal from "../../../hooks/useModal.js";
 
 function ResourceManagement() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { resources, loading, fetchResources, uploadResources, deleteResource, clearCurrentResource } = useResourceStore();
   const { modal, showModal, closeModal } = useModal();
   const [dragActive, setDragActive] = useState(false);
@@ -153,7 +153,7 @@ function ResourceManagement() {
             </div>
           </div>
           <button
-            onClick={() => navigate("/instructor/assessments")}
+            onClick={() => router.push("/instructor/assessments")}
             className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "gap-2")}
           >
             <FaArrowLeft className="text-xs" />
@@ -169,13 +169,13 @@ function ResourceManagement() {
           </div>
           <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3 sm:p-4">
             <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">
-              {resources.filter(r => (r.file_type || r.content_type)?.toLowerCase().includes('pdf')).length}
+              {resources.filter(r => (r.fileType || r.contentType)?.toLowerCase().includes('pdf')).length}
             </p>
             <p className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>PDF Documents</p>
           </div>
           <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-amber-500/30 rounded-xl p-3 sm:p-4">
             <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">
-              {resources.filter(r => !(r.file_type || r.content_type)?.toLowerCase().includes('pdf')).length}
+              {resources.filter(r => !(r.fileType || r.contentType)?.toLowerCase().includes('pdf')).length}
             </p>
             <p className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>Other Files</p>
           </div>
@@ -286,16 +286,16 @@ function ResourceManagement() {
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
                       <div className="w-11 h-11 bg-btn-secondary border border-border rounded-xl flex items-center justify-center flex-shrink-0 text-xl">
-                        {getFileIcon(resource.file_type || resource.content_type)}
+                        {getFileIcon(resource.fileType || resource.contentType)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className={cn("font-semibold", "text-secondary-foreground", "truncate", "mb-2")}>{resource.name}</p>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={getFileTypeBadge(resource.file_type || resource.content_type)}>
-                            {(resource.file_type || resource.content_type)?.toUpperCase()}
+                          <span className={getFileTypeBadge(resource.fileType || resource.contentType)}>
+                            {(resource.fileType || resource.contentType)?.toUpperCase()}
                           </span>
                           <span className={cn("inline-flex", "items-center", "gap-1.5", "px-2.5", "py-1", "rounded-full", "text-xs", "font-semibold", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>
-                            {formatFileSize(resource.file_size)}
+                            {formatFileSize(resource.fileSize)}
                           </span>
                         </div>
                       </div>

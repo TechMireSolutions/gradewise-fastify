@@ -1,5 +1,5 @@
-import AmbientBackground from "./AmbientBackground.jsx";
 import { cn } from "@/lib/cn.js";
+import AmbientBackground from "./AmbientBackground.jsx";
 import { page } from "@/lib/ui.js";
 
 export default function PageShell({ children, className = "" }) {

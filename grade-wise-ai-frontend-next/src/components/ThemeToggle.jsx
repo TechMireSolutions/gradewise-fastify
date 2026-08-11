@@ -1,9 +1,9 @@
 "use client";
+import { cn } from "@/lib/cn.js";
 
 import { FaMoon, FaSun } from "react-icons/fa";
 import useThemeStore from "@/features/theme/store.js";
 import { resolveTheme } from "@/features/theme/resolveTheme.js";
-import { cn } from "@/lib/cn.js";
 import { focusRing } from "@/lib/ui.js";
 
 export default function ThemeToggle({ className = "" }) {

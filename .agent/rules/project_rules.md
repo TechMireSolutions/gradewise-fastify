@@ -125,6 +125,6 @@ pm2 stop all
 ## Quick Pointers
 
 - **Backend:** cookie auth · async AI via BullMQ · encrypted AI keys · thin routes · fat services.
-- **Frontend:** httpOnly cookie session · `middleware.js` + `ProtectedRoute` · TanStack Query provider · `schemas/` for Zod.
+- **Frontend:** httpOnly cookie session · `proxy.js` + `ProtectedRoute` · TanStack Query provider · `schemas/` for Zod.
 - **Styling:** `ui.md` + slate/indigo/violet/emerald palette.
 - **Before commit:** `workflow_rules.md`.

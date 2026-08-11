@@ -112,7 +112,7 @@ npm run start
 ### Frontend
 
 - **httpOnly cookie session** — `withCredentials: true`; no token in localStorage
-- `middleware.js` + `ProtectedRoute` + `/auth/me`
+- `proxy.js` (Next.js 16 middleware) + `ProtectedRoute` + `/auth/me`
 - State: TanStack Query (server) + Zustand (UI/auth user)
 - Zod in `src/schemas/` (renamed from `scheema/`)
 - Google: Firebase popup → `getIdToken()` → backend

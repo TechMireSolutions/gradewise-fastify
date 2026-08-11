@@ -28,7 +28,7 @@ export const UpdateAssessmentSchema = z.object({
 });
 
 export const EnrollStudentSchema = z.object({
-  studentId: z.number().int().positive(),
+  email: z.string().email(),
 });
 
 export const PhysicalPaperSchema = z.object({
@@ -41,9 +41,11 @@ export const PhysicalPaperSchema = z.object({
   totalMarks: z.number().int().positive(),
   notes: z.string().optional(),
   pageSize: z.enum(["A4", "A5", "LETTER"]).default("A4"),
-  headerFontSize: z.number().int().min(8).max(32).default(14),
+  headerFontSize: z.number().int().min(8).max(40).default(14),
   bodyFontSize: z.number().int().min(8).max(24).default(11),
+  optionFontSize: z.number().int().min(8).max(24).optional(),
   outputFormat: z.enum(["pdf", "docx"]).default("pdf"),
+  language: z.string().default("en"),
 });
 
 export type CreateAssessmentInput = z.infer<typeof CreateAssessmentSchema>;

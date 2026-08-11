@@ -1,362 +1,212 @@
+"use client";
+
 import { cn } from "@/lib/cn.js";
-import { btn, card, cardHeader, cardInteractive, eyebrow, pageDesc, pageTitle, tableHead } from "@/lib/ui.js";
+import { card, pageTitle, pageDesc } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import useAssessmentStore from "@/features/assessments/store.js";
-import Modal from "../../../components/ui/Modal";
-import PageShell from "../../../components/layout/PageShell.jsx";
-import EmptyState from "../../../components/ui/EmptyState.jsx";
-import LoadingState from "../../../components/ui/LoadingState.jsx";
-import SearchField from "../../../components/ui/SearchField.jsx";
+import Link from "next/link";
+import useAssessmentsStore from "@/features/assessments/store.js";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import {
-  FaEye,
+  FaPlus,
+  FaSearch,
+  FaChartBar,
+  FaUserPlus,
   FaEdit,
   FaTrash,
-  FaChartBar,
-  FaFilePdf,
-  FaUserPlus,
-  FaClipboardList,
-  FaBinoculars,
-  FaPlus,
+  FaList,
+  FaThLarge
 } from "react-icons/fa";
 
-// Import Physical Paper Modal
-import PhysicalPaperModal from "../../../components/PhysicalPaperModal.jsx";
-import useModal from "../../../hooks/useModal.js";
+export default function AssessmentList() {
+  const {
+    assessments,
+    loading,
+    getInstructorAssessments,
+    deleteAssessment
+  } = useAssessmentsStore();
 
-function AssessmentList() {
-  const { assessments, loading, getInstructorAssessments, deleteAssessment } = useAssessmentStore();
-  const { modal, showModal, closeModal } = useModal();
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-
-  // Paper Modal State
-  const [paperModal, setPaperModal] = useState({
-    isOpen: false,
-    assessmentId: null,
-    title: "",
-  });
-
-  const openPaperModal = (assessment) => {
-    setPaperModal({
-      isOpen: true,
-      assessmentId: assessment.id,
-      title: assessment.title,
-    });
-  };
+  const [viewMode, setViewMode] = useState("table");
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        await getInstructorAssessments();
-      } catch {
-        showModal("error", "Error", "Failed to fetch assessments. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [getInstructorAssessments, showModal]);
+    if (typeof getInstructorAssessments === "function") {
+      getInstructorAssessments();
+    }
+  }, [getInstructorAssessments]);
 
-  const handleDeleteAssessment = (assessmentId, assessmentTitle) => {
-    setDeleteTarget({ id: assessmentId, title: assessmentTitle });
-    showModal("warning", "Confirm Deletion", `Are you sure you want to delete "${assessmentTitle}"? This action cannot be undone.`);
+  const handleDelete = async (id) => {
+    if (!id) return;
+    if (window.confirm("Are you sure you want to delete this assessment?")) {
+      if (typeof deleteAssessment === "function") {
+        await deleteAssessment(id);
+      }
+    }
   };
 
-  const filteredAssessments = assessments?.filter(a =>
-    a && a.id && a.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredAssessments = Array.isArray(assessments)
+    ? assessments.filter((a) =>
+        a?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner size="lg" type="spinner" color="blue" />
+      </div>
+    );
+  }
 
   return (
-    <PageShell>
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className={eyebrow}>Instructor Portal</p>
-            <h1 className={cn(pageTitle, "mb-2")}>My Assessments</h1>
-            <p className={pageDesc}>Manage and view all your assessments</p>
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className={pageTitle}>Assessments</h1>
+          <p className={pageDesc}>Manage and monitor created assessments</p>
+        </div>
+        <Link
+          href="/instructor/assessments/create"
+          className={cn(
+            "inline-flex items-center justify-center gap-2 px-5 py-2.5",
+            "bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold",
+            "rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all text-sm"
+          )}
+        >
+          <FaPlus /> Create Assessment
+        </Link>
+      </div>
+
+      <div className={cn("mb-6", card, "shadow-xl", "p-5")}>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:w-80">
+            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
+            <input
+              type="text"
+              placeholder="Search assessments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-input border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500"
+            />
           </div>
-          <Link to="/instructor/assessments/create" className={cn(btn.primary, "shrink-0")}>
-            <FaPlus className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Create Assessment</span>
-          </Link>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button
+              onClick={() => setViewMode("table")}
+              className={cn(
+                "p-2.5 rounded-xl border border-border text-sm transition-colors",
+                viewMode === "table" ? "bg-indigo-500/10 border-indigo-500 text-indigo-400" : "text-muted-foreground hover:bg-input"
+              )}
+            >
+              <FaList />
+            </button>
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                "p-2.5 rounded-xl border border-border text-sm transition-colors",
+                viewMode === "grid" ? "bg-indigo-500/10 border-indigo-500 text-indigo-400" : "text-muted-foreground hover:bg-input"
+              )}
+            >
+              <FaThLarge />
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div className={cn("mb-6", card, "shadow-xl", "p-5")}>
-          <SearchField
-            id="assessment-search"
-            label="Search assessments"
-            placeholder="Search assessments by title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+      {filteredAssessments.length === 0 ? (
+        <div className={cn(card, "p-12 text-center text-muted-foreground")}>
+          No assessments found.
         </div>
-
-        {isLoading || loading ? (
-          <LoadingState message="Loading assessments..." />
-        ) : filteredAssessments.length === 0 ? (
-          <EmptyState
-            icon={FaClipboardList}
-            title={searchTerm ? "No assessments found" : "No assessments yet"}
-            description={
-              searchTerm
-                ? "Try a different search term or clear your search."
-                : "Start by creating your first assessment to get started."
-            }
-            action={
-              !searchTerm ? (
-                <Link to="/instructor/assessments/create" className={cn(btn.primary)}>
-                  <FaPlus className="w-3.5 h-3.5" aria-hidden="true" />
-                  Create your first assessment
+      ) : viewMode === "table" ? (
+        <div className={cn(card, "overflow-hidden shadow-xl")}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border bg-input/50">
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Title</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Created</th>
+                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pr-8">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredAssessments.map((assessment) => (
+                  <tr key={assessment.id} className="hover:bg-indigo-500/5 transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-foreground">
+                      {assessment.title}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                      {assessment.createdAt ? new Date(assessment.createdAt).toLocaleDateString() : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-right pr-6 space-x-2">
+                      <Link
+                        href={`/instructor/assessments/${assessment.id}/analytics`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                      >
+                        <FaChartBar /> Analytics
+                      </Link>
+                      <Link
+                        href={`/instructor/assessments/${assessment.id}/enroll`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-secondary hover:bg-emerald-500/20 border border-border hover:border-emerald-500/40 text-secondary-foreground hover:text-emerald-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                      >
+                        <FaUserPlus /> Enroll
+                      </Link>
+                      <Link
+                        href={`/instructor/assessments/${assessment.id}/edit`}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-secondary hover:bg-violet-500/20 border border-border hover:border-violet-500/40 text-secondary-foreground hover:text-violet-300 rounded-lg font-medium text-xs transition-all duration-200 cursor-pointer"
+                      >
+                        <FaEdit /> Edit
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(assessment.id)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-secondary hover:bg-amber-500/20 border border-border hover:border-amber-500/40 text-secondary-foreground hover:text-amber-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAssessments.map((assessment) => (
+            <div key={assessment.id} className={cn(card, "p-6 flex flex-col justify-between space-y-4 shadow-xl")}>
+              <div>
+                <h3 className="font-semibold text-secondary-foreground truncate">{assessment.title}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Created: {assessment.createdAt ? new Date(assessment.createdAt).toLocaleDateString() : "—"}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                <Link
+                  href={`/instructor/assessments/${assessment.id}/analytics`}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                >
+                  <FaChartBar /> Analytics
                 </Link>
-              ) : null
-            }
-          />
-        ) : (
-          <>
-            {/* Desktop Table */}
-            <div className="hidden lg:block">
-              <div className={cn(card, "overflow-hidden", "shadow-2xl")}>
-                <div className={cn(cardHeader, "flex", "items-center", "justify-between")}>
-                  <h2 className="text-xl font-bold text-foreground">
-                    All Assessments
-                    <span className="ml-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-                      {filteredAssessments.length}
-                    </span>
-                  </h2>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full">
-                    <thead className={tableHead}>
-                      <tr>
-                        <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
-                          Title
-                        </th>
-                        <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
-                          Created
-                        </th>
-                        <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>
-                          Status
-                        </th>
-                        <th className={cn("px-6", "py-3.5", "text-right", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border", "pr-8")}>
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-700/30">
-                      {filteredAssessments.map((assessment) => (
-                        <tr key={assessment.id} className="hover:bg-indigo-500/5 transition-colors duration-150">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
-                                <FaClipboardList className="w-4 h-4 text-white" />
-                              </div>
-                              <span className={cn("font-semibold", "text-secondary-foreground")}>{assessment.title}</span>
-                            </div>
-                          </td>
-                          <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>
-                            {new Date(assessment.created_at).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </td>
-                          <td className="px-6 py-4">
-                            {assessment.is_executed ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                                Executed
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
-                                Draft
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex flex-wrap justify-end items-center gap-2">
-                              <Link
-                                to={`/instructor/assessments/${assessment.id}`}
-                                className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-indigo-500/20", "border", "border-border", "hover:border-indigo-500/40", "text-secondary-foreground", "hover:text-indigo-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
-                              >
-                                <FaEye className="w-3 h-3" /> View
-                              </Link>
-                              <Link
-                                to={`/instructor/assessments/${assessment.id}/enroll`}
-                                className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-emerald-500/20", "border", "border-border", "hover:border-emerald-500/40", "text-secondary-foreground", "hover:text-emerald-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
-                              >
-                                <FaUserPlus className="w-3 h-3" /> Enroll
-                              </Link>
-                              {!assessment.is_executed && (
-                                <Link
-                                  to={`/instructor/assessments/${assessment.id}/edit`}
-                                  className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-violet-500/20", "border", "border-border", "hover:border-violet-500/40", "text-secondary-foreground", "hover:text-violet-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
-                                >
-                                  <FaEdit className="w-3 h-3" /> Edit
-                                </Link>
-                              )}
-                              {!assessment.is_executed && (
-                                <button
-                                  onClick={() => handleDeleteAssessment(assessment.id, assessment.title)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer"
-                                >
-                                  <FaTrash className="w-3 h-3" /> Delete
-                                </button>
-                              )}
-                              {assessment.is_executed && (
-                                <Link
-                                  to={`/instructor/assessments/${assessment.id}/analytics`}
-                                  className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-violet-500/20", "border", "border-border", "hover:border-violet-500/40", "text-secondary-foreground", "hover:text-violet-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
-                                >
-                                  <FaChartBar className="w-3 h-3" /> Analytics
-                                </Link>
-                              )}
-                              <button
-                                onClick={() => openPaperModal(assessment)}
-                                className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-amber-500/20", "border", "border-border", "hover:border-amber-500/40", "text-secondary-foreground", "hover:text-amber-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
-                              >
-                                <FaFilePdf className="w-3 h-3" /> Paper
-                              </button>
-                              {!assessment.is_executed && (
-                                <Link
-                                  to={`/instructor/assessments/${assessment.id}/preview`}
-                                  className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-sky-500/20", "border", "border-border", "hover:border-sky-500/40", "text-secondary-foreground", "hover:text-sky-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
-                                >
-                                  <FaBinoculars className="w-3 h-3" /> Preview
-                                </Link>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <Link
+                  href={`/instructor/assessments/${assessment.id}/enroll`}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-btn-secondary hover:bg-emerald-500/20 border border-border hover:border-emerald-500/40 text-secondary-foreground hover:text-emerald-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                >
+                  <FaUserPlus /> Enroll
+                </Link>
+                <Link
+                  href={`/instructor/assessments/${assessment.id}/edit`}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-btn-secondary hover:bg-violet-500/20 border border-border hover:border-violet-500/40 text-secondary-foreground hover:text-violet-300 rounded-xl font-medium transition-all duration-200 cursor-pointer"
+                >
+                  <FaEdit /> Edit
+                </Link>
+                <button
+                  onClick={() => handleDelete(assessment.id)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-btn-secondary hover:bg-amber-500/20 border border-border hover:border-amber-500/40 text-secondary-foreground hover:text-amber-300 rounded-xl font-medium transition-all duration-200 active:scale-95 cursor-pointer"
+                >
+                  <FaTrash /> Delete
+                </button>
               </div>
             </div>
-
-            {/* Mobile Cards */}
-            <div className="lg:hidden space-y-4">
-              {filteredAssessments.map((assessment) => (
-                <div
-                  key={assessment.id}
-                  className={cn(card, cardInteractive, "shadow-2xl", "p-5")}
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                        <FaClipboardList className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className={cn("font-semibold", "text-secondary-foreground", "truncate")}>{assessment.title}</h3>
-                        <p className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>
-                          Created: {new Date(assessment.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="ml-3 flex-shrink-0">
-                      {assessment.is_executed ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                          Executed
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
-                          Draft
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <Link
-                      to={`/instructor/assessments/${assessment.id}`}
-                      className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-indigo-500/20", "border", "border-border", "hover:border-indigo-500/40", "text-secondary-foreground", "hover:text-indigo-300", "rounded-xl", "font-medium", "transition-all", "duration-200", "cursor-pointer")}
-                    >
-                      <FaEye className="w-3.5 h-3.5" /> View
-                    </Link>
-                    <Link
-                      to={`/instructor/assessments/${assessment.id}/enroll`}
-                      className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-emerald-500/20", "border", "border-border", "hover:border-emerald-500/40", "text-secondary-foreground", "hover:text-emerald-300", "rounded-xl", "font-medium", "transition-all", "duration-200", "cursor-pointer")}
-                    >
-                      <FaUserPlus className="w-3.5 h-3.5" /> Enroll
-                    </Link>
-                    {!assessment.is_executed && (
-                      <>
-                        <Link
-                          to={`/instructor/assessments/${assessment.id}/edit`}
-                          className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-violet-500/20", "border", "border-border", "hover:border-violet-500/40", "text-secondary-foreground", "hover:text-violet-300", "rounded-xl", "font-medium", "transition-all", "duration-200", "cursor-pointer")}
-                        >
-                          <FaEdit className="w-3.5 h-3.5" /> Edit
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteAssessment(assessment.id, assessment.title)}
-                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium transition-all duration-200 active:scale-95 cursor-pointer"
-                        >
-                          <FaTrash className="w-3.5 h-3.5" /> Delete
-                        </button>
-                        <Link
-                          to={`/instructor/assessments/${assessment.id}/preview`}
-                          className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-sky-500/20", "border", "border-border", "hover:border-sky-500/40", "text-secondary-foreground", "hover:text-sky-300", "rounded-xl", "font-medium", "transition-all", "duration-200", "cursor-pointer", "col-span-2")}
-                        >
-                          <FaBinoculars className="w-3.5 h-3.5" /> Preview
-                        </Link>
-                      </>
-                    )}
-                    {assessment.is_executed && (
-                      <Link
-                        to={`/instructor/assessments/${assessment.id}/analytics`}
-                        className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-violet-500/20", "border", "border-border", "hover:border-violet-500/40", "text-secondary-foreground", "hover:text-violet-300", "rounded-xl", "font-medium", "transition-all", "duration-200", "cursor-pointer")}
-                      >
-                        <FaChartBar className="w-3.5 h-3.5" /> Analytics
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => openPaperModal(assessment)}
-                      className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-amber-500/20", "border", "border-border", "hover:border-amber-500/40", "text-secondary-foreground", "hover:text-amber-300", "rounded-xl", "font-medium", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "col-span-2")}
-                    >
-                      <FaFilePdf className="w-3.5 h-3.5" /> Physical Paper
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-      {/* Physical Paper Modal */}
-      <PhysicalPaperModal
-        isOpen={paperModal.isOpen}
-        onClose={() => setPaperModal({ ...paperModal, isOpen: false })}
-        assessmentId={paperModal.assessmentId}
-        assessmentTitle={paperModal.title}
-      />
-
-      {/* General Modal */}
-      <Modal
-        isOpen={modal.isOpen}
-        onClose={() => {
-          closeModal();
-          setDeleteTarget(null);
-        }}
-        type={modal.type}
-        title={modal.title}
-        onConfirm={
-          deleteTarget
-            ? async () => {
-                await deleteAssessment(deleteTarget.id);
-                showModal("success", "Deleted", "Assessment deleted successfully!");
-                setDeleteTarget(null);
-                await getInstructorAssessments();
-              }
-            : undefined
-        }
-        confirmText="Yes, Delete"
-        cancelText="Cancel"
-      >
-        {modal.message}
-      </Modal>
-    </PageShell>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
-
-export default AssessmentList;

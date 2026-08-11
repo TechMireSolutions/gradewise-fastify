@@ -1,68 +1,64 @@
-# Google Antigravity (AGY) SDK Development Rules
+# Google Antigravity (AGY) SDK Rules
 
-Engineering guidelines for designing and orchestrating autonomous AI agents using the **Google Antigravity (AGY) SDK**.
+> **Scope:** These rules apply to **AI agent orchestration** using the Antigravity SDK — not to the Gradewise Fastify/Next.js application code. For app rules see `.agent/rules/` or `.claude/rules/`.
 
-> **Scope:** Agent SDK orchestration only — not Gradewise application code. For app rules see `.agent/rules/` or `.claude/rules/`.
+## Architecture
 
----
+Decouple every agent into three components:
 
-## 1. Core Architecture
-
-Every agent implementation must decouple three components:
-
-| Component | Role |
-|-----------|------|
-| **Agent** | Orchestrates the loop, tool selection, skills, input processing |
+| Component | Responsibility |
+|-----------|----------------|
+| **Agent** | Agentic loop, tool selection, skill execution, input processing |
 | **Conversation** | Context memory, system instructions, turn history |
 | **Connection** | Bridge to local resources, env config, MCP servers |
 
----
+## Model Selection
 
-## 2. Model Selection & Configuration
-
-- Use fully qualified model IDs — never abbreviate (e.g. current Gemini Pro / Flash tier names).
-- **Reasoning models** for planning, multi-step debugging, structural design.
-- **Fast models** for summarization, validation, routing (latency + cost).
+- Use fully qualified model IDs — never abbreviate.
+- **Reasoning/planning:** capability-tier model (e.g. current Gemini Pro class).
+- **Summarization/routing/validation:** fast model (e.g. current Gemini Flash class).
 - Set an explicit **`thinking_budget`** on every reasoning model.
 
----
-
-## 3. MCP Server & Custom Tool Integration
+## MCP & Custom Tools
 
 - Register MCP servers via **Stdio** or **SSE** only.
-- Python tools: type annotations + docstrings for schema generation.
-- Prefer **idempotent**, side-effect-free tools; sandbox non-idempotent tools.
+- Python tool functions: type annotations + docstrings (schema generation).
+  - Example: `def calculate(x: int, y: int) -> int:`
+- Prefer **idempotent**, side-effect-free tools.
+- Non-idempotent tools → sandboxed scopes + user confirmation.
 
----
-
-## 4. Safety & Execution Restrictions
+## Safety & Execution Restrictions
 
 - Restrict FS tools to the **workspace directory**.
-- Block system folders unless explicitly approved.
-- **Read** — path-prefix validation · **Write** — approval or sandbox · **Execute/Network** — user confirmation.
+- Block system paths (`/etc`, Windows user dirs) unless explicitly approved.
+- Permission predicates:
+  - **Read** — path-prefix validation
+  - **Write** — approval or sandbox output dir only
+  - **Execute/Network** — explicit user confirmation
 
----
-
-## 5. Lifecycle Hooks & Error Recovery
+## Lifecycle Hooks
 
 | Hook | Purpose |
 |------|---------|
-| `pre_turn` | Log input size, check state |
-| `post_turn` | Track tokens, parse output |
-| `on_tool_call` | Pre-execution safety check |
-| `on_error` | Rate limits → exponential backoff + jitter |
+| `pre_turn(agent, ctx)` | Log input size, check state flags |
+| `post_turn(agent, ctx)` | Track output tokens, parse structured output |
+| `on_tool_call(agent, name, args)` | Pre-execution safety validation |
+| `on_error(agent, err)` | Rate-limit recovery, exponential backoff + jitter |
 
-Single API failures must not crash long-running agent stacks.
+A single API failure must **never** crash a long-running agent stack.
 
----
+## Observability & Cost Controls
 
-## 6. Observability & Token Auditing
-
-- Markdown turn logs in `app_data_dir/logs/`.
+- Log execution paths to `app_data_dir/logs/` (markdown per turn).
 - Track prompt, completion, and thinking tokens per turn.
-- Session-level cost/token ceiling — terminate on exceed (no infinite tool loops).
+- Define a session-level token/cost ceiling — terminate with status error when exceeded (no infinite tool loops).
 
----
+## Scope Boundary
+
+- **Antigravity rules** → agent SDK design, MCP, hooks, safety.
+- **Gradewise app rules** → `project_rules.md`, `backend_rules.md`, `frontend_rules.md`, `domain_rules.md`.
+
+Do not mix Express/v2 backend paths or deprecated frontend `src/store/` patterns into Antigravity agent instructions.
 
 ## Mirrored Locations
 

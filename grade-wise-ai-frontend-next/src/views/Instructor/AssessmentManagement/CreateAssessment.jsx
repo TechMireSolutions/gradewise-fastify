@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -12,7 +12,7 @@ import AmbientBackground from "../../../components/layout/AmbientBackground.jsx"
 import useModal from "../../../hooks/useModal.js";
 
 function CreateAssessment() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { createAssessment, loading } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
     const { modal, showModal, closeModal } = useModal();
@@ -155,7 +155,7 @@ function CreateAssessment() {
       showModal("success", "Success", "Assessment created successfully!");
 
       setTimeout(() => {
-        navigate("/instructor/assessments");
+        router.push("/instructor/assessments");
       }, 1500);
     } catch (err) {
       showModal("error", "Error", err.message || "Failed to create assessment");
@@ -179,7 +179,7 @@ function CreateAssessment() {
           </div>
           <button
             type="button"
-            onClick={() => navigate("/instructor/assessments")}
+            onClick={() => router.push("/instructor/assessments")}
             className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "self-start", "sm:self-auto")}
           >
             <FiArrowLeft className="text-base" />
@@ -268,7 +268,7 @@ function CreateAssessment() {
                           />
                           <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
                             <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
-                            <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.content_type}</span>
+                            <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.contentType}</span>
                           </label>
                         </div>
                       ))}
@@ -474,7 +474,7 @@ function CreateAssessment() {
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 pb-4">
             <button
               type="button"
-              onClick={() => navigate("/instructor/assessments")}
+              onClick={() => router.push("/instructor/assessments")}
               className={cn("px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1")}
               disabled={isProcessing}
             >

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, page } from "@/lib/ui.js";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import Modal from "../../components/ui/Modal.jsx";
 import PageLoader from "../../components/ui/PageLoader.jsx";
 import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
@@ -77,7 +77,7 @@ function SuperAdminDashboard() {
                   <p className={cn("text-xs", "text-muted-foreground", "font-medium")}>Total Users</p>
                 </div>
                 <Link
-                  to="/super-admin/api-config"
+                  href="/super-admin/api-config"
                   className="inline-flex flex-col items-center gap-1.5 bg-input hover:bg-btn-secondary border border-border hover:border-indigo-500/30 backdrop-blur-sm rounded-2xl p-4 text-center transition-all duration-200 group min-w-[90px]"
                 >
                   <FaKey className="w-7 h-7 text-indigo-400 group-hover:scale-110 transition-transform duration-150" />

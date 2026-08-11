@@ -33,7 +33,7 @@ React 19 · Next.js 16 (Turbopack) · **Tailwind CSS 4 (pure utilities)** · Zus
 
 ```
 grade-wise-ai-frontend-next/src/
-  middleware.js
+  proxy.js
   app/
     globals.css           # Tokens + @theme + animations ONLY
     layout.js             # ThemeScript, SkipLink, Providers
@@ -50,7 +50,7 @@ grade-wise-ai-frontend-next/src/
   components/
     Providers.jsx         # QueryClient + ThemeProvider + ErrorBoundary
     ThemeProvider.jsx ThemeToggle.jsx
-    ui/                   # Button, Input, Card, IconBadge, StatusBadge…
+    ui/                   # Button, Input, Card, StatusBadge…
     layout/               # PageShell, MainLandmark, AuthPageLayout…
     auth/ admin/ dashboard/
   hooks/
@@ -64,7 +64,7 @@ grade-wise-ai-frontend-next/src/
 | Task | Pattern |
 |------|---------|
 | New page | `app/.../page.jsx` → `dynamic(() => import('@/views/...'), { ssr: false })` |
-| Route protection | `middleware.js` + `<ProtectedRoute requiredRole="...">` |
+| Route protection | `proxy.js` + `<ProtectedRoute requiredRole="...">` |
 | Session | httpOnly cookie — **no JWT in localStorage** |
 | Auth store | Persist `user` only; call `fetchMe()` / `logoutApi()` |
 | Google sign-in | Firebase popup → `getIdToken()` → `{ idToken }` to backend |
@@ -88,8 +88,8 @@ grade-wise-ai-frontend-next/src/
 ### Decision order
 
 ```
-1. UI primitive (Button, Input, Card, IconBadge, StatusBadge…)
-2. Token from lib/ui.js (page, card, btn.primary, chipTone.indigo…)
+1. UI primitive (Button, Input, Card, StatusBadge…)
+2. Token from lib/ui.js (page, card, btn.primary, chip…)
 3. Raw Tailwind utility (one-off)
 4. If pattern repeats → add export to lib/ui.js (never new CSS class)
 ```
@@ -98,7 +98,7 @@ grade-wise-ai-frontend-next/src/
 
 ```jsx
 import { cn } from "@/lib/cn.js";
-import { btn, card, chip, chipTone, focusRing, page } from "@/lib/ui.js";
+import { btn, card, chip, focusRing, page } from "@/lib/ui.js";
 import Button from "@/components/ui/Button.jsx";
 import { Card, CardHeader } from "@/components/ui/Card.jsx";
 
@@ -113,7 +113,7 @@ import { Card, CardHeader } from "@/components/ui/Card.jsx";
 <Card hover><CardHeader>Title</CardHeader>…</Card>
 
 // Table action chip
-<Link className={cn(chip, chipTone.indigo, focusRing)}>View</Link>
+<Link className={cn(chip, focusRing)}>View</Link>
 
 // Form
 <Input hasIcon={false} error={!!errors.email} {...register("email")} />

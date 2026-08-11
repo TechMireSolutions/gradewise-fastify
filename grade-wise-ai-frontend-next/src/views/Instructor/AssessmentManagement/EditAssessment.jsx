@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -13,7 +13,7 @@ import useModal from "../../../hooks/useModal.js";
 
 function EditAssessment() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
     const { modal, showModal, closeModal } = useModal();
@@ -212,7 +212,7 @@ function EditAssessment() {
     try {
       await updateAssessment(parseInt(id), assessmentData);
       showModal("success", "Success!", "Assessment updated!");
-      setTimeout(() => navigate("/instructor/assessments"), 1500);
+      setTimeout(() => router.push("/instructor/assessments"), 1500);
     } catch (err) {
       console.error("DEBUG: Frontend EditAssessment - Update error:", err);
       showModal("error", "Error", err.message || "Update failed");
@@ -248,7 +248,7 @@ function EditAssessment() {
               <h1 className="text-3xl font-bold text-foreground mb-4">Error</h1>
               <p className={cn("text-muted-foreground", "mb-8")}>{error}</p>
               <button
-                onClick={() => navigate("/instructor/assessments")}
+                onClick={() => router.push("/instructor/assessments")}
                 className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
               >
                 <FaArrowLeft />
@@ -279,7 +279,7 @@ function EditAssessment() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-5">
             <button
-              onClick={() => navigate("/instructor/assessments")}
+              onClick={() => router.push("/instructor/assessments")}
               className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
             >
               <FaArrowLeft className="text-xs" />
@@ -467,7 +467,7 @@ function EditAssessment() {
                             >
                               <span className="font-medium">{resource.name}</span>
                               <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>
-                                {resource.content_type}
+                                {resource.contentType}
                               </span>
                             </label>
                           </div>
@@ -623,7 +623,7 @@ function EditAssessment() {
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate("/instructor/assessments")}
+              onClick={() => router.push("/instructor/assessments")}
               className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1", "disabled:opacity-50", "disabled:cursor-not-allowed")}
               disabled={isProcessing}
             >

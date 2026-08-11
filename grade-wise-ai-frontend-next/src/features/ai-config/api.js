@@ -5,11 +5,6 @@ export const getAllConfigs = async () => {
   return response.data;
 };
 
-export const updateConfig = async (configData) => {
-  const response = await apiClient.post("/config/update", configData);
-  return response.data;
-};
-
 export const bulkUpdateConfigs = async (configs) => {
   const response = await apiClient.post("/config/bulk-update", { configs });
   return response.data;

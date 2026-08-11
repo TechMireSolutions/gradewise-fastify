@@ -1,44 +1,21 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
-import { toHttpError } from "../../utils/errors.js";
 import {
+  getResourcesService,
   uploadResourceService,
-  getInstructorResourcesService,
-  getAllResourcesService,
-  getResourceByIdService,
-  updateResourceService,
   deleteResourceService,
-  linkResourceToAssessmentService,
-  unlinkResourceFromAssessmentService,
-  getAssessmentResourcesService,
 } from "./resources.service.js";
-
 import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
-import {
-  AssessmentIdParamSchema,
-  ResourceIdParamSchema,
-} from "../../schemas/common.js";
+import { ResourceIdParamSchema } from "../../schemas/common.js";
+import { toHttpError } from "../../utils/errors.js";
 
-const ALLOWED_MIMETYPES = new Set([
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/msword",
-  "text/plain",
-  "application/vnd.ms-powerpoint",
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
-
-export default async function resourcesModule(app: FastifyInstance) {
+export default async function resourcesRoutes(app: FastifyInstance) {
   const f = app.withTypeProvider<ZodTypeProvider>();
 
   // POST /api/resources  (multipart)
-  app.post("/", {
+  f.post("/", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
   }, async (request, reply) => {
     try {
@@ -51,7 +28,6 @@ export default async function resourcesModule(app: FastifyInstance) {
       const parts = request.parts();
       for await (const part of parts) {
         if (part.type === "file") {
-          if (!ALLOWED_MIMETYPES.has(part.mimetype)) continue;
           const buffer = await part.toBuffer();
           files.push({ buffer, filename: part.filename, mimetype: part.mimetype });
         } else {
@@ -59,10 +35,6 @@ export default async function resourcesModule(app: FastifyInstance) {
           if (part.fieldname === "url") url = part.value as string;
           if (part.fieldname === "visibility") visibility = part.value as "private" | "public";
         }
-      }
-
-      if (!files.length && !url) {
-        return reply.code(400).send({ success: false, message: "Provide at least one file or URL." });
       }
 
       const { uploaded, skipped } = await uploadResourceService(files, user.id, name, url, visibility);
@@ -81,11 +53,10 @@ export default async function resourcesModule(app: FastifyInstance) {
   // GET /api/resources
   f.get("/", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { querystring: z.object({ visibility: z.string().optional() }) },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number };
-      const data = await getInstructorResourcesService(user.id, request.query.visibility);
+      const data = await getResourcesService(user.id);
       return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -93,63 +64,14 @@ export default async function resourcesModule(app: FastifyInstance) {
     }
   });
 
-  // GET /api/resources/all
+  // GET /api/resources/all  (alias)
   f.get("/all", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-  }, async (_request, reply) => {
-    try {
-      const data = await getAllResourcesService();
-      return reply.send({ success: true, data });
-    } catch (err) {
-      const { statusCode, message } = toHttpError(err);
-      return reply.code(statusCode).send({ success: false, message });
-    }
-  });
-
-  // GET /api/resources/assessments/:assessmentId
-  f.get("/assessments/:assessmentId", {
-    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: AssessmentIdParamSchema },
-  }, async (request, reply) => {
-    try {
-      const data = await getAssessmentResourcesService(request.params.assessmentId);
-      return reply.send({ success: true, data });
-    } catch (err) {
-      const { statusCode, message } = toHttpError(err);
-      return reply.code(statusCode).send({ success: false, message });
-    }
-  });
-
-  // GET /api/resources/:resourceId
-  f.get("/:resourceId", {
-    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: ResourceIdParamSchema },
-  }, async (request, reply) => {
-    try {
-      const user = request.user as { id: number; role: string };
-      const data = await getResourceByIdService(request.params.resourceId, user.id, user.role);
-      return reply.send({ success: true, data });
-    } catch (err) {
-      const { statusCode, message } = toHttpError(err);
-      return reply.code(statusCode).send({ success: false, message });
-    }
-  });
-
-  // PUT /api/resources/:resourceId
-  f.put("/:resourceId", {
-    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: {
-      params: ResourceIdParamSchema,
-      body: z.object({
-        name: z.string().optional(),
-        visibility: z.enum(["private", "public"]).optional(),
-      }),
-    },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number };
-      const data = await updateResourceService(request.params.resourceId, user.id, request.body);
-      return reply.send({ success: true, message: "Resource updated.", data });
+      const data = await getResourcesService(user.id);
+      return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });
@@ -165,42 +87,6 @@ export default async function resourcesModule(app: FastifyInstance) {
       const user = request.user as { id: number; role: string };
       await deleteResourceService(request.params.resourceId, user.id, user.role);
       return reply.send({ success: true, message: "Resource deleted." });
-    } catch (err) {
-      const { statusCode, message } = toHttpError(err);
-      return reply.code(statusCode).send({ success: false, message });
-    }
-  });
-
-  // POST /api/resources/:resourceId/assessments/:assessmentId
-  f.post("/:resourceId/assessments/:assessmentId", {
-    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: {
-      params: ResourceIdParamSchema.extend({
-        assessmentId: z.coerce.number().int().positive(),
-      }),
-    },
-  }, async (request, reply) => {
-    try {
-      await linkResourceToAssessmentService(request.params.resourceId, request.params.assessmentId);
-      return reply.send({ success: true, message: "Resource linked to assessment." });
-    } catch (err) {
-      const { statusCode, message } = toHttpError(err);
-      return reply.code(statusCode).send({ success: false, message });
-    }
-  });
-
-  // DELETE /api/resources/:resourceId/assessments/:assessmentId
-  f.delete("/:resourceId/assessments/:assessmentId", {
-    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: {
-      params: ResourceIdParamSchema.extend({
-        assessmentId: z.coerce.number().int().positive(),
-      }),
-    },
-  }, async (request, reply) => {
-    try {
-      await unlinkResourceFromAssessmentService(request.params.resourceId, request.params.assessmentId);
-      return reply.send({ success: true, message: "Resource unlinked from assessment." });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });

@@ -18,7 +18,7 @@ This document summarizes infrastructure and architecture upgrades applied across
 - **Google OAuth**: verifies Firebase/Google **ID token** server-side (`google-auth-library`)
 - **AI key encryption at rest** when `ENCRYPTION_KEY` is set
 - **Strict CORS** in production (no `origin: true` fallback)
-- **Next.js middleware** route protection (`src/middleware.js`)
+- **Next.js Proxy/Middleware** route protection (`src/proxy.js`) — Next.js 16 renamed `middleware` → `proxy`
 
 ## Phase 2 — Frontend
 
@@ -33,7 +33,6 @@ This document summarizes infrastructure and architecture upgrades applied across
 - **Async assessment start** when `USE_ASYNC_JOBS=true` + `REDIS_URL` (polls `/status`)
 - **Batch answer inserts** on submit
 - **Redis-backed rate limiting** when `REDIS_URL` is set
-- **S3/MinIO storage scaffold** (`src/services/storage.ts`)
 - **pgvector** init SQL (run on DB once: `CREATE EXTENSION IF NOT EXISTS vector;`)
 
 ## Phase 4 — Observability
@@ -93,3 +92,40 @@ pm2 start ecosystem.config.cjs
 **Frontend:** `@tanstack/react-query`, `@playwright/test`, `react-hook-form` (all other deps already latest).
 
 **Backend:** `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`, `bullmq`, `google-auth-library`, `ioredis`, `vitest`; `@types/node` pinned to **`^24.13.2`** (matches Node 24 runtime).
+
+## Phase 6 — Stability fixes (2026-08)
+
+### Exam submit crash fix
+
+- **Removed** `student-assessment/store.js` calls to non-existent student-analytics store methods (`fetchOverview`, `fetchPerformance`, `fetchRecommendations`) that crashed exam submission; leftover import cleaned up.
+
+### Matching questions end-to-end
+
+- **Backend persistence** (`generation.ts`): matching left/right items now stored in the question `options` jsonb (`{ leftItems, rightItems }`), supporting both `left_items`/`right_items` and `leftItems`/`rightItems` AI output naming.
+- **Backend grading** (`student-assessments.service.ts`): new `normalizeMatchPairs` helper + `evaluateAnswer` matching branch — order-independent, case-insensitive pair comparison (supports array-of-pairs, single-entry object, and plain-object payloads).
+- **Frontend UI** (`TakeAssessment.jsx`): matching question renderer with a right-side dropdown per left item; answer stored as a JSON pair array.
+
+### Admin edit access control
+
+- **`PUT /api/assessments/:id`** now passes the caller's `role`; `updateAssessmentService` uses `assertCanManageAssessment` so `admin`/`super_admin` can edit any assessment (previously admin edits silently failed with `NOT_FOUND` because of the `instructorId` filter).
+
+### Versioning
+
+- **Backend** bumped `1.0.0` → **`2.1.0`** (`package.json` + `package-lock.json` synced).
+
+### Dead code removal
+
+Removed files with zero references:
+
+- `grade-wise-ai-backend-fastify/src/utils/route-handler.ts`
+- `grade-wise-ai-backend-fastify/src/services/storage.ts` (S3/MinIO scaffold was unused)
+- `grade-wise-ai-frontend-next/src/utils/pdfGenerator.js`
+- `grade-wise-ai-frontend-next/src/utils/docxGenerator.js`
+- `grade-wise-ai-frontend-next/src/views/InstructorLogin.jsx`
+- `grade-wise-ai-frontend-next/src/views/AdminLogin.jsx`
+
+### Security verification
+
+- Confirmed only `.env.example` files are tracked in git; real `.env*` files are ignored by the root `.gitignore` (`**/.env.*`, exception `!**/.env.example`).
+
+> **Verification:** backend `typecheck` / `build` / `vitest` and frontend `build` / `lint` all pass.

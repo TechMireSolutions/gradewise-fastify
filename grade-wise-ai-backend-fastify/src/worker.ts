@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./lib/load-env.js";
 import { startAssessmentWorker } from "./queue/index.js";
 
 const worker = startAssessmentWorker();

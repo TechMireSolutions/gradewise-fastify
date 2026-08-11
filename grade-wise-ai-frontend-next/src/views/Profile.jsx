@@ -1,6 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 import {
@@ -64,7 +65,7 @@ const DASHBOARD_MAP = {
 
 function Profile() {
   const { user } = useAuthStore();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const theme    = user ? (ROLE_THEME[user.role] ?? DEFAULT_THEME) : DEFAULT_THEME;
   const RoleIcon = theme.Icon;
@@ -72,7 +73,7 @@ function Profile() {
   const getDashboardLink = () => (user ? (DASHBOARD_MAP[user.role] ?? "/") : "/");
 
   const handleChangePassword = () => {
-    if (user) navigate("/forgot-password");
+    if (user) router.push("/forgot-password");
   };
 
   return (
@@ -235,7 +236,7 @@ function Profile() {
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <Link
-                            to={getDashboardLink()}
+                            href={getDashboardLink()}
                             className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 min-h-[44px]"
                           >
                             <FaTachometerAlt />
@@ -271,7 +272,7 @@ function Profile() {
               Please log in to view your profile.
             </p>
             <Link
-              to="/login"
+              href="/login"
               className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 min-h-[44px]"
             >
               <FaUser />

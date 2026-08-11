@@ -14,7 +14,7 @@ description: "Next.js frontend — routing, middleware, cookie auth, TanStack Qu
 
 ```
 src/
-├── middleware.js           # Cookie session gate for protected routes
+├── proxy.js               # Cookie session gate (Next.js 16 proxy)
 ├── app/
 │   ├── layout.js           # RootLayout + Providers + Toaster
 │   ├── loading.js          # Global loading UI
@@ -44,7 +44,7 @@ src/
 
 - Route groups: `(auth)`, `(dashboard)`, `(exam)`.
 - Pages: `dynamic import` + `{ ssr: false }` where Zustand persist / Firebase needed.
-- **`middleware.js`** — redirects unauthenticated users (no `gradewise_token` cookie).
+- **`proxy.js`** — redirects unauthenticated users (no `gradewise_token` cookie).
 - **`ProtectedRoute`** — validates session via `/api/auth/me` + role check.
 - App Router conventions: `loading.js`, `error.js`, `not-found.jsx`.
 
@@ -134,9 +134,9 @@ When backend returns `{ status: "generating" }`:
 | Page wrapper | `PageShell` or `page` from `ui.js` |
 | Skip target | `MainLandmark` (`id="main-content"`) |
 | Buttons | `Button` or `btn.*` via `cn()` |
-| Form fields | `Input` / `Select` / `Textarea` / `Label` |
-| Cards | `Card`, `CardHeader` |
-| Action chips | `chip` + `chipTone.*` |
+| Form fields | `Input` or `input` / `select` / `textarea` / `label` tokens |
+| Cards | `Card`, `CardHeader`, `CardContent` |
+| Action chips | `chip` |
 | Theme toggle | `ThemeToggle` + `features/theme/store.js` |
 | Class merge | `cn()` from `lib/cn.js` only |
 

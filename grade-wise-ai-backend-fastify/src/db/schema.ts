@@ -65,7 +65,10 @@ export const users = pgTable(
   },
   (t) => [
     uniqueIndex("users_email_idx").on(t.email),
+    uniqueIndex("users_uid_idx").on(t.uid),
     index("users_role_idx").on(t.role),
+    index("users_verification_token_idx").on(t.verificationToken),
+    index("users_reset_token_idx").on(t.resetToken),
   ]
 );
 
@@ -184,7 +187,6 @@ export const assessmentAttempts = pgTable(
     completedAt: timestamp("completed_at"),
     score: numeric("score", { precision: 8, scale: 2 }),
     status: attemptStatusEnum("status").notNull().default("pending"),
-    attemptNumber: integer("attempt_number").notNull().default(1),
     language: text("language").notNull().default("en"),
   },
   (t) => [
@@ -240,6 +242,7 @@ export const studentAnswers = pgTable(
     submittedAt: timestamp("submitted_at").notNull().defaultNow(),
   },
   (t) => [
+    uniqueIndex("student_answers_attempt_question_idx").on(t.attemptId, t.questionId),
     index("student_answers_attempt_idx").on(t.attemptId),
     index("student_answers_question_idx").on(t.questionId),
   ]
@@ -253,7 +256,6 @@ export const resourceChunks = pgTable(
       .notNull()
       .references(() => resources.id, { onDelete: "cascade" }),
     chunkText: text("chunk_text").notNull(),
-    embedding: text("embedding"),
     chunkIndex: integer("chunk_index").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },

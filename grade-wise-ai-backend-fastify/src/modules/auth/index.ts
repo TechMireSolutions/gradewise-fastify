@@ -221,7 +221,8 @@ export default async function authModule(app: FastifyInstance) {
     schema: { params: UserIdParamSchema },
   }, async (request, reply) => {
     try {
-      await removeUserService(request.params.userId);
+      const requester = request.user as { id: number };
+      await removeUserService(request.params.userId, requester.id);
       return reply.send({ success: true, message: "User deleted successfully." });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);

@@ -99,12 +99,29 @@ export async function generateQuestionsForAttempt(input: {
     parsed = parsed.slice(0, block.questionCount);
 
     for (const q of parsed) {
+      const isMatching = block.questionType === "matching";
+      const leftItems = Array.isArray(q["left_items"])
+        ? (q["left_items"] as unknown[]).map(String)
+        : Array.isArray(q["leftItems"])
+          ? (q["leftItems"] as unknown[]).map(String)
+          : [];
+      const rightItems = Array.isArray(q["right_items"])
+        ? (q["right_items"] as unknown[]).map(String)
+        : Array.isArray(q["rightItems"])
+          ? (q["rightItems"] as unknown[]).map(String)
+          : [];
+
       rows.push({
         attemptId,
         questionOrder: orderIndex++,
         questionType: block.questionType,
         questionText: String(q["question_text"] ?? q["questionText"] ?? "Question unavailable"),
-        options: Array.isArray(q["options"]) ? (q["options"] as string[]) : null,
+        options:
+          isMatching && leftItems.length > 0 && rightItems.length > 0
+            ? [JSON.stringify({ leftItems, rightItems })]
+            : Array.isArray(q["options"])
+              ? (q["options"] as string[])
+              : null,
         correctAnswer: String(q["correct_answer"] ?? q["correctAnswer"] ?? ""),
         positiveMarks: block.positiveMarks,
         negativeMarks: block.negativeMarks,

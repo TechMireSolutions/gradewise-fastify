@@ -15,7 +15,7 @@ import {
   type NewAssessment,
 } from "../../db/schema.js";
 import { eq, and, inArray, sql } from "drizzle-orm";
-import { AppError, NotFoundError, ForbiddenError } from "../../utils/errors.js";
+import { AppError, NotFoundError, ForbiddenError, ConflictError } from "../../utils/errors.js";
 import { generateContent, mapLanguageCode } from "../../ai/generate.js";
 import type { CreateAssessmentInput, UpdateAssessmentInput, PhysicalPaperInput } from "./assessments.schema.js";
 import {
@@ -25,6 +25,34 @@ import {
 } from "./question-generation.js";
 import { generatePhysicalPaperPdf } from "../../utils/pdf.js";
 import { PassThrough } from "stream";
+
+// ─── Access control ───────────────────────────────────────────────────────────
+
+function assertCanManageAssessment(
+  assessment: Assessment,
+  userId: number,
+  role: string
+): void {
+  if (["admin", "super_admin"].includes(role)) return;
+  if (assessment.instructorId !== userId) {
+    throw new ForbiddenError("Access denied to this assessment");
+  }
+}
+
+async function loadAssessmentForManagement(
+  assessmentId: number,
+  userId: number,
+  role: string
+): Promise<Assessment> {
+  const [assessment] = await db
+    .select()
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+  if (!assessment) throw new NotFoundError("Assessment");
+  assertCanManageAssessment(assessment, userId, role);
+  return assessment;
+}
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
@@ -186,15 +214,17 @@ export async function getAssessmentService(
 export async function updateAssessmentService(
   assessmentId: number,
   input: UpdateAssessmentInput,
-  userId: number
+  userId: number,
+  role?: string
 ): Promise<Assessment> {
-  const existing = await db
+  const [existing] = await db
     .select()
     .from(assessments)
-    .where(and(eq(assessments.id, assessmentId), eq(assessments.instructorId, userId)))
+    .where(eq(assessments.id, assessmentId))
     .limit(1);
 
-  if (!existing[0]) throw new NotFoundError("Assessment");
+  if (!existing) throw new NotFoundError("Assessment");
+  assertCanManageAssessment(existing, userId, role ?? "instructor");
 
   const hasAttempt = await db
     .select({ id: assessmentAttempts.id })
@@ -298,41 +328,56 @@ export async function deleteAssessmentService(
 
 export async function enrollStudentService(
   assessmentId: number,
-  studentId: number,
-  instructorId: number
+  email: string,
+  userId: number,
+  role: string
 ): Promise<void> {
-  const assessment = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment[0]) throw new NotFoundError("Assessment");
+  await loadAssessmentForManagement(assessmentId, userId, role);
 
   const student = await db
     .select({ id: users.id, role: users.role })
     .from(users)
-    .where(eq(users.id, studentId))
+    .where(eq(users.email, email))
     .limit(1);
   if (!student[0] || student[0].role !== "student") {
-    throw new AppError("INVALID_STUDENT", "User is not a student", 400);
+    throw new AppError("INVALID_STUDENT", "User is not a student or not found", 400);
+  }
+
+  const studentId = student[0].id;
+
+  const existing = await db
+    .select({ id: enrollments.id })
+    .from(enrollments)
+    .where(and(eq(enrollments.assessmentId, assessmentId), eq(enrollments.studentId, studentId)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    throw new ConflictError("Student is already enrolled in this assessment.");
   }
 
   await db
     .insert(enrollments)
-    .values({ assessmentId, studentId })
-    .onConflictDoNothing();
+    .values({ assessmentId, studentId });
 }
 
 export async function unenrollStudentService(
   assessmentId: number,
-  studentId: number
+  studentId: number,
+  userId: number,
+  role: string
 ): Promise<void> {
+  await loadAssessmentForManagement(assessmentId, userId, role);
   await db
     .delete(enrollments)
     .where(and(eq(enrollments.assessmentId, assessmentId), eq(enrollments.studentId, studentId)));
 }
 
-export async function getEnrolledStudentsService(assessmentId: number) {
+export async function getEnrolledStudentsService(
+  assessmentId: number,
+  userId: number,
+  role: string
+) {
+  await loadAssessmentForManagement(assessmentId, userId, role);
   return db
     .select({
       id: users.id,
@@ -348,29 +393,22 @@ export async function getEnrolledStudentsService(assessmentId: number) {
 
 // ─── Preview questions ────────────────────────────────────────────────────────
 
-export async function previewQuestionsService(
-  assessmentId: number,
-  language = "en"
+async function generatePreviewQuestions(
+  assessment: Assessment,
+  language: string
 ): Promise<object[]> {
-  const assessment = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment[0]) throw new NotFoundError("Assessment");
-
   const blocks = await db
     .select()
     .from(questionBlocks)
-    .where(eq(questionBlocks.assessmentId, assessmentId));
+    .where(eq(questionBlocks.assessmentId, assessment.id));
 
   if (blocks.length === 0) {
     throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
   }
 
-  const context = await gatherAssessmentContext(assessmentId);
+  const context = await gatherAssessmentContext(assessment.id);
   const langLabel = mapLanguageCode(language);
-  const prompt = assessment[0].prompt ?? "";
+  const prompt = assessment.prompt ?? "";
 
   const allQuestions: object[] = [];
 
@@ -384,6 +422,16 @@ export async function previewQuestionsService(
   return allQuestions;
 }
 
+export async function previewQuestionsService(
+  assessmentId: number,
+  language = "en",
+  userId?: number,
+  role?: string
+): Promise<object[]> {
+  const assessment = await loadAssessmentForManagement(assessmentId, userId ?? -1, role ?? "instructor");
+  return generatePreviewQuestions(assessment, language);
+}
+
 // Re-export for backward compatibility
 export { parseQuestionsFromAI } from "./question-generation.js";
 
@@ -391,14 +439,11 @@ export { parseQuestionsFromAI } from "./question-generation.js";
 
 export async function generatePhysicalPaperService(
   assessmentId: number,
-  options: PhysicalPaperInput
+  options: PhysicalPaperInput,
+  userId?: number,
+  role?: string
 ): Promise<Buffer> {
-  const assessment = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment[0]) throw new NotFoundError("Assessment");
+  const assessment = await loadAssessmentForManagement(assessmentId, userId ?? -1, role ?? "instructor");
 
   const blocks = await db
     .select()
@@ -407,7 +452,7 @@ export async function generatePhysicalPaperService(
   if (blocks.length === 0) throw new AppError("NO_BLOCKS", "No question blocks configured", 400);
 
   // Generate preview questions to populate the paper
-  const questions = await previewQuestionsService(assessmentId);
+  const questions = await generatePreviewQuestions(assessment, options.language);
   const paperQuestions = questions.map((q, i) => {
     const question = q as Record<string, unknown>;
     return {

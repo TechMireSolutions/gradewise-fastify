@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card } from "@/lib/ui.js";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
@@ -12,7 +13,7 @@ import { FaSignInAlt, FaGoogle, FaUserCircle } from "react-icons/fa";
 import { redirectByRole } from "../utils/redirectByRole.js";
 
 function Login() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { googleAuth } = useAuthStore();
   const { form, loading, modal, showModal, closeModal, handleLogin } = useLoginForm();
   const { register, formState: { errors } } = form;
@@ -23,7 +24,7 @@ function Login() {
     try {
       const response = await googleAuth();
       showModal("success", "Welcome!", `Successfully signed in with Google! Welcome back, ${response.name}!`);
-      setTimeout(() => redirectByRole(response.role, navigate), 1500);
+      setTimeout(() => redirectByRole(response.role, (to) => router.push(to)), 1500);
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || "Google login failed. Please try again.";
       showModal("error", "Google Login Failed", errorMessage);
@@ -76,13 +77,13 @@ function Login() {
           <div className="text-center">
             <p className={cn("text-sm", "text-muted-foreground")}>
               Don&apos;t have an account?{" "}
-              <Link to="/signup" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-150 cursor-pointer">
+              <Link href="/signup" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-150 cursor-pointer">
                 Create one here
               </Link>
             </p>
           </div>
           <div className="text-center pt-4 border-t border-border">
-            <Link to="/forgot-password" className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors duration-150 cursor-pointer">
+            <Link href="/forgot-password" className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors duration-150 cursor-pointer">
               Forgot your password?
             </Link>
           </div>

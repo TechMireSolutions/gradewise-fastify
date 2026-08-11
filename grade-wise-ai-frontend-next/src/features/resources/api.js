@@ -1,13 +1,10 @@
 import apiClient from "@/lib/apiClient.js";
 
 export const fetchResourcesAPI = () =>
-  apiClient.get("/resources");
+  apiClient.get("/resources/all");
 
 export const fetchAllResourcesAPI = () =>
   apiClient.get("/resources/all");
-
-export const getResourceByIdAPI = (resourceId) =>
-  apiClient.get(`/resources/${resourceId}`);
 
 export const uploadResourcesAPI = (files) => {
   const formData = new FormData();

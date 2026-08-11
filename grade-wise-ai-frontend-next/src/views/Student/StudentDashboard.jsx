@@ -1,90 +1,76 @@
+"use client";
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, cardInteractive, iconBadgeTeal, page } from "@/lib/ui.js";
+
+import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import useAuthStore from "@/features/auth/store.js";
-import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
+import apiClient from "@/lib/apiClient.js";
 import {
   FaClipboardList,
   FaCheckCircle,
   FaClock,
-  FaChartLine,
-  FaUser,
-  FaSync,
-  FaPlayCircle,
-  FaTrophy,
-  FaCalendarAlt,
   FaBook,
   FaGraduationCap
 } from "react-icons/fa";
 
 function StudentDashboard() {
   const { user } = useAuthStore();
-  const { analytics, loading, fetchOverview } = useStudentAnalyticsStore();
+  const [assessmentsList, setAssessmentsList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalAssessments: 0,
     completedAssessments: 0,
     pendingAssessments: 0,
   });
 
-  useEffect(() => {
-    fetchOverview();
-  }, []);
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      const overviewRes = await apiClient.get("/student-analytics/overview");
+      const overviewData = overviewRes.data?.data || overviewRes.data || {};
+      
+      const res = await apiClient.get("/student-analytics/assessments");
+      const dataArray = res.data?.data || res.data || [];
+      
+      let totalCount = 0;
+      let completedCount = 0;
 
-  useEffect(() => {
-    if (analytics) {
-      const totalEnrolled = analytics.total_assessments || 0;
-      const completed = analytics.completed_assessments || 0;
-      const pending = Math.max(0, totalEnrolled - completed);
+      if (overviewData.enrolled) {
+        totalCount = parseInt(overviewData.enrolled.count || overviewData.enrolled, 10) || 0;
+      }
+      if (overviewData.completed) {
+        completedCount = parseInt(overviewData.completed.count || overviewData.completed, 10) || 0;
+      }
+
+      if (Array.isArray(dataArray) && dataArray.length > 0) {
+        setAssessmentsList(dataArray);
+        if (totalCount === 0) totalCount = dataArray.length;
+        if (completedCount === 0) {
+          completedCount = dataArray.filter(a => a.status === "completed" || a.status === "graded").length;
+        }
+      }
 
       setStats({
-        totalAssessments: totalEnrolled,
-        completedAssessments: completed,
-        pendingAssessments: pending,
+        totalAssessments: totalCount || dataArray.length || 0,
+        completedAssessments: completedCount || 0,
+        pendingAssessments: Math.max(0, totalCount - completedCount),
       });
+
+    } catch (err) {
+      console.error("Dashboard error:", err);
+    } finally {
+      setLoading(false);
     }
-  }, [analytics]);
-
-const getAssessmentStatus = (assessment) => {
-  if (!analytics?.recent_performance) {
-    return { status: "available", color: "blue", text: "Available" };
-  }
-
-  const completedAttempt = analytics.recent_performance.find(
-    (a) => a.assessment_id === assessment.id
-  );
-
-  return completedAttempt
-    ? { status: "completed", color: "green", text: "Completed" }
-    : { status: "available", color: "blue", text: "Available" };
-};
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "No deadline";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
-  if (loading) {
-    return (
-      <div className={cn(page, "flex", "items-center", "justify-center")}>
-        <div className="flex flex-col items-center justify-center py-32 gap-4">
-          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-            <LoadingSpinner size="lg" type="spinner" color="blue" />
-          </div>
-          <p className={cn("text-muted-foreground", "text-sm")}>Loading your dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
 
   const statsData = [
     {
@@ -110,29 +96,25 @@ const getAssessmentStatus = (assessment) => {
     }
   ];
 
+  if (loading) {
+    return (
+      <div className={cn(page, "flex", "items-center", "justify-center")}>
+        <LoadingSpinner size="lg" type="spinner" color="blue" />
+      </div>
+    );
+  }
+
   return (
     <div className={page}>
-      {/* Ambient blobs */}
       <AmbientBackground />
-
       <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-
         <WelcomeBanner
           eyebrow="Student Portal"
           title={`Welcome back, ${user?.name || "Student"}!`}
           description="Your personalized learning dashboard — track progress, complete assessments, and achieve excellence."
           icon={FaGraduationCap}
-          aside={
-            <div className={cn("hidden", "sm:block", card, "p-5", "text-center")}>
-              <div className={cn(iconBadgeTeal, "inline-flex", "mb-2", "p-3")}>
-                <FaTrophy className="w-6 h-6 text-white" />
-              </div>
-              <p className={cn("text-xs", "font-semibold", "text-secondary-foreground", "mt-2")}>Keep going!</p>
-            </div>
-          }
         />
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
           {statsData.map((stat, index) => (
             <div key={index} className={stat.cardClass}>
@@ -141,213 +123,50 @@ const getAssessmentStatus = (assessment) => {
                   <p className={cn("text-xs", "text-muted-foreground", "mt-0.5", "mb-1")}>{stat.label}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-foreground leading-none">{stat.value}</p>
                 </div>
-                <div className={stat.iconClass}>
-                  {stat.icon}
-                </div>
+                <div className={stat.iconClass}>{stat.icon}</div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Analytics CTA */}
-        <div className="mb-8 sm:mb-10">
-          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
-            <div className="p-6 sm:p-8 lg:p-10">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                    <FaChartLine className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>Performance Insights</p>
-                    <h3 className="text-xl font-bold text-foreground mb-2">Track Your Progress</h3>
-                    <p className={cn("text-muted-foreground", "text-sm", "leading-relaxed", "max-w-lg")}>
-                      View detailed performance analytics, strengths, weaknesses, and personalized improvement recommendations.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  <Link
-                    to="/student/analytics"
-                    className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
-                  >
-                    <FaChartLine />
-                    View Analytics
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
-
-          {/* Available Assessments */}
-          <div className={cn(card, cardInteractive, "shadow-2xl")}>
-            <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
-                <FaBook className="w-4 h-4 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">Available Assessments</h2>
-            </div>
-            <div className="p-4 sm:p-6">
-              {analytics?.enrolled_assessments?.length > 0 ? (
-                <div className="space-y-4">
-                  {analytics.enrolled_assessments.map((assessment) => {
-                    const status = getAssessmentStatus(assessment);
-                    return (
-                      <div
-                        key={assessment.id}
-                        className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
-                      >
-                        <div className="flex items-start gap-3 mb-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                            status.status === "completed"
-                              ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25"
-                              : "bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25"
-                          }`}>
-                            {status.status === "completed" ? <FaCheckCircle className="w-4 h-4 text-white" /> : <FaClipboardList className="w-4 h-4 text-white" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className={cn("font-semibold", "text-base", "text-secondary-foreground", "mb-1")}>
-                              {assessment.title || "Untitled"}
-                            </h3>
-                            {assessment.prompt && (
-                              <p className={cn("text-xs", "text-muted-foreground", "line-clamp-2", "mb-2", "leading-relaxed")}>
-                                {assessment.prompt}
-                              </p>
-                            )}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-                                <FaCheckCircle className="w-2.5 h-2.5" />
-                                AI-Generated
-                              </span>
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                                <FaCheckCircle className="w-2.5 h-2.5" />
-                                Auto-Graded
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-border">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            status.status === "completed"
-                              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                              : "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20"
-                          }`}>
-                            {status.status === "completed" ? <FaCheckCircle className="w-2.5 h-2.5" /> : <FaClock className="w-2.5 h-2.5" />}
-                            {status.text}
-                          </span>
-                          {status.status === "available" && (
-                            <Link
-                              to={`/student/assessments/${assessment.id}/take`}
-                              className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-lg font-semibold text-xs shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <FaPlayCircle className="w-3 h-3" />
-                              Start
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
-                    <FaBook className="w-8 h-8 text-indigo-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">No assessments yet</h3>
-                  <p className={cn("text-muted-foreground", "text-sm", "max-w-xs")}>Check back later for new assessments assigned by your instructor.</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className={cn(card, cardInteractive, "shadow-2xl")}>
-            <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
-                <FaCheckCircle className="w-4 h-4 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">Recent Activity</h2>
-            </div>
-            <div className="p-4 sm:p-6">
-              {analytics?.recent_performance?.length > 0 ? (
-                <div className="divide-y divide-border">
-                  {analytics.recent_performance.slice(0, 5).map((attempt) => (
-                    <div
-                      key={attempt.assessment_id}
-                      className="flex items-center gap-4 py-4 first:pt-0 last:pb-0 hover:bg-indigo-500/5 rounded-xl px-2 transition-colors duration-150"
-                    >
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25 flex-shrink-0">
-                        <FaCheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("font-semibold", "text-sm", "text-secondary-foreground", "mb-1", "truncate")}>
-                          {attempt.title || "Untitled Assessment"}
-                        </p>
-                        <div className={cn("flex", "items-center", "gap-1.5", "text-xs", "text-muted-foreground")}>
-                          <FaCalendarAlt className="w-3 h-3" />
-                          <span>Completed on {formatDate(attempt.date)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center mb-6">
-                    <FaCheckCircle className="w-8 h-8 text-emerald-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">No recent activity</h3>
-                  <p className={cn("text-muted-foreground", "text-sm", "max-w-xs")}>Complete your first assessment to see it here.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
         <div className={cn(card, cardInteractive, "shadow-2xl")}>
           <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25">
-              <FaTrophy className="w-4 h-4 text-white" />
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <FaBook className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-xl font-bold text-foreground">Quick Actions</h2>
+            <h2 className="text-xl font-bold text-foreground">Available Assessments</h2>
           </div>
           <div className="p-4 sm:p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <Link
-                to="/profile"
-                className="flex items-center p-5 sm:p-6 bg-input border border-border rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 group"
-              >
-                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                  <FaUser className="w-5 h-5 text-white" />
-                </div>
-                <div className="ml-4 sm:ml-5">
-                  <p className={cn("font-semibold", "text-base", "text-secondary-foreground", "mb-0.5", "group-hover:text-foreground", "transition-colors", "duration-150")}>Update Profile</p>
-                  <p className={cn("text-xs", "text-muted-foreground")}>Manage your personal information</p>
-                </div>
-              </Link>
-
-              <button
-                onClick={fetchOverview}
-                className="flex items-center p-5 sm:p-6 bg-input border border-border rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 text-left group cursor-pointer w-full"
-              >
-                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                  <FaSync className="w-5 h-5 text-white" />
-                </div>
-                <div className="ml-4 sm:ml-5">
-                  <p className={cn("font-semibold", "text-base", "text-secondary-foreground", "mb-0.5", "group-hover:text-foreground", "transition-colors", "duration-150")}>Refresh Dashboard</p>
-                  <p className={cn("text-xs", "text-muted-foreground")}>Update with latest data</p>
-                </div>
-              </button>
-            </div>
+            {assessmentsList.length > 0 ? (
+              <div className="space-y-4">
+                {assessmentsList.map((assessment) => {
+                  const isCompleted = assessment.status === "completed" || assessment.status === "graded";
+                  return (
+                    <div key={assessment.id} className="bg-input rounded-xl border border-border p-4 sm:p-5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base text-secondary-foreground mb-1">{assessment.title || "Untitled"}</h3>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+                        <span className="text-xs font-semibold text-indigo-400">{isCompleted ? "Completed" : "Available"}</span>
+                        {!isCompleted && (
+                          <Link href={`/student/assessments/${assessment.id}/take`} className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-violet-600 text-white rounded-lg font-semibold text-xs">
+                            Start
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <h3 className="text-lg font-bold text-foreground mb-2">No assessments yet</h3>
+              </div>
+            )}
           </div>
         </div>
-
       </div>
     </div>
   );

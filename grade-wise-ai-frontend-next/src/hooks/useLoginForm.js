@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import useAuthStore from "@/features/auth/store.js";
 import useRecaptchaInit from "./useRecaptchaInit.js";
@@ -17,7 +17,7 @@ export default function useLoginForm({
   successMessage = (name) => `Welcome back, ${name}!`,
   redirectDelay = 1500,
 } = {}) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login } = useAuthStore();
   const { modal, showModal, closeModal } = useModal();
   const [loading, setLoading] = useState(false);
@@ -45,7 +45,7 @@ export default function useLoginForm({
       }
 
       showModal("success", successTitle, successMessage(response.name));
-      setTimeout(() => redirectByRole(response.role, navigate), redirectDelay);
+      setTimeout(() => redirectByRole(response.role, (to) => router.push(to)), redirectDelay);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
       showModal("error", "Login Failed", errorMessage);

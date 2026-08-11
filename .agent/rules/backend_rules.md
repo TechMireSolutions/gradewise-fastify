@@ -8,7 +8,7 @@ description: "Fastify v5 + TypeScript + Drizzle ORM backend: structure, cookie a
 
 > **Mandatory:** `standards_rules.md` Policies 1–5.
 
-**Stack:** Node ≥22 · Fastify 5 · TypeScript 6 (strict) · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 6 · Vitest
+**Stack:** Node ≥24 · Fastify 5 · TypeScript 6 (strict) · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 6 · Vitest
 
 ## Module System & Imports
 

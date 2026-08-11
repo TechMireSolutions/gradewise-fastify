@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { card } from "@/lib/ui.js";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
@@ -11,7 +12,7 @@ import { FaEnvelope, FaPaperPlane, FaArrowLeft, FaLock, FaExclamationTriangle } 
 import { resetPasswordSchema } from "../schemas/passwordSchemas.js";
 import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 function ResetPassword() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const forgotPassword = useAuthStore((state) => state.forgotPassword);
 
   const [formData, setFormData] = useState({
@@ -54,7 +55,7 @@ function ResetPassword() {
         "If an account with that email exists, a password reset link has been sent. Please check your inbox and spam/junk folder. The link will take you to a page to set a new password."
       );
 
-      setTimeout(() => navigate("/login"), 5000);
+      setTimeout(() => router.push("/login"), 5000);
     } catch (error) {
       console.error("Forgot password error:", error);
 
@@ -138,7 +139,7 @@ function ResetPassword() {
           <div className="mt-6 pt-6 border-t border-border space-y-4">
             <div className="text-center">
               <Link
-                to="/login"
+                href="/login"
                 className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
               >
                 <FaArrowLeft className="text-xs" />

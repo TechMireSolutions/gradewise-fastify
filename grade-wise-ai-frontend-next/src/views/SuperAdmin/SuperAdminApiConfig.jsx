@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { card as uiCard, page, tableHead, tableRowHover } from "@/lib/ui.js";
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import {
@@ -262,15 +262,27 @@ function SuperAdminApiConfig() {
   const [actionLoading, setActionLoading]   = useState(null);
   const { modal, showModal, closeModal } = useModal();
 
-  useEffect(() => { refreshAllKeyLists(); }, []);
-
-  const patchPP = (purpose, provider, patch) =>
+  const patchPP = useCallback((purpose, provider, patch) =>
     setAiState(prev => ({
       ...prev,
       [purpose]: { ...prev[purpose], [provider]: { ...prev[purpose][provider], ...patch } },
-    }));
+    })), []);
 
-  const refreshAllKeyLists = async () => {
+  const refreshKeyList = useCallback(async (purpose, provider) => {
+    try {
+      const r = await listAiKeys(purpose, provider);
+      if (r.success) {
+        patchPP(purpose, provider, {
+          list:  r.keys  || [],
+          model: r.model || defaultModelMap[provider],
+        });
+      }
+    } catch (e) {
+      console.error(`Failed to load ${purpose}/${provider} keys:`, e);
+    }
+  }, [patchPP]);
+
+  const refreshAllKeyLists = useCallback(async () => {
     try {
       const summary = await getAiSummary();
       if (!summary.success) return;
@@ -287,21 +299,9 @@ function SuperAdminApiConfig() {
     } catch (e) {
       console.error("Failed to load AI summary:", e);
     }
-  };
+  }, [patchPP, refreshKeyList]);
 
-  const refreshKeyList = async (purpose, provider) => {
-    try {
-      const r = await listAiKeys(purpose, provider);
-      if (r.success) {
-        patchPP(purpose, provider, {
-          list:  r.keys  || [],
-          model: r.model || defaultModelMap[provider],
-        });
-      }
-    } catch (e) {
-      console.error(`Failed to load ${purpose}/${provider} keys:`, e);
-    }
-  };
+  useEffect(() => { refreshAllKeyLists(); }, [refreshAllKeyLists]);
 
   const updateActiveCard = (field, value) => {
     const pur  = configSubTab;
@@ -470,7 +470,7 @@ function SuperAdminApiConfig() {
         {/* ── Page Header ───────────────────────────────────── */}
         <div className="mb-8">
           <Link
-            to="/super-admin/dashboard"
+            href="/super-admin/dashboard"
             className={cn("inline-flex", "items-center", "gap-2", "text-muted-foreground", "hover:text-foreground", "text-sm", "font-medium", "mb-6", "transition-colors", "duration-150", "group")}
           >
             <FaArrowLeft className="w-3 h-3 transition-transform duration-150 group-hover:-translate-x-0.5" />

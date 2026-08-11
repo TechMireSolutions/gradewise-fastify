@@ -1,8 +1,8 @@
 "use client";
+import { cn } from "@/lib/cn.js";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
-import { cn } from "@/lib/cn";
 
 function Modal({
   isOpen,
@@ -19,10 +19,10 @@ function Modal({
 
   const isConfirmModal = typeof onConfirm === "function";
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => onClose(), 300);
-  };
+  }, [onClose]);
 
   // Auto close ONLY for non-confirm modals
   useEffect(() => {
@@ -44,7 +44,7 @@ function Modal({
       clearTimeout(timer);
       clearInterval(progressInterval);
     };
-  }, [isOpen, isConfirmModal]);
+  }, [isOpen, isConfirmModal, handleClose]);
 
   // Prevent background scroll
   useEffect(() => {
@@ -58,7 +58,7 @@ function Modal({
     const handler = (e) => { if (e.key === "Escape") handleClose(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 

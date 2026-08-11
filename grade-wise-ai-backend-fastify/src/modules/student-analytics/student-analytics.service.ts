@@ -6,8 +6,21 @@ import {
   generatedQuestions,
   studentAnswers,
 } from "../../db/schema.js";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, gte, type SQL } from "drizzle-orm";
 import { getCompletedAttempt, getAttemptQuestionsWithAnswers } from "../analytics/shared.js";
+
+function timeRangeCutoff(timeRange: string): Date | null {
+  switch (timeRange) {
+    case "7d":
+      return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    case "30d":
+      return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    case "90d":
+      return new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return null;
+  }
+}
 
 export async function getStudentOverview(studentId: number) {
   const [enrolled] = await db
@@ -86,7 +99,14 @@ export async function getStudentAssessments(studentId: number) {
     .orderBy(desc(enrollments.enrolledAt));
 }
 
-export async function getStudentPerformance(studentId: number) {
+export async function getStudentPerformance(studentId: number, timeRange = "30d") {
+  const cutoff = timeRangeCutoff(timeRange);
+  const filters: SQL[] = [
+    eq(assessmentAttempts.studentId, studentId),
+    eq(assessmentAttempts.status, "completed"),
+  ];
+  if (cutoff) filters.push(gte(assessmentAttempts.completedAt, cutoff));
+
   return db
     .select({
       title: assessments.title,
@@ -95,12 +115,7 @@ export async function getStudentPerformance(studentId: number) {
     })
     .from(assessmentAttempts)
     .innerJoin(assessments, eq(assessmentAttempts.assessmentId, assessments.id))
-    .where(
-      and(
-        eq(assessmentAttempts.studentId, studentId),
-        eq(assessmentAttempts.status, "completed")
-      )
-    )
+    .where(and(...filters))
     .orderBy(assessmentAttempts.completedAt)
     .limit(50);
 }

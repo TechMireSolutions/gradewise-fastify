@@ -1,8 +1,8 @@
 "use client";
+import { cn } from "@/lib/cn.js";
 
 import { useState } from "react";
-import { saveAs } from "file-saver";
-import Modal from "./ui/Modal"; //  use shared Modal instead of toast
+import Modal from "./ui/Modal";
 import LoadingSpinner from "./ui/LoadingSpinner";
 import { FaFilePdf, FaTimes, FaGlobe, FaArrowLeft, FaDownload } from "react-icons/fa";
 import { sanitizeFileName } from "../utils/paperUtils";
@@ -33,7 +33,7 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
-  const [notify, setNotify] = useState(INITIAL_NOTIFY); //  replaces toast
+  const [notify, setNotify] = useState(INITIAL_NOTIFY);
 
   const { generatePhysicalPaper } = useAssessmentStore();
 
@@ -82,13 +82,19 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
         pageSize: form.pageSize.toUpperCase(),
         headerFontSize: Number(form.headerFontSize),
         bodyFontSize: Number(form.questionFontSize),
+        optionFontSize: Number(form.optionFontSize),
         outputFormat: "pdf",
       });
 
       const fileName = `${sanitizeFileName(assessmentTitle)}_Paper_${selectedLanguage.toUpperCase()}.pdf`;
-      saveAs(blob, fileName);
-
-      // Show success — modal auto-closes after its 6s timer, then we close the paper modal too
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
       showNotify("success", "Success", t("paperGenerated"));
       setTimeout(() => {
         resetModal();
@@ -118,7 +124,6 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
 
   return (
     <>
-      {/* ── Notification (success / error) — same Modal used everywhere else ── */}
       <Modal
         isOpen={notify.isOpen}
         onClose={() => setNotify(INITIAL_NOTIFY)}
@@ -128,32 +133,34 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
         {notify.message}
       </Modal>
 
-      {/* ── Paper Modal ── */}
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
         <div
-          className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto animate-in fade-in zoom-in duration-300"
+          className={cn(
+            "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto transition-all duration-300",
+            isRTL ? "text-right" : "text-left"
+          )}
           dir={isRTL ? "rtl" : "ltr"}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white px-5 sm:px-6 py-4 sm:py-5 rounded-t-2xl sm:rounded-t-3xl flex justify-between items-center shadow-lg z-10">
+          <div className="sticky top-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 dark:from-indigo-950 dark:via-purple-950 dark:to-indigo-950 text-white px-5 sm:px-6 py-4 sm:py-5 rounded-t-2xl sm:rounded-t-3xl flex justify-between items-center shadow-lg z-10 border-b border-indigo-500/20 dark:border-indigo-800/40">
             <div className="flex items-center gap-3">
-              <div className="bg-white/20 backdrop-blur-sm p-2 sm:p-3 rounded-xl">
+              <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm p-2 sm:p-3 rounded-xl">
                 {step === "language" ? (
-                  <FaGlobe className="text-2xl sm:text-3xl" />
+                  <FaGlobe className="text-2xl sm:text-3xl text-indigo-100 dark:text-indigo-300" />
                 ) : (
-                  <FaFilePdf className="text-2xl sm:text-3xl" />
+                  <FaFilePdf className="text-2xl sm:text-3xl text-indigo-100 dark:text-indigo-300" />
                 )}
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold">{t("modalTitle")}</h2>
-                <p className="text-indigo-100 text-xs sm:text-sm truncate max-w-xs sm:max-w-md">
+                <h2 className="text-xl sm:text-2xl font-bold text-white">{t("modalTitle")}</h2>
+                <p className="text-indigo-100 dark:text-indigo-200 text-xs sm:text-sm truncate max-w-xs sm:max-w-md">
                   {step === "language" ? t("modalSubtitle") : assessmentTitle}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-200 hover:rotate-90 active:scale-90"
+              className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-200 hover:rotate-90 active:scale-90"
             >
               <FaTimes className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
@@ -161,13 +168,12 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
 
           <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
             {step === "language" ? (
-              /* ── LANGUAGE SELECTION ── */
               <div className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">
+                  <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                     {t("selectLanguage")}
                   </h3>
-                  <p className="text-muted-foreground">{t("selectLanguageDesc")}</p>
+                  <p className="text-slate-500 dark:text-slate-400">{t("selectLanguageDesc")}</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -175,10 +181,10 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                     <button
                       key={lang.value}
                       onClick={() => handleLanguageSelect(lang.value)}
-                      className="p-6 rounded-2xl border-3 transition-all duration-300 border-border hover:border-indigo-400 hover:bg-card/60 flex items-center justify-center gap-3 active:scale-95"
+                      className="p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 hover:border-indigo-500 dark:hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 text-slate-700 dark:text-slate-200"
                     >
                       <span className="text-4xl">{lang.label.split(" ")[0]}</span>
-                      <span className="text-xl font-bold text-foreground">
+                      <span className="text-xl font-bold text-slate-700 dark:text-slate-100">
                         {lang.label.split(" ").slice(1).join(" ")}
                       </span>
                     </button>
@@ -186,22 +192,21 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                 </div>
               </div>
             ) : (
-              /* ── FORM STEP ── */
               <>
                 <button
                   onClick={() => setStep("language")}
-                  className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors"
+                  className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-semibold transition-colors"
                 >
                   <FaArrowLeft />
                   <span>{t("back")}</span>
                 </button>
 
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border-2 border-indigo-200">
+                <div className="bg-indigo-50 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-200 dark:border-indigo-500/20">
                   <div className="flex items-center gap-3">
-                    <FaGlobe className="text-2xl text-indigo-600" />
+                    <FaGlobe className="text-2xl text-indigo-600 dark:text-indigo-400" />
                     <div>
-                      <p className="text-sm text-muted-foreground">{t("selectLanguage")}</p>
-                      <p className="text-lg font-bold text-foreground">
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{t("selectLanguage")}</p>
+                      <p className="text-lg font-bold text-slate-700 dark:text-slate-100">
                         {LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage)?.label}
                       </p>
                     </div>
@@ -211,18 +216,18 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                 <PaperFormFields form={form} onChange={handleChange} language={selectedLanguage} />
                 <FormattingOptions form={form} onChange={handleChange} language={selectedLanguage} />
 
-                <div className="flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 border-t-2 border-border">
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
                   <button
                     onClick={handleClose}
                     disabled={loading}
-                    className="px-6 py-3 w-full sm:w-auto border-2 border-border hover:border-gray-400 rounded-xl font-bold text-secondary-foreground hover:bg-card/60 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                    className="px-6 py-3 w-full sm:w-auto border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-700 rounded-xl font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                   >
                     {t("cancel")}
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 w-full sm:w-auto text-white rounded-xl font-bold text-sm sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 w-full sm:w-auto text-white rounded-xl font-bold text-sm sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
                   >
                     {loading ? (
                       <>

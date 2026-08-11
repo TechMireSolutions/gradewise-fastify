@@ -3,8 +3,10 @@ import {
   assessmentResources,
   resourceChunks,
   resources,
+  assessments,
 } from "../../db/schema.js";
 import { eq } from "drizzle-orm";
+import axios from "axios";
 
 export interface QuestionBlockLike {
   questionType: string;
@@ -14,16 +16,68 @@ export interface QuestionBlockLike {
   rightCount?: number | null;
 }
 
+// Scraper function to fetch and clean raw text from external URLs
+async function scrapeExternalLink(url: string): Promise<string> {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      },
+      timeout: 8000,
+    });
+
+    const html = response.data;
+    if (typeof html !== "string") return "";
+
+    // Remove scripts, styles, and extra boilerplate spaces
+    let cleanText = html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // Limit single link content to avoid token overflow
+    return cleanText.substring(0, 4000);
+  } catch (error) {
+    console.error(`Failed to scrape link: ${url}`, error instanceof Error ? error.message : error);
+    return "";
+  }
+}
+
 export async function gatherAssessmentContext(assessmentId: number): Promise<string> {
+  // 1. Fetch chunks from linked uploaded resources (PDFs)
   const linkedResources = await db
     .select({ chunkText: resourceChunks.chunkText })
     .from(assessmentResources)
     .innerJoin(resources, eq(assessmentResources.resourceId, resources.id))
     .innerJoin(resourceChunks, eq(resourceChunks.resourceId, resources.id))
     .where(eq(assessmentResources.assessmentId, assessmentId))
-    .limit(20);
+    .limit(15);
 
-  return linkedResources.map((r) => r.chunkText).join("\n\n");
+  let contextParts = linkedResources.map((r) => r.chunkText);
+
+  // 2. Fetch and scrape stored external links
+  const [assessmentData] = await db
+    .select({ externalLinks: assessments.externalLinks })
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+
+  if (assessmentData?.externalLinks && Array.isArray(assessmentData.externalLinks)) {
+    console.log(`[Scraper] Found ${assessmentData.externalLinks.length} external links to process.`);
+    for (const url of assessmentData.externalLinks) {
+      if (typeof url === "string" && url.startsWith("http")) {
+        const pageText = await scrapeExternalLink(url);
+        if (pageText) {
+          contextParts.push(`\n--- Source Link: ${url} ---\n${pageText}`);
+        }
+      }
+    }
+  }
+
+  return contextParts.join("\n\n");
 }
 
 export function buildBlockPrompt(
@@ -44,7 +98,7 @@ export function buildBlockPrompt(
   return `Generate exactly ${block.questionCount} ${typeDesc} in ${language}.
 
 ${instructorPrompt ? `Topic/Instructions: ${instructorPrompt}\n` : ""}
-${context ? `Reference Material:\n${context.substring(0, 3000)}\n` : ""}
+${context ? `Reference Material:\n${context.substring(0, 4000)}\n` : ""}
 
 Return ONLY a valid JSON array. Each object must have:
 - "question_text": the question
