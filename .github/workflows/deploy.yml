@@ -21,15 +21,16 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 11092 }}
           script: |
-            set -e
+            set -euo pipefail
             echo "🚀 Pipeline Triggered Successfully..."
 
             cd /www/wwwroot/gradewiseai.techmiresolutions.com
 
             # Force sync to remote main (handles local drift)
             git fetch origin main
-            git clean -fd -e .env -e .env.local -e .env.production -e node_modules -e .next
-            git reset --hard origin/main
+            git clean -fd -e .env -e .env.local -e .env.production -e node_modules -e .next -e .user.ini || true
+            git checkout origin/main -- . 2>/dev/null || git reset --hard origin/main
+            git clean -fd -e .env -e .env.local -e .env.production -e node_modules -e .next -e .user.ini || true
 
             # ---------------------------------------------
             # 1. BACKEND DEPLOYMENT (Fastify)
