@@ -25,8 +25,10 @@ jobs:
             echo "🚀 Pipeline Triggered Successfully..."
 
             cd /www/wwwroot/gradewiseai.techmiresolutions.com
+
+            # Force sync to remote main (handles local drift)
             git fetch origin main
-            git clean -fd -e .env -e .env.local -e .env.production -e node_modules
+            git clean -fd -e .env -e .env.local -e .env.production -e node_modules -e .next
             git reset --hard origin/main
 
             # ---------------------------------------------
@@ -56,7 +58,8 @@ jobs:
             rm -rf .next
             npm run build
 
-            npx pm2 restart gradewise-frontend || NODE_ENV=production npx pm2 start node_modules/next/dist/bin/next --name "gradewise-frontend" -- start -p 3000
+            npx pm2 delete gradewise-frontend 2>/dev/null || true
+            npx pm2 start node_modules/next/dist/bin/next --name "gradewise-frontend" -- start -p 3000
             cd ..
 
             # ---------------------------------------------

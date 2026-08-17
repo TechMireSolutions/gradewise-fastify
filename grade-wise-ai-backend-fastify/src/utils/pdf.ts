@@ -182,10 +182,20 @@ export function generatePhysicalPaperPdf(
     const finalText = (isRTL && fontLoaded) ? fixBiDi(text) : text;
 
     if (isRTL && fontLoaded) {
-      if (x !== undefined && finalY !== undefined) {
-        doc.text(finalText, x, finalY, mergedOptions);
-      } else {
-        doc.text(finalText, mergedOptions);
+      try {
+        if (x !== undefined && finalY !== undefined) {
+          doc.text(finalText, x, finalY, mergedOptions);
+        } else {
+          doc.text(finalText, mergedOptions);
+        }
+      } catch {
+        // fontkit GPOS anchor crash — fall back without rtla feature
+        const fallbackOptions = { ...mergedOptions, features: [] };
+        if (x !== undefined && finalY !== undefined) {
+          doc.text(finalText, x, finalY, fallbackOptions);
+        } else {
+          doc.text(finalText, fallbackOptions);
+        }
       }
     } else {
       if (x !== undefined && finalY !== undefined) {
