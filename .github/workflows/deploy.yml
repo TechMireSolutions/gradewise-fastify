@@ -40,7 +40,7 @@ jobs:
 
             [ -f .env ] || { echo "❌ ERROR: backend .env missing on server."; exit 1; }
 
-            npm ci
+            npm install --ignore-engines
             npm run build
             npm run db:migrate || npx drizzle-kit push
 
@@ -55,7 +55,7 @@ jobs:
 
             [ -f .env.production ] || [ -f .env.local ] || { echo "❌ ERROR: frontend .env.production/.env.local missing on server."; exit 1; }
 
-            npm ci
+            npm install --ignore-engines
             rm -rf .next
             npm run build
 
