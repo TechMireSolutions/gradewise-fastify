@@ -40,6 +40,9 @@ jobs:
 
             [ -f .env ] || { echo "❌ ERROR: backend .env missing on server."; exit 1; }
 
+            # Ensure SKIP_CAPTCHA is set (reCAPTCHA not configured yet)
+            grep -q '^SKIP_CAPTCHA=true' .env || echo 'SKIP_CAPTCHA=true' >> .env
+
             npm install --ignore-engines
             npm run build
             npm run db:migrate || npx drizzle-kit push
