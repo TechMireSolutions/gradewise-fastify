@@ -32,6 +32,8 @@ function TakeAssessment() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRTL, setIsRTL] = useState(false);
 
+  const isQuranic = ["ar", "fa"].includes(selectedLanguage);
+
   useEffect(() => {
     if (hasStarted) setIsRTL(["ur", "ar", "fa"].includes(selectedLanguage));
   }, [hasStarted, selectedLanguage]);
@@ -155,7 +157,7 @@ function TakeAssessment() {
   const optionSelected = "border-indigo-500/50 bg-indigo-500/15 text-indigo-800 shadow-lg shadow-indigo-500/10 dark:text-indigo-300";
 
   return (
-    <div className="min-h-screen" dir={isRTL ? "rtl" : "ltr"}>
+    <div className={cn("min-h-screen", isQuranic && "font-quran")} dir={isRTL ? "rtl" : "ltr"}>
       {!hasStarted && (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className={cn("w-full", "max-w-2xl", card, "shadow-2xl", "p-6 sm:p-8 space-y-6")}>

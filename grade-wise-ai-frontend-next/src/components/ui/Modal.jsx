@@ -13,6 +13,7 @@ function Modal({
   onConfirm,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  zIndex = "z-50",
 }) {
   const [progress, setProgress] = useState(100);
   const [isClosing, setIsClosing] = useState(false);
@@ -112,7 +113,7 @@ function Modal({
   const ariaRole = isConfirmModal ? "dialog" : (type === "error" || type === "warning") ? "alert" : "status";
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none">
+    <div className={`fixed inset-0 ${zIndex} pointer-events-none`}>
       <div className="fixed top-4 right-4 left-1 sm:left-auto sm:right-6 md:right-8 pointer-events-auto w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
         <div
           role={ariaRole}

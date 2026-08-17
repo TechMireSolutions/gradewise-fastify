@@ -1,4 +1,4 @@
-import { Outfit } from "next/font/google";
+import { Outfit, Amiri } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Providers from "@/components/Providers.jsx";
 import { ThemeScript } from "@/components/ThemeProvider.jsx";
@@ -11,6 +11,13 @@ const outfit = Outfit({
   display: "swap",
 });
 
+const amiri = Amiri({
+  subsets: ["arabic"],
+  weight: ["400", "700"],
+  variable: "--font-amiri",
+  display: "swap",
+});
+
 export const metadata = {
   title: "Gradewise AI - Intelligent Assessment Platform",
   description: "Automate question generation, evaluation, and explainable feedback using AI.",
@@ -18,7 +25,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`h-full antialiased ${outfit.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`h-full antialiased ${outfit.variable} ${amiri.variable}`} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>

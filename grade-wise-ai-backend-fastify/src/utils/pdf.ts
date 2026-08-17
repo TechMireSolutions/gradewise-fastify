@@ -32,8 +32,6 @@ export interface PaperQuestion {
   marks: number;
 }
 
-type RtlTextOptions = PDFKit.Mixins.TextOptions & { direction?: "rtl" | "ltr" };
-
 export function generatePhysicalPaperPdf(
   options: PhysicalPaperOptions,
   outputStream: Writable
@@ -62,18 +60,86 @@ export function generatePhysicalPaperPdf(
 
   doc.pipe(outputStream);
 
-  const isRTL = ["ur", "ar", "sd", "ps"].includes(language.toLowerCase());
-  const defaultFontPath = path.join(__dirname, "..", "assets", "fonts", "NotoSansArabic-Regular.ttf");
-  const urduFontPath = process.env["URDU_FONT_PATH"] ?? defaultFontPath;
-  const fontLoaded = isRTL && fs.existsSync(urduFontPath);
+  const langKey = language.toLowerCase();
+  const isUrdu = langKey === "ur";
+  const isRTL = ["ur", "ar", "fa", "sd", "ps"].includes(langKey);
 
-  if (fontLoaded) {
-    doc.registerFont("UrduFont", urduFontPath);
+  const LABELS: Record<string, { subject: string; teacher: string; total: string; duration: string; instructions: string; question: string; marks: string; answerKey: string; answerOmitted: string; options: string[] }> = {
+    ar: {
+      subject: "المادة:",
+      teacher: "المعلم:",
+      total: "المجموع الكلي:",
+      duration: "المدة:",
+      instructions: "التعليمات:",
+      question: "السؤال",
+      marks: "علامة",
+      answerKey: "ورقة الإجابات",
+      answerOmitted: "[الجواب غير متاح]",
+      options: ["أ", "ب", "ج", "د", "هـ", "و"],
+    },
+    fa: {
+      subject: "موضوع:",
+      teacher: "معلم:",
+      total: "مجموع نمرات:",
+      duration: "مدت:",
+      instructions: "دستورالعمل:",
+      question: "سوال",
+      marks: "نمره",
+      answerKey: "راهنما",
+      answerOmitted: "[جواب ذخیره شده]",
+      options: ["ا", "ب", "ج", "د", "هـ", "و"],
+    },
+    ur: {
+      subject: "مضمون:",
+      teacher: "استاد:",
+      total: "کل نمبر:",
+      duration: "دورانیہ:",
+      instructions: "ہدایات:",
+      question: "سوال",
+      marks: "نمبر",
+      answerKey: "جوابی پرچہ",
+      answerOmitted: "[جواب محفوظ ہے]",
+      options: ["ا", "ب", "ج", "د", "ہ", "و"],
+    },
+  };
+  const lbl: (typeof LABELS)["ur"] = LABELS[langKey] ?? LABELS.ur!;
+  
+  const nastaliqFontPath = process.env["URDU_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "NotoNastaliqUrdu-Regular.ttf");
+  const quranicFontPath = process.env["ARABIC_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "AmiriQuran-Regular.ttf");
+  const arabicFontPath = path.join(__dirname, "..", "assets", "fonts", "Amiri-Regular.ttf");
+
+  let fontLoaded = false;
+  let activeFontKey = "";
+
+  if (isUrdu && fs.existsSync(nastaliqFontPath)) {
+    doc.registerFont("UrduFont", nastaliqFontPath);
+    activeFontKey = "UrduFont";
+    fontLoaded = true;
+  } else if (langKey === "fa" && fs.existsSync(arabicFontPath)) {
+    // Standard Amiri — the Quranic variant lacks Persian letters (ک، گ، پ، چ، ژ)
+    doc.registerFont("ArabicFont", arabicFontPath);
+    activeFontKey = "ArabicFont";
+    fontLoaded = true;
+  } else if (isRTL && fs.existsSync(quranicFontPath)) {
+    // Amiri Quran — shared Quranic font for Arabic (and other RTL languages)
+    doc.registerFont("ArabicFont", quranicFontPath);
+    activeFontKey = "ArabicFont";
+    fontLoaded = true;
+  } else if (isRTL && fs.existsSync(arabicFontPath)) {
+    // Fallback to standard Amiri if the Quranic variant is missing
+    doc.registerFont("ArabicFont", arabicFontPath);
+    activeFontKey = "ArabicFont";
+    fontLoaded = true;
+  } else if (isRTL && fs.existsSync(nastaliqFontPath)) {
+    // Fallback for Arabic to Nastaliq if Arabic fonts are missing
+    doc.registerFont("UrduFont", nastaliqFontPath);
+    activeFontKey = "UrduFont";
+    fontLoaded = true;
   }
 
   const applyFont = (isBold = false) => {
-    if (fontLoaded) {
-      doc.font("UrduFont");
+    if (fontLoaded && activeFontKey) {
+      doc.font(activeFontKey);
     } else {
       doc.font(isBold ? "Helvetica-Bold" : "Helvetica");
     }
@@ -81,100 +147,140 @@ export function generatePhysicalPaperPdf(
 
   const useEnglish = (isBold = false) => { doc.font(isBold ? "Helvetica-Bold" : "Helvetica"); };
 
-  const printRTLText = (text: string, printOptions: RtlTextOptions = {}) => {
+  const fixBiDi = (text: string) => {
+    // PDFKit lays out the whole line as one run and reverses its glyph array when
+    // the first non-Common character is Arabic (rtla). Pre-reverse the LTR runs
+    // (Latin words and digits) so they display left-to-right after that reversal.
+    // Mirror fontkit's direction detection: skip Common chars (space, digits,
+    // punctuation) and inspect the first script-bearing character.
+    const first = [...text].find(ch => !/[\s0-9\u0660-\u0669\u06F0-\u06F9.\-_/:،٫()[\]{}<>«»"'`!?،؛^~*+|=&%#$@]/.test(ch));
+    const isRtlLine = !!first && /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(first);
+    if (!isRtlLine) return text;
+    return text.replace(/[0-9\u0660-\u0669\u06F0-\u06F9A-Za-z]+(?:[.\-_/:،٫\u200c\u200d]+[0-9\u0660-\u0669\u06F0-\u06F9A-Za-z]+)*/g, match => match.split('').reverse().join(''));
+  };
+
+  const printRTLText = (text: string, xOrOptions?: number | PDFKit.Mixins.TextOptions, y?: number, options?: PDFKit.Mixins.TextOptions) => {
+    let x: number | undefined;
+    let finalY: number | undefined;
+    let printOptions: PDFKit.Mixins.TextOptions = {};
+
+    if (typeof xOrOptions === 'number') {
+      x = xOrOptions;
+      finalY = y;
+      printOptions = options || {};
+    } else if (typeof xOrOptions === 'object') {
+      printOptions = xOrOptions;
+    }
+
+    const mergedOptions: PDFKit.Mixins.TextOptions = {
+      ...printOptions,
+      align: printOptions.align || "right",
+      features: ["rtla" as PDFKit.Mixins.OpenTypeFeatures],
+      lineGap: printOptions.lineGap ?? bodyFontSize * 0.18,
+    };
+
+    const finalText = (isRTL && fontLoaded) ? fixBiDi(text) : text;
+
     if (isRTL && fontLoaded) {
-      doc.text(text, {
-        ...printOptions,
-        direction: "rtl",
-        align: printOptions.align || "right",
-      } as PDFKit.Mixins.TextOptions);
+      if (x !== undefined && finalY !== undefined) {
+        doc.text(finalText, x, finalY, mergedOptions);
+      } else {
+        doc.text(finalText, mergedOptions);
+      }
     } else {
-      doc.text(text, printOptions);
+      if (x !== undefined && finalY !== undefined) {
+        doc.text(finalText, x, finalY, printOptions);
+      } else {
+        doc.text(finalText, printOptions);
+      }
     }
   };
 
   const textAlignment = isRTL ? "right" : "left";
   const optionFontSizeFinal = optionFontSize ?? bodyFontSize - 1;
 
+  const contentLeft = doc.page.margins.left;
+  const contentWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
   // 1. Header (Centered Layout)
   applyFont(true);
   doc.fontSize(headerFontSize + 6);
   printRTLText(instituteName, { align: "center" });
 
-  doc.moveDown(0.2);
+  doc.moveDown(0.35);
   doc.fontSize(headerFontSize + 1);
-  printRTLText(isRTL ? `مضمون: ${subjectName}` : "Subject: " + subjectName, { align: "center" });
+  printRTLText(isRTL ? `${lbl.subject} ${subjectName}` : "Subject: " + subjectName, { align: "center" });
 
-  doc.moveDown(0.5);
+  doc.moveDown(0.8);
 
-  // 2. Grid Metadata Table (Typecasted direction parameter to fix build errors)
+  // 2. Grid Metadata Table
   const startY = doc.y;
-  const pageWidth = doc.page.width - 120;
 
   doc.fontSize(bodyFontSize);
   if (isRTL && fontLoaded) {
-    const metadataCol = pageWidth / 3;
+    const metadataCol = contentWidth / 3;
     applyFont(false);
-    doc.text(`استاد: ${teacherName}`, 60, startY, { width: metadataCol, align: "right", direction: "rtl" } as PDFKit.Mixins.TextOptions);
+    printRTLText(`${lbl.teacher} ${teacherName}`, contentLeft, startY, { width: metadataCol, align: "right" });
     useEnglish();
-    doc.text(`Date: ${paperDate}`, 60 + metadataCol, startY, { width: metadataCol, align: "center" });
-    doc.text(`Time: ${paperTime}`, 60 + (2 * metadataCol), startY, { width: metadataCol, align: "left" });
+    doc.text(`Date: ${paperDate}`, contentLeft + metadataCol, startY, { width: metadataCol, align: "center" });
+    doc.text(`Time: ${paperTime}`, contentLeft + 2 * metadataCol, startY, { width: metadataCol, align: "left" });
 
-    const nextY = startY + doc.currentLineHeight() + 8;
+    const nextY = startY + doc.currentLineHeight() + bodyFontSize * 0.7;
     applyFont(false);
-    doc.text(`کل نمبر: ${totalMarks}`, 60, nextY, { width: pageWidth / 2, align: "right", direction: "rtl" } as PDFKit.Mixins.TextOptions);
-    doc.text(`دورانیہ: ${paperDuration}`, 60 + (pageWidth / 2), nextY, { width: pageWidth / 2, align: "left", direction: "rtl" } as PDFKit.Mixins.TextOptions);
+    printRTLText(`${lbl.total} ${totalMarks}`, contentLeft, nextY, { width: contentWidth / 2, align: "right" });
+    printRTLText(`${lbl.duration} ${paperDuration}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "left" });
     doc.y = nextY + doc.currentLineHeight();
   } else {
     useEnglish();
-    doc.text(`Teacher: ${teacherName}`, 60, startY, { width: pageWidth / 3, align: "left" });
-    doc.text(`Date: ${paperDate}`, 60 + (pageWidth / 3), startY, { width: pageWidth / 3, align: "center" });
-    doc.text(`Time: ${paperTime}`, 60 + (2 * pageWidth / 3), startY, { width: pageWidth / 3, align: "right" });
-    
+    doc.text(`Teacher: ${teacherName}`, contentLeft, startY, { width: contentWidth / 3, align: "left" });
+    doc.text(`Date: ${paperDate}`, contentLeft + contentWidth / 3, startY, { width: contentWidth / 3, align: "center" });
+    doc.text(`Time: ${paperTime}`, contentLeft + 2 * contentWidth / 3, startY, { width: contentWidth / 3, align: "right" });
+
     const nextY = startY + doc.currentLineHeight() + 5;
-    doc.text(`Total Marks: ${totalMarks}`, 60, nextY, { width: pageWidth / 2, align: "left" });
-    doc.text(`Duration: ${paperDuration}`, 60 + (pageWidth / 2), nextY, { width: pageWidth / 2, align: "right" });
+    doc.text(`Total Marks: ${totalMarks}`, contentLeft, nextY, { width: contentWidth / 2, align: "left" });
+    doc.text(`Duration: ${paperDuration}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "right" });
     doc.y = nextY + doc.currentLineHeight();
   }
 
   if (notes) {
-    doc.moveDown(0.4);
+    doc.moveDown(0.5);
     doc.fontSize(bodyFontSize - 1);
     if (isRTL && fontLoaded) {
       applyFont(false);
-      printRTLText(`ہدایات: ${notes}`, { align: "right" });
+      printRTLText(`${lbl.instructions} ${notes}`, { align: "right" });
     } else {
       doc.font("Helvetica-Oblique");
-      doc.text("Instructions: " + notes, 60, doc.y, { align: "left" });
+      doc.text("Instructions: " + notes, contentLeft, doc.y, { align: "left" });
     }
   }
 
-  doc.moveDown(0.6);
-  doc.moveTo(60, doc.y).lineTo(doc.page.width - 60, doc.y).stroke();
-  doc.moveDown(1.0);
+  // 3. Separator — generous spacing so Nastaliq descenders clear the rule
+  doc.moveDown(1.1);
+  doc.moveTo(contentLeft, doc.y).lineTo(contentLeft + contentWidth, doc.y).stroke();
+  doc.moveDown(1.4);
 
-  // 3. Questions Rendering
+  // 4. Questions Rendering
   for (const q of questions) {
     applyFont(true);
     doc.fontSize(bodyFontSize);
 
     if (isRTL && fontLoaded) {
-      const questionFullText = `سوال ${q.questionNumber}: ${q.questionText} (${q.marks} نمبر)`;
+      const questionFullText = `${lbl.question} ${q.questionNumber}: ${q.questionText} (${q.marks} ${lbl.marks})`;
       printRTLText(questionFullText, { align: "right" });
 
       if (q.options && q.options.length > 0) {
         doc.moveDown(0.1);
         applyFont(false);
-        const labels = ["ا", "ب", "ج", "د", "ہ", "و"];
+        const optionLabels = lbl.options;
         for (let i = 0; i < q.options.length; i++) {
           doc.fontSize(optionFontSizeFinal);
           const optionMainText = q.options[i] || "";
-          printRTLText(`${labels[i]}. ${optionMainText}`, { align: "right" });
+          printRTLText(`${optionLabels[i]}. ${optionMainText}`, { align: "right" });
         }
       }
     } else {
       useEnglish(true);
-      doc.text(`Q${q.questionNumber}. ${q.questionText}  (${q.marks} marks)`, 60, doc.y, { align: "left" });
+      doc.text(`Q${q.questionNumber}. ${q.questionText}  (${q.marks} marks)`, contentLeft, doc.y, { align: "left" });
 
       if (q.options && q.options.length > 0) {
         doc.moveDown(0.1);
@@ -182,19 +288,19 @@ export function generatePhysicalPaperPdf(
         const labels = ["A", "B", "C", "D", "E", "F"];
         for (let i = 0; i < q.options.length; i++) {
           const optionVal = q.options[i] || "";
-          doc.fontSize(optionFontSizeFinal).text(`   ${labels[i]}. ${optionVal}`, 60, doc.y, { align: "left" });
+          doc.fontSize(optionFontSizeFinal).text(`   ${labels[i]}. ${optionVal}`, contentLeft, doc.y, { align: "left" });
         }
       }
     }
-    doc.moveDown(1.0);
+    doc.moveDown(1.1);
   }
 
-  // 4. Answer Key Page Configuration
+  // 5. Answer Key Page Configuration
   doc.addPage();
   doc.fontSize(headerFontSize);
   applyFont(true);
-  printRTLText(isRTL ? "جوابی پرچہ" : "Answer Key", { align: "center" });
-  
+  printRTLText(isRTL ? lbl.answerKey : "Answer Key", { align: "center" });
+
   doc.moveDown(1);
   doc.fontSize(bodyFontSize);
   applyFont(false);
@@ -202,9 +308,9 @@ export function generatePhysicalPaperPdf(
   for (const q of questions) {
     if (q.questionType === "multiple_choice" || q.questionType === "true_false") {
       if (isRTL && fontLoaded) {
-        printRTLText(`سوال ${q.questionNumber}: [جواب خارج کر دیا گیا ہے]`, { align: "right" });
+        printRTLText(`${lbl.question} ${q.questionNumber}: ${lbl.answerOmitted}`, { align: "right" });
       } else {
-        useEnglish(false); doc.text(`Q${q.questionNumber}: [Answer omitted — see evaluation system]`, 60, doc.y, { align: "left" });
+        useEnglish(false); doc.text(`Q${q.questionNumber}: [Answer omitted — see evaluation system]`, contentLeft, doc.y, { align: "left" });
       }
     }
   }

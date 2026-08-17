@@ -39,6 +39,7 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
 
   const t = (key) => getTranslation(selectedLanguage, key);
   const isRTL = isRTLLanguage(selectedLanguage);
+  const isQuranic = ["ar", "fa"].includes(selectedLanguage);
 
   const showNotify = (type, title, message) =>
     setNotify({ isOpen: true, type, title, message });
@@ -77,7 +78,7 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
         paperDate: form.paperDate,
         paperTime: form.paperTime,
         paperDuration: form.paperDuration,
-        totalMarks: Number(form.totalMarks),
+        totalMarks: parseInt(form.totalMarks, 10),
         notes: form.notes,
         pageSize: form.pageSize.toUpperCase(),
         headerFontSize: Number(form.headerFontSize),
@@ -129,15 +130,18 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
         onClose={() => setNotify(INITIAL_NOTIFY)}
         type={notify.type}
         title={notify.title}
+        zIndex="z-[110]"
       >
         {notify.message}
       </Modal>
 
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+        <div className="min-h-full flex items-center justify-center">
         <div
           className={cn(
             "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto transition-all duration-300",
-            isRTL ? "text-right" : "text-left"
+            isRTL ? "text-right" : "text-left",
+            isQuranic && "font-quran"
           )}
           dir={isRTL ? "rtl" : "ltr"}
         >
@@ -181,7 +185,10 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                     <button
                       key={lang.value}
                       onClick={() => handleLanguageSelect(lang.value)}
-                      className="p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 hover:border-indigo-500 dark:hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 text-slate-700 dark:text-slate-200"
+                      className={cn(
+                        "p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 hover:border-indigo-500 dark:hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 text-slate-700 dark:text-slate-200",
+                        ["ar", "fa"].includes(lang.value) && "font-quran"
+                      )}
                     >
                       <span className="text-4xl">{lang.label.split(" ")[0]}</span>
                       <span className="text-xl font-bold text-slate-700 dark:text-slate-100">
@@ -216,7 +223,7 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
                 <PaperFormFields form={form} onChange={handleChange} language={selectedLanguage} />
                 <FormattingOptions form={form} onChange={handleChange} language={selectedLanguage} />
 
-                <div className="flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 mt-6">
                   <button
                     onClick={handleClose}
                     disabled={loading}
@@ -245,6 +252,7 @@ const PhysicalPaperModal = ({ isOpen, onClose, assessmentId, assessmentTitle }) 
               </>
             )}
           </div>
+        </div>
         </div>
       </div>
     </>

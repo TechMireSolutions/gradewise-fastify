@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useAssessmentStore from "@/features/assessments/store.js";
 
 function useAssessmentPreview(assessmentId) {
@@ -29,7 +29,7 @@ function useAssessmentPreview(assessmentId) {
   }, [assessmentId, getAssessmentById]);
 
   // Load preview questions
-  const loadPreviewQuestions = async () => {
+  const loadPreviewQuestions = useCallback(async () => {
     if (!assessment || questions.length > 0 || questionError) return;
 
     setQuestionsLoading(true);
@@ -47,7 +47,7 @@ function useAssessmentPreview(assessmentId) {
     } finally {
       setQuestionsLoading(false);
     }
-  };
+  }, [assessment, questions, questionError, assessmentId, fetchPreviewQuestions]);
 
   return {
     assessment,

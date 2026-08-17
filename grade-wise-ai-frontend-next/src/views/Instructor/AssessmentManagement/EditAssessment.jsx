@@ -564,6 +564,7 @@ function EditAssessment() {
                           value={block.duration_per_question}
                           onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
                           min="30"
+                          max="600"
                           placeholder="e.g. 120"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}

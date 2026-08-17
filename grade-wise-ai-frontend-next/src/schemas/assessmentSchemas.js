@@ -14,7 +14,7 @@ selectedResources: z.array(z.number()).optional(),
         z.object({
           questionType: z.enum(["multiple_choice", "true_false"]),
           questionCount: z.number().min(1),
-          durationPerQuestion: z.number().min(30),
+          durationPerQuestion: z.number().min(30).max(600),
           numOptions: z.number().min(2).optional(),
           positiveMarks: z.number().min(0),
           negativeMarks: z.number().min(0),

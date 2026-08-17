@@ -402,6 +402,7 @@ function CreateAssessment() {
                           value={block.durationPerQuestion}
                           onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
                           min="30"
+                          max="600"
                           placeholder="e.g. 120"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           required
