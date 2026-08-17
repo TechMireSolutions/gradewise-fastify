@@ -25,7 +25,9 @@ jobs:
             echo "🚀 Pipeline Triggered Successfully..."
 
             cd /www/wwwroot/gradewiseai.techmiresolutions.com
-            git pull origin main
+            git fetch origin main
+            git clean -fd -e .env -e .env.local -e .env.production -e node_modules
+            git reset --hard origin/main
 
             # ---------------------------------------------
             # 1. BACKEND DEPLOYMENT (Fastify)
