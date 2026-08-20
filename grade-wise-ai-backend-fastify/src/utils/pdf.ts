@@ -115,11 +115,6 @@ export function generatePhysicalPaperPdf(
     doc.registerFont("UrduFont", nastaliqFontPath);
     activeFontKey = "UrduFont";
     fontLoaded = true;
-  } else if (langKey === "fa" && fs.existsSync(arabicFontPath)) {
-    // Standard Amiri — the Quranic variant lacks Persian letters (ک، گ، پ، چ، ژ)
-    doc.registerFont("ArabicFont", arabicFontPath);
-    activeFontKey = "ArabicFont";
-    fontLoaded = true;
   } else if (isRTL && fs.existsSync(quranicFontPath)) {
     // Amiri Quran — shared Quranic font for Arabic (and other RTL languages)
     doc.registerFont("ArabicFont", quranicFontPath);
