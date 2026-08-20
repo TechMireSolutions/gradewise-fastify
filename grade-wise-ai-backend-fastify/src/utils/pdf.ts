@@ -116,17 +116,14 @@ export function generatePhysicalPaperPdf(
     activeFontKey = "UrduFont";
     fontLoaded = true;
   } else if (isRTL && fs.existsSync(quranicFontPath)) {
-    // Amiri Quran — shared Quranic font for Arabic (and other RTL languages)
     doc.registerFont("ArabicFont", quranicFontPath);
     activeFontKey = "ArabicFont";
     fontLoaded = true;
   } else if (isRTL && fs.existsSync(arabicFontPath)) {
-    // Fallback to standard Amiri if the Quranic variant is missing
     doc.registerFont("ArabicFont", arabicFontPath);
     activeFontKey = "ArabicFont";
     fontLoaded = true;
   } else if (isRTL && fs.existsSync(nastaliqFontPath)) {
-    // Fallback for Arabic to Nastaliq if Arabic fonts are missing
     doc.registerFont("UrduFont", nastaliqFontPath);
     activeFontKey = "UrduFont";
     fontLoaded = true;
@@ -143,11 +140,6 @@ export function generatePhysicalPaperPdf(
   const useEnglish = (isBold = false) => { doc.font(isBold ? "Helvetica-Bold" : "Helvetica"); };
 
   const fixBiDi = (text: string) => {
-    // PDFKit lays out the whole line as one run and reverses its glyph array when
-    // the first non-Common character is Arabic (rtla). Pre-reverse the LTR runs
-    // (Latin words and digits) so they display left-to-right after that reversal.
-    // Mirror fontkit's direction detection: skip Common chars (space, digits,
-    // punctuation) and inspect the first script-bearing character.
     const first = [...text].find(ch => !/[\s0-9\u0660-\u0669\u06F0-\u06F9.\-_/:،٫()[\]{}<>«»"'`!?،؛^~*+|=&%#$@]/.test(ch));
     const isRtlLine = !!first && /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(first);
     if (!isRtlLine) return text;
@@ -183,20 +175,27 @@ export function generatePhysicalPaperPdf(
         } else {
           doc.text(finalText, mergedOptions);
         }
-      } catch {
-        // fontkit GPOS anchor crash — fall back without rtla feature
+      } catch (err) {
         const fallbackOptions = { ...mergedOptions, features: [] };
-        if (x !== undefined && finalY !== undefined) {
-          doc.text(finalText, x, finalY, fallbackOptions);
-        } else {
-          doc.text(finalText, fallbackOptions);
+        try {
+          if (x !== undefined && finalY !== undefined) {
+            doc.text(finalText, x, finalY, fallbackOptions);
+          } else {
+            doc.text(finalText, fallbackOptions);
+          }
+        } catch (innerErr) {
+          console.error("PDFKit fallback rendering failed:", innerErr);
         }
       }
     } else {
-      if (x !== undefined && finalY !== undefined) {
-        doc.text(finalText, x, finalY, printOptions);
-      } else {
-        doc.text(finalText, printOptions);
+      try {
+        if (x !== undefined && finalY !== undefined) {
+          doc.text(finalText, x, finalY, printOptions);
+        } else {
+          doc.text(finalText, printOptions);
+        }
+      } catch (err) {
+        console.error("PDFKit LTR rendering failed:", err);
       }
     }
   };
@@ -259,7 +258,7 @@ export function generatePhysicalPaperPdf(
     }
   }
 
-  // 3. Separator — generous spacing so Nastaliq descenders clear the rule
+  // 3. Separator
   doc.moveDown(1.1);
   doc.moveTo(contentLeft, doc.y).lineTo(contentLeft + contentWidth, doc.y).stroke();
   doc.moveDown(1.4);
@@ -300,7 +299,7 @@ export function generatePhysicalPaperPdf(
     doc.moveDown(1.1);
   }
 
-  // 5. Answer Key Page Configuration
+  // 5. Answer Key Page
   doc.addPage();
   doc.fontSize(headerFontSize);
   applyFont(true);
