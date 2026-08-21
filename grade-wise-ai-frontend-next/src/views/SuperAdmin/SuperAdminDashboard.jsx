@@ -132,7 +132,8 @@ function SuperAdminDashboard() {
         onConfirm={pendingDelete ? confirmDeleteUser : undefined}
         type={modal.type}
         title={modal.title}
-        loading={pendingDelete && actionLoading === `delete-${pendingDelete.userId}`}
+        loading={Boolean(pendingDelete && actionLoading === `delete-${pendingDelete.userId}`)}
+        closeOnConfirm={false}
         confirmText="Delete User"
       >
         {modal.message}

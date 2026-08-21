@@ -6,14 +6,15 @@ export default function useUserManagement() {
   const { user, getUsers, changeUserRole, deleteUser } = useAuthStore();
   const { modal, showModal, closeModal: closeModalBase } = useModal();
 
-  const closeModal = useCallback(() => {
-    closeModalBase();
-    setPendingDelete(null);
-  }, [closeModalBase]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+
+  const closeModal = useCallback(() => {
+    closeModalBase();
+    setPendingDelete(null);
+  }, [closeModalBase]);
 
   const fetchUsers = useCallback(async () => {
     try {

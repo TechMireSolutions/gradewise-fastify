@@ -108,7 +108,9 @@ export const questionBlocks = pgTable(
     negativeMarks: numeric("negative_marks", { precision: 5, scale: 2 })
       .notNull()
       .default("0.25"),
-    createdBy: integer("created_by").references(() => users.id),
+    createdBy: integer("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [index("question_blocks_assessment_idx").on(t.assessmentId)]
