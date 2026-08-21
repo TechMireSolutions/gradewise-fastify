@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { db, users } from "../../db/index.js";
+import { db, users, questionBlocks } from "../../db/index.js";
 import { eq, or } from "drizzle-orm";
 import type { NewUser, User } from "../../db/schema.js";
 import {
@@ -257,6 +257,14 @@ export async function removeUserService(userId: number, requesterId: number): Pr
   if (userId === requesterId) {
     throw new AppError("SELF_DELETE", "Cannot delete your own account", 400);
   }
+  // Detach question blocks created by this user before delete so the
+  // question_blocks_created_by FK cannot block removal (blocks stay with
+  // their assessment; only creator attribution is cleared).
+  await db
+    .update(questionBlocks)
+    .set({ createdBy: null })
+    .where(eq(questionBlocks.createdBy, userId));
+
   const result = await db.delete(users).where(eq(users.id, userId)).returning();
   if (result.length === 0) throw new NotFoundError("User");
 }
