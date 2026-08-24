@@ -1,86 +1,171 @@
 # Gradewise AI — Cursor Project Rules
 
-> **Canonical rule files** live in `.agent/rules/` and `.claude/rules/` (mirrored). Read the specialized file for your task — this file is the quick index.
-
-## Rule Map
-
-| File | When to read |
-|------|--------------|
-| **`standards_rules.md`** | **Policies 1–5: deps · structure · naming · DRY · security/infra/testing** |
-| `project_rules.md` | Repo layout, PM2, CI, commands, routes, env |
-| `domain_rules.md` | RBAC, assessments, multilingual, XAI, business logic |
-| `backend_rules.md` | `grade-wise-ai-backend-fastify/**/*.ts` |
-| `frontend_rules.md` | `grade-wise-ai-frontend-next/**` |
-| `ui.md` | Pure Tailwind v4 tokens, theme, a11y, `lib/ui.js` catalog |
-| `workflow_rules.md` | Before commit — build/lint/test gates |
-| `antigravity_rules.md` | Antigravity SDK agents only (not app code) |
-
-Also see **`MIGRATION.md`** for modernization changelog.
-
-Paths: `.agent/rules/` · `.claude/rules/` · root `ANTIGRAVITY_RULES.md`
+> **Canonical source:** `CLAUDE.md` at repo root. This file is a quick index for Cursor agents.
 
 ---
 
 ## Repository
 
-| App | Path | Stack |
-|-----|------|-------|
-| Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
-| Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
-| Process manager | `ecosystem.config.cjs` | PM2 — api + worker |
+| App | Path | Stack | Port |
+|-----|------|-------|------|
+| Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 (strict) · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest | 8000 |
+| Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query · Zod 4 · Playwright | 3000 |
+| CI/CD | `.github/workflows/deploy.yml` | SSH deploy → PM2 restart → health check | — |
 
-**Deprecated:** `grade-wise-ai-backend-v2/` (Express) — do not use.
+**Deprecated:** `grade-wise-ai-backend-v2/` (Express) — do not use or reference.
 
 ---
 
 ## Commands
 
 ```bash
-# Process manager (api + worker)
-pm2 start ecosystem.config.cjs
+# Backend
+cd grade-wise-ai-backend-fastify
+npm run dev              # API on :8000
+npm run dev:worker       # BullMQ worker (USE_ASYNC_JOBS=true)
+npm run typecheck        # tsc --noEmit
+npm run build            # tsc + fonts copy
+npm test                 # Vitest
+npm run db:push          # push schema (local)
+npm run db:seed          # seed super_admin
 
-# Frontend (port 3000)
-cd grade-wise-ai-frontend-next && npm run dev
-
-# Backend API (port 5005) — dev mode
-cd grade-wise-ai-backend-fastify && npm run dev
-
-# Backend worker (when USE_ASYNC_JOBS=true) — dev mode
-cd grade-wise-ai-backend-fastify && npm run dev:worker
+# Frontend
+cd grade-wise-ai-frontend-next
+npm run dev              # Next.js on :3000
+npm run build            # production build
+npm run lint             # ESLint flat config
+npm run test:e2e         # Playwright
 ```
 
-| Check | Command | Directory |
-|-------|---------|-----------|
-| FE build | `npm run build` | `grade-wise-ai-frontend-next/` |
-| FE lint | `npm run lint` | `grade-wise-ai-frontend-next/` |
-| FE E2E | `npm run test:e2e` | `grade-wise-ai-frontend-next/` |
-| BE typecheck | `npm run typecheck` | `grade-wise-ai-backend-fastify/` |
-| BE build | `npm run build` | `grade-wise-ai-backend-fastify/` |
-| BE tests | `npm test` | `grade-wise-ai-backend-fastify/` |
+### Quality Gates (before every commit)
 
-Copy `.env.example` → `.env` (backend) and `.env.local` (frontend) before first run.
+```bash
+# Backend
+npm run typecheck && npm run build && npm test
 
----
-
-## Non-Negotiables (see `standards_rules.md`)
-
-1. **Policy 1 — Dependencies:** Latest stable; verify build/lint/test/typecheck.
-2. **Policy 2 — Structure:** Backend `modules/<domain>/` · Frontend `features/<domain>/` · `schemas/` (not `scheema/`).
-3. **Policy 3 — Naming:** camelCase · PascalCase components · kebab-case folders.
-4. **Policy 4 — DRY:** Extract on 2nd use; reuse shared modules in standards.
-5. **Policy 5 — Security:** httpOnly cookie auth · Google idToken verify · no JWT in localStorage · CI/tests.
+# Frontend
+npm run build && npm run lint
+```
 
 ---
 
-## Agent Skills
+## Non-Negotiables
 
-Mirrored in `.agent/skills/` and `.claude/skills/`. Activate by task:
+1. **TypeScript strict** — Backend has `strict: true` + `noUncheckedIndexedAccess: true`. Never use `any`.
+2. **ESM with `.js` suffixes** — All backend imports use `.js` extension (NodeNext resolution).
+3. **Cookie auth only** — JWT in httpOnly cookie (`gradewise_token`); never localStorage/sessionStorage.
+4. **Services throw `AppError`** — Routes stay thin; business logic in services.
+5. **AI keys encrypted** — AES-256-GCM via `encryptSecret`/`decryptSecret`. Never log or expose keys.
+6. **Config cache** — `system_configs` cached 60s. Call `invalidateConfigCache()` after writes.
+7. **Google OAuth** — Backend verifies Firebase ID tokens via custom `verifyGoogleIdToken()`.
+8. **RBAC** — `authenticate` + `authorize(...roles)` preHandler hooks. Roles: super_admin > admin > instructor > student.
 
-| Skill | When |
-|-------|------|
-| `gradewise-backend` | API, DB, Redis, BullMQ, cookie auth, AI, workers |
-| `gradewise-frontend` | Next.js UI, middleware, TanStack Query, hooks, forms |
-| `gradewise-domain` | Business rules, assessments, RBAC |
-| `google-antigravity-sdk` | AGY agent orchestration only |
-| `ui-ux-pro-max` | UI design decisions, dashboards |
-| `ui-styling` · `design` · `brand` | Visual design and assets |
+---
+
+## Backend Architecture
+
+### Module Pattern
+
+```
+src/modules/<domain>/
+├── index.ts            # Route definitions (prefix: /api/<domain>)
+├── <domain>.schema.ts  # Zod request/response schemas
+└── <domain>.service.ts # Business logic (throws AppError)
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/app.ts` | Fastify app factory (plugins, hooks, routes) |
+| `src/index.ts` | Server entry point |
+| `src/worker.ts` | BullMQ worker entry point |
+| `src/db/schema.ts` | Drizzle table definitions (11 tables) |
+| `src/ai/providers.ts` | AI provider rotation + config from DB |
+| `src/ai/generate.ts` | `generateContent()` / `generatePdfContent()` |
+| `src/utils/crypto.ts` | AES-256-GCM encrypt/decrypt + Firebase token verify |
+| `src/utils/pdf.ts` | PDFKit physical paper generator (RTL support) |
+| `src/utils/errors.ts` | AppError hierarchy + `toHttpError()` mapper |
+| `src/hooks/authenticate.ts` | JWT verification preHandler |
+| `src/hooks/authorize.ts` | Role-based RBAC preHandler |
+
+### 37 API Routes
+
+- **Auth** (12): signup, login, Google OAuth, logout, me, verify, forgot/change password, user management
+- **Assessments** (10): CRUD, enrollment, preview, physical paper PDF
+- **Taking** (4): start, submit, status poll, submission detail
+- **Config** (9): AI key CRUD, model set, test, bulk update
+- **Resources** (4): upload (PDF/DOCX/txt), list, delete
+- **Instructor Analytics** (4): overview, assessments, students, questions
+- **Student Analytics** (7): overview, assessments, performance, detail, questions, report, recommendations
+
+### AI Provider System
+
+- **6 providers**: Gemini, Groq, OpenAI, Claude, Mistral, DeepSeek
+- **Config keys**: `TEXT_<PROVIDER>_KEYS`, `TEXT_<PROVIDER>_MODEL`, `PDF_<PROVIDER>_KEYS`
+- **Rotation**: `callWithRotation()` tries up to 4 providers with cooldown
+- **Current Groq models**: `openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.6-27b`
+- **Default fallbacks** in `src/ai/constants.ts`
+
+### Database
+
+- **Driver**: `postgres` (postgres.js), max 20 connections
+- **ORM**: Drizzle ORM with typed queries
+- **Enums**: role, auth_provider, question_type, attempt_status, resource_content_type, visibility
+- **Seeding**: `npm run db:seed` creates super_admin + system_configs from env vars
+
+---
+
+## Frontend Architecture
+
+### Feature Module Pattern
+
+```
+src/features/<domain>/
+├── api.js     # API calls (uses shared apiClient)
+└── store.js   # Zustand store (optional)
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/proxy.js` | Next.js 16 middleware — auth gate (cookie check) |
+| `src/lib/apiClient.js` | Axios instance (`withCredentials: true`, base URL) |
+| `src/lib/cn.js` | `clsx` + `tailwind-merge` utility |
+| `src/lib/ui.js` | UI component catalog |
+| `src/components/ui/` | Design system primitives (Button, Card, Input, Modal, etc.) |
+| `src/components/ProtectedRoutes.jsx` | Client-side route guard |
+| `src/components/Providers.jsx` | Context wrapper (TanStack Query, theme, etc.) |
+| `src/schemas/fields.js` | Shared Zod field validators |
+
+### Views Layer
+
+- `app/` pages are thin wrappers that render `views/<Role>/` components
+- Route groups: `(auth)`, `(dashboard)`, `(exam)`
+
+### State Management
+
+- **Server state**: TanStack Query (all data fetching/caching)
+- **Client state**: Zustand (auth user, theme, assessment-taking state, UI state)
+- **Forms**: react-hook-form + Zod resolver
+
+### Tailwind v4
+
+- No `tailwind.config.js` — CSS-first config in `globals.css`
+- `@theme inline {}` block with custom tokens (edu-navy, edu-teal, edu-sky, edu-gold)
+- Dark mode via `.dark` class on `<html>`
+- `cn()` utility for class merging
+
+---
+
+## Common Pitfalls
+
+1. **Port 8000**: Only ONE backend PM2 process should bind this port
+2. **EADDRINUSE**: `pm2 delete <duplicate>` then `pm2 restart <name>`
+3. **Config cache**: DB changes take 60s to reflect; restart PM2 for immediate effect
+4. **SKIP_CAPTCHA**: Set `true` when no reCAPTCHA is configured
+5. **FIREBASE_PROJECT_ID**: Must be set in backend `.env` for Google Auth to work
+6. **Groq models**: Use current catalog (`openai/gpt-oss-120b`), not deprecated Llama models
+7. **Font paths**: Backend builds copy fonts from `src/assets/fonts/` to `dist/assets/fonts/`
+8. **Node version**: Server runs Node 22; use `npm install --ignore-engines` on deploy
