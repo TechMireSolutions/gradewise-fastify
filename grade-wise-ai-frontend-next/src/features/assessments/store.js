@@ -9,6 +9,7 @@ import {
   enrollStudentApi,
   unenrollStudentApi,
   fetchPreviewQuestionsApi,
+  fetchAIPromptApi,
   generatePhysicalPaperApi,
 } from "./api.js";
 
@@ -197,16 +198,26 @@ const useAssessmentStore = create((set) => ({
      AI Preview
   ========================= */
 
-  fetchPreviewQuestions: async (assessmentId) => {
+  fetchPreviewQuestions: async (assessmentId, language) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchPreviewQuestionsApi(assessmentId);
+      const response = await fetchPreviewQuestionsApi(assessmentId, language);
       set({ loading: false });
       return response.data.questions;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to generate preview questions";
       set({ error: message, loading: false });
       throw error;
+    }
+  },
+
+  getAIPrompt: async (assessmentId) => {
+    try {
+      const response = await fetchAIPromptApi(assessmentId);
+      return response.data.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to load AI prompt";
+      throw new Error(message);
     }
   },
 

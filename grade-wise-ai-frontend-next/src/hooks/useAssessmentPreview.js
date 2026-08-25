@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import useAssessmentStore from "@/features/assessments/store.js";
 
 function useAssessmentPreview(assessmentId) {
-  const { getAssessmentById, fetchPreviewQuestions } = useAssessmentStore();
+  const { getAssessmentById, fetchPreviewQuestions, getAIPrompt } = useAssessmentStore();
 
   const [assessment, setAssessment] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -10,6 +10,8 @@ function useAssessmentPreview(assessmentId) {
   const [error, setError] = useState(null);
   const [questionError, setQuestionError] = useState(null);
   const [questionsLoading, setQuestionsLoading] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState(null);
+  const [aiPromptLoading, setAiPromptLoading] = useState(false);
 
   // Load assessment data
   useEffect(() => {
@@ -28,14 +30,28 @@ function useAssessmentPreview(assessmentId) {
     loadData();
   }, [assessmentId, getAssessmentById]);
 
-  // Load preview questions
+  // Load real AI prompt blueprint (the exact prompt sent to the AI)
+  const loadAIPrompt = useCallback(async () => {
+    if (!assessmentId || aiPrompt || aiPromptLoading) return;
+    setAiPromptLoading(true);
+    try {
+      const data = await getAIPrompt(assessmentId);
+      setAiPrompt(data);
+    } catch {
+      setAiPrompt(null); // fallback to local generator
+    } finally {
+      setAiPromptLoading(false);
+    }
+  }, [assessmentId, aiPrompt, aiPromptLoading, getAIPrompt]);
+
+  // Load preview questions in the assessment's selected language
   const loadPreviewQuestions = useCallback(async () => {
     if (!assessment || questions.length > 0 || questionError) return;
 
     setQuestionsLoading(true);
     try {
       setQuestionError(null);
-      const q = await fetchPreviewQuestions(assessmentId);
+      const q = await fetchPreviewQuestions(assessmentId, assessment.language || "en");
 
       if (!Array.isArray(q) || q.length === 0) {
         throw new Error("Empty preview result");
@@ -56,7 +72,10 @@ function useAssessmentPreview(assessmentId) {
     error,
     questionError,
     questionsLoading,
-    loadPreviewQuestions
+    aiPrompt,
+    aiPromptLoading,
+    loadPreviewQuestions,
+    loadAIPrompt
   };
 }
 

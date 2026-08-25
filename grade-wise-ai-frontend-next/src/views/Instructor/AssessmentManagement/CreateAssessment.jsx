@@ -6,7 +6,7 @@ import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
-import { createAssessmentSchema } from "../../../schemas/assessmentSchemas.js";
+import { createAssessmentSchema, assessmentLanguages } from "../../../schemas/assessmentSchemas.js";
 import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
 import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
 import useModal from "../../../hooks/useModal.js";
@@ -25,6 +25,7 @@ function CreateAssessment() {
   const [formData, setFormData] = useState({
     title: "",
     prompt: "",
+    language: "en",
     externalLinks: [""],
   });
 
@@ -122,6 +123,7 @@ function CreateAssessment() {
     const validationResult = createAssessmentSchema.safeParse({
       title: formData.title,
       prompt: formData.prompt,
+      language: formData.language || "en",
       selectedResources,
       externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
       questionBlocks,
@@ -137,6 +139,7 @@ function CreateAssessment() {
     const payload = {
       title: formData.title.trim(),
       prompt: formData.prompt.trim(),
+      language: formData.language || "en",
       externalLinks: formData.externalLinks.filter((link) => link.trim()),
       selectedResources,
       questionBlocks: questionBlocks.map((block) => ({
@@ -213,6 +216,25 @@ function CreateAssessment() {
                     placeholder="e.g., Data Structures Final Exam"
                     required
                   />
+                </div>
+
+                {/* Language Selector */}
+                <div>
+                  <label htmlFor="language" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                    Questions Language <span className={cn("text-muted-foreground", "font-normal")}>(AI will generate questions in this language)</span>
+                  </label>
+                  <select
+                    name="language"
+                    id="language"
+                    value={formData.language}
+                    onChange={handleInputChange}
+                    className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
+                    disabled={isProcessing}
+                  >
+                    {assessmentLanguages.map((lang) => (
+                      <option key={lang.value} value={lang.value}>{lang.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Prompt Textarea */}

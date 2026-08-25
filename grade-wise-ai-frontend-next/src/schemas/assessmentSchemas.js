@@ -1,10 +1,18 @@
 // assessmentSchemas.js
 import { z } from "zod";
 
+export const assessmentLanguages = [
+  { value: "en", label: "English" },
+  { value: "ur", label: "اردو (Urdu)" },
+  { value: "ar", label: "العربية (Arabic)" },
+  { value: "fa", label: "فارسی (Persian)" },
+];
+
 export const createAssessmentSchema = z
   .object({
     title: z.string().min(3, "Title is required"),
     prompt: z.string().optional(),
+    language: z.enum(["en", "ur", "ar", "fa"]).default("en"),
 selectedResources: z.array(z.number()).optional(),
 
     externalLinks: z.array(z.string().url("Invalid URL")).optional(),

@@ -83,6 +83,7 @@ export const assessments = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     isExecuted: boolean("is_executed").notNull().default(false),
+    language: text("language").notNull().default("en"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },

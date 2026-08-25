@@ -48,5 +48,10 @@ export const unenrollStudentApi = (assessmentId, studentId) =>
    Preview / AI
 ========================= */
 
-export const fetchPreviewQuestionsApi = (assessmentId) =>
-  apiClient.get(`/assessments/${assessmentId}/preview-questions`);
+export const fetchPreviewQuestionsApi = (assessmentId, language) =>
+  apiClient.get(`/assessments/${assessmentId}/preview-questions`, {
+    params: language ? { language } : undefined,
+  });
+
+export const fetchAIPromptApi = (assessmentId) =>
+  apiClient.get(`/assessments/${assessmentId}/ai-prompt`);

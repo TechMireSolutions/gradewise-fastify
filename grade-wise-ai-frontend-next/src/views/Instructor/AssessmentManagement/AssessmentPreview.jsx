@@ -25,7 +25,10 @@ function AssessmentPreview() {
     error,
     questionError,
     questionsLoading,
-    loadPreviewQuestions
+    aiPrompt,
+    aiPromptLoading,
+    loadPreviewQuestions,
+    loadAIPrompt
   } = useAssessmentPreview(id);
 
   // Load questions when switching to assessment tab
@@ -35,10 +38,24 @@ function AssessmentPreview() {
     }
   }, [tab, assessment, loadPreviewQuestions]);
 
+  // Load the real AI prompt when switching to prompt tab
+  useEffect(() => {
+    if (tab === "prompt") {
+      loadAIPrompt();
+    }
+  }, [tab, loadAIPrompt]);
+
   const handleCopyPrompt = () => {
     if (!assessment) return;
 
-    const promptText = generateAIPrompt(assessment);
+    let promptText;
+    if (aiPrompt?.blocks?.length > 0) {
+      promptText = aiPrompt.blocks
+        .map((b, i) => `--- Block ${i + 1} (${b.questionType} x${b.questionCount}) ---\n${b.prompt}`)
+        .join("\n\n");
+    } else {
+      promptText = generateAIPrompt(assessment);
+    }
     navigator.clipboard.writeText(promptText);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -120,6 +137,8 @@ function AssessmentPreview() {
             {tab === "prompt" && (
               <PromptTab
                 assessment={assessment}
+                aiPrompt={aiPrompt}
+                aiPromptLoading={aiPromptLoading}
                 copied={copied}
                 onCopy={handleCopyPrompt}
               />

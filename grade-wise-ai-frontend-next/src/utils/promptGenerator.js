@@ -1,10 +1,18 @@
+const LANGUAGE_LABELS = {
+  en: "English",
+  ur: "Urdu",
+  ar: "Arabic",
+  fa: "Persian",
+};
+
 export const generateAIPrompt = (assessment) => {
   if (!assessment) return "";
 
+  const language = LANGUAGE_LABELS[assessment.language] || "English";
   const questionTypes = [...new Set(assessment.question_blocks?.map(b => b.question_type) || [])];
   const mcqOptionsCount = assessment.question_blocks?.find(b => b.question_type === "multiple_choice")?.num_options || "N/A";
 
-  let promptText = `Generate questions in English language only. All text MUST be in English.
+  let promptText = `Generate questions in ${language} language only. All text MUST be in ${language}.
 
 CONTENT TO BASE QUESTIONS ON:
 Title: "${assessment.title}"

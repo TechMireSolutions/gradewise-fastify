@@ -30,7 +30,7 @@ function QuestionCard({ question, index }) {
           {index + 1}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-base sm:text-lg font-semibold text-foreground mb-4 break-words leading-relaxed">
+          <p dir="auto" className="text-base sm:text-lg font-semibold text-foreground mb-4 break-words leading-relaxed">
             {displayText(question.question_text)}
           </p>
 
@@ -60,7 +60,7 @@ function QuestionCard({ question, index }) {
                   <div className={cn("w-8", "h-8", "border-2", "border-slate-600", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
                     {key}
                   </div>
-                  <span className={cn("text-secondary-foreground", "break-words")}>{displayText(text)}</span>
+                  <span dir="auto" className={cn("text-secondary-foreground", "break-words")}>{displayText(text)}</span>
                 </div>
               ))}
             </div>

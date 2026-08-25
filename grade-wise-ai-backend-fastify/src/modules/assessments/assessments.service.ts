@@ -60,7 +60,7 @@ export async function createAssessmentService(
   input: CreateAssessmentInput,
   instructorId: number
 ): Promise<Assessment> {
-  const { title, prompt, externalLinks, questionBlocks: blocks, selectedResources } = input;
+  const { title, prompt, externalLinks, questionBlocks: blocks, selectedResources, language } = input;
 
   const hasLinks = externalLinks && externalLinks.length > 0;
   const hasResources = selectedResources && selectedResources.length > 0;
@@ -81,6 +81,7 @@ export async function createAssessmentService(
         externalLinks: hasLinks ? externalLinks : null,
         instructorId,
         isExecuted: false,
+        language: language ?? "en",
       } satisfies Omit<NewAssessment, "id" | "createdAt" | "updatedAt">)
       .returning();
 
@@ -142,6 +143,7 @@ function mapAssessment(a: Assessment) {
     external_links: a.externalLinks,
     instructor_id: a.instructorId,
     is_executed: a.isExecuted,
+    language: a.language ?? "en",
     created_at: a.createdAt,
     updated_at: a.updatedAt,
   };
@@ -244,6 +246,7 @@ export async function updateAssessmentService(
   if (input.title) updateData.title = input.title.trim();
   if (input.prompt !== undefined) updateData.prompt = input.prompt?.trim() ?? null;
   if (input.externalLinks !== undefined) updateData.externalLinks = input.externalLinks;
+  if (input.language !== undefined) updateData.language = input.language;
 
   const [updated] = await db
     .update(assessments)
@@ -430,6 +433,42 @@ export async function previewQuestionsService(
 ): Promise<object[]> {
   const assessment = await loadAssessmentForManagement(assessmentId, userId ?? -1, role ?? "instructor");
   return generatePreviewQuestions(assessment, language);
+}
+
+// ─── AI prompt blueprint ──────────────────────────────────────────────────────
+
+export async function getAssessmentAIPromptService(
+  assessmentId: number,
+  userId: number,
+  role: string
+): Promise<{
+  language: string;
+  languageLabel: string;
+  blocks: Array<{ id: number | null; questionType: string; questionCount: number; prompt: string }>;
+}> {
+  const assessment = await loadAssessmentForManagement(assessmentId, userId, role);
+
+  const blocks = await db
+    .select()
+    .from(questionBlocks)
+    .where(eq(questionBlocks.assessmentId, assessmentId));
+
+  if (blocks.length === 0) {
+    throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
+  }
+
+  const context = await gatherAssessmentContext(assessment.id);
+  const langLabel = mapLanguageCode(assessment.language ?? "en");
+  const instructorPrompt = assessment.prompt ?? "";
+
+  const mapped = blocks.map((block) => ({
+    id: block.id,
+    questionType: block.questionType,
+    questionCount: block.questionCount,
+    prompt: buildBlockPrompt(block, instructorPrompt, context, langLabel),
+  }));
+
+  return { language: assessment.language ?? "en", languageLabel: langLabel, blocks: mapped };
 }
 
 // Re-export for backward compatibility

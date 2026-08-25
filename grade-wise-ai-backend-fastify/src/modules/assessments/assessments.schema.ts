@@ -11,12 +11,15 @@ export const QuestionBlockSchema = z.object({
   negativeMarks: z.number().min(0).max(100).default(0.25),
 });
 
+export const AssessmentLanguageSchema = z.enum(["en", "ur", "ar", "fa"]).default("en");
+
 export const CreateAssessmentSchema = z.object({
   title: z.string().min(1).max(255).trim(),
   prompt: z.string().max(5000).optional(),
   externalLinks: z.array(z.string().url()).optional().default([]),
   questionBlocks: z.array(QuestionBlockSchema).min(1).max(10),
   selectedResources: z.array(z.number().int().positive()).optional().default([]),
+  language: AssessmentLanguageSchema,
 });
 
 export const UpdateAssessmentSchema = z.object({
@@ -25,6 +28,7 @@ export const UpdateAssessmentSchema = z.object({
   externalLinks: z.array(z.string().url()).optional(),
   questionBlocks: z.array(QuestionBlockSchema).min(1).max(10).optional(),
   selectedResources: z.array(z.number().int().positive()).optional(),
+  language: AssessmentLanguageSchema.optional(),
 });
 
 export const EnrollStudentSchema = z.object({

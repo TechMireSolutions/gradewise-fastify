@@ -20,6 +20,7 @@ import {
   unenrollStudentService,
   getEnrolledStudentsService,
   previewQuestionsService,
+  getAssessmentAIPromptService,
   generatePhysicalPaperService,
 } from "./assessments.service.js";
 
@@ -166,6 +167,21 @@ export default async function assessmentsModule(app: FastifyInstance) {
       const user = request.user as { id: number; role: string };
       const questions = await previewQuestionsService(request.params.id, request.query.language, user.id, user.role);
       return reply.send({ success: true, questions });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
+  // GET /api/assessments/:id/ai-prompt
+  f.get("/:id/ai-prompt", {
+    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
+    schema: { params: IdParamSchema },
+  }, async (request, reply) => {
+    try {
+      const user = request.user as { id: number; role: string };
+      const data = await getAssessmentAIPromptService(request.params.id, user.id, user.role);
+      return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });
