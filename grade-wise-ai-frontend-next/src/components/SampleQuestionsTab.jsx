@@ -2,15 +2,38 @@ import { cn } from "@/lib/cn.js";
 import LoadingSpinner from "./ui/LoadingSpinner";
 import QuestionCard from "./QuestionCard";
 import { FiAlertCircle, FiList } from "react-icons/fi";
+import { LANGUAGE_OPTIONS } from "@/utils/translations.js";
 
-function SampleQuestionsTab({ questions, questionError, loading }) {
+function SampleQuestionsTab({ questions, questionError, loading, selectedLanguage, onLanguageChange }) {
   return (
     <div className="animate-fadeIn">
       <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-          Sample Questions
-        </h2>
-        <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>What students will see during the assessment</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+              Sample Questions
+            </h2>
+            <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>What students will see during the assessment</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Question language">
+            {LANGUAGE_OPTIONS.map((lang) => (
+              <button
+                key={lang.value}
+                type="button"
+                onClick={() => onLanguageChange?.(lang.value)}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
+                  selectedLanguage === lang.value
+                    ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+                    : "bg-btn-secondary border border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
+                )}
+              >
+                <span className="text-sm leading-none">{lang.label.split(" ")[0]}</span>
+                <span>{lang.label.replace(/^\S+\s/, "")}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {questionError ? (

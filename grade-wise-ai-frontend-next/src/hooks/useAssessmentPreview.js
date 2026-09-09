@@ -12,6 +12,7 @@ function useAssessmentPreview(assessmentId) {
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [aiPrompt, setAiPrompt] = useState(null);
   const [aiPromptLoading, setAiPromptLoading] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(null);
 
   // Load assessment data
   useEffect(() => {
@@ -20,6 +21,7 @@ function useAssessmentPreview(assessmentId) {
       try {
         const data = await getAssessmentById(assessmentId);
         setAssessment(data);
+        setSelectedLanguage((prev) => prev || data?.language || "en");
         setError(null);
       } catch {
         setError("Failed to load assessment. Please try again.");
@@ -44,14 +46,14 @@ function useAssessmentPreview(assessmentId) {
     }
   }, [assessmentId, aiPrompt, aiPromptLoading, getAIPrompt]);
 
-  // Load preview questions in the assessment's selected language
-  const loadPreviewQuestions = useCallback(async () => {
-    if (!assessment || questions.length > 0 || questionError) return;
+  // Load preview questions in the given language
+  const loadPreviewQuestions = useCallback(async (language) => {
+    if (!assessment || !language) return;
 
     setQuestionsLoading(true);
     try {
       setQuestionError(null);
-      const q = await fetchPreviewQuestions(assessmentId, assessment.language || "en");
+      const q = await fetchPreviewQuestions(assessmentId, language);
 
       if (!Array.isArray(q) || q.length === 0) {
         throw new Error("Empty preview result");
@@ -60,10 +62,17 @@ function useAssessmentPreview(assessmentId) {
       setQuestions(q);
     } catch {
       setQuestionError("Failed to generate sample questions. Please retry.");
+      setQuestions([]);
     } finally {
       setQuestionsLoading(false);
     }
-  }, [assessment, questions, questionError, assessmentId, fetchPreviewQuestions]);
+  }, [assessment, assessmentId, fetchPreviewQuestions]);
+
+  const selectLanguage = useCallback((language) => {
+    setSelectedLanguage(language);
+    setQuestions([]);
+    setQuestionError(null);
+  }, []);
 
   return {
     assessment,
@@ -74,6 +83,8 @@ function useAssessmentPreview(assessmentId) {
     questionsLoading,
     aiPrompt,
     aiPromptLoading,
+    selectedLanguage,
+    selectLanguage,
     loadPreviewQuestions,
     loadAIPrompt
   };

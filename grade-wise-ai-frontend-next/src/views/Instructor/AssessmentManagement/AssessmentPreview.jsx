@@ -27,16 +27,18 @@ function AssessmentPreview() {
     questionsLoading,
     aiPrompt,
     aiPromptLoading,
+    selectedLanguage,
+    selectLanguage,
     loadPreviewQuestions,
     loadAIPrompt
   } = useAssessmentPreview(id);
 
   // Load questions when switching to assessment tab
   useEffect(() => {
-    if (tab === "assessment" && assessment) {
-      loadPreviewQuestions();
+    if (tab === "assessment" && assessment && selectedLanguage) {
+      loadPreviewQuestions(selectedLanguage);
     }
-  }, [tab, assessment, loadPreviewQuestions]);
+  }, [tab, assessment, selectedLanguage, loadPreviewQuestions]);
 
   // Load the real AI prompt when switching to prompt tab
   useEffect(() => {
@@ -149,6 +151,8 @@ function AssessmentPreview() {
                 questions={questions}
                 questionError={questionError}
                 loading={questionsLoading || (questions.length === 0 && !questionError)}
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={selectLanguage}
               />
             )}
           </div>
