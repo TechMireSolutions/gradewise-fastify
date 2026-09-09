@@ -84,7 +84,8 @@ export function buildBlockPrompt(
   block: QuestionBlockLike,
   instructorPrompt: string,
   context: string,
-  language: string
+  language: string,
+  maxContextChars = 4000
 ): string {
   const typeDescriptions: Record<string, string> = {
     multiple_choice: `multiple choice questions, each with exactly ${block.numOptions ?? 4} options (A, B, C, D...)`,
@@ -98,7 +99,7 @@ export function buildBlockPrompt(
   return `Generate exactly ${block.questionCount} ${typeDesc} in ${language}.
 
 ${instructorPrompt ? `Topic/Instructions: ${instructorPrompt}\n` : ""}
-${context ? `Reference Material:\n${context.substring(0, 4000)}\n` : ""}
+${context ? `Reference Material:\n${context.substring(0, maxContextChars)}\n` : ""}
 
 Return ONLY a valid JSON array. Each object must have:
 - "question_text": the question

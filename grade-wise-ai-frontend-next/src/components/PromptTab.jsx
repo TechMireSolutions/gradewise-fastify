@@ -30,7 +30,7 @@ export default function PromptTab({ assessment, aiPrompt, aiPromptLoading, copie
       ) : aiPrompt?.blocks?.length > 0 ? (
         <div className="space-y-4">
           <p className={cn("text-xs text-muted-foreground")}>
-            This is the exact prompt the system sends to the AI for each question block:
+            The prompt the system sends to the AI for each question block, with the full reference material from your linked documents and links:
           </p>
           {aiPrompt.blocks.map((block, i) => (
             <details key={block.id ?? i} open={aiPrompt.blocks.length === 1} className="rounded-lg border border-border overflow-hidden">

@@ -197,9 +197,18 @@ export async function getAssessmentService(
     db.select().from(questionBlocks).where(eq(questionBlocks.assessmentId, assessmentId)),
     db.select({ count: sql<number>`count(*)` }).from(enrollments).where(eq(enrollments.assessmentId, assessmentId)),
     db
-      .select({ id: resources.id, name: resources.name, url: resources.url, fileType: resources.fileType, contentType: resources.contentType, createdAt: resources.createdAt })
+      .select({
+        id: resources.id,
+        name: resources.name,
+        url: resources.url,
+        fileType: resources.fileType,
+        contentType: resources.contentType,
+        createdAt: resources.createdAt,
+        chunkText: resourceChunks.chunkText,
+      })
       .from(assessmentResources)
       .innerJoin(resources, eq(assessmentResources.resourceId, resources.id))
+      .leftJoin(resourceChunks, eq(resourceChunks.resourceId, resources.id))
       .where(eq(assessmentResources.assessmentId, assessmentId)),
   ]);
 
@@ -207,7 +216,13 @@ export async function getAssessmentService(
     ...mapAssessment(assessment),
     question_blocks: blocks.map(mapBlock),
     enrolled_count: countResult[0]?.count ?? 0,
-    resources: linkedResources.map((r) => ({ ...r, created_at: r.createdAt, file_type: r.fileType, content_type: r.contentType })),
+    resources: linkedResources.map(({ chunkText, createdAt, fileType, contentType, ...rest }) => ({
+      ...rest,
+      created_at: createdAt,
+      file_type: fileType,
+      content_type: contentType,
+      chunks: chunkText ? [{ chunk_text: chunkText, chunk_index: 0 }] : [],
+    })),
   };
 }
 
@@ -465,7 +480,7 @@ export async function getAssessmentAIPromptService(
     id: block.id,
     questionType: block.questionType,
     questionCount: block.questionCount,
-    prompt: buildBlockPrompt(block, instructorPrompt, context, langLabel),
+    prompt: buildBlockPrompt(block, instructorPrompt, context, langLabel, 50_000),
   }));
 
   return { language: assessment.language ?? "en", languageLabel: langLabel, blocks: mapped };
