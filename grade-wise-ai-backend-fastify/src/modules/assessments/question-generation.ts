@@ -92,6 +92,7 @@ export function buildBlockPrompt(
     short_answer: "short answer questions requiring 1-3 sentence answers",
     true_false: "true/false questions",
     matching: `matching questions with ${block.leftCount ?? 3} items on the left and ${block.rightCount ?? 4} options on the right`,
+    fill_in_the_blank: "fill-in-the-blank questions where one key word or short phrase is missing",
   };
 
   const typeDesc = typeDescriptions[block.questionType] ?? "questions";
@@ -107,6 +108,7 @@ Return ONLY a valid JSON array. Each object must have:
 ${block.questionType === "multiple_choice" ? `- "options": array of ${block.numOptions ?? 4} strings\n- "correct_answer": the correct option text` : ""}
 ${block.questionType === "true_false" ? '- "correct_answer": "True" or "False"' : ""}
 ${block.questionType === "short_answer" ? '- "correct_answer": a model answer string' : ""}
+${block.questionType === "fill_in_the_blank" ? '- "correct_answer": the exact missing word or phrase (make the blank obvious in the question_text)' : ""}
 ${block.questionType === "matching" ? `- "left_items": array of ${block.leftCount ?? 3} strings\n- "right_items": array of ${block.rightCount ?? 4} strings\n- "correct_answer": JSON string of match pairs` : ""}
 
 Do not include any text outside the JSON array.`;

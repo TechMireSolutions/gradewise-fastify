@@ -29,6 +29,7 @@ export const questionTypeEnum = pgEnum("question_type", [
   "short_answer",
   "true_false",
   "matching",
+  "fill_in_the_blank",
 ]);
 
 export const attemptStatusEnum = pgEnum("attempt_status", [

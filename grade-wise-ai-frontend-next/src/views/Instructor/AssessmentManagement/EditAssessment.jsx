@@ -534,6 +534,7 @@ function EditAssessment() {
                           {block.question_type === "multiple_choice" && "Multiple Choice"}
                           {block.question_type === "short_answer" && "Short Answer"}
                           {block.question_type === "true_false" && "True / False"}
+                          {block.question_type === "fill_in_the_blank" && "Fill in the Blank"}
                         </h3>
                       </div>
                       {questionBlocks.length > 1 && (
@@ -562,6 +563,7 @@ function EditAssessment() {
                           <option value="multiple_choice">Multiple Choice</option>
                           <option value="short_answer">Short Answer</option>
                           <option value="true_false">True/False</option>
+                          <option value="fill_in_the_blank">Fill in the Blank</option>
                         </select>
                       </div>
 

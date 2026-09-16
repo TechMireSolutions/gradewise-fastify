@@ -16,7 +16,7 @@ export const ASSESSMENT_CONSTANTS = {
   MAX_OPTIONS: 6,
   MIN_MARKS: 0,
   MAX_MARKS: 100,
-  QUESTION_TYPES: ['multiple_choice', 'short_answer', 'true_false'],
+  QUESTION_TYPES: ['multiple_choice', 'short_answer', 'true_false', 'fill_in_the_blank'],
   MAX_EXTERNAL_LINKS: 10,
   MAX_FILE_SIZE: FILE_CONSTANTS.MAX_FILE_SIZE,
   ALLOWED_FILE_TYPES: FILE_CONSTANTS.ALLOWED_FILE_TYPES,

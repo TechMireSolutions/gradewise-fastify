@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/cn.js";
 
-import { btn, card, chip, examBar, focusRing, panel, select, textarea } from "@/lib/ui.js";
+import { btn, card, chip, examBar, focusRing, input, panel, select, textarea } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
@@ -242,6 +242,17 @@ function TakeAssessment() {
                     placeholder="Type your answer here..."
                     rows={6}
                     className={cn(textarea, focusRing)}
+                  />
+                )}
+
+                {/* Fill in the Blank Render */}
+                {(rawType === "fill_in_the_blank" || rawType === "fill-in-the-blank" || rawType === "fill_in_blank") && (
+                  <input
+                    type="text"
+                    value={currentQuestion.answer || ""}
+                    onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
+                    placeholder="Type the missing word/phrase here..."
+                    className={cn(input, focusRing)}
                   />
                 )}
 

@@ -23,6 +23,10 @@ const sql = postgres(url, { max: 1 });
 
 const patches = [
   {
+    name: "0003_add-fill-in-the-blank-type",
+    run: () => sql`ALTER TYPE question_type ADD VALUE IF NOT EXISTS 'fill_in_the_blank'`,
+  },
+  {
     name: "0002_add-assessments-language",
     run: () =>
       sql`ALTER TABLE assessments ADD COLUMN IF NOT EXISTS language text NOT NULL DEFAULT 'en'`,

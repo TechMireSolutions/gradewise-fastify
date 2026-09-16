@@ -387,7 +387,10 @@ function CreateAssessment() {
                           Block {index + 1}
                         </span>
                         <h3 className={cn("text-base", "font-semibold", "text-secondary-foreground")}>
-                          {block.questionType === "multiple_choice" ? "Multiple Choice" : "True / False"}
+                          {block.questionType === "multiple_choice" && "Multiple Choice"}
+                          {block.questionType === "short_answer" && "Short Answer"}
+                          {block.questionType === "true_false" && "True / False"}
+                          {block.questionType === "fill_in_the_blank" && "Fill in the Blank"}
                         </h3>
                       </div>
                       {questionBlocks.length > 1 && (
@@ -412,7 +415,9 @@ function CreateAssessment() {
                           disabled={isProcessing}
                         >
                           <option value="multiple_choice">Multiple Choice</option>
+                          <option value="short_answer">Short Answer</option>
                           <option value="true_false">True/False</option>
+                          <option value="fill_in_the_blank">Fill in the Blank</option>
                         </select>
                       </div>
 

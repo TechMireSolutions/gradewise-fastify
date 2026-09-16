@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const QuestionBlockSchema = z.object({
-  questionType: z.enum(["multiple_choice", "short_answer", "true_false", "matching"]),
+  questionType: z.enum(["multiple_choice", "short_answer", "true_false", "matching", "fill_in_the_blank"]),
   questionCount: z.number().int().min(1).max(50).default(5),
   durationPerQuestion: z.number().int().min(30).max(600).default(60),
   numOptions: z.number().int().min(2).max(6).optional().default(4),
