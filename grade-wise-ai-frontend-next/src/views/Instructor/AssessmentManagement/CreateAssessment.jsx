@@ -40,6 +40,7 @@ function CreateAssessment() {
   ]);
 
   const [selectedResources, setSelectedResources] = useState([]);
+  const [sourceMode, setSourceMode] = useState("links");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -232,47 +233,124 @@ function CreateAssessment() {
                   />
                 </div>
 
-                {/* Resources Section */}
+                {/* Content Source (External Links or Existing Resources) */}
                 <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <FiBook className="text-indigo-400 text-sm" />
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>Select Existing Resources</label>
-                    {selectedResources.length > 0 && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
-                        {selectedResources.length} selected
-                      </span>
-                    )}
+                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>Content Source <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using Prompt)</span></label>
                   </div>
-                  {resourcesLoading ? (
+
+                  {/* Ask the user which source type to add */}
+                  <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Content source type">
+                    <button
+                      type="button"
+                      onClick={() => setSourceMode("links")}
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer",
+                        sourceMode === "links"
+                          ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+                          : "bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground"
+                      )}
+                      disabled={isProcessing}
+                    >
+                      <FiLink className="text-base" />
+                      Add External Link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSourceMode("resources")}
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer",
+                        sourceMode === "resources"
+                          ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+                          : "bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground"
+                      )}
+                      disabled={isProcessing}
+                    >
+                      <FiBook className="text-base" />
+                      Select Existing Resource
+                    </button>
+                  </div>
+
+                  {sourceMode === "links" ? (
+                    <div>
+                      <div className="space-y-3">
+                        {formData.externalLinks.map((link, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <FiLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
+                              <input
+                                type="url"
+                                value={link}
+                                onChange={(e) => handleLinkChange(index, e.target.value)}
+                                placeholder="https://example.com/resource"
+                                className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
+                                disabled={isProcessing}
+                              />
+                            </div>
+                            {formData.externalLinks.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeExternalLink(index)}
+                                className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                disabled={isProcessing}
+                              >
+                                <FiX className="text-base" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addExternalLink}
+                        className={cn("mt-4", "inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
+                        disabled={isProcessing}
+                      >
+                        <FiPlus className="text-base" />
+                        Add Link
+                      </button>
+                    </div>
+                  ) : resourcesLoading ? (
                     <div className="flex justify-center py-8">
                       <LoadingSpinner size="sm" type="dots" color="blue" />
                     </div>
                   ) : resources.length > 0 ? (
-                    <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                      {resources.map((resource) => (
-                        <div
-                          key={resource.id}
-                          className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
-                            selectedResources.includes(resource.id)
-                              ? "bg-indigo-500/10 border-indigo-500/30"
-                              : "bg-slate-900/30 border-border hover:bg-indigo-500/5 hover:border-indigo-500/20"
-                          }`}
-                          onClick={() => !isProcessing && handleResourceToggle(resource.id)}
-                        >
-                          <input
-                            type="checkbox"
-                            id={`resource-${resource.id}`}
-                            checked={selectedResources.includes(resource.id)}
-                            onChange={() => handleResourceToggle(resource.id)}
-                            className="h-4 w-4 accent-indigo-500 border-slate-600 rounded focus:ring-indigo-500 cursor-pointer"
-                            disabled={isProcessing}
-                          />
-                          <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
-                            <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
-                            <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.contentType}</span>
-                          </label>
-                        </div>
-                      ))}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn("text-muted-foreground", "text-xs")}>Select one or more uploaded documents:</span>
+                        {selectedResources.length > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
+                            {selectedResources.length} selected
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                        {resources.map((resource) => (
+                          <div
+                            key={resource.id}
+                            className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
+                              selectedResources.includes(resource.id)
+                                ? "bg-indigo-500/10 border-indigo-500/30"
+                                : "bg-slate-900/30 border-border hover:bg-indigo-500/5 hover:border-indigo-500/20"
+                            }`}
+                            onClick={() => !isProcessing && handleResourceToggle(resource.id)}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`resource-${resource.id}`}
+                              checked={selectedResources.includes(resource.id)}
+                              onChange={() => handleResourceToggle(resource.id)}
+                              className="h-4 w-4 accent-indigo-500 border-slate-600 rounded focus:ring-indigo-500 cursor-pointer"
+                              disabled={isProcessing}
+                            />
+                            <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
+                              <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
+                              <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.contentType}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -283,50 +361,6 @@ function CreateAssessment() {
                       <p className={cn("text-muted-foreground", "text-xs", "mt-1")}>Upload them from the Resources page.</p>
                     </div>
                   )}
-                </div>
-
-                {/* External Links */}
-                <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FiLink className="text-indigo-400 text-sm" />
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>External Links</label>
-                  </div>
-                  <div className="space-y-3">
-                    {formData.externalLinks.map((link, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div className="relative flex-1">
-                          <FiLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
-                          <input
-                            type="url"
-                            value={link}
-                            onChange={(e) => handleLinkChange(index, e.target.value)}
-                            placeholder="https://example.com/resource"
-                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
-                            disabled={isProcessing}
-                          />
-                        </div>
-                        {formData.externalLinks.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeExternalLink(index)}
-                            className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
-                            disabled={isProcessing}
-                          >
-                            <FiX className="text-base" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addExternalLink}
-                    className={cn("mt-4", "inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
-                    disabled={isProcessing}
-                  >
-                    <FiPlus className="text-base" />
-                    Add Link
-                  </button>
                 </div>
               </div>
             </div>
