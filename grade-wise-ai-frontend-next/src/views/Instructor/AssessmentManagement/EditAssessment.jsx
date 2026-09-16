@@ -596,6 +596,21 @@ function EditAssessment() {
                         />
                       </div>
 
+                      {/* Negative Marks */}
+                      <div>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
+                        <input
+                          type="number"
+                          value={block.negative_marks || ""}
+                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
+                          min="0"
+                          step="0.1"
+                          placeholder="e.g. 0.25"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                          disabled={currentAssessment.is_executed}
+                        />
+                      </div>
+
                       {/* Number of Options (MCQ only) */}
                       {block.question_type === "multiple_choice" && (
                         <div>
@@ -612,21 +627,6 @@ function EditAssessment() {
                           />
                         </div>
                       )}
-
-                      {/* Negative Marks */}
-                      <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
-                        <input
-                          type="number"
-                          value={block.negative_marks || ""}
-                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
-                          min="0"
-                          step="0.1"
-                          placeholder="e.g. 0.25"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
-                        />
-                      </div>
                     </div>
                   </div>
                 ))}

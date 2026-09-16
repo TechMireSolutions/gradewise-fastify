@@ -450,23 +450,6 @@ function CreateAssessment() {
                         />
                       </div>
 
-                      {block.questionType === "multiple_choice" && (
-                        <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Number of Options</label>
-                          <input
-                            type="number"
-                            value={block.numOptions}
-                            onChange={(e) => handleBlockChange(index, "numOptions", e.target.value)}
-                            min="2"
-                            max="6"
-                            placeholder="2 to 6"
-                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
-                            required
-                            disabled={isProcessing}
-                          />
-                        </div>
-                      )}
-
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
                         <input
@@ -494,6 +477,23 @@ function CreateAssessment() {
                           disabled={isProcessing}
                         />
                       </div>
+
+                      {block.questionType === "multiple_choice" && (
+                        <div>
+                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Number of Options</label>
+                          <input
+                            type="number"
+                            value={block.numOptions}
+                            onChange={(e) => handleBlockChange(index, "numOptions", e.target.value)}
+                            min="2"
+                            max="6"
+                            placeholder="2 to 6"
+                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
+                            required
+                            disabled={isProcessing}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
