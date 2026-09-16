@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import ThemeProvider from "./ThemeProvider.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";
+import AutoLogout from "./AutoLogout.jsx";
 
 export default function Providers({ children }) {
   const [queryClient] = useState(
@@ -24,6 +25,7 @@ export default function Providers({ children }) {
       <ThemeProvider>
         <ErrorBoundary>{children}</ErrorBoundary>
       </ThemeProvider>
+      <AutoLogout />
     </QueryClientProvider>
   );
 }
