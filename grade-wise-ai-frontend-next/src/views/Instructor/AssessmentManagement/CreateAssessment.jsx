@@ -7,7 +7,7 @@ import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { createAssessmentSchema } from "../../../schemas/assessmentSchemas.js";
-import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
+import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft, FiChevronDown } from "react-icons/fi";
 import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
 import useModal from "../../../hooks/useModal.js";
 
@@ -408,17 +408,20 @@ function CreateAssessment() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
-                        <select
-                          value={block.questionType}
-                          onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
-                          disabled={isProcessing}
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="true_false">True/False</option>
-                          <option value="fill_in_the_blank">Fill in the Blank</option>
-                        </select>
+                        <div className="relative">
+                          <select
+                            value={block.questionType}
+                            onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
+                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "pr-10", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
+                            disabled={isProcessing}
+                          >
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="true_false">True/False</option>
+                            <option value="fill_in_the_blank">Fill in the Blank</option>
+                          </select>
+                          <FiChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-subtle-foreground" />
+                        </div>
                       </div>
 
                       <div>

@@ -8,7 +8,7 @@ import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { validateAssessmentForm, validateFiles } from "../../../schemas/editAssessmentSchemas.js";
 import { assessmentLanguages } from "../../../schemas/assessmentSchemas.js";
-import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
+import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave, FaChevronDown } from "react-icons/fa";
 import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
 import useModal from "../../../hooks/useModal.js";
 
@@ -554,17 +554,20 @@ function EditAssessment() {
                       {/* Question Type */}
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
-                        <select
-                          value={block.question_type}
-                          onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
-                          className={cn("w-full", "appearance-none", "bg-input", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="true_false">True/False</option>
-                          <option value="fill_in_the_blank">Fill in the Blank</option>
-                        </select>
+                        <div className="relative">
+                          <select
+                            value={block.question_type}
+                            onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
+                            className={cn("w-full", "appearance-none", "bg-input", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "pr-10", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                            disabled={currentAssessment.is_executed}
+                          >
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="true_false">True/False</option>
+                            <option value="fill_in_the_blank">Fill in the Blank</option>
+                          </select>
+                          <FaChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-subtle-foreground text-xs" />
+                        </div>
                       </div>
 
                       {/* Question Count */}
