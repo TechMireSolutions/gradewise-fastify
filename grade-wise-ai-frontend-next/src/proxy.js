@@ -20,6 +20,8 @@ export function proxy(request) {
 
   if (
     pathname.startsWith("/_next") ||
+    pathname.startsWith("/__/auth") ||
+    pathname.startsWith("/__/firebase") ||
     pathname.startsWith("/api") ||
     pathname.includes(".")
   ) {
