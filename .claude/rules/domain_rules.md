@@ -58,6 +58,7 @@ Each assessment is composed of one or more typed blocks. Every block is fully co
 |------|--------------------------|
 | **MCQ** (Multiple Choice) | Number of choices (default: 4) |
 | **Short Answer** | — |
+| **Fill in the Blank** | `correct_answer` = the missing word/phrase (exact match) |
 | **True / False** | — |
 | **Matching** | Left-side option count (default: 3), Right-side option count (default: 4) |
 

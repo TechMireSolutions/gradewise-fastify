@@ -54,7 +54,7 @@ src/
 - `apiClient` uses `withCredentials: true`.
 - Auth store persists **`user` only** (not token): `partialize: (state) => ({ user: state.user })`.
 - Login/signup/google → backend sets cookie → frontend stores `user` from response.
-- Google: Firebase popup → `getIdToken()` → `POST /auth/google-auth { idToken }`.
+- Google: Firebase redirect (`signInWithRedirect` on click + `getRedirectResult` in Login/Signup `useEffect`) → `getIdToken()` → `POST /auth/google-auth { idToken }` → instant role redirect.
 - Logout: `POST /auth/logout` + clear Zustand user.
 - 401 → clear `auth-storage` + redirect `/login`.
 

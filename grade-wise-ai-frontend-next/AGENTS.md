@@ -77,6 +77,7 @@ src/
 │   │   └── ScrollArea.jsx  # Scroll area
 │   ├── Layout/             # Sidebar, Header, NotificationBell, ThemeToggle
 │   ├── ProtectedRoutes.jsx # Client-side route guard (useAuthStore)
+│   ├── AutoLogout.jsx      # 1h inactivity auto-logout (mounted in Providers)
 │   ├── Providers.jsx       # Context wrapper (TanStack Query, theme, etc.)
 │   ├── LandingPage.jsx     # Marketing landing page
 │   └── PdfPreview.jsx      # PDF preview component
@@ -104,7 +105,7 @@ src/
 ├── proxy.js                # Next.js 16 middleware (auth gate)
 ├── schemas/                # Zod schemas
 │   ├── authSchemas.js
-│   ├── assessmentSchemas.js
+│   ├── assessmentSchemas.js # Q types: multiple_choice, short_answer, true_false, fill_in_the_blank
 │   ├── aiConfigSchemas.js
 │   └── fields.js           # Shared field validators
 └── views/                  # Page-level components by role
@@ -247,7 +248,7 @@ const mutation = useMutation({
 ## Authentication Flow
 
 1. **Login** → POST `/api/auth/login` → httpOnly cookie set → redirect to `/dashboard`
-2. **Google Auth** → Firebase popup → `getIdToken()` → POST `/api/auth/google-auth` → cookie set
+2. **Google Auth** → Firebase redirect (`signInWithRedirect` on click + `getRedirectResult` in `Login`/`Signup` `useEffect`) → `getIdToken()` → POST `/api/auth/google-auth` → cookie set → instant role redirect (no success modal/delay)
 3. **Session check** → GET `/api/auth/me` → returns user object (used by `useAuthStore`)
 4. **Logout** → POST `/api/auth/logout` → cookie cleared → redirect to `/login`
 5. **Middleware** → `proxy.js` checks `gradewise_token` cookie on every request

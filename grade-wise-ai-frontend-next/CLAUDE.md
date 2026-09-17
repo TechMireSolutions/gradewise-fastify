@@ -22,6 +22,7 @@ npm run test:e2e     # Playwright E2E
 | `src/lib/apiClient.js` | Axios instance (withCredentials) |
 | `src/lib/cn.js` | clsx + tailwind-merge |
 | `src/lib/firebase.js` | Firebase config |
+| `src/components/AutoLogout.jsx` | 1h inactivity auto-logout |
 | `src/components/ui/` | Design system primitives |
 | `src/features/*/` | Domain modules (api.js + store.js) |
 | `src/schemas/fields.js` | Shared Zod validators |

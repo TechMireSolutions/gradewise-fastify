@@ -68,7 +68,7 @@ pm2 start ecosystem.config.cjs
 
 **Frontend** (`.env.local`):
 - `NEXT_PUBLIC_API_URL=http://localhost:5005`
-- Firebase vars unchanged (Google sign-in still uses Firebase popup; sends `idToken` to backend)
+- Firebase vars unchanged (Google sign-in uses Firebase **redirect** flow (`signInWithRedirect` + `getRedirectResult`), sends `idToken` to backend)
 
 ## Breaking changes
 
@@ -129,3 +129,33 @@ Removed files with zero references:
 - Confirmed only `.env.example` files are tracked in git; real `.env*` files are ignored by the root `.gitignore` (`**/.env.*`, exception `!**/.env.example`).
 
 > **Verification:** backend `typecheck` / `build` / `vitest` and frontend `build` / `lint` all pass.
+
+## Phase 7 — UX & Auth/Question-type refinements (2026-09)
+
+### Google OAuth: popup → redirect flow
+
+- **Removed** Firebase `signInWithPopup` (popup window + blank auth-handler intermediate).
+- **Now:** `signInWithRedirect(auth, googleProvider)` on button click; `getRedirectResult(auth)` awaited in a `useEffect` on **both** `Login.jsx` and `Signup.jsx`.
+- Store split: `googleAuth()` (starts redirect) + `completeGoogleRedirect()` (exchanges idToken via `/auth/google-auth`, persists user in Zustand).
+- **No success modal, no `setTimeout`** — user is instantly routed to their role dashboard via `router.replace` (`redirectByRole`).
+
+### Fill in the Blank question type
+
+- **DB enum** `question_type` now includes `fill_in_the_blank` (idempotent patch `0003_add-fill-in-the-blank-type` in `scripts/apply-db-patches.mjs`).
+- **Backend**: `QuestionBlockSchema` + `question-generation.ts` prompt/JSON requirements updated.
+- **Frontend**: Create/Edit forms expose `multiple_choice`, `short_answer`, `true_false`, and `fill_in_the_blank`; `TakeAssessment.jsx` renders a single-line input for fill-in-the-blank (short answer uses a textarea).
+- Grading uses exact-match (lowered + trimmed), same as short answer.
+- **UI tweaks**: "Number of Options" moved to the last field slot (MCQ-only); `Question Type` selects now show a chevron icon.
+
+### Assessment creation UX
+
+- **Removed** the "Questions Language" field from Create Assessment (payload hardcodes `language: "en"`; per-block language generation unchanged).
+- **Content Source** merged: "Add External Link" and "Select Existing Resource" are now one card toggled by `sourceMode` (`"links"` / `"resources"`).
+
+### Auto logout
+
+- Added `src/components/AutoLogout.jsx` — 1-hour **inactivity** idle timer (mouse/keyboard/touch/scroll/focus events, 30s reset throttle); logs out, toasts, redirects to `/login`. Mounted in `Providers.jsx`.
+
+### Full AI Prompt blueprint
+
+- `buildBlockPrompt` gained `maxContextChars = 4000` default; the blueprint prompt service passes `50_000`, and `getAssessmentService` returns resource `chunks` so the **Full AI Prompt now includes full document content**.

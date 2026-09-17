@@ -104,7 +104,8 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 - **Views** — `views/<Role>/` contain page-level components; `app/` pages are thin wrappers
 - **Dark mode** — class-based (`.dark` on `<html>`); theme tokens in `globals.css` `@theme inline {}`
 - **RTL support** — exam layout supports RTL via `dir="rtl"` and `font-quran` font family
-- **Google Auth** — Firebase popup → `getIdToken()` → POST to `/api/auth/google-auth`
+- **Google Auth** — Firebase redirect flow (`signInWithRedirect` on click + `getRedirectResult` in `Login`/`Signup` `useEffect`) → `getIdToken()` → POST to `/api/auth/google-auth` → instant role-based redirect (`router.replace`, no success modal/delay)
+- **Auto logout** — 1h inactivity idle timer in `src/components/AutoLogout.jsx`, mounted in `Providers.jsx`
 
 ---
 

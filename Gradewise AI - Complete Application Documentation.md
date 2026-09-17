@@ -57,6 +57,8 @@ Question Blocks:
 
 * True False  (number of questions, duration for each question, positive marks, negative marks.
 
+* Fill in the Blank  (number of questions, duration for each question, positive marks, negative marks.
+
 * Matching Questions  (number of questions, duration for each question, number of first side options ,number of second , side options, positive marks, negative marks.
 
 * **Performance Analytics and Reporting:**  
@@ -97,6 +99,8 @@ Question Blocks:
 * Short answers (number of questions, duration for each question , positive marks, negative marks.
 
 * True False  (number of questions, duration for each question, positive marks, negative marks.
+
+* Fill in the Blank  (number of questions, duration for each question, positive marks, negative marks.
 
 * Matching Questions  (number of questions, duration for each question, number of first side options ,number of second , side options, positive marks, negative marks.
 
@@ -147,7 +151,7 @@ B. Instructor: Learning Experience Architect
   * Initiate a new assessment from available resources.  
   * Provide a unique name and define high-level AI directives (e.g., "Focus on conceptual understanding," "Generate application-based questions").  
   * Construct the assessment using Question Blocks, with customizable parameters for each type:  
-    * Supported Types: Multiple Choice (MCQ), Short Answer, True/False, Matching.  
+    * Supported Types: Multiple Choice (MCQ), Short Answer, Fill in the Blank, True/False, Matching.  
     * Parameters per Block:  
       * Number of Questions *(e.g., default: 5\)*  
       * Duration per Question *(e.g., default: 60s)*  
@@ -275,6 +279,7 @@ Assessment properties for Instructor:
   * Structure assessments using **Question Blocks** for supported types:  
     * Multiple Choice (MCQ)  
     * Short Answer  
+    * Fill in the Blank  
     * True/False  
     * Matching  
   * **Block Configuration Parameters:**  

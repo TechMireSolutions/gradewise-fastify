@@ -67,7 +67,7 @@ grade-wise-ai-frontend-next/src/
 | Route protection | `proxy.js` + `<ProtectedRoute requiredRole="...">` |
 | Session | httpOnly cookie — **no JWT in localStorage** |
 | Auth store | Persist `user` only; call `fetchMe()` / `logoutApi()` |
-| Google sign-in | Firebase popup → `getIdToken()` → `{ idToken }` to backend |
+| Google sign-in | Firebase redirect (`signInWithRedirect` + `getRedirectResult` in Login/Signup) → `{ idToken }` to backend → instant role redirect |
 | Server state | TanStack Query (wrap app in `Providers.jsx`) |
 | UI state | Zustand in `features/<domain>/store.js` |
 | API calls | `features/<domain>/api.js` via `apiClient.js` |
