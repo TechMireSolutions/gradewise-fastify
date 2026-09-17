@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card, headingGradient } from "@/lib/ui.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
@@ -17,7 +17,7 @@ import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 function Signup() {
   const router = useRouter();
-  const { signup, googleAuth } = useAuthStore();
+  const { signup, googleAuth, completeGoogleRedirect } = useAuthStore();
 
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -27,6 +27,26 @@ function Signup() {
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "dummy-key";
   useRecaptchaInit(siteKey);
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const user = await completeGoogleRedirect();
+        if (isMounted && user) {
+          redirectByRole(user.role, (to) => router.replace(to));
+        }
+      } catch (error) {
+        if (isMounted) {
+          const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
+          showModal("error", "Google Signup Failed", errorMessage);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [completeGoogleRedirect, router, showModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,14 +82,11 @@ function Signup() {
   const handleGoogleSignup = async () => {
     setGoogleLoading(true);
     try {
-      const captchaToken = await getCaptchaToken(siteKey, "google_signup");
-      const user = await googleAuth({ captchaToken });
-      showModal("success", "Welcome!", `Successfully signed up with Google! Welcome, ${user.name}!`);
-      setTimeout(() => redirectByRole(user.role, (to) => router.push(to)), 2000);
+      await getCaptchaToken(siteKey, "google_signup");
+      await googleAuth();
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
       showModal("error", "Google Signup Failed", errorMessage);
-    } finally {
       setGoogleLoading(false);
     }
   };

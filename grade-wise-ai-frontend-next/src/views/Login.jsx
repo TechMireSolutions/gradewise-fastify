@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card } from "@/lib/ui.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
@@ -14,20 +14,38 @@ import { redirectByRole } from "../utils/redirectByRole.js";
 
 function Login() {
   const router = useRouter();
-  const { googleAuth } = useAuthStore();
+  const { googleAuth, completeGoogleRedirect } = useAuthStore();
   const { form, loading, modal, showModal, closeModal, handleLogin } = useLoginForm();
   const { register, formState: { errors } } = form;
   const [googleLoading, setGoogleLoading] = useState(false);
 
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const user = await completeGoogleRedirect();
+        if (isMounted && user) {
+          redirectByRole(user.role, (to) => router.replace(to));
+        }
+      } catch (error) {
+        if (isMounted) {
+          const errorMessage = error.response?.data?.message || error.message || "Google login failed. Please try again.";
+          showModal("error", "Google Login Failed", errorMessage);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [completeGoogleRedirect, router, showModal]);
+
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     try {
-      const response = await googleAuth();
-      redirectByRole(response.role, (to) => router.replace(to));
+      await googleAuth();
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || "Google login failed. Please try again.";
       showModal("error", "Google Login Failed", errorMessage);
-    } finally {
       setGoogleLoading(false);
     }
   };

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { auth, googleProvider } from "@/config/firebase.js";
 
 import {
@@ -49,7 +49,17 @@ const useAuthStore = create(
                 "Google sign-in is not configured. Please set up Firebase environment variables.",
             };
           }
-          const result = await signInWithPopup(auth, googleProvider);
+          await signInWithRedirect(auth, googleProvider);
+        } catch (error) {
+          throw error.response?.data || error;
+        }
+      },
+
+      completeGoogleRedirect: async () => {
+        if (!auth) return null;
+        try {
+          const result = await getRedirectResult(auth);
+          if (!result?.user) return null;
           const idToken = await result.user.getIdToken();
           const response = await googleAuthApi({ idToken });
           set({ user: response.data.user });
