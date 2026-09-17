@@ -23,8 +23,7 @@ function Login() {
     setGoogleLoading(true);
     try {
       const response = await googleAuth();
-      showModal("success", "Welcome!", `Successfully signed in with Google! Welcome back, ${response.name}!`);
-      setTimeout(() => redirectByRole(response.role, (to) => router.push(to)), 1500);
+      redirectByRole(response.role, (to) => router.replace(to));
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || "Google login failed. Please try again.";
       showModal("error", "Google Login Failed", errorMessage);
