@@ -7,7 +7,6 @@ import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
 import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
-import PageLoader from "../components/ui/PageLoader.jsx";
 import useModal from "../hooks/useModal.js";
 import { getCaptchaToken } from "../config/captcha.js";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaGoogle, FaGraduationCap, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
@@ -24,7 +23,6 @@ function Signup() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [isCheckingRedirect, setIsCheckingRedirect] = useState(false);
   const { modal, showModal, closeModal } = useModal();
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "dummy-key";
@@ -33,7 +31,7 @@ function Signup() {
   useEffect(() => {
     let isMounted = true;
     if (sessionStorage.getItem("googleRedirect") === "true") {
-      setIsCheckingRedirect(true);
+      setGoogleLoading(true);
     }
     
     (async () => {
@@ -43,12 +41,12 @@ function Signup() {
           sessionStorage.removeItem("googleRedirect");
           redirectByRole(user.role, (to) => router.replace(to));
         } else if (isMounted) {
-          setIsCheckingRedirect(false);
+          setGoogleLoading(false);
           sessionStorage.removeItem("googleRedirect");
         }
       } catch (error) {
         if (isMounted) {
-          setIsCheckingRedirect(false);
+          setGoogleLoading(false);
           sessionStorage.removeItem("googleRedirect");
           const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
           showModal("error", "Google Signup Failed", errorMessage);
@@ -104,10 +102,6 @@ function Signup() {
       setGoogleLoading(false);
     }
   };
-
-  if (isCheckingRedirect) {
-    return <PageLoader message="Completing Google Sign In..." />;
-  }
 
   return (
     <AuthPageLayout backLabel="Back to Home">
