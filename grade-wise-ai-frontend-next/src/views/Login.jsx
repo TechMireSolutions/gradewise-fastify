@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
-import PageLoader from "../components/ui/PageLoader.jsx";
 import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
 import useLoginForm from "../hooks/useLoginForm.js";
 import LoginFormFields, { LoginSubmitButton, AuthCardHeader } from "../components/auth/LoginFormFields.jsx";
@@ -19,12 +18,11 @@ function Login() {
   const { form, loading, modal, showModal, closeModal, handleLogin } = useLoginForm();
   const { register, formState: { errors } } = form;
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [isCheckingRedirect, setIsCheckingRedirect] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     if (sessionStorage.getItem("googleRedirect") === "true") {
-      setIsCheckingRedirect(true);
+      setGoogleLoading(true);
     }
     
     (async () => {
@@ -34,12 +32,12 @@ function Login() {
           sessionStorage.removeItem("googleRedirect");
           redirectByRole(user.role, (to) => router.replace(to));
         } else if (isMounted) {
-          setIsCheckingRedirect(false);
+          setGoogleLoading(false);
           sessionStorage.removeItem("googleRedirect");
         }
       } catch (error) {
         if (isMounted) {
-          setIsCheckingRedirect(false);
+          setGoogleLoading(false);
           sessionStorage.removeItem("googleRedirect");
           const errorMessage = error.response?.data?.message || error.message || "Google login failed. Please try again.";
           showModal("error", "Google Login Failed", errorMessage);
@@ -63,10 +61,6 @@ function Login() {
       setGoogleLoading(false);
     }
   };
-
-  if (isCheckingRedirect) {
-    return <PageLoader message="Completing Google Sign In..." />;
-  }
 
   return (
     <AuthPageLayout backLabel="Back to Home">
