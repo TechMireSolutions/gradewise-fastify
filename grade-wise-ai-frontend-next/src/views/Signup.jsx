@@ -30,24 +30,15 @@ function Signup() {
 
   useEffect(() => {
     let isMounted = true;
-    if (sessionStorage.getItem("googleRedirect") === "true") {
-      setGoogleLoading(true);
-    }
     
     (async () => {
       try {
         const user = await completeGoogleRedirect();
         if (isMounted && user) {
-          sessionStorage.removeItem("googleRedirect");
           redirectByRole(user.role, (to) => router.replace(to));
-        } else if (isMounted) {
-          setGoogleLoading(false);
-          sessionStorage.removeItem("googleRedirect");
         }
       } catch (error) {
         if (isMounted) {
-          setGoogleLoading(false);
-          sessionStorage.removeItem("googleRedirect");
           const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
           showModal("error", "Google Signup Failed", errorMessage);
         }
@@ -91,12 +82,11 @@ function Signup() {
 
   const handleGoogleSignup = async () => {
     setGoogleLoading(true);
-    sessionStorage.setItem("googleRedirect", "true");
     try {
       await getCaptchaToken(siteKey, "google_signup");
-      await googleAuth();
+      const user = await googleAuth();
+      redirectByRole(user.role, (to) => router.replace(to));
     } catch (error) {
-      sessionStorage.removeItem("googleRedirect");
       const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
       showModal("error", "Google Signup Failed", errorMessage);
       setGoogleLoading(false);
