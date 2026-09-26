@@ -119,68 +119,58 @@ function Login() {
     }
   };
 
-  const handleSelectAccount = async (account) => {
-    setGoogleLoading(true);
+  const handleSelectAccount = (account) => {
+    // 1. Immediately restore user snapshot from remembered verified account
+    const restoredUser = account.userSnapshot || {
+      id: account.id || account._id,
+      name: account.name,
+      email: account.email,
+      avatar: account.avatar,
+      role: account.role || "student",
+    };
 
-    try {
-      // 1. Instant check: is user session already active in memory?
-      const activeUser = useAuthStore.getState().user;
-      if (
-        activeUser?.email?.toLowerCase() === account.email.toLowerCase() &&
-        activeUser?.role
-      ) {
-        saveRememberedAccount(activeUser);
-        const destination = getDestinationRoute(activeUser.role);
-        router.replace(destination);
-        return;
-      }
+    // 2. Set user immediately in global auth store
+    useAuthStore.setState({ user: restoredUser, isBootstrapped: true });
 
-      // 2. Check if Fastify server session cookie is still valid
+    // 3. Synchronize auth-storage so ProtectedRoute & all pages see valid session immediately
+    if (typeof window !== "undefined") {
       try {
-        const meRes = await meApi();
-        const verifiedUser = meRes.data?.user;
-        if (
-          verifiedUser?.email?.toLowerCase() === account.email.toLowerCase() &&
-          verifiedUser?.role
-        ) {
-          useAuthStore.setState({ user: verifiedUser });
-          saveRememberedAccount(verifiedUser);
-          const destination = getDestinationRoute(verifiedUser.role);
-          router.replace(destination);
-          return;
+        localStorage.setItem(
+          "auth-storage",
+          JSON.stringify({
+            state: { user: restoredUser },
+            version: 0,
+          })
+        );
+      } catch {
+        // Ignore storage error
+      }
+    }
+
+    // 4. Update last login timestamp
+    saveRememberedAccount(restoredUser);
+
+    // 5. Open dashboard DIRECTLY without any verifying or popup!
+    const destination = getDestinationRoute(restoredUser.role);
+    if (router?.prefetch) {
+      router.prefetch(destination);
+    }
+    router.replace(destination);
+
+    // 6. Silently in the background (no UI blocker, no popup):
+    // Refresh backend session / token if Firebase or cookie is available
+    (async () => {
+      try {
+        if (auth?.currentUser) {
+          const idToken = await auth.currentUser.getIdToken(true);
+          await googleAuthApi({ idToken });
+        } else {
+          await meApi();
         }
       } catch {
-        // Session cookie expired or missing, proceed to Google Auth
+        // Silent background refresh
       }
-
-      // 3. Trigger Google OAuth with login_hint so it selects this account directly
-      if (googleProvider) {
-        googleProvider.setCustomParameters({
-          login_hint: account.email,
-          prompt: "select_account",
-        });
-      }
-
-      const user = await executeGoogleAuthBootstrap({
-        mode: "popup",
-        router,
-      });
-
-      if (user) {
-        saveRememberedAccount(user);
-        setRememberedAccounts(getRememberedAccounts());
-      }
-    } catch (error) {
-      console.error("Quick sign-in error:", error);
-      await clearPartialSession();
-      setGoogleLoading(false);
-      const errorMessage =
-        error.code === "auth/popup-closed-by-user"
-          ? "Google sign-in was cancelled."
-          : error.response?.data?.message || error.message || "Failed to sign in. Please try again.";
-      showModal("error", "Sign-In Failed", errorMessage);
-      toast.error(errorMessage);
-    }
+    })();
   };
 
   const handleRemoveAccount = (email) => {

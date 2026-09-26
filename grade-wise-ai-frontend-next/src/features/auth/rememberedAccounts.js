@@ -23,12 +23,14 @@ export function getRememberedAccounts() {
       const user = parsedAuth?.state?.user;
       if (user?.email) {
         const initialAccount = {
+          id: user.id || user._id,
           name: user.name || user.displayName || user.email.split("@")[0],
           email: user.email,
           avatar: user.avatar || user.photoURL || null,
           role: user.role || "student",
           provider: "google",
           lastLogin: Date.now(),
+          userSnapshot: user,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify([initialAccount]));
         return [initialAccount];
@@ -52,12 +54,21 @@ export function saveRememberedAccount(user) {
       (user.email ? user.email.split("@")[0] : "User");
 
     const newAccount = {
+      id: user.id || user._id,
       name: displayName,
       email: user.email,
       avatar: user.avatar || user.photoURL || null,
       role: user.role || "student",
       provider: user.provider || "google",
       lastLogin: Date.now(),
+      userSnapshot: {
+        id: user.id || user._id,
+        name: displayName,
+        email: user.email,
+        avatar: user.avatar || user.photoURL || null,
+        role: user.role || "student",
+        ...user,
+      },
     };
 
     // Filter out existing entry with same email and place newest at front (max 4 accounts)
