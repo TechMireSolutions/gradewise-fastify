@@ -8,6 +8,7 @@ import useModal from "./useModal.js";
 import { getCaptchaToken } from "../config/captcha.js";
 import { loginSchema } from "../schemas/authSchemas.js";
 import { redirectByRole } from "../utils/redirectByRole.js";
+import { saveRememberedAccount } from "@/features/auth/rememberedAccounts.js";
 
 export default function useLoginForm({
   allowedRoles = null,
@@ -43,6 +44,8 @@ export default function useLoginForm({
         showModal("error", "Access Denied", message);
         return;
       }
+
+      saveRememberedAccount(response);
 
       showModal("success", successTitle, successMessage(response.name));
       setTimeout(() => redirectByRole(response.role, (to) => router.push(to)), redirectDelay);

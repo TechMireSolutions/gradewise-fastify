@@ -11,16 +11,27 @@ import LoginFormFields, { LoginSubmitButton, AuthCardHeader } from "../component
 import { FaSignInAlt, FaGoogle, FaUserCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { executeGoogleAuthBootstrap, clearPartialSession, bootstrapAppData } from "@/features/auth/bootstrap.js";
-import { googleAuthApi } from "@/features/auth/api.js";
-import { auth } from "@/config/firebase.js";
+import { googleAuthApi, meApi } from "@/features/auth/api.js";
+import { auth, googleProvider } from "@/config/firebase.js";
 import { getRedirectResult } from "firebase/auth";
 import { getDestinationRoute } from "../utils/redirectByRole.js";
+import RememberedAccountCard from "../components/auth/RememberedAccountCard.jsx";
+import {
+  getRememberedAccounts,
+  saveRememberedAccount,
+  removeRememberedAccount,
+} from "@/features/auth/rememberedAccounts.js";
 
 function Login() {
   const router = useRouter();
   const { form, loading, modal, showModal, closeModal, handleLogin } = useLoginForm();
   const { register, formState: { errors } } = form;
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [rememberedAccounts, setRememberedAccounts] = useState([]);
+
+  useEffect(() => {
+    setRememberedAccounts(getRememberedAccounts());
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -40,7 +51,16 @@ function Login() {
         const user = authResponse.data?.user;
         if (!user) throw new Error("Failed to authenticate session with server.");
 
+        if (result?.user?.photoURL && !user.avatar) {
+          user.avatar = result.user.photoURL;
+        }
+
         useAuthStore.setState({ user });
+        saveRememberedAccount(user);
+        if (isMounted) {
+          setRememberedAccounts(getRememberedAccounts());
+        }
+
         const destination = getDestinationRoute(user.role);
         if (router?.prefetch) router.prefetch(destination);
 
@@ -73,10 +93,19 @@ function Login() {
     setGoogleLoading(true);
 
     try {
-      await executeGoogleAuthBootstrap({
+      if (googleProvider) {
+        googleProvider.setCustomParameters({ prompt: "select_account" });
+      }
+
+      const user = await executeGoogleAuthBootstrap({
         mode: "popup",
         router,
       });
+
+      if (user) {
+        saveRememberedAccount(user);
+        setRememberedAccounts(getRememberedAccounts());
+      }
     } catch (error) {
       console.error("Google Auth Bootstrap failed:", error);
       await clearPartialSession();
@@ -90,6 +119,75 @@ function Login() {
     }
   };
 
+  const handleSelectAccount = async (account) => {
+    setGoogleLoading(true);
+
+    try {
+      // 1. Instant check: is user session already active in memory?
+      const activeUser = useAuthStore.getState().user;
+      if (
+        activeUser?.email?.toLowerCase() === account.email.toLowerCase() &&
+        activeUser?.role
+      ) {
+        saveRememberedAccount(activeUser);
+        const destination = getDestinationRoute(activeUser.role);
+        router.replace(destination);
+        return;
+      }
+
+      // 2. Check if Fastify server session cookie is still valid
+      try {
+        const meRes = await meApi();
+        const verifiedUser = meRes.data?.user;
+        if (
+          verifiedUser?.email?.toLowerCase() === account.email.toLowerCase() &&
+          verifiedUser?.role
+        ) {
+          useAuthStore.setState({ user: verifiedUser });
+          saveRememberedAccount(verifiedUser);
+          const destination = getDestinationRoute(verifiedUser.role);
+          router.replace(destination);
+          return;
+        }
+      } catch {
+        // Session cookie expired or missing, proceed to Google Auth
+      }
+
+      // 3. Trigger Google OAuth with login_hint so it selects this account directly
+      if (googleProvider) {
+        googleProvider.setCustomParameters({
+          login_hint: account.email,
+          prompt: "select_account",
+        });
+      }
+
+      const user = await executeGoogleAuthBootstrap({
+        mode: "popup",
+        router,
+      });
+
+      if (user) {
+        saveRememberedAccount(user);
+        setRememberedAccounts(getRememberedAccounts());
+      }
+    } catch (error) {
+      console.error("Quick sign-in error:", error);
+      await clearPartialSession();
+      setGoogleLoading(false);
+      const errorMessage =
+        error.code === "auth/popup-closed-by-user"
+          ? "Google sign-in was cancelled."
+          : error.response?.data?.message || error.message || "Failed to sign in. Please try again.";
+      showModal("error", "Sign-In Failed", errorMessage);
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleRemoveAccount = (email) => {
+    const updated = removeRememberedAccount(email);
+    setRememberedAccounts(updated);
+  };
+
   return (
     <AuthPageLayout backLabel="Back to Home">
       <div className={cn(card, "p-8", "shadow-2xl")}>
@@ -99,14 +197,37 @@ function Login() {
           subtitle="Sign in to your Gradewise AI account"
         />
 
-        <button
-          onClick={handleGoogleLogin}
-          disabled={googleLoading || loading}
-          className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-        >
-          <FaGoogle className="text-base" />
-          <span>Continue with Google</span>
-        </button>
+        {rememberedAccounts.length > 0 ? (
+          <div className="mb-6 space-y-2.5">
+            {rememberedAccounts.map((account) => (
+              <RememberedAccountCard
+                key={account.email}
+                account={account}
+                onSelect={handleSelectAccount}
+                onRemove={handleRemoveAccount}
+                disabled={googleLoading || loading}
+              />
+            ))}
+
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={googleLoading || loading}
+              className="w-full text-center text-xs font-medium text-muted-foreground hover:text-indigo-400 py-1 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Use another account
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleGoogleLogin}
+            disabled={googleLoading || loading}
+            className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+          >
+            <FaGoogle className="text-base" />
+            <span>Continue with Google</span>
+          </button>
+        )}
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">

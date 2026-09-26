@@ -8,6 +8,7 @@ import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.j
 import useResourceStore from "@/features/resources/store.js";
 import { getAiSummary } from "@/features/ai-config/api.js";
 import { getDestinationRoute } from "@/utils/redirectByRole.js";
+import { saveRememberedAccount } from "./rememberedAccounts.js";
 
 /**
  * Executes a blocking Promise.all pipeline that pre-fetches and populates
@@ -137,6 +138,7 @@ export async function executeGoogleAuthBootstrap({
   onProgress?.(15);
 
   let idToken = null;
+  let photo = null;
 
   if (mode === "popup") {
     if (!auth) {
@@ -148,11 +150,13 @@ export async function executeGoogleAuthBootstrap({
     if (!result?.user) {
       throw new Error("No user returned from Google sign-in.");
     }
+    photo = result.user.photoURL;
     idToken = await result.user.getIdToken();
   } else if (mode === "redirect") {
     if (!auth) return null;
     const result = await getRedirectResult(auth);
     if (!result?.user) return null;
+    photo = result.user.photoURL;
     idToken = await result.user.getIdToken();
   }
 
@@ -167,8 +171,13 @@ export async function executeGoogleAuthBootstrap({
     );
   }
 
-  // Pre-seed user in auth store
+  if (photo && !initialUser.avatar) {
+    initialUser.avatar = photo;
+  }
+
+  // Pre-seed user in auth store and remember verified account
   useAuthStore.setState({ user: initialUser });
+  saveRememberedAccount(initialUser);
 
   // Pre-fetch destination route chunks
   const destination = getDestinationRoute(initialUser.role);
