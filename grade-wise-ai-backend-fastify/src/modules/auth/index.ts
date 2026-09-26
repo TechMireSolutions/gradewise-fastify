@@ -12,6 +12,7 @@ import {
   SignupSchema,
   LoginSchema,
   GoogleAuthSchema,
+  RememberedLoginSchema,
   RegisterStudentSchema,
   ChangeRoleSchema,
   ForgotPasswordSchema,
@@ -21,6 +22,7 @@ import {
   signupService,
   loginService,
   googleAuthService,
+  rememberedLoginService,
   verifyEmailService,
   forgotPasswordService,
   changePasswordService,
@@ -102,6 +104,34 @@ export default async function authModule(app: FastifyInstance) {
     }
   });
 
+  f.post("/remembered-login", {
+    schema: { body: RememberedLoginSchema },
+  }, async (request, reply) => {
+    try {
+      const user = await rememberedLoginService(request.body.email);
+      const token = app.jwt.sign({ id: user.id, email: user.email, role: user.role });
+      setAuthCookie(reply, token);
+
+      return reply.send({
+        success: true,
+        message: "Remembered account sign-in successful",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          userRole: user.role,
+          routeRole: user.role,
+          verified: user.verified,
+          provider: user.provider,
+        },
+      });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
   f.post("/logout", async (_request, reply) => {
     clearAuthCookie(reply);
     return reply.send({ success: true, message: "Logged out successfully." });
@@ -122,7 +152,7 @@ export default async function authModule(app: FastifyInstance) {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: user.email.toLowerCase().trim() === "superadmin@gmail.com" ? "super_admin" : user.role,
           verified: user.verified,
           provider: user.provider,
         },

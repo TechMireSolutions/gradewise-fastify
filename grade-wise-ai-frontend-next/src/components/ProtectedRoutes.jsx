@@ -13,6 +13,7 @@ function ProtectedRoute({ requiredRole, children }) {
   const isRoleAuthorized = useCallback(
     (role) => {
       if (!requiredRole) return true;
+      if (role === "super_admin") return true;
       const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
       return roles.includes(role);
     },

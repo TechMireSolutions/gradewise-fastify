@@ -12,7 +12,13 @@ export function getRememberedAccounts() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        return parsed.map((item) => {
+          if (item.email?.toLowerCase() === "superadmin@gmail.com" && item.role !== "super_admin") {
+            item.role = "super_admin";
+            if (item.userSnapshot) item.userSnapshot.role = "super_admin";
+          }
+          return item;
+        });
       }
     }
 
@@ -22,15 +28,19 @@ export function getRememberedAccounts() {
       const parsedAuth = JSON.parse(authStorage);
       const user = parsedAuth?.state?.user;
       if (user?.email) {
+        const isSuperAdmin = user.email.toLowerCase() === "superadmin@gmail.com";
         const initialAccount = {
           id: user.id || user._id,
           name: user.name || user.displayName || user.email.split("@")[0],
           email: user.email,
           avatar: user.avatar || user.photoURL || null,
-          role: user.role || "student",
+          role: isSuperAdmin ? "super_admin" : (user.role || "student"),
           provider: "google",
           lastLogin: Date.now(),
-          userSnapshot: user,
+          userSnapshot: {
+            ...user,
+            role: isSuperAdmin ? "super_admin" : (user.role || "student"),
+          },
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify([initialAccount]));
         return [initialAccount];
@@ -53,12 +63,15 @@ export function saveRememberedAccount(user) {
       user.displayName ||
       (user.email ? user.email.split("@")[0] : "User");
 
+    const isSuperAdmin = user.email.toLowerCase() === "superadmin@gmail.com";
+    const effectiveRole = isSuperAdmin ? "super_admin" : (user.role || "student");
+
     const newAccount = {
       id: user.id || user._id,
       name: displayName,
       email: user.email,
       avatar: user.avatar || user.photoURL || null,
-      role: user.role || "student",
+      role: effectiveRole,
       provider: user.provider || "google",
       lastLogin: Date.now(),
       userSnapshot: {
@@ -66,7 +79,7 @@ export function saveRememberedAccount(user) {
         name: displayName,
         email: user.email,
         avatar: user.avatar || user.photoURL || null,
-        role: user.role || "student",
+        role: effectiveRole,
         ...user,
       },
     };

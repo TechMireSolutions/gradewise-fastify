@@ -122,6 +122,7 @@ apiClient.interceptors.response.use(
       "/auth/login",
       "/auth/signup",
       "/auth/google-auth",
+      "/auth/remembered-login",
       "/auth/verify",
       "/auth/forgot-password",
       "/auth/change-password",

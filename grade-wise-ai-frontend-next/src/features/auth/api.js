@@ -9,6 +9,9 @@ export const signupApi = (data) =>
 export const googleAuthApi = (payload) =>
   apiClient.post("/auth/google-auth", payload);
 
+export const rememberedLoginApi = (email) =>
+  apiClient.post("/auth/remembered-login", { email });
+
 export const logoutApi = () =>
   apiClient.post("/auth/logout", {});
 

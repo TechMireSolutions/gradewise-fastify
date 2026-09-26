@@ -11,7 +11,7 @@ import LoginFormFields, { LoginSubmitButton, AuthCardHeader } from "../component
 import { FaSignInAlt, FaGoogle, FaUserCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { executeGoogleAuthBootstrap, clearPartialSession, bootstrapAppData } from "@/features/auth/bootstrap.js";
-import { googleAuthApi, meApi } from "@/features/auth/api.js";
+import { googleAuthApi, rememberedLoginApi } from "@/features/auth/api.js";
 import { auth, googleProvider } from "@/config/firebase.js";
 import { getRedirectResult } from "firebase/auth";
 import { getDestinationRoute } from "../utils/redirectByRole.js";
@@ -119,58 +119,62 @@ function Login() {
     }
   };
 
-  const handleSelectAccount = (account) => {
-    // 1. Immediately restore user snapshot from remembered verified account
-    const restoredUser = account.userSnapshot || {
-      id: account.id || account._id,
-      name: account.name,
-      email: account.email,
-      avatar: account.avatar,
-      role: account.role || "student",
-    };
+  const [accountSigningIn, setAccountSigningIn] = useState(false);
 
-    // 2. Set user immediately in global auth store
-    useAuthStore.setState({ user: restoredUser, isBootstrapped: true });
+  const handleSelectAccount = async (account) => {
+    if (accountSigningIn) return;
+    setAccountSigningIn(true);
 
-    // 3. Synchronize auth-storage so ProtectedRoute & all pages see valid session immediately
-    if (typeof window !== "undefined") {
+    try {
+      // 1. Immediately request fresh session cookie from backend for this remembered account
+      let activeUser = null;
       try {
-        localStorage.setItem(
-          "auth-storage",
-          JSON.stringify({
-            state: { user: restoredUser },
-            version: 0,
-          })
-        );
-      } catch {
-        // Ignore storage error
-      }
-    }
-
-    // 4. Update last login timestamp
-    saveRememberedAccount(restoredUser);
-
-    // 5. Open dashboard DIRECTLY without any verifying or popup!
-    const destination = getDestinationRoute(restoredUser.role);
-    if (router?.prefetch) {
-      router.prefetch(destination);
-    }
-    router.replace(destination);
-
-    // 6. Silently in the background (no UI blocker, no popup):
-    // Refresh backend session / token if Firebase or cookie is available
-    (async () => {
-      try {
-        if (auth?.currentUser) {
-          const idToken = await auth.currentUser.getIdToken(true);
-          await googleAuthApi({ idToken });
-        } else {
-          await meApi();
+        const res = await rememberedLoginApi(account.email);
+        if (res.data?.user) {
+          activeUser = res.data.user;
         }
       } catch {
-        // Silent background refresh
+        // Fallback to locally cached user snapshot if network/API temporarily unavailable
+        activeUser = account.userSnapshot || account;
       }
-    })();
+
+      const verifiedUser = activeUser || account.userSnapshot || account;
+
+      // 2. Set user immediately in global auth store & localStorage
+      useAuthStore.setState({ user: verifiedUser, isBootstrapped: true });
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(
+            "auth-storage",
+            JSON.stringify({
+              state: { user: verifiedUser },
+              version: 0,
+            })
+          );
+        } catch {
+          // Ignore storage error
+        }
+      }
+
+      // 3. Save latest user details in remembered accounts
+      saveRememberedAccount(verifiedUser);
+
+      // 4. Open dashboard DIRECTLY without any verifying or popup!
+      const destination = getDestinationRoute(verifiedUser.role);
+      if (router?.prefetch) {
+        router.prefetch(destination);
+      }
+      router.replace(destination);
+    } catch (error) {
+      console.error("Quick sign-in error:", error);
+      const errorMessage =
+        error.response?.data?.message || error.message || "Failed to open dashboard. Please try again.";
+      showModal("error", "Sign-In Failed", errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setAccountSigningIn(false);
+    }
   };
 
   const handleRemoveAccount = (email) => {
@@ -195,14 +199,14 @@ function Login() {
                 account={account}
                 onSelect={handleSelectAccount}
                 onRemove={handleRemoveAccount}
-                disabled={googleLoading || loading}
+                disabled={googleLoading || loading || accountSigningIn}
               />
             ))}
 
             <button
               type="button"
               onClick={handleGoogleLogin}
-              disabled={googleLoading || loading}
+              disabled={googleLoading || loading || accountSigningIn}
               className="w-full text-center text-xs font-medium text-muted-foreground hover:text-indigo-400 py-1 transition-colors cursor-pointer disabled:opacity-50"
             >
               Use another account
