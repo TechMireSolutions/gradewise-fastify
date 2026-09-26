@@ -2,13 +2,12 @@
 import { cn } from "@/lib/cn.js";
 
 import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
-import apiClient from "@/lib/apiClient.js";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import {
   FaClipboardList,
@@ -39,24 +38,29 @@ function StudentDashboard() {
     pendingAssessments: 0,
   });
 
-  const loadDashboardData = async (isSilent = false) => {
-    try {
-      if (!isSilent) {
-        setLoading(true);
+  const loadDashboardData = useCallback(
+    async (isSilent = false) => {
+      try {
+        if (!isSilent) {
+          setLoading(true);
+        }
+        const data = await fetchStudentDashboardData();
+        setAssessmentsList(data.assessments || []);
+        setStats(
+          data.stats || {
+            totalAssessments: 0,
+            completedAssessments: 0,
+            pendingAssessments: 0,
+          }
+        );
+      } catch (err) {
+        console.error("Dashboard error:", err);
+      } finally {
+        setLoading(false);
       }
-      const data = await fetchStudentDashboardData();
-      setAssessmentsList(data.assessments || []);
-      setStats(data.stats || {
-        totalAssessments: 0,
-        completedAssessments: 0,
-        pendingAssessments: 0,
-      });
-    } catch (err) {
-      console.error("Dashboard error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [fetchStudentDashboardData]
+  );
 
   useEffect(() => {
     if (!hasInitialData) {
@@ -64,10 +68,9 @@ function StudentDashboard() {
     } else {
       setAssessmentsList(storeAssessments);
       setStats(storeStats);
-      // Optional silent sync in background
       loadDashboardData(true);
     }
-  }, [hasInitialData]);
+  }, [hasInitialData, loadDashboardData, storeAssessments, storeStats]);
 
   const statsData = [
     {

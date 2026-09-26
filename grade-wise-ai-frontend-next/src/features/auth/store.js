@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { signInWithRedirect, getRedirectResult, signInWithPopup } from "firebase/auth";
+import { getRedirectResult, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/config/firebase.js";
+
 
 import {
   loginApi,

@@ -16,7 +16,7 @@ import { executeGoogleAuthBootstrap, clearPartialSession, bootstrapAppData } fro
 import { googleAuthApi } from "@/features/auth/api.js";
 import { auth } from "@/config/firebase.js";
 import { getRedirectResult } from "firebase/auth";
-import { getDestinationRoute, redirectByRole } from "../utils/redirectByRole.js";
+import { getDestinationRoute } from "../utils/redirectByRole.js";
 
 function Login() {
   const router = useRouter();

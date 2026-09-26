@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useHydrated from "../hooks/useHydrated.js";
@@ -11,11 +11,14 @@ function ProtectedRoute({ requiredRole, children }) {
   const router = useRouter();
   const hydrated = useHydrated();
 
-  const isRoleAuthorized = (role) => {
-    if (!requiredRole) return true;
-    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-    return roles.includes(role);
-  };
+  const isRoleAuthorized = useCallback(
+    (role) => {
+      if (!requiredRole) return true;
+      const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+      return roles.includes(role);
+    },
+    [requiredRole]
+  );
 
   const hasImmediateValidSession = Boolean(user?.role && isRoleAuthorized(user.role));
   const [checking, setChecking] = useState(!hasImmediateValidSession);
@@ -54,7 +57,7 @@ function ProtectedRoute({ requiredRole, children }) {
     return () => {
       cancelled = true;
     };
-  }, [hydrated, user, requiredRole, router, fetchMe, hasImmediateValidSession]);
+  }, [hydrated, user, router, fetchMe, hasImmediateValidSession, isRoleAuthorized]);
 
   if ((!hydrated || checking) && !hasImmediateValidSession) {
     return (

@@ -2,9 +2,9 @@
 
 import { cn } from "@/lib/cn.js";
 import { card, iconBadge } from "@/lib/ui.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
-import { FaGraduationCap, FaCheckCircle, FaSpinner } from "react-icons/fa";
+import { FaGraduationCap, FaSpinner } from "react-icons/fa";
+
 
 /**
  * Single Blocking Sign-In Loading Screen.
