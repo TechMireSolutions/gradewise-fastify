@@ -11,7 +11,6 @@ import useLoginForm from "../hooks/useLoginForm.js";
 import LoginFormFields, { LoginSubmitButton, AuthCardHeader } from "../components/auth/LoginFormFields.jsx";
 import { FaSignInAlt, FaGoogle, FaUserCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
-import AuthBootstrapOverlay from "@/components/auth/AuthBootstrapOverlay.jsx";
 import { executeGoogleAuthBootstrap, clearPartialSession, bootstrapAppData } from "@/features/auth/bootstrap.js";
 import { googleAuthApi } from "@/features/auth/api.js";
 import { auth } from "@/config/firebase.js";
@@ -23,9 +22,6 @@ function Login() {
   const { form, loading, modal, showModal, closeModal, handleLogin } = useLoginForm();
   const { register, formState: { errors } } = form;
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [isBootstrapping, setIsBootstrapping] = useState(false);
-  const [bootstrapStep, setBootstrapStep] = useState("Signing in and loading your workspace...");
-  const [bootstrapProgress, setBootstrapProgress] = useState(15);
 
   useEffect(() => {
     let isMounted = true;
@@ -37,10 +33,7 @@ function Login() {
         if (!result?.user) return;
 
         if (isMounted) {
-          setIsBootstrapping(true);
           setGoogleLoading(true);
-          setBootstrapStep("Resolving Google credentials...");
-          setBootstrapProgress(35);
         }
 
         const idToken = await result.user.getIdToken();
@@ -52,28 +45,15 @@ function Login() {
         const destination = getDestinationRoute(user.role);
         if (router?.prefetch) router.prefetch(destination);
 
-        if (isMounted) {
-          setBootstrapStep("Pre-fetching workspace data and assessments...");
-          setBootstrapProgress(60);
-        }
-
-        await bootstrapAppData(user, (step, pct) => {
-          if (isMounted) {
-            setBootstrapStep(step);
-            setBootstrapProgress(pct);
-          }
-        });
+        await bootstrapAppData(user);
 
         if (isMounted) {
-          setBootstrapStep("Workspace ready! Redirecting...");
-          setBootstrapProgress(100);
-          setTimeout(() => router.replace(destination), 300);
+          router.replace(destination);
         }
       } catch (error) {
         console.error("Google Redirect Bootstrap failed:", error);
         await clearPartialSession();
         if (isMounted) {
-          setIsBootstrapping(false);
           setGoogleLoading(false);
           const errorMessage =
             error.response?.data?.message || error.message || "Google sign-in failed. Please try again.";
@@ -90,21 +70,15 @@ function Login() {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
-    setIsBootstrapping(true);
-    setBootstrapStep("Connecting to Google authentication...");
-    setBootstrapProgress(20);
 
     try {
       await executeGoogleAuthBootstrap({
         mode: "popup",
         router,
-        onStepChange: (step) => setBootstrapStep(step),
-        onProgress: (pct) => setBootstrapProgress(pct),
       });
     } catch (error) {
       console.error("Google Auth Bootstrap failed:", error);
       await clearPartialSession();
-      setIsBootstrapping(false);
       setGoogleLoading(false);
       const errorMessage =
         error.code === "auth/popup-closed-by-user"
@@ -116,75 +90,66 @@ function Login() {
   };
 
   return (
-    <>
-      {isBootstrapping && (
-        <AuthBootstrapOverlay
-          title="Signing in and loading your workspace..."
-          step={bootstrapStep}
-          progress={bootstrapProgress}
+    <AuthPageLayout backLabel="Back to Home">
+      <div className={cn(card, "p-8", "shadow-2xl")}>
+        <AuthCardHeader
+          icon={FaUserCircle}
+          title="Welcome Back"
+          subtitle="Sign in to your Gradewise AI account"
         />
-      )}
-      <AuthPageLayout backLabel="Back to Home">
-        <div className={cn(card, "p-8", "shadow-2xl")}>
-          <AuthCardHeader
-            icon={FaUserCircle}
-            title="Welcome Back"
-            subtitle="Sign in to your Gradewise AI account"
-          />
 
-          <button
-            onClick={handleGoogleLogin}
-            disabled={googleLoading || loading || isBootstrapping}
-            className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-          >
-            {googleLoading ? (
-              <LoadingSpinner size="sm" type="dots" color="blue" />
-            ) : (
-              <>
-                <FaGoogle className="text-base" />
-                <span>Continue with Google</span>
-              </>
-            )}
-          </button>
+        <button
+          onClick={handleGoogleLogin}
+          disabled={googleLoading || loading}
+          className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+        >
+          {googleLoading ? (
+            <LoadingSpinner size="sm" type="dots" color="blue" />
+          ) : (
+            <>
+              <FaGoogle className="text-base" />
+              <span>Continue with Google</span>
+            </>
+          )}
+        </button>
 
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className={cn("px-4", "bg-card", "text-muted-foreground", "font-semibold", "uppercase", "tracking-widest")}>
-                Or continue with email
-              </span>
-            </div>
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
           </div>
-
-          <form onSubmit={handleLogin} className="space-y-5">
-            <LoginFormFields register={register} errors={errors} />
-            <LoginSubmitButton loading={loading} disabled={googleLoading || isBootstrapping} label="Sign In" icon={FaSignInAlt} />
-          </form>
-
-          <div className="mt-6 space-y-4">
-            <div className="text-center">
-              <p className={cn("text-sm", "text-muted-foreground")}>
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-150 cursor-pointer">
-                  Create one here
-                </Link>
-              </p>
-            </div>
-            <div className="text-center pt-4 border-t border-border">
-              <Link href="/forgot-password" className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors duration-150 cursor-pointer">
-                Forgot your password?
-              </Link>
-            </div>
+          <div className="relative flex justify-center text-xs">
+            <span className={cn("px-4", "bg-card", "text-muted-foreground", "font-semibold", "uppercase", "tracking-widest")}>
+              Or continue with email
+            </span>
           </div>
         </div>
 
-        <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title}>
-          {modal.message}
-        </Modal>
-      </AuthPageLayout>
-    </>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <LoginFormFields register={register} errors={errors} />
+          <LoginSubmitButton loading={loading} disabled={googleLoading} label="Sign In" icon={FaSignInAlt} />
+        </form>
+
+        <div className="mt-6 space-y-4">
+          <div className="text-center">
+            <p className={cn("text-sm", "text-muted-foreground")}>
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="text-teal-400 hover:text-teal-300 font-medium transition-colors duration-150 cursor-pointer">
+                Create one here
+              </Link>
+            </p>
+          </div>
+          <div className="text-center pt-4 border-t border-border">
+            <Link href="/forgot-password" className="text-teal-400 hover:text-teal-300 font-medium text-sm transition-colors duration-150 cursor-pointer">
+              Forgot your password?
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title}>
+        {modal.message}
+      </Modal>
+    </AuthPageLayout>
   );
 }
 

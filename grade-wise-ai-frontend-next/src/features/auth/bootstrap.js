@@ -185,9 +185,6 @@ export async function executeGoogleAuthBootstrap({
     onProgress?.(pct);
   });
 
-  // Brief delay for visual smoothness
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
   // Navigate to destination route - state is 100% preloaded!
   if (router) {
     router.replace(destination);
@@ -195,3 +192,4 @@ export async function executeGoogleAuthBootstrap({
 
   return finalizedUser;
 }
+
