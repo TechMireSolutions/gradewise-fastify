@@ -33,11 +33,13 @@ export default function AuthCallbackPage() {
           const destination = getDestinationRoute(existingUser.role);
           if (router.prefetch) router.prefetch(destination);
 
-          await bootstrapAppData(existingUser);
-
           if (!isCancelled) {
             router.replace(destination);
           }
+
+          bootstrapAppData(existingUser).catch((err) => {
+            console.warn("Background prefetch warning:", err);
+          });
           return;
         }
 

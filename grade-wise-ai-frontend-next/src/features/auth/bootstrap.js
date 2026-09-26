@@ -176,20 +176,20 @@ export async function executeGoogleAuthBootstrap({
     router.prefetch(destination);
   }
 
-  onStepChange?.("Signing in and loading your workspace...");
-  onProgress?.(50);
-
-  // Trigger blocking Promise.all pre-fetch sequence
-  const { user: finalizedUser } = await bootstrapAppData(initialUser, (msg, pct) => {
-    onStepChange?.(msg);
-    onProgress?.(pct);
-  });
-
-  // Navigate to destination route - state is 100% preloaded!
+  // Navigate immediately so the UI transitions straight to dashboard without delay
   if (router) {
     router.replace(destination);
   }
 
-  return finalizedUser;
+  // Pre-fetch workspace data silently in background without blocking the UI
+  bootstrapAppData(initialUser, (msg, pct) => {
+    onStepChange?.(msg);
+    onProgress?.(pct);
+  }).catch((err) => {
+    console.warn("Background data prefetch warning:", err);
+  });
+
+  return initialUser;
 }
+
 

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
-import LoadingState from "../../components/ui/LoadingState.jsx";
 import EmptyState from "../../components/ui/EmptyState.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
@@ -180,12 +179,8 @@ function InstructorDashboard() {
           }
         />
 
-        {isLoading || loading ? (
-          <LoadingState message="Loading dashboard data..." />
-        ) : (
-          <>
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+        {/* Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
               {statsData.map((stat, index) => (
                 <div key={index} className={stat.cardClass}>
                   <div className="flex items-center justify-between">
@@ -489,9 +484,7 @@ function InstructorDashboard() {
                 )}
               </div>
             </div>
-          </>
-        )}
-      </div>
+          </div>
 
 
       {/* Physical Paper Modal */}

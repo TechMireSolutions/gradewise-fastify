@@ -1,7 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { btn, headingGradient, iconBadgeTeal, input, inputError, label } from "@/lib/ui.js";
 import { FaEnvelope, FaLock, FaExclamationTriangle } from "react-icons/fa";
-import LoadingSpinner from "../ui/LoadingSpinner.jsx";
 
 export default function LoginFormFields({
   register,
@@ -63,14 +62,8 @@ export function LoginSubmitButton({ loading, label = "Sign In", icon: Icon, disa
       disabled={loading || disabled}
       className={cn(btn.primary, "w-full", "disabled:opacity-50", "disabled:cursor-not-allowed")}
     >
-      {loading ? (
-        <LoadingSpinner size="sm" color="white" type="dots" />
-      ) : (
-        <>
-          {Icon && <Icon />}
-          <span>{label}</span>
-        </>
-      )}
+      {Icon && <Icon />}
+      <span>{label}</span>
     </button>
   );
 }

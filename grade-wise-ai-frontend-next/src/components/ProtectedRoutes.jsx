@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useHydrated from "../hooks/useHydrated.js";
-import LoadingSpinner from "./ui/LoadingSpinner.jsx";
 
 function ProtectedRoute({ requiredRole, children }) {
   const { user, fetchMe } = useAuthStore();
@@ -60,11 +59,7 @@ function ProtectedRoute({ requiredRole, children }) {
   }, [hydrated, user, router, fetchMe, hasImmediateValidSession, isRoleAuthorized]);
 
   if ((!hydrated || checking) && !hasImmediateValidSession) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <LoadingSpinner size="lg" type="spinner" color="blue" />
-      </div>
-    );
+    return null;
   }
 
   if (!user?.role) return null;

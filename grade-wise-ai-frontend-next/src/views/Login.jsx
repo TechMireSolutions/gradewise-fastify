@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
-import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
 import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
 import useLoginForm from "../hooks/useLoginForm.js";
@@ -45,11 +44,13 @@ function Login() {
         const destination = getDestinationRoute(user.role);
         if (router?.prefetch) router.prefetch(destination);
 
-        await bootstrapAppData(user);
-
         if (isMounted) {
           router.replace(destination);
         }
+
+        bootstrapAppData(user).catch((err) => {
+          console.warn("Background data prefetch warning:", err);
+        });
       } catch (error) {
         console.error("Google Redirect Bootstrap failed:", error);
         await clearPartialSession();
@@ -103,14 +104,8 @@ function Login() {
           disabled={googleLoading || loading}
           className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
         >
-          {googleLoading ? (
-            <LoadingSpinner size="sm" type="dots" color="blue" />
-          ) : (
-            <>
-              <FaGoogle className="text-base" />
-              <span>Continue with Google</span>
-            </>
-          )}
+          <FaGoogle className="text-base" />
+          <span>Continue with Google</span>
         </button>
 
         <div className="relative mb-6">

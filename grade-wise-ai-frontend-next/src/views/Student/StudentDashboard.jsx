@@ -5,7 +5,6 @@ import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import useAuthStore from "@/features/auth/store.js";
-import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
@@ -95,14 +94,6 @@ function StudentDashboard() {
       iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25",
     }
   ];
-
-  if (loading && !hasInitialData) {
-    return (
-      <div className={cn(page, "flex", "items-center", "justify-center")}>
-        <LoadingSpinner size="lg" type="spinner" color="blue" />
-      </div>
-    );
-  }
 
   return (
     <div className={page}>

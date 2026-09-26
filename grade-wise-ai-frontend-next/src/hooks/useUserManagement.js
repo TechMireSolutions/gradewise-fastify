@@ -6,8 +6,8 @@ export default function useUserManagement() {
   const { user, getUsers, changeUserRole, deleteUser } = useAuthStore();
   const { modal, showModal, closeModal: closeModalBase } = useModal();
 
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState(() => useAuthStore.getState().cachedUsers || []);
+  const [loading, setLoading] = useState(() => !(useAuthStore.getState().cachedUsers?.length > 0));
   const [actionLoading, setActionLoading] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
 
