@@ -11,7 +11,6 @@ function AdminDashboard() {
   const {
     user,
     users,
-    loading,
     actionLoading,
     modal,
     closeModal,

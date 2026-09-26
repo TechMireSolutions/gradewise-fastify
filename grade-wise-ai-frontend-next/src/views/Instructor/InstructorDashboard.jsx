@@ -35,15 +35,13 @@ function InstructorDashboard() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { assessments, getInstructorAssessments } = useAssessmentStore();
-  const { overview, loading, getInstructorOverview } = useInstructorAnalyticsStore();
+  const { overview, getInstructorOverview } = useInstructorAnalyticsStore();
   const { modal, showModal, closeModal } = useModal();
-  const [isLoading, setIsLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState({
     isOpen: false,
     assessmentId: null,
     title: "",
   });
-
 
   const [paperModal, setPaperModal] = useState({
     isOpen: false,
@@ -53,7 +51,6 @@ function InstructorDashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
       try {
         await Promise.all([
           getInstructorAssessments(),
@@ -66,8 +63,6 @@ function InstructorDashboard() {
         if (error.response?.status === 403 || error.message === "No authentication token found") {
           router.push("/login");
         }
-      } finally {
-        setIsLoading(false);
       }
     };
 

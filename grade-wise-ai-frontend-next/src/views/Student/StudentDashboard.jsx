@@ -30,7 +30,6 @@ function StudentDashboard() {
   );
 
   const [assessmentsList, setAssessmentsList] = useState(() => storeAssessments || []);
-  const [loading, setLoading] = useState(!hasInitialData);
   const [stats, setStats] = useState(() => storeStats || {
     totalAssessments: 0,
     completedAssessments: 0,
@@ -38,11 +37,8 @@ function StudentDashboard() {
   });
 
   const loadDashboardData = useCallback(
-    async (isSilent = false) => {
+    async () => {
       try {
-        if (!isSilent) {
-          setLoading(true);
-        }
         const data = await fetchStudentDashboardData();
         setAssessmentsList(data.assessments || []);
         setStats(
@@ -54,8 +50,6 @@ function StudentDashboard() {
         );
       } catch (err) {
         console.error("Dashboard error:", err);
-      } finally {
-        setLoading(false);
       }
     },
     [fetchStudentDashboardData]
@@ -63,11 +57,11 @@ function StudentDashboard() {
 
   useEffect(() => {
     if (!hasInitialData) {
-      loadDashboardData(false);
+      loadDashboardData();
     } else {
       setAssessmentsList(storeAssessments);
       setStats(storeStats);
-      loadDashboardData(true);
+      loadDashboardData();
     }
   }, [hasInitialData, loadDashboardData, storeAssessments, storeStats]);
 
