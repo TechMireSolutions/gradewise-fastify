@@ -9,6 +9,7 @@ import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
 import apiClient from "@/lib/apiClient.js";
+import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import {
   FaClipboardList,
   FaCheckCircle,
@@ -19,48 +20,37 @@ import {
 
 function StudentDashboard() {
   const { user } = useAuthStore();
-  const [assessmentsList, setAssessmentsList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
+  const {
+    assessments: storeAssessments,
+    stats: storeStats,
+    hasLoaded,
+    fetchStudentDashboardData,
+  } = useStudentAnalyticsStore();
+
+  const hasInitialData = Boolean(
+    hasLoaded || (storeAssessments && storeAssessments.length > 0)
+  );
+
+  const [assessmentsList, setAssessmentsList] = useState(() => storeAssessments || []);
+  const [loading, setLoading] = useState(!hasInitialData);
+  const [stats, setStats] = useState(() => storeStats || {
     totalAssessments: 0,
     completedAssessments: 0,
     pendingAssessments: 0,
   });
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isSilent = false) => {
     try {
-      setLoading(true);
-      
-      const overviewRes = await apiClient.get("/student-analytics/overview");
-      const overviewData = overviewRes.data?.data || overviewRes.data || {};
-      
-      const res = await apiClient.get("/student-analytics/assessments");
-      const dataArray = res.data?.data || res.data || [];
-      
-      let totalCount = 0;
-      let completedCount = 0;
-
-      if (overviewData.enrolled) {
-        totalCount = parseInt(overviewData.enrolled.count || overviewData.enrolled, 10) || 0;
+      if (!isSilent) {
+        setLoading(true);
       }
-      if (overviewData.completed) {
-        completedCount = parseInt(overviewData.completed.count || overviewData.completed, 10) || 0;
-      }
-
-      if (Array.isArray(dataArray) && dataArray.length > 0) {
-        setAssessmentsList(dataArray);
-        if (totalCount === 0) totalCount = dataArray.length;
-        if (completedCount === 0) {
-          completedCount = dataArray.filter(a => a.status === "completed" || a.status === "graded").length;
-        }
-      }
-
-      setStats({
-        totalAssessments: totalCount || dataArray.length || 0,
-        completedAssessments: completedCount || 0,
-        pendingAssessments: Math.max(0, totalCount - completedCount),
+      const data = await fetchStudentDashboardData();
+      setAssessmentsList(data.assessments || []);
+      setStats(data.stats || {
+        totalAssessments: 0,
+        completedAssessments: 0,
+        pendingAssessments: 0,
       });
-
     } catch (err) {
       console.error("Dashboard error:", err);
     } finally {
@@ -69,8 +59,15 @@ function StudentDashboard() {
   };
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (!hasInitialData) {
+      loadDashboardData(false);
+    } else {
+      setAssessmentsList(storeAssessments);
+      setStats(storeStats);
+      // Optional silent sync in background
+      loadDashboardData(true);
+    }
+  }, [hasInitialData]);
 
   const statsData = [
     {
@@ -96,7 +93,7 @@ function StudentDashboard() {
     }
   ];
 
-  if (loading) {
+  if (loading && !hasInitialData) {
     return (
       <div className={cn(page, "flex", "items-center", "justify-center")}>
         <LoadingSpinner size="lg" type="spinner" color="blue" />

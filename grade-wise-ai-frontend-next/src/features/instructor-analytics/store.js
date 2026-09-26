@@ -14,6 +14,7 @@ const useInstructorAnalyticsStore = create((set) => ({
     resources: 0,
   },
   loading: false,
+  hasLoaded: false,
   error: null,
   assessments: [],
   students: [],
@@ -21,9 +22,9 @@ const useInstructorAnalyticsStore = create((set) => ({
   selectedAssessmentId: null,
   selectedStudentId: null,
 
-  getInstructorOverview: async () => {
+  getInstructorOverview: async (silent = false) => {
     try {
-      set({ loading: true, error: null });
+      if (!silent) set({ loading: true, error: null });
       const res = await fetchInstructorOverviewAPI();
       const data = res.data.data || {};
       
@@ -32,10 +33,12 @@ const useInstructorAnalyticsStore = create((set) => ({
         overview: {
           assessments: data.totalAssessments || 0,
           executedAssessments: data.completedAttempts || 0,
-          resources: data.totalResources || 0, // Assuming backend sends totalResources or you can map from elsewhere
+          resources: data.totalResources || 0,
         },
         loading: false,
+        hasLoaded: true,
       });
+      return data;
     } catch (err) {
       const msg = err.message || "Failed to fetch overview";
       set({ error: msg, loading: false });

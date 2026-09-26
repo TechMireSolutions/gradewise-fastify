@@ -18,23 +18,27 @@ const useAssessmentStore = create((set) => ({
   currentAssessment: null,
   enrolledStudents: [],
   loading: false,
+  hasLoaded: false,
   error: null,
 
   /* =========================
      Instructor
   ========================= */
 
-  getInstructorAssessments: async () => {
-    set({ loading: true, error: null });
+  getInstructorAssessments: async (silent = false) => {
+    if (!silent) set({ loading: true, error: null });
     try {
       const response = await fetchInstructorAssessments();
+      const list = (response.data?.data || []).map((a) => ({
+        ...a,
+        is_executed: a.is_executed || false,
+      }));
       set({
-        assessments: response.data.data.map((a) => ({
-          ...a,
-          is_executed: a.is_executed || false,
-        })),
+        assessments: list,
         loading: false,
+        hasLoaded: true,
       });
+      return list;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to fetch assessments";
       set({ error: message, loading: false });

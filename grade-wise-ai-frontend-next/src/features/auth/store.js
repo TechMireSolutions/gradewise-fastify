@@ -155,11 +155,51 @@ const useAuthStore = create(
         }
       },
 
+      cachedUsers: [],
+      hasLoadedUsers: false,
+      aiSummary: null,
+      isBootstrapped: false,
+
+      setIsBootstrapped: (isBootstrapped) => set({ isBootstrapped }),
+
+      fetchAndCacheUsers: async () => {
+        try {
+          const response = await fetchUsersApi();
+          const users = response.data?.users || [];
+          set({ cachedUsers: users, hasLoadedUsers: true });
+          return users;
+        } catch (error) {
+          throw error.response?.data || error;
+        }
+      },
+
+      clearSession: async () => {
+        try {
+          await logoutApi();
+        } catch {
+          // ignore network error on logout
+        } finally {
+          set({
+            user: null,
+            cachedUsers: [],
+            hasLoadedUsers: false,
+            aiSummary: null,
+            isBootstrapped: false,
+          });
+        }
+      },
+
       logout: async () => {
         try {
           await logoutApi();
         } finally {
-          set({ user: null });
+          set({
+            user: null,
+            cachedUsers: [],
+            hasLoadedUsers: false,
+            aiSummary: null,
+            isBootstrapped: false,
+          });
         }
       },
 

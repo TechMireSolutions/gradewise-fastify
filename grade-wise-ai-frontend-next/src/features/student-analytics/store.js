@@ -11,15 +11,84 @@ const useStudentAnalyticsStore = create((set) => ({
   selectedAssessmentDetails: null,
   loading: false,
   error: null,
+  overview: null,
+  stats: {
+    totalAssessments: 0,
+    completedAssessments: 0,
+    pendingAssessments: 0,
+  },
+  hasLoaded: false,
+
+  fetchStudentDashboardData: async () => {
+    try {
+      set({ loading: true, error: null });
+      const { default: apiClient } = await import("@/lib/apiClient.js");
+      const [overviewRes, assessmentsRes] = await Promise.all([
+        apiClient.get("/student-analytics/overview").catch(() => ({ data: {} })),
+        apiClient.get("/student-analytics/assessments").catch(() => ({ data: { data: [] } })),
+      ]);
+
+      const overviewData = overviewRes.data?.data || overviewRes.data || {};
+      const dataArray = assessmentsRes.data?.data || assessmentsRes.data || [];
+
+      let totalCount = 0;
+      let completedCount = 0;
+
+      if (overviewData.enrolled) {
+        totalCount = parseInt(overviewData.enrolled.count || overviewData.enrolled, 10) || 0;
+      }
+      if (overviewData.completed) {
+        completedCount = parseInt(overviewData.completed.count || overviewData.completed, 10) || 0;
+      }
+
+      if (Array.isArray(dataArray) && dataArray.length > 0) {
+        if (totalCount === 0) totalCount = dataArray.length;
+        if (completedCount === 0) {
+          completedCount = dataArray.filter(
+            (a) => a.status === "completed" || a.status === "graded"
+          ).length;
+        }
+      }
+
+      const calculatedStats = {
+        totalAssessments: totalCount || (Array.isArray(dataArray) ? dataArray.length : 0),
+        completedAssessments: completedCount || 0,
+        pendingAssessments: Math.max(
+          0,
+          (totalCount || (Array.isArray(dataArray) ? dataArray.length : 0)) - completedCount
+        ),
+      };
+
+      set({
+        assessments: Array.isArray(dataArray) ? dataArray : [],
+        overview: overviewData,
+        stats: calculatedStats,
+        hasLoaded: true,
+        loading: false,
+      });
+
+      return {
+        assessments: Array.isArray(dataArray) ? dataArray : [],
+        stats: calculatedStats,
+        overview: overviewData,
+      };
+    } catch (err) {
+      set({ error: err.message, loading: false });
+      throw err;
+    }
+  },
 
   fetchAssessments: async () => {
     try {
       set({ loading: true, error: null });
       const { default: apiClient } = await import("@/lib/apiClient.js");
       const res = await apiClient.get("/student-analytics/assessments");
-      set({ assessments: res.data.data || [] });
+      const list = res.data?.data || [];
+      set({ assessments: list, hasLoaded: true });
+      return list;
     } catch (err) {
       set({ assessments: [], error: err.message });
+      throw err;
     } finally {
       set({ loading: false });
     }
