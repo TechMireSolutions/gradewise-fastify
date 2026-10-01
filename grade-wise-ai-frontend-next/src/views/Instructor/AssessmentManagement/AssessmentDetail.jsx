@@ -415,6 +415,7 @@ function AssessmentDetail() {
         onClose={() => setPaperModal({ ...paperModal, isOpen: false })}
         assessmentId={paperModal.assessmentId}
         assessmentTitle={paperModal.title}
+        assessment={currentAssessment}
       />
 
       {/* Error/Success Modal */}
