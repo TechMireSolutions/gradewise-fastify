@@ -64,7 +64,7 @@ export function generatePhysicalPaperPdf(
   const isUrdu = langKey === "ur";
   const isRTL = ["ur", "ar", "fa", "sd", "ps"].includes(langKey);
 
-  const LABELS: Record<string, { subject: string; teacher: string; total: string; duration: string; instructions: string; question: string; marks: string; answerKey: string; answerOmitted: string; date: string; time: string; options: string[] }> = {
+  const LABELS: Record<string, { subject: string; teacher: string; total: string; duration: string; instructions: string; question: string; marks: string; date: string; time: string; options: string[] }> = {
     ar: {
       subject: "المادة:",
       teacher: "المعلم:",
@@ -73,8 +73,6 @@ export function generatePhysicalPaperPdf(
       instructions: "التعليمات:",
       question: "السؤال",
       marks: "علامة",
-      answerKey: "ورقة الإجابات",
-      answerOmitted: "[الجواب غير متاح]",
       date: "التاريخ:",
       time: "الوقت:",
       options: ["أ", "ب", "ج", "د", "هـ", "و"],
@@ -87,8 +85,6 @@ export function generatePhysicalPaperPdf(
       instructions: "دستورالعمل:",
       question: "سوال",
       marks: "نمره",
-      answerKey: "راهنما",
-      answerOmitted: "[جواب ذخیره شده]",
       date: "تاریخ:",
       time: "زمان:",
       options: ["ا", "ب", "ج", "د", "هـ", "و"],
@@ -101,8 +97,6 @@ export function generatePhysicalPaperPdf(
       instructions: "ہدایات:",
       question: "سوال",
       marks: "نمبر",
-      answerKey: "جوابی پرچہ",
-      answerOmitted: "[جواب محفوظ ہے]",
       date: "تاریخ:",
       time: "وقت:",
       options: ["ا", "ب", "ج", "د", "ہ", "و"],
@@ -115,8 +109,6 @@ export function generatePhysicalPaperPdf(
       instructions: "Instructions:",
       question: "Question",
       marks: "marks",
-      answerKey: "Answer Key",
-      answerOmitted: "[Answer omitted — see evaluation system]",
       date: "Date:",
       time: "Time:",
       options: ["A", "B", "C", "D", "E", "F"],
@@ -330,27 +322,6 @@ export function generatePhysicalPaperPdf(
       }
     }
     doc.moveDown(1.1);
-  }
-
-  // 5. Answer Key Page
-  doc.addPage();
-  doc.fontSize(headerFontSize);
-  applyFont(true);
-  printRTLText(isRTL ? lbl.answerKey : "Answer Key", { align: "center" });
-
-  doc.moveDown(1);
-  doc.fontSize(bodyFontSize);
-  applyFont(false);
-
-  for (const q of questions) {
-    if (q.questionType === "multiple_choice" || q.questionType === "true_false") {
-      if (isRTL && fontLoaded) {
-        printRTLText(`${lbl.question} ${q.questionNumber}: ${lbl.answerOmitted}`, { align: "right" });
-      } else {
-        useEnglish(false);
-        doc.text(`Q${q.questionNumber}: [Answer omitted — see evaluation system]`, contentLeft, doc.y, { align: "left" });
-      }
-    }
   }
 
   doc.end();
