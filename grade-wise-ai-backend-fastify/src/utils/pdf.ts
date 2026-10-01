@@ -245,6 +245,9 @@ export function generatePhysicalPaperPdf(
 
   const useEnglish = (isBold = false) => { doc.font(isBold ? "Helvetica-Bold" : "Helvetica"); };
 
+  const contentLeft = doc.page.margins.left;
+  const contentWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+
   const printRTLText = (text: string, xOrOptions?: number | PDFKit.Mixins.TextOptions, y?: number, options?: PDFKit.Mixins.TextOptions) => {
     let x: number | undefined;
     let finalY: number | undefined;
@@ -258,10 +261,12 @@ export function generatePhysicalPaperPdf(
       printOptions = xOrOptions;
     }
 
-    const targetWidth = printOptions.width ?? (x !== undefined ? (doc.page.width - doc.page.margins.right - x) : contentWidth);
+    const startX = x ?? contentLeft;
+    const targetWidth = printOptions.width ?? (doc.page.width - doc.page.margins.right - startX);
 
     const mergedOptions: PDFKit.Mixins.TextOptions = {
       ...printOptions,
+      width: targetWidth,
       align: printOptions.align || (isRTL ? "right" : "left"),
       lineGap: printOptions.lineGap ?? bodyFontSize * 0.22,
     };
@@ -276,19 +281,11 @@ export function generatePhysicalPaperPdf(
           doc.addPage();
         }
         try {
-          if (x !== undefined) {
-            doc.text(line, x, doc.y, mergedOptions);
-          } else {
-            doc.text(line, mergedOptions);
-          }
+          doc.text(line, startX, doc.y, mergedOptions);
         } catch (err) {
           console.warn("[PDFKit] RTL text print warning:", err);
           try {
-            if (x !== undefined) {
-              doc.text(line, x, doc.y, { ...mergedOptions, features: [] });
-            } else {
-              doc.text(line, { ...mergedOptions, features: [] });
-            }
+            doc.text(line, startX, doc.y, { ...mergedOptions, features: [] });
           } catch (innerErr) {
             console.error("PDFKit fallback rendering failed:", innerErr);
           }
@@ -296,10 +293,10 @@ export function generatePhysicalPaperPdf(
       }
     } else {
       try {
-        if (x !== undefined && finalY !== undefined) {
-          doc.text(text, x, finalY, printOptions);
+        if (finalY !== undefined) {
+          doc.text(text, startX, finalY, mergedOptions);
         } else {
-          doc.text(text, printOptions);
+          doc.text(text, startX, doc.y, mergedOptions);
         }
       } catch (err) {
         console.error("PDFKit LTR rendering failed:", err);
@@ -309,9 +306,6 @@ export function generatePhysicalPaperPdf(
 
   const textAlignment = isRTL ? "right" : "left";
   const optionFontSizeFinal = optionFontSize ?? bodyFontSize - 1;
-
-  const contentLeft = doc.page.margins.left;
-  const contentWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
 
   // 1. Header (Centered Layout)
   applyFont(true);
