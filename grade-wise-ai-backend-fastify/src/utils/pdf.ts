@@ -156,6 +156,85 @@ export function generatePhysicalPaperPdf(
     }
   }
 
+  const RTL_REGEX = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+  const isRtlText = (str: string): boolean => RTL_REGEX.test(str);
+
+  // Tokenizes line into logical chunks:
+  // Pure LTR runs (Latin letters, numbers, code symbols, inner spaces) stay together as single atomic tokens
+  // RTL words are separated
+  const tokenizeBiDiLine = (line: string): string[] => {
+    const tokens: string[] = [];
+    let currentLtr = "";
+    const words = line.split(/\s+/);
+
+    for (const word of words) {
+      if (!word) continue;
+
+      if (isRtlText(word)) {
+        if (currentLtr.trim()) {
+          tokens.push(currentLtr.trim());
+          currentLtr = "";
+        }
+        tokens.push(word);
+      } else {
+        if (currentLtr) {
+          currentLtr += " " + word;
+        } else {
+          currentLtr = word;
+        }
+      }
+    }
+
+    if (currentLtr.trim()) {
+      tokens.push(currentLtr.trim());
+    }
+
+    return tokens;
+  };
+
+  // Wraps an RTL text paragraph into lines respecting maxWidth, then reverses tokens per line for PDFKit
+  const formatRtlParagraph = (text: string, maxWidth?: number): string[] => {
+    if (!isRtlText(text)) return [text];
+
+    const paragraphs = text.split("\n");
+    const resultLines: string[] = [];
+
+    for (const para of paragraphs) {
+      if (!para.trim()) {
+        resultLines.push("");
+        continue;
+      }
+
+      if (!isRtlText(para)) {
+        resultLines.push(para);
+        continue;
+      }
+
+      const tokens = tokenizeBiDiLine(para);
+      let currentTokens: string[] = [];
+
+      for (const token of tokens) {
+        const candidateTokens = [...currentTokens, token];
+        const candidateStr = candidateTokens.join(" ");
+        const width = doc.widthOfString(candidateStr);
+
+        if (maxWidth && maxWidth > 0 && width > maxWidth && currentTokens.length > 0) {
+          resultLines.push([...currentTokens].reverse().join(" "));
+          currentTokens = [token];
+        } else {
+          currentTokens.push(token);
+        }
+      }
+
+      if (currentTokens.length > 0) {
+        resultLines.push([...currentTokens].reverse().join(" "));
+      }
+    }
+
+    return resultLines;
+  };
+
   const applyFont = (isBold = false) => {
     if (fontLoaded && activeFontKey) {
       doc.font(activeFontKey);
@@ -179,6 +258,8 @@ export function generatePhysicalPaperPdf(
       printOptions = xOrOptions;
     }
 
+    const targetWidth = printOptions.width ?? (x !== undefined ? (doc.page.width - doc.page.margins.right - x) : contentWidth);
+
     const mergedOptions: PDFKit.Mixins.TextOptions = {
       ...printOptions,
       align: printOptions.align || (isRTL ? "right" : "left"),
@@ -186,22 +267,31 @@ export function generatePhysicalPaperPdf(
     };
 
     if (isRTL && fontLoaded) {
-      try {
-        if (x !== undefined && finalY !== undefined) {
-          doc.text(text, x, finalY, mergedOptions);
-        } else {
-          doc.text(text, mergedOptions);
+      const formattedLines = formatRtlParagraph(text, targetWidth);
+      if (finalY !== undefined) {
+        doc.y = finalY;
+      }
+      for (const line of formattedLines) {
+        if (doc.y + doc.currentLineHeight() > doc.page.height - doc.page.margins.bottom) {
+          doc.addPage();
         }
-      } catch (err) {
-        console.warn("[PDFKit] RTL text print warning:", err);
         try {
-          if (x !== undefined && finalY !== undefined) {
-            doc.text(text, x, finalY, { ...mergedOptions, features: [] });
+          if (x !== undefined) {
+            doc.text(line, x, doc.y, mergedOptions);
           } else {
-            doc.text(text, { ...mergedOptions, features: [] });
+            doc.text(line, mergedOptions);
           }
-        } catch (innerErr) {
-          console.error("PDFKit fallback rendering failed:", innerErr);
+        } catch (err) {
+          console.warn("[PDFKit] RTL text print warning:", err);
+          try {
+            if (x !== undefined) {
+              doc.text(line, x, doc.y, { ...mergedOptions, features: [] });
+            } else {
+              doc.text(line, { ...mergedOptions, features: [] });
+            }
+          } catch (innerErr) {
+            console.error("PDFKit fallback rendering failed:", innerErr);
+          }
         }
       }
     } else {
@@ -241,14 +331,19 @@ export function generatePhysicalPaperPdf(
   if (isRTL && fontLoaded) {
     const metadataCol = contentWidth / 3;
     applyFont(false);
-    printRTLText(`${lbl.teacher} ${teacherName}`, contentLeft, startY, { width: metadataCol, align: "right" });
+    // Right col: Teacher
+    printRTLText(`${lbl.teacher} ${teacherName}`, contentLeft + 2 * metadataCol, startY, { width: metadataCol, align: "right" });
+    // Center col: Date
     printRTLText(`${lbl.date} ${paperDate}`, contentLeft + metadataCol, startY, { width: metadataCol, align: "center" });
-    printRTLText(`${lbl.time} ${paperTime}`, contentLeft + 2 * metadataCol, startY, { width: metadataCol, align: "left" });
+    // Left col: Time
+    printRTLText(`${lbl.time} ${paperTime}`, contentLeft, startY, { width: metadataCol, align: "left" });
 
     const nextY = Math.max(doc.y, startY + doc.currentLineHeight() + 6);
     applyFont(false);
-    printRTLText(`${lbl.total} ${totalMarks}`, contentLeft, nextY, { width: contentWidth / 2, align: "right" });
-    printRTLText(`${lbl.duration} ${paperDuration}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "left" });
+    // Right col: Total Marks
+    printRTLText(`${lbl.total} ${totalMarks}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "right" });
+    // Left col: Duration
+    printRTLText(`${lbl.duration} ${paperDuration}`, contentLeft, nextY, { width: contentWidth / 2, align: "left" });
     doc.y = nextY + doc.currentLineHeight() + 6;
   } else {
     useEnglish();
