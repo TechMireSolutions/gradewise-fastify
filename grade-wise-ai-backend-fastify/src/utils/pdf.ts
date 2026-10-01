@@ -124,29 +124,44 @@ export function generatePhysicalPaperPdf(
   };
   const lbl: (typeof LABELS)["ur"] = LABELS[langKey] ?? LABELS.en!;
   
-  const nastaliqFontPath = process.env["URDU_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "NotoNastaliqUrdu-Regular.ttf");
-  const quranicFontPath = process.env["ARABIC_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "AmiriQuran-Regular.ttf");
+  const notoArabicFontPath = path.join(__dirname, "..", "assets", "fonts", "NotoSansArabic-Regular.ttf");
   const arabicFontPath = path.join(__dirname, "..", "assets", "fonts", "Amiri-Regular.ttf");
+  const quranicFontPath = process.env["ARABIC_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "AmiriQuran-Regular.ttf");
+  const customUrduFontPath = process.env["URDU_FONT_PATH"];
 
   let fontLoaded = false;
   let activeFontKey = "";
 
-  if (isUrdu && fs.existsSync(nastaliqFontPath)) {
-    doc.registerFont("UrduFont", nastaliqFontPath);
-    activeFontKey = "UrduFont";
-    fontLoaded = true;
-  } else if (isRTL && fs.existsSync(quranicFontPath)) {
-    doc.registerFont("ArabicFont", quranicFontPath);
-    activeFontKey = "ArabicFont";
-    fontLoaded = true;
-  } else if (isRTL && fs.existsSync(arabicFontPath)) {
-    doc.registerFont("ArabicFont", arabicFontPath);
-    activeFontKey = "ArabicFont";
-    fontLoaded = true;
-  } else if (isRTL && fs.existsSync(nastaliqFontPath)) {
-    doc.registerFont("UrduFont", nastaliqFontPath);
-    activeFontKey = "UrduFont";
-    fontLoaded = true;
+  if (isUrdu) {
+    // NotoSansArabic has full Urdu alphabet support (ٹ, ڈ, ڑ, ے, ں, چ, پ, گ, ژ, ہ, ھ),
+    // Latin characters, numbers, and does not crash fontkit with anchor errors.
+    if (customUrduFontPath && fs.existsSync(customUrduFontPath)) {
+      doc.registerFont("UrduFont", customUrduFontPath);
+      activeFontKey = "UrduFont";
+      fontLoaded = true;
+    } else if (fs.existsSync(notoArabicFontPath)) {
+      doc.registerFont("UrduFont", notoArabicFontPath);
+      activeFontKey = "UrduFont";
+      fontLoaded = true;
+    } else if (fs.existsSync(arabicFontPath)) {
+      doc.registerFont("UrduFont", arabicFontPath);
+      activeFontKey = "UrduFont";
+      fontLoaded = true;
+    }
+  } else if (isRTL) {
+    if (fs.existsSync(arabicFontPath)) {
+      doc.registerFont("ArabicFont", arabicFontPath);
+      activeFontKey = "ArabicFont";
+      fontLoaded = true;
+    } else if (fs.existsSync(notoArabicFontPath)) {
+      doc.registerFont("ArabicFont", notoArabicFontPath);
+      activeFontKey = "ArabicFont";
+      fontLoaded = true;
+    } else if (fs.existsSync(quranicFontPath)) {
+      doc.registerFont("ArabicFont", quranicFontPath);
+      activeFontKey = "ArabicFont";
+      fontLoaded = true;
+    }
   }
 
   const applyFont = (isBold = false) => {
@@ -158,13 +173,6 @@ export function generatePhysicalPaperPdf(
   };
 
   const useEnglish = (isBold = false) => { doc.font(isBold ? "Helvetica-Bold" : "Helvetica"); };
-
-  const fixBiDi = (text: string) => {
-    const first = [...text].find(ch => !/[\s0-9\u0660-\u0669\u06F0-\u06F9.\-_/:،٫()[\]{}<>«»"'`!?،؛^~*+|=&%#$@]/.test(ch));
-    const isRtlLine = !!first && /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(first);
-    if (!isRtlLine) return text;
-    return text.replace(/[0-9\u0660-\u0669\u06F0-\u06F9A-Za-z]+(?:[.\-_/:،٫\u200c\u200d]+[0-9\u0660-\u0669\u06F0-\u06F9A-Za-z]+)*/g, match => match.split('').reverse().join(''));
-  };
 
   const printRTLText = (text: string, xOrOptions?: number | PDFKit.Mixins.TextOptions, y?: number, options?: PDFKit.Mixins.TextOptions) => {
     let x: number | undefined;
@@ -181,27 +189,24 @@ export function generatePhysicalPaperPdf(
 
     const mergedOptions: PDFKit.Mixins.TextOptions = {
       ...printOptions,
-      align: printOptions.align || "right",
-      features: ["rtla" as PDFKit.Mixins.OpenTypeFeatures],
-      lineGap: printOptions.lineGap ?? bodyFontSize * 0.18,
+      align: printOptions.align || (isRTL ? "right" : "left"),
+      lineGap: printOptions.lineGap ?? bodyFontSize * 0.22,
     };
-
-    const finalText = (isRTL && fontLoaded) ? fixBiDi(text) : text;
 
     if (isRTL && fontLoaded) {
       try {
         if (x !== undefined && finalY !== undefined) {
-          doc.text(finalText, x, finalY, mergedOptions);
+          doc.text(text, x, finalY, mergedOptions);
         } else {
-          doc.text(finalText, mergedOptions);
+          doc.text(text, mergedOptions);
         }
       } catch (err) {
-        const fallbackOptions = { ...mergedOptions, features: [] };
+        console.warn("[PDFKit] RTL text print warning:", err);
         try {
           if (x !== undefined && finalY !== undefined) {
-            doc.text(finalText, x, finalY, fallbackOptions);
+            doc.text(text, x, finalY, { ...mergedOptions, features: [] });
           } else {
-            doc.text(finalText, fallbackOptions);
+            doc.text(text, { ...mergedOptions, features: [] });
           }
         } catch (innerErr) {
           console.error("PDFKit fallback rendering failed:", innerErr);
@@ -210,9 +215,9 @@ export function generatePhysicalPaperPdf(
     } else {
       try {
         if (x !== undefined && finalY !== undefined) {
-          doc.text(finalText, x, finalY, printOptions);
+          doc.text(text, x, finalY, printOptions);
         } else {
-          doc.text(finalText, printOptions);
+          doc.text(text, printOptions);
         }
       } catch (err) {
         console.error("PDFKit LTR rendering failed:", err);

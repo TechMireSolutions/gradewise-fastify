@@ -42,9 +42,51 @@ export const generateAIPrompt = (assessment) => {
     return `- Section ${idx + 1}: ${qCount} questions of type "${b.question_type}" ${detail} [Marks: +${pMarks} positive, ${nMarks} negative, Time: ${dur}s per question]`;
   }).join("\n");
 
+  const languageDirectives = {
+    ur: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is URDU (اردو). Every single question, multiple choice option, instruction, and answer key item MUST be written 100% in fluent, natural Urdu (اردو رسم الخط).
+2. SOURCE CONTENT TRANSLATION: Regardless of the language of the uploaded resources, reference documents, or external links below (even if they are in English, French, technical code, or mixed languages), you MUST comprehend the academic subject matter, translate it completely, and compose all questions, choices, and explanations in URDU.
+3. ABSOLUTELY NO WEB CODE OR CORRUPTED TOKENS: Do NOT leak raw HTML fragments, website code, tracking parameters, URLs, version numbers (like 26.04.1), or non-educational artifacts into questions or options. Every question and choice must be clean educational prose in Urdu.
+4. COHERENT URDU CHOICES: For multiple-choice questions, every option must be a full, meaningful answer in Urdu. Do NOT output English letters or placeholders like "Option A".`,
+    ar: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is ARABIC (العربية). Every single question, multiple choice option, instruction, and answer key item MUST be written 100% in standard Arabic (الفصحى).
+2. SOURCE CONTENT TRANSLATION: Even if reference material or external links below are in English or another language, translate the core knowledge and formulate all questions and options fully in ARABIC.
+3. NO RAW CODE / METADATA: Do NOT output URLs, tracking hashes, or web fragments. Author genuine academic questions in Arabic.
+4. COHERENT ARABIC CHOICES: For multiple choice, every option must be an articulate Arabic statement.`,
+    fa: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is PERSIAN (فارسی). Every single question, multiple choice option, instruction, and answer key item MUST be written 100% in Persian.
+2. SOURCE CONTENT TRANSLATION: Even if reference material or external links below are in English or another language, translate the core knowledge and formulate all questions and options fully in PERSIAN.
+3. NO RAW CODE / METADATA: Do NOT output URLs, tracking hashes, or web fragments. Author genuine academic questions in Persian.
+4. COHERENT PERSIAN CHOICES: For multiple choice, every option must be an articulate Persian statement.`,
+    en: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is ENGLISH. Every question, multiple choice option, instruction, and answer key item MUST be written in clear English.
+2. If reference material or links are in another language, translate the core concepts into English.
+3. NO RAW CODE / METADATA: Do NOT copy raw URLs, HTML snippets, or website tracking parameters.`,
+  };
+
+  const specificDirective = languageDirectives[langKey] || languageDirectives.en;
+
+  const schemaOptions = langKey === "ur"
+    ? `["پہلا ممکنہ جواب", "دوسرا ممکنہ جواب", "تیسرا ممکنہ جواب", "چوتھا ممکنہ جواب"]`
+    : langKey === "ar"
+    ? `["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"]`
+    : langKey === "fa"
+    ? `["گزینه اول", "گزینه دوم", "گزینه سوم", "گزینه چهارم"]`
+    : `["Option A description", "Option B description", "Option C description", "Option D description"]`;
+
+  const schemaQuestion = langKey === "ur"
+    ? `سوال کا مکمل متن یہاں اردو میں لکھیں`
+    : langKey === "ar"
+    ? `نص السؤال الكامل هنا باللغة العربية`
+    : langKey === "fa"
+    ? `متن کامل سوال به زبان فارسی`
+    : `Question text here in ${language}`;
+
   let promptText = `${baseInstruction}
 
 Target Language: ${language} (${langKey}). All question items, instructions, and response schemas MUST be in ${language}.
+
+${specificDirective}
 
 Multilingual Reference Instruction:
 [English] Generate a complete assignment including instructions, question items, marks distribution, and answer key.
@@ -62,7 +104,7 @@ Instructor Prompt / Instructions: "${assessment.prompt || "No specific instructo
 
   // Add uploaded resources if present
   if ((assessment.resources || []).length > 0) {
-    promptText += `\n\nUploaded Resource Content:\n${assessment.resources
+    promptText += `\n\nUploaded Resource Content (Translate and adapt into ${language}):\n${assessment.resources
       .map(
         (r) =>
           `Resource "${r.name}":\n${
@@ -84,9 +126,9 @@ Return ONLY a valid JSON object matching this structure:
     {
       "question_order": 1,
       "question_type": "multiple_choice",
-      "question_text": "Question text in ${language}",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correct_answer": "Option A",
+      "question_text": "${schemaQuestion}",
+      "options": ${schemaOptions},
+      "correct_answer": ${langKey === "ur" ? `"پہلا ممکنہ جواب"` : langKey === "ar" ? `"الخيار الأول"` : langKey === "fa" ? `"گزینه اول"` : `"Option A description"`},
       "positive_marks": 1,
       "negative_marks": 0.25,
       "duration_per_question": 60
@@ -95,18 +137,18 @@ Return ONLY a valid JSON object matching this structure:
   "answer_key": [
     {
       "question_order": 1,
-      "correct_answer": "Option A"
+      "correct_answer": ${langKey === "ur" ? `"پہلا ممکنہ جواب"` : langKey === "ar" ? `"الخيار الأول"` : langKey === "fa" ? `"گزینه اول"` : `"Option A description"`}
     }
   ]
 }
 
 Strict Rules:
 1. Provide questions in exact order of the sections defined above.
-2. For multiple_choice, options must be an array of strings.
+2. For multiple_choice, options must be an array of strings in ${language}.
 3. For true_false, options must be ["True", "False"], and correct_answer "True" or "False".
-4. For matching, include "left_items" and "right_items", and correct_answer as JSON match string.
-5. For short_answer, correct_answer is a model answer string.
-6. For fill_in_the_blank, mark the blank with _______ in question_text, and correct_answer is the missing term.
+4. For matching, include "left_items" and "right_items" in ${language}, and correct_answer as JSON match string.
+5. For short_answer, correct_answer is a model answer string in ${language}.
+6. For fill_in_the_blank, mark the blank with _______ in question_text, and correct_answer is the missing term in ${language}.
 7. Return ONLY the JSON object. Do not include markdown or conversational prefixes.`;
 
   return promptText.trim();

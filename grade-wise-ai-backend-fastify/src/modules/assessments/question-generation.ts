@@ -34,11 +34,20 @@ async function scrapeExternalLink(url: string): Promise<string> {
     const html = response.data;
     if (typeof html !== "string") return "";
 
-    // Remove scripts, styles, and extra boilerplate spaces
+    // Remove scripts, styles, SVGs, noscripts, navigation, headers, footers, and boilerplate
     let cleanText = html
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+      .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, " ")
+      .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, " ")
+      .replace(/<nav\b[^<]*(?:(?!<\/nav>)<[^<]*)*<\/nav>/gi, " ")
+      .replace(/<header\b[^<]*(?:(?!<\/header>)<[^<]*)*<\/header>/gi, " ")
+      .replace(/<footer\b[^<]*(?:(?!<\/footer>)<[^<]*)*<\/footer>/gi, " ")
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, " ")
       .replace(/<[^>]+>/g, " ")
+      .replace(/&[a-z0-9#]+;/gi, " ")
+      .replace(/https?:\/\/[^\s]+/g, " ")
+      .replace(/\b[a-f0-9]{24,}\b/gi, " ")
       .replace(/\s+/g, " ")
       .trim();
 
@@ -102,18 +111,19 @@ export function buildBlockPrompt(
   const typeDesc = typeDescriptions[block.questionType] ?? "questions";
 
   return `Generate exactly ${block.questionCount} ${typeDesc} in ${language}.
+All question text, options, and answers MUST be composed strictly in ${language}. If the reference material or external links below are in another language, translate and adapt the concepts into ${language}. Do not include raw URLs, tracking code, or HTML artifacts.
 
 ${instructorPrompt ? `Topic/Instructions: ${instructorPrompt}\n` : ""}
-${context ? `Reference Material:\n${context.substring(0, maxContextChars)}\n` : ""}
+${context ? `Reference Material (Translate and adapt into ${language}):\n${context.substring(0, maxContextChars)}\n` : ""}
 
 Return ONLY a valid JSON array. Each object must have:
-- "question_text": the question
+- "question_text": the question written in ${language}
 - "question_type": "${block.questionType}"
-${block.questionType === "multiple_choice" ? `- "options": array of ${block.numOptions ?? 4} strings\n- "correct_answer": the correct option text` : ""}
+${block.questionType === "multiple_choice" ? `- "options": array of ${block.numOptions ?? 4} strings in ${language}\n- "correct_answer": the correct option text in ${language}` : ""}
 ${block.questionType === "true_false" ? '- "correct_answer": "True" or "False"' : ""}
-${block.questionType === "short_answer" ? '- "correct_answer": a model answer string' : ""}
-${block.questionType === "fill_in_the_blank" ? '- "correct_answer": the exact missing word or phrase (make the blank obvious in the question_text)' : ""}
-${block.questionType === "matching" ? `- "left_items": array of ${block.leftCount ?? 3} strings\n- "right_items": array of ${block.rightCount ?? 4} strings\n- "correct_answer": JSON string of match pairs` : ""}
+${block.questionType === "short_answer" ? `- "correct_answer": a model answer string in ${language}` : ""}
+${block.questionType === "fill_in_the_blank" ? `- "correct_answer": the exact missing word or phrase in ${language} (make the blank obvious with _______ in the question_text)` : ""}
+${block.questionType === "matching" ? `- "left_items": array of ${block.leftCount ?? 3} strings in ${language}\n- "right_items": array of ${block.rightCount ?? 4} strings in ${language}\n- "correct_answer": JSON string of match pairs` : ""}
 
 Do not include any text outside the JSON array.`;
 }
@@ -172,10 +182,52 @@ export function buildUnifiedAssignmentPrompt(
 
   const totalQuestions = blocks.reduce((sum, b) => sum + (b.questionCount || 0), 0);
 
+  const languageDirectives: Record<string, string> = {
+    ur: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is URDU (اردو). Every single question, multiple choice option, instruction, and answer key item MUST be written 100% in fluent, natural Urdu (اردو رسم الخط).
+2. SOURCE CONTENT TRANSLATION: Regardless of the language of the uploaded resources, reference documents, or external links below (even if they are in English, French, technical code, or mixed languages), you MUST comprehend the academic subject matter, translate it completely, and compose all questions, choices, and explanations in URDU.
+3. ABSOLUTELY NO WEB CODE OR CORRUPTED TOKENS: Do NOT leak raw HTML fragments, website code, tracking parameters, URLs, version numbers (like 26.04.1), or non-educational artifacts into questions or options. Every question and choice must be clean educational prose in Urdu.
+4. COHERENT URDU CHOICES: For multiple-choice questions, every option must be a full, meaningful answer in Urdu. Do NOT output English letters or placeholders like "Option A".`,
+    ar: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is ARABIC (العربية). Every single question, multiple choice option, instruction, and answer key item MUST be written 100% in standard Arabic (الفصحى).
+2. SOURCE CONTENT TRANSLATION: Even if reference material or external links below are in English or another language, translate the core knowledge and formulate all questions and options fully in ARABIC.
+3. NO RAW CODE / METADATA: Do NOT output URLs, tracking hashes, or web fragments. Author genuine academic questions in Arabic.
+4. COHERENT ARABIC CHOICES: For multiple choice, every option must be an articulate Arabic statement.`,
+    fa: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is PERSIAN (فارسی). Every single question, multiple choice option, instruction, and answer key item MUST be written 100% in Persian.
+2. SOURCE CONTENT TRANSLATION: Even if reference material or external links below are in English or another language, translate the core knowledge and formulate all questions and options fully in PERSIAN.
+3. NO RAW CODE / METADATA: Do NOT output URLs, tracking hashes, or web fragments. Author genuine academic questions in Persian.
+4. COHERENT PERSIAN CHOICES: For multiple choice, every option must be an articulate Persian statement.`,
+    en: `CRITICAL LANGUAGE & SOURCE ADAPTATION RULES:
+1. Target Language is ENGLISH. Every question, multiple choice option, instruction, and answer key item MUST be written in clear English.
+2. If reference material or links are in another language, translate the core concepts into English.
+3. NO RAW CODE / METADATA: Do NOT copy raw URLs, HTML snippets, or website tracking parameters.`,
+  };
+
+  const specificDirective = languageDirectives[normLang] || languageDirectives.en!;
+
+  const schemaOptions = normLang === "ur"
+    ? `["پہلا ممکنہ جواب", "دوسرا ممکنہ جواب", "تیسرا ممکنہ جواب", "چوتھا ممکنہ جواب"]`
+    : normLang === "ar"
+    ? `["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"]`
+    : normLang === "fa"
+    ? `["گزینه اول", "گزینه دوم", "گزینه سوم", "گزینه چهارم"]`
+    : `["Option A description", "Option B description", "Option C description", "Option D description"]`;
+
+  const schemaQuestion = normLang === "ur"
+    ? `سوال کا مکمل متن یہاں اردو میں لکھیں`
+    : normLang === "ar"
+    ? `نص السؤال الكامل هنا باللغة العربية`
+    : normLang === "fa"
+    ? `متن کامل سوال به زبان فارسی`
+    : `Question text here in ${languageLabel}`;
+
   return `${baseInstruction}
 
 Target Language: ${languageLabel} (${normLang}).
 All question text, options, and explanations MUST be written in ${languageLabel}.
+
+${specificDirective}
 
 Multilingual Reference Instruction:
 [English] Generate a complete assignment including instructions, question items, marks distribution, and answer key.
@@ -185,7 +237,7 @@ Multilingual Reference Instruction:
 
 Assignment Title: "${title}"
 ${instructorPrompt ? `Instructor Instructions / Topic: "${instructorPrompt}"\n` : ""}
-${context ? `Reference Material:\n${context.substring(0, maxContextChars)}\n` : ""}
+${context ? `Reference Material (Translate and adapt this material into ${languageLabel}):\n${context.substring(0, maxContextChars)}\n` : ""}
 
 Assignment Requirements & Marks Distribution:
 Total Questions to Generate: ${totalQuestions}
@@ -199,9 +251,9 @@ Return ONLY a valid JSON object matching this unified structure:
     {
       "question_order": 1,
       "question_type": "multiple_choice",
-      "question_text": "Question text here in ${languageLabel}",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correct_answer": "Option A",
+      "question_text": "${schemaQuestion}",
+      "options": ${schemaOptions},
+      "correct_answer": ${normLang === "ur" ? `"پہلا ممکنہ جواب"` : normLang === "ar" ? `"الخيار الأول"` : normLang === "fa" ? `"گزینه اول"` : `"Option A description"`},
       "positive_marks": 1,
       "negative_marks": 0.25,
       "duration_per_question": 60
@@ -210,18 +262,18 @@ Return ONLY a valid JSON object matching this unified structure:
   "answer_key": [
     {
       "question_order": 1,
-      "correct_answer": "Option A"
+      "correct_answer": ${normLang === "ur" ? `"پہلا ممکنہ جواب"` : normLang === "ar" ? `"الخيار الأول"` : normLang === "fa" ? `"گزینه اول"` : `"Option A description"`}
     }
   ]
 }
 
 Strict Rules:
 1. Provide questions in exact order of the sections defined above.
-2. For multiple_choice, options must be an array of strings.
+2. For multiple_choice, options must be an array of strings in ${languageLabel}.
 3. For true_false, options must be ["True", "False"], and correct_answer "True" or "False".
-4. For matching, include "left_items" (array of strings) and "right_items" (array of strings), and correct_answer as JSON match mapping.
-5. For short_answer, correct_answer is a model answer string.
-6. For fill_in_the_blank, mark the blank with _______ in question_text, and correct_answer is the missing term.
+4. For matching, include "left_items" (array of strings) and "right_items" (array of strings in ${languageLabel}), and correct_answer as JSON match mapping.
+5. For short_answer, correct_answer is a model answer string in ${languageLabel}.
+6. For fill_in_the_blank, mark the blank with _______ in question_text, and correct_answer is the missing term in ${languageLabel}.
 7. Return ONLY the JSON object. Do not include markdown or conversational prefixes.`;
 }
 
