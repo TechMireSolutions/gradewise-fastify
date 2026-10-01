@@ -164,9 +164,18 @@ export function generatePhysicalPaperPdf(
   // Pure LTR runs (Latin letters, numbers, code symbols, inner spaces) stay together as single atomic tokens
   // RTL words are separated
   const tokenizeBiDiLine = (line: string): string[] => {
+    // 1. Keep question prefix + number together:
+    // e.g. "سوال 1:" or "السؤال 1:" -> "سوال\u00A01:"
+    let s = line.replace(/([\u0600-\u06FF]+)\s+(\d+[:.])/g, "$1\u00A0$2");
+
+    // 2. Keep bracketed marks/expressions together as an atomic unit:
+    // e.g. "(1 نمبر)" or "(5 marks)" -> "(1\u00A0نمبر)"
+    s = s.replace(/\(([^)]+)\)/g, (match) => match.replace(/\s+/g, "\u00A0"));
+
     const tokens: string[] = [];
     let currentLtr = "";
-    const words = line.split(/\s+/);
+    // Use [ \t\r\n]+ instead of \s+ so that \u00A0 (non-breaking space) is preserved inside tokens
+    const words = s.split(/[ \t\r\n]+/);
 
     for (const word of words) {
       if (!word) continue;
@@ -176,7 +185,7 @@ export function generatePhysicalPaperPdf(
           tokens.push(currentLtr.trim());
           currentLtr = "";
         }
-        tokens.push(word);
+        tokens.push(word.replace(/\u00A0/g, " "));
       } else {
         if (currentLtr) {
           currentLtr += " " + word;
