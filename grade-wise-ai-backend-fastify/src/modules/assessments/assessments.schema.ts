@@ -7,8 +7,8 @@ export const QuestionBlockSchema = z.object({
   numOptions: z.number().int().min(2).max(6).optional().default(4),
   leftCount: z.number().int().min(2).max(10).optional().default(3),
   rightCount: z.number().int().min(2).max(10).optional().default(4),
-  positiveMarks: z.number().min(0).max(100).default(1),
-  negativeMarks: z.number().min(0).max(100).default(0.25),
+  positiveMarks: z.coerce.number().min(0).max(100).default(1),
+  negativeMarks: z.coerce.number().min(-100).max(100).default(0.25),
 });
 
 export const AssessmentLanguageSchema = z.enum(["en", "ur", "ar", "fa"]).default("en");
@@ -42,7 +42,7 @@ export const PhysicalPaperSchema = z.object({
   paperDate: z.string().min(1),
   paperTime: z.string().min(1),
   paperDuration: z.string().min(1),
-  totalMarks: z.number().int().positive(),
+  totalMarks: z.coerce.number().positive(),
   notes: z.string().optional(),
   pageSize: z.enum(["A4", "A5", "LETTER"]).default("A4"),
   headerFontSize: z.number().int().min(8).max(40).default(14),

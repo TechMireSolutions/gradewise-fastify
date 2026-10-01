@@ -182,9 +182,8 @@ function TakeAssessment() {
         <div className="min-h-screen flex flex-col">
           <div className={examBar}>
             <div className="mx-auto max-w-7xl px-4 py-4 flex justify-between items-center">
-              <div className="flex gap-2">
-                <span className="bg-indigo-500/15 text-indigo-400 px-3 py-1 rounded-full text-xs font-semibold">Q {currentQuestionIndex + 1}/{assessmentQuestions.length}</span>
-                <span className="bg-emerald-500/15 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold">{answeredCount} Answered</span>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-xs text-foreground uppercase tracking-wider">Assessment Session</span>
               </div>
               <div className="flex gap-2 text-xs font-semibold">
                 <span className="bg-amber-500/15 text-amber-400 px-3 py-1 rounded-full">Q Time: {formatTime(questionTimeLeft)}</span>

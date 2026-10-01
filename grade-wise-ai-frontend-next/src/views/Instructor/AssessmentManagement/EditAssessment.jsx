@@ -17,7 +17,7 @@ function EditAssessment() {
   const router = useRouter();
   const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
-    const { modal, showModal, closeModal } = useModal();
+  const { modal, showModal, closeModal } = useModal();
 
 
   useEffect(() => {
@@ -95,16 +95,24 @@ function EditAssessment() {
       prev.map((block, i) =>
         i === index
           ? {
-              ...block,
-              [field]:
-                field === "question_count" || field === "duration_per_question" || field === "num_options"
-                  ? Math.max(Number.parseInt(value) || 1, 1)
-                  : field === "positive_marks" || field === "negative_marks"
+            ...block,
+            [field]:
+              field === "question_count" || field === "duration_per_question" || field === "num_options"
+                ? Math.max(Number.parseInt(value) || 1, 1)
+                : field === "positive_marks"
+                  ? value === "" || value === null
+                    ? null
+                    : Math.max(Number.parseFloat(value) || 0, 0)
+                  : field === "negative_marks"
                     ? value === "" || value === null
                       ? null
-                      : Math.max(Number.parseFloat(value) || 0, 0)
+                      : value === "-" || value.toString().endsWith(".")
+                        ? value
+                        : isNaN(Number(value))
+                          ? 0
+                          : Number(value)
                     : value,
-            }
+          }
           : block
       )
     );
@@ -207,8 +215,8 @@ function EditAssessment() {
           numOptions: b.question_type === "multiple_choice" ? (Number(b.num_options) || 4) : 4,
           leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
           rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
-          positiveMarks: Number(b.positive_marks) || 1,
-          negativeMarks: Number(b.negative_marks) || 0,
+          positiveMarks: Number(b.positive_marks ?? 1),
+          negativeMarks: b.negative_marks !== "" && b.negative_marks !== null && !isNaN(Number(b.negative_marks)) ? Number(b.negative_marks) : 0,
         })),
       }),
     };
@@ -604,11 +612,10 @@ function EditAssessment() {
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
                         <input
                           type="number"
-                          value={block.negative_marks || ""}
+                          value={block.negative_marks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
-                          min="0"
-                          step="0.1"
-                          placeholder="e.g. 0.25"
+                          step="0.05"
+                          placeholder="e.g. 0.25 or -0.25"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />

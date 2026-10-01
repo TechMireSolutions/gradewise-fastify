@@ -113,10 +113,6 @@ function Footer() {
                       </div>
                     </div>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                    <div className="size-2 animate-pulse rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 motion-reduce:animate-none" aria-hidden="true" />
-                    Online · Active Now
-                  </div>
                 </div>
               </div>
             </div>
@@ -132,11 +128,6 @@ function Footer() {
                 <span className="flex items-center gap-2 font-medium">
                   Made with <FaHeart className="animate-pulse text-rose-500 motion-reduce:animate-none" aria-hidden="true" /> for educators
                 </span>
-                <span className="hidden sm:inline text-slate-600">•</span>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                  <FaCheckCircle className="text-emerald-500" />
-                  All systems operational
-                </div>
               </div>
             </div>
 

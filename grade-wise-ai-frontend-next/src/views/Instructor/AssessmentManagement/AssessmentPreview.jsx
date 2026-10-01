@@ -51,7 +51,9 @@ function AssessmentPreview() {
     if (!assessment) return;
 
     let promptText;
-    if (aiPrompt?.blocks?.length > 0) {
+    if (aiPrompt?.unifiedPrompt) {
+      promptText = aiPrompt.unifiedPrompt;
+    } else if (aiPrompt?.blocks?.length > 0) {
       promptText = aiPrompt.blocks
         .map((b, i) => `--- Block ${i + 1} (${b.questionType} x${b.questionCount}) ---\n${b.prompt}`)
         .join("\n\n");

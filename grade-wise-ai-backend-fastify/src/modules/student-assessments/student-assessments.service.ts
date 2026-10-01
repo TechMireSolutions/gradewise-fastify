@@ -212,7 +212,7 @@ export async function submitAssessmentService(
     const score = isCorrect
       ? Number(question.positiveMarks ?? 1)
       : answer.trim()
-      ? -Number(question.negativeMarks ?? 0)
+      ? -Math.abs(Number(question.negativeMarks ?? 0))
       : 0;
 
     totalScore += score;

@@ -48,6 +48,7 @@ export default function AssessmentList() {
       isOpen: true,
       assessmentId: assessment.id,
       title: assessment.title,
+      assessment,
     });
   };
 
@@ -299,6 +300,7 @@ export default function AssessmentList() {
         onClose={() => setPaperModal({ ...paperModal, isOpen: false })}
         assessmentId={paperModal.assessmentId}
         assessmentTitle={paperModal.title}
+        assessment={paperModal.assessment}
       />
     </div>
   );

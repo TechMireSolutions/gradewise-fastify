@@ -64,7 +64,7 @@ export function generatePhysicalPaperPdf(
   const isUrdu = langKey === "ur";
   const isRTL = ["ur", "ar", "fa", "sd", "ps"].includes(langKey);
 
-  const LABELS: Record<string, { subject: string; teacher: string; total: string; duration: string; instructions: string; question: string; marks: string; answerKey: string; answerOmitted: string; options: string[] }> = {
+  const LABELS: Record<string, { subject: string; teacher: string; total: string; duration: string; instructions: string; question: string; marks: string; answerKey: string; answerOmitted: string; date: string; time: string; options: string[] }> = {
     ar: {
       subject: "المادة:",
       teacher: "المعلم:",
@@ -75,6 +75,8 @@ export function generatePhysicalPaperPdf(
       marks: "علامة",
       answerKey: "ورقة الإجابات",
       answerOmitted: "[الجواب غير متاح]",
+      date: "التاريخ:",
+      time: "الوقت:",
       options: ["أ", "ب", "ج", "د", "هـ", "و"],
     },
     fa: {
@@ -87,6 +89,8 @@ export function generatePhysicalPaperPdf(
       marks: "نمره",
       answerKey: "راهنما",
       answerOmitted: "[جواب ذخیره شده]",
+      date: "تاریخ:",
+      time: "زمان:",
       options: ["ا", "ب", "ج", "د", "هـ", "و"],
     },
     ur: {
@@ -99,10 +103,26 @@ export function generatePhysicalPaperPdf(
       marks: "نمبر",
       answerKey: "جوابی پرچہ",
       answerOmitted: "[جواب محفوظ ہے]",
+      date: "تاریخ:",
+      time: "وقت:",
       options: ["ا", "ب", "ج", "د", "ہ", "و"],
     },
+    en: {
+      subject: "Subject:",
+      teacher: "Teacher:",
+      total: "Total Marks:",
+      duration: "Duration:",
+      instructions: "Instructions:",
+      question: "Question",
+      marks: "marks",
+      answerKey: "Answer Key",
+      answerOmitted: "[Answer omitted — see evaluation system]",
+      date: "Date:",
+      time: "Time:",
+      options: ["A", "B", "C", "D", "E", "F"],
+    },
   };
-  const lbl: (typeof LABELS)["ur"] = LABELS[langKey] ?? LABELS.ur!;
+  const lbl: (typeof LABELS)["ur"] = LABELS[langKey] ?? LABELS.en!;
   
   const nastaliqFontPath = process.env["URDU_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "NotoNastaliqUrdu-Regular.ttf");
   const quranicFontPath = process.env["ARABIC_FONT_PATH"] ?? path.join(__dirname, "..", "assets", "fonts", "AmiriQuran-Regular.ttf");
@@ -225,25 +245,25 @@ export function generatePhysicalPaperPdf(
     const metadataCol = contentWidth / 3;
     applyFont(false);
     printRTLText(`${lbl.teacher} ${teacherName}`, contentLeft, startY, { width: metadataCol, align: "right" });
-    useEnglish();
-    doc.text(`Date: ${paperDate}`, contentLeft + metadataCol, startY, { width: metadataCol, align: "center" });
-    doc.text(`Time: ${paperTime}`, contentLeft + 2 * metadataCol, startY, { width: metadataCol, align: "left" });
+    printRTLText(`${lbl.date} ${paperDate}`, contentLeft + metadataCol, startY, { width: metadataCol, align: "center" });
+    printRTLText(`${lbl.time} ${paperTime}`, contentLeft + 2 * metadataCol, startY, { width: metadataCol, align: "left" });
 
-    const nextY = startY + doc.currentLineHeight() + bodyFontSize * 0.7;
+    const nextY = Math.max(doc.y, startY + doc.currentLineHeight() + 6);
     applyFont(false);
     printRTLText(`${lbl.total} ${totalMarks}`, contentLeft, nextY, { width: contentWidth / 2, align: "right" });
     printRTLText(`${lbl.duration} ${paperDuration}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "left" });
-    doc.y = nextY + doc.currentLineHeight();
+    doc.y = nextY + doc.currentLineHeight() + 6;
   } else {
     useEnglish();
-    doc.text(`Teacher: ${teacherName}`, contentLeft, startY, { width: contentWidth / 3, align: "left" });
-    doc.text(`Date: ${paperDate}`, contentLeft + contentWidth / 3, startY, { width: contentWidth / 3, align: "center" });
-    doc.text(`Time: ${paperTime}`, contentLeft + 2 * contentWidth / 3, startY, { width: contentWidth / 3, align: "right" });
+    const metadataCol = contentWidth / 3;
+    doc.text(`Teacher: ${teacherName}`, contentLeft, startY, { width: metadataCol, align: "left" });
+    doc.text(`Date: ${paperDate}`, contentLeft + metadataCol, startY, { width: metadataCol, align: "center" });
+    doc.text(`Time: ${paperTime}`, contentLeft + 2 * metadataCol, startY, { width: metadataCol, align: "right" });
 
-    const nextY = startY + doc.currentLineHeight() + 5;
+    const nextY = Math.max(doc.y, startY + doc.currentLineHeight() + 6);
     doc.text(`Total Marks: ${totalMarks}`, contentLeft, nextY, { width: contentWidth / 2, align: "left" });
     doc.text(`Duration: ${paperDuration}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "right" });
-    doc.y = nextY + doc.currentLineHeight();
+    doc.y = nextY + doc.currentLineHeight() + 6;
   }
 
   if (notes) {
@@ -263,8 +283,16 @@ export function generatePhysicalPaperPdf(
   doc.moveTo(contentLeft, doc.y).lineTo(contentLeft + contentWidth, doc.y).stroke();
   doc.moveDown(1.4);
 
-  // 4. Questions Rendering
+  // 4. Questions Rendering with Auto-Pagebreak & Clipping Protection
   for (const q of questions) {
+    const optionCount = q.options?.length || 0;
+    const estQuestionHeight = 28 + (optionCount * (optionFontSizeFinal + 8)) + 30;
+
+    // Check printable area boundary to prevent visual clipping
+    if (doc.y + estQuestionHeight > doc.page.height - doc.page.margins.bottom) {
+      doc.addPage();
+    }
+
     applyFont(true);
     doc.fontSize(bodyFontSize);
 
@@ -314,10 +342,61 @@ export function generatePhysicalPaperPdf(
       if (isRTL && fontLoaded) {
         printRTLText(`${lbl.question} ${q.questionNumber}: ${lbl.answerOmitted}`, { align: "right" });
       } else {
-        useEnglish(false); doc.text(`Q${q.questionNumber}: [Answer omitted — see evaluation system]`, contentLeft, doc.y, { align: "left" });
+        useEnglish(false);
+        doc.text(`Q${q.questionNumber}: [Answer omitted — see evaluation system]`, contentLeft, doc.y, { align: "left" });
       }
     }
   }
 
   doc.end();
 }
+
+// ─── Automated PDF Validation & Processing Pipeline ───────────────────────────
+
+export interface PdfValidationResult {
+  isValid: boolean;
+  issues: string[];
+  buffer: Buffer;
+}
+
+export function validateAndProcessPdf(
+  buffer: Buffer,
+  options?: Partial<PhysicalPaperOptions>
+): PdfValidationResult {
+  const issues: string[] = [];
+
+  if (!Buffer.isBuffer(buffer) || buffer.length < 200) {
+    issues.push("Generated PDF stream is empty or corrupt (< 200 bytes)");
+    return { isValid: false, issues, buffer };
+  }
+
+  const sample = buffer.toString("binary", 0, Math.min(buffer.length, 4096));
+
+  // Check PDF signature header
+  if (!sample.startsWith("%PDF-")) {
+    issues.push("Missing valid %PDF- magic signature header");
+  }
+
+  // Check EOF trailer
+  const tail = buffer.toString("binary", Math.max(0, buffer.length - 2048));
+  if (!tail.includes("%%EOF")) {
+    issues.push("Truncated PDF structure: Missing %%EOF trailer marker");
+  }
+
+  // Validate critical paper option constraints
+  if (options) {
+    if (options.totalMarks !== undefined && options.totalMarks <= 0) {
+      issues.push("Total marks must be a positive numeric value");
+    }
+    if (options.paperTime !== undefined && options.paperTime.trim() === "") {
+      issues.push("Paper time field is empty or unformatted");
+    }
+  }
+
+  return {
+    isValid: issues.length === 0,
+    issues,
+    buffer,
+  };
+}
+

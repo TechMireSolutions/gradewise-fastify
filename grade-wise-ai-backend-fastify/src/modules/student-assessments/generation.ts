@@ -13,6 +13,8 @@ import {
   gatherAssessmentContext,
   buildBlockPrompt,
   parseQuestionsFromAI,
+  buildUnifiedAssignmentPrompt,
+  parseUnifiedAssignmentQuestionsFromAI,
 } from "../assessments/question-generation.js";
 
 function createFallbackQuestion(questionType: string, index: number) {
@@ -82,23 +84,43 @@ export async function generateQuestionsForAttempt(input: {
   let orderIndex = 0;
   const rows: Array<typeof generatedQuestions.$inferInsert> = [];
 
+  const unifiedPrompt = buildUnifiedAssignmentPrompt(
+    blocks,
+    instructorPrompt,
+    context,
+    language,
+    langLabel,
+    assessment[0].title
+  );
+
+  let parsedQuestions: Array<Record<string, unknown>> = [];
+  try {
+    const raw = await generateContent(unifiedPrompt, { maxOutputTokens: 8192, temperature: 0.7 });
+    parsedQuestions = parseUnifiedAssignmentQuestionsFromAI(raw, blocks) as Array<Record<string, unknown>>;
+  } catch (error) {
+    console.warn("[AssignmentGeneration] Unified prompt execution encountered issue, trying fallback:", error);
+    for (const block of blocks) {
+      try {
+        const prompt = buildBlockPrompt(block, instructorPrompt, context, langLabel);
+        const raw = await generateContent(prompt, { maxOutputTokens: 4096, temperature: 0.7 });
+        const blockParsed = parseQuestionsFromAI(raw, block.questionType) as Array<Record<string, unknown>>;
+        parsedQuestions.push(...blockParsed);
+      } catch {
+        // Fallbacks will be created below if insufficient
+      }
+    }
+  }
+
+  // Ensure every block has its required question count
+  let qPointer = 0;
   for (const block of blocks) {
-    const prompt = buildBlockPrompt(block, instructorPrompt, context, langLabel);
+    const targetCount = block.questionCount || 1;
+    for (let c = 0; c < targetCount; c++) {
+      let q = parsedQuestions[qPointer++];
+      if (!q || typeof q !== "object") {
+        q = createFallbackQuestion(block.questionType, c + 1);
+      }
 
-    let parsed: Array<Record<string, unknown>> = [];
-    try {
-      const raw = await generateContent(prompt, { maxOutputTokens: 4096, temperature: 0.7 });
-      parsed = parseQuestionsFromAI(raw, block.questionType) as Array<Record<string, unknown>>;
-    } catch {
-      parsed = [];
-    }
-
-    while (parsed.length < block.questionCount) {
-      parsed.push(createFallbackQuestion(block.questionType, parsed.length + 1));
-    }
-    parsed = parsed.slice(0, block.questionCount);
-
-    for (const q of parsed) {
       const isMatching = block.questionType === "matching";
       const leftItems = Array.isArray(q["left_items"])
         ? (q["left_items"] as unknown[]).map(String)
@@ -115,7 +137,7 @@ export async function generateQuestionsForAttempt(input: {
         attemptId,
         questionOrder: orderIndex++,
         questionType: block.questionType,
-        questionText: String(q["question_text"] ?? q["questionText"] ?? "Question unavailable"),
+        questionText: String(q["question_text"] ?? q["questionText"] ?? `Question ${orderIndex}`),
         options:
           isMatching && leftItems.length > 0 && rightItems.length > 0
             ? [JSON.stringify({ leftItems, rightItems })]

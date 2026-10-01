@@ -59,11 +59,19 @@ function CreateAssessment() {
             [field]:
               field === "questionCount" || field === "durationPerQuestion" || field === "numOptions"
                 ? Math.max(Number.parseInt(value) || 1, 1)
-                : field === "positiveMarks" || field === "negativeMarks"
+                : field === "positiveMarks"
                   ? value === "" || value === null
                     ? null
                     : Math.max(Number.parseFloat(value) || 0, 0)
-                  : value,
+                  : field === "negativeMarks"
+                    ? value === "" || value === null
+                      ? null
+                      : value === "-" || value.toString().endsWith(".")
+                        ? value
+                        : isNaN(Number(value))
+                          ? 0
+                          : Number(value)
+                    : value,
           }
           : block
       )
@@ -457,7 +465,7 @@ function CreateAssessment() {
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
                         <input
                           type="number"
-                          value={block.positiveMarks || ""}
+                          value={block.positiveMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
                           min="0"
                           step="0.1"
@@ -471,11 +479,10 @@ function CreateAssessment() {
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
                         <input
                           type="number"
-                          value={block.negativeMarks || ""}
+                          value={block.negativeMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
-                          min="0"
-                          step="0.1"
-                          placeholder="e.g. 0.25"
+                          step="0.05"
+                          placeholder="e.g. 0.25 or -0.25"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />

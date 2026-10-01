@@ -22,8 +22,10 @@ import {
   gatherAssessmentContext,
   buildBlockPrompt,
   parseQuestionsFromAI,
+  buildUnifiedAssignmentPrompt,
+  parseUnifiedAssignmentQuestionsFromAI,
 } from "./question-generation.js";
-import { generatePhysicalPaperPdf } from "../../utils/pdf.js";
+import { generatePhysicalPaperPdf, validateAndProcessPdf } from "../../utils/pdf.js";
 import { PassThrough } from "stream";
 
 // ─── Access control ───────────────────────────────────────────────────────────
@@ -428,16 +430,33 @@ async function generatePreviewQuestions(
   const langLabel = mapLanguageCode(language);
   const prompt = assessment.prompt ?? "";
 
-  const allQuestions: object[] = [];
+  const unifiedPrompt = buildUnifiedAssignmentPrompt(
+    blocks,
+    prompt,
+    context,
+    language,
+    langLabel,
+    assessment.title
+  );
 
-  for (const block of blocks) {
-    const blockPrompt = buildBlockPrompt(block, prompt, context, langLabel);
-    const raw = await generateContent(blockPrompt, { maxOutputTokens: 4096, temperature: 0.7 });
-    const parsed = parseQuestionsFromAI(raw, block.questionType);
-    allQuestions.push(...parsed);
+  try {
+    const raw = await generateContent(unifiedPrompt, { maxOutputTokens: 8192, temperature: 0.7 });
+    return parseUnifiedAssignmentQuestionsFromAI(raw, blocks);
+  } catch (err) {
+    console.warn("[PreviewQuestions] Unified generation encountered error, falling back to block prompt:", err);
+    const allQuestions: object[] = [];
+    for (const block of blocks) {
+      try {
+        const blockPrompt = buildBlockPrompt(block, prompt, context, langLabel);
+        const raw = await generateContent(blockPrompt, { maxOutputTokens: 4096, temperature: 0.7 });
+        const parsed = parseQuestionsFromAI(raw, block.questionType);
+        allQuestions.push(...parsed);
+      } catch (blockErr) {
+        console.error(`[PreviewQuestions] Block ${block.id} generation failed:`, blockErr);
+      }
+    }
+    return allQuestions;
   }
-
-  return allQuestions;
 }
 
 export async function previewQuestionsService(
@@ -459,6 +478,7 @@ export async function getAssessmentAIPromptService(
 ): Promise<{
   language: string;
   languageLabel: string;
+  unifiedPrompt: string;
   blocks: Array<{ id: number | null; questionType: string; questionCount: number; prompt: string }>;
 }> {
   const assessment = await loadAssessmentForManagement(assessmentId, userId, role);
@@ -476,6 +496,16 @@ export async function getAssessmentAIPromptService(
   const langLabel = mapLanguageCode(assessment.language ?? "en");
   const instructorPrompt = assessment.prompt ?? "";
 
+  const unifiedPrompt = buildUnifiedAssignmentPrompt(
+    blocks,
+    instructorPrompt,
+    context,
+    assessment.language ?? "en",
+    langLabel,
+    assessment.title,
+    50_000
+  );
+
   const mapped = blocks.map((block) => ({
     id: block.id,
     questionType: block.questionType,
@@ -483,7 +513,7 @@ export async function getAssessmentAIPromptService(
     prompt: buildBlockPrompt(block, instructorPrompt, context, langLabel, 50_000),
   }));
 
-  return { language: assessment.language ?? "en", languageLabel: langLabel, blocks: mapped };
+  return { language: assessment.language ?? "en", languageLabel: langLabel, unifiedPrompt, blocks: mapped };
 }
 
 // Re-export for backward compatibility
@@ -518,7 +548,7 @@ export async function generatePhysicalPaperService(
     };
   });
 
-  return new Promise((resolve, reject) => {
+  const pdfBuffer: Buffer = await new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     const stream = new PassThrough();
     stream.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -526,4 +556,12 @@ export async function generatePhysicalPaperService(
     stream.on("error", reject);
     generatePhysicalPaperPdf({ ...options, questions: paperQuestions }, stream);
   });
+
+  // Automated PDF check and validation pipeline
+  const validation = validateAndProcessPdf(pdfBuffer, options);
+  if (!validation.isValid) {
+    console.warn("[PhysicalPaper] PDF check pipeline reported formatting warnings:", validation.issues);
+  }
+
+  return validation.buffer;
 }
