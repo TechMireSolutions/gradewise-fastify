@@ -119,7 +119,6 @@ function TakeAssessment() {
     }
   }, [isSubmitted, router]);
 
-  const answeredCount = assessmentQuestions.filter(q => q.answer !== undefined && q.answer !== null).length;
   const formatTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
 
   if (loading && !hasStarted) {

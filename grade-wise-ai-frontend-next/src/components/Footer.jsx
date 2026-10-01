@@ -7,7 +7,6 @@ import {
   FaLinkedinIn,
   FaEnvelope,
   FaHeart,
-  FaCheckCircle,
   FaCrown,
   FaUserShield,
   FaChalkboardTeacher,

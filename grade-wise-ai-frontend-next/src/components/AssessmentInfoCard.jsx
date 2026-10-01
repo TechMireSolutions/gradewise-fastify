@@ -3,9 +3,6 @@ import { card, cardInteractive } from "@/lib/ui.js";
 import { FaFileAlt } from "react-icons/fa";
 
 function AssessmentInfoCard({ assessment }) {
-  const totalQuestions = assessment.question_blocks?.reduce((sum, b) => sum + (b.question_count || 0), 0) || 0;
-  const resourceCount = assessment.resources?.length || 0;
-
   return (
     <div className={cn("mb-6", card, cardInteractive, "shadow-2xl", "p-4", "sm:p-6")}>
       <div className="flex items-start gap-4">
