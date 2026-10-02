@@ -164,28 +164,32 @@ export function generatePhysicalPaperPdf(
   // Pure LTR runs (Latin letters, numbers, code symbols, inner spaces) stay together as single atomic tokens
   // RTL words are separated
   const tokenizeBiDiLine = (line: string): string[] => {
-    // 1. Keep question prefix + number together:
-    // e.g. "سوال 1:" or "السؤال 1:" -> "سوال\u00A01:"
-    let s = line.replace(/([\u0600-\u06FF]+)\s+(\d+[:.])/g, "$1\u00A0$2");
-
-    // 2. Keep bracketed marks/expressions together as an atomic unit:
-    // e.g. "(1 نمبر)" or "(5 marks)" -> "(1\u00A0نمبر)"
-    s = s.replace(/\(([^)]+)\)/g, (match) => match.replace(/\s+/g, "\u00A0"));
-
     const tokens: string[] = [];
     let currentLtr = "";
-    // Use [ \t\r\n]+ instead of \s+ so that \u00A0 (non-breaking space) is preserved inside tokens
-    const words = s.split(/[ \t\r\n]+/);
+    const words = line.split(/[ \t\r\n]+/);
 
     for (const word of words) {
       if (!word) continue;
+
+      const isQuestionNumber = /^[:.]\d+$|^\d+[:.]$/.test(word);
+      const isParenthesizedNumber = /^\(\d+\)$|^\[\d+\]$/.test(word);
 
       if (isRtlText(word)) {
         if (currentLtr.trim()) {
           tokens.push(currentLtr.trim());
           currentLtr = "";
         }
-        tokens.push(word.replace(/\u00A0/g, " "));
+        tokens.push(word);
+      } else if (isQuestionNumber || isParenthesizedNumber) {
+        if (currentLtr.trim()) {
+          tokens.push(currentLtr.trim());
+          currentLtr = "";
+        }
+        if (/^[:.]\d+$/.test(word)) {
+          tokens.push(" " + word);
+        } else {
+          tokens.push(word);
+        }
       } else {
         if (currentLtr) {
           currentLtr += " " + word;
@@ -391,8 +395,12 @@ export function generatePhysicalPaperPdf(
     applyFont(true);
     doc.fontSize(bodyFontSize);
 
+    const cleanQuestionText = (q.questionText || "")
+      .replace(/^(?:Q\d+[:.]?|Question\s*\d+[:.]?|سوال\s*[\d\u0660-\u0669\u06F0-\u06F9]+[:.]?|السؤال\s*[\d\u0660-\u0669\u06F0-\u06F9]+[:.]?|[\d\u0660-\u0669\u06F0-\u06F9]+[:.-])\s*/i, "")
+      .trim();
+
     if (isRTL && fontLoaded) {
-      const questionFullText = `${lbl.question} ${q.questionNumber}: ${q.questionText} (${q.marks} ${lbl.marks})`;
+      const questionFullText = `${lbl.question} :${q.questionNumber} ${cleanQuestionText} (${q.marks})`;
       printRTLText(questionFullText, { align: "right" });
 
       if (q.options && q.options.length > 0) {
@@ -402,12 +410,12 @@ export function generatePhysicalPaperPdf(
         for (let i = 0; i < q.options.length; i++) {
           doc.fontSize(optionFontSizeFinal);
           const optionMainText = q.options[i] || "";
-          printRTLText(`${optionLabels[i]}. ${optionMainText}`, { align: "right" });
+          printRTLText(`${optionLabels[i]}.  ${optionMainText}`, { align: "right" });
         }
       }
     } else {
       useEnglish(true);
-      doc.text(`Q${q.questionNumber}. ${q.questionText}  (${q.marks} marks)`, contentLeft, doc.y, { align: "left" });
+      doc.text(`Q${q.questionNumber}. ${cleanQuestionText}  (${q.marks} marks)`, contentLeft, doc.y, { align: "left" });
 
       if (q.options && q.options.length > 0) {
         doc.moveDown(0.1);
