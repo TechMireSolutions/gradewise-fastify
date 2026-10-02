@@ -397,10 +397,11 @@ export function generatePhysicalPaperPdf(
 
     const cleanQuestionText = (q.questionText || "")
       .replace(/^(?:Q\d+[:.]?|Question\s*\d+[:.]?|سوال\s*[\d\u0660-\u0669\u06F0-\u06F9]+[:.]?|السؤال\s*[\d\u0660-\u0669\u06F0-\u06F9]+[:.]?|[\d\u0660-\u0669\u06F0-\u06F9]+[:.-])\s*/i, "")
+      .replace(/\s*\(\s*\d+\s*(?:marks?|mark|علامات?|علامة|نمبر|نمره)?\s*\)\s*$/i, "")
       .trim();
 
     if (isRTL && fontLoaded) {
-      const questionFullText = `${lbl.question} :${q.questionNumber} ${cleanQuestionText} (${q.marks})`;
+      const questionFullText = `${lbl.question} :${q.questionNumber} ${cleanQuestionText}`;
       printRTLText(questionFullText, { align: "right" });
 
       if (q.options && q.options.length > 0) {
