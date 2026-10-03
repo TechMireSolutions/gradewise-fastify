@@ -12,10 +12,10 @@ const LANGUAGE_LABELS = {
   fa: "Persian",
 };
 
-export const generateAIPrompt = (assessment) => {
+export const generateAIPrompt = (assessment, targetLang) => {
   if (!assessment) return "";
 
-  const langKey = (assessment.language || "en").toLowerCase();
+  const langKey = (targetLang || assessment.language || "en").toLowerCase();
   const language = LANGUAGE_LABELS[langKey] || "English";
   const baseInstruction = MULTILANGUAGE_PROMPTS[langKey] || MULTILANGUAGE_PROMPTS.en;
 

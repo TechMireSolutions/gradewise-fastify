@@ -29,6 +29,8 @@ function AssessmentPreview() {
     aiPromptLoading,
     selectedLanguage,
     selectLanguage,
+    promptLanguage,
+    selectPromptLanguage,
     loadPreviewQuestions,
     loadAIPrompt
   } = useAssessmentPreview(id);
@@ -42,10 +44,10 @@ function AssessmentPreview() {
 
   // Load the real AI prompt when switching to prompt tab
   useEffect(() => {
-    if (tab === "prompt") {
-      loadAIPrompt();
+    if (tab === "prompt" && assessment && promptLanguage) {
+      loadAIPrompt(promptLanguage);
     }
-  }, [tab, loadAIPrompt]);
+  }, [tab, assessment, promptLanguage, loadAIPrompt]);
 
   const handleCopyPrompt = () => {
     if (!assessment) return;
@@ -58,7 +60,7 @@ function AssessmentPreview() {
         .map((b, i) => `--- Block ${i + 1} (${b.questionType} x${b.questionCount}) ---\n${b.prompt}`)
         .join("\n\n");
     } else {
-      promptText = generateAIPrompt(assessment);
+      promptText = generateAIPrompt(assessment, promptLanguage || selectedLanguage);
     }
     navigator.clipboard.writeText(promptText);
     setCopied(true);
@@ -145,6 +147,8 @@ function AssessmentPreview() {
                 aiPromptLoading={aiPromptLoading}
                 copied={copied}
                 onCopy={handleCopyPrompt}
+                selectedLanguage={promptLanguage || selectedLanguage || "en"}
+                onLanguageChange={selectPromptLanguage}
               />
             )}
 

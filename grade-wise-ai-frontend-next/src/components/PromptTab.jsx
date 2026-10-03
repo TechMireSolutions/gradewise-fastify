@@ -2,44 +2,99 @@ import { cn } from "@/lib/cn.js";
 import { FaFileAlt, FaLanguage, FaCopy } from "react-icons/fa";
 import React from "react";
 import { generateAIPrompt } from "../utils/promptGenerator.js";
+import { LANGUAGE_OPTIONS } from "@/utils/translations.js";
+import LoadingSpinner from "./ui/LoadingSpinner.jsx";
 
-export default function PromptTab({ assessment, aiPrompt, aiPromptLoading, copied, onCopy }) {
+export default function PromptTab({
+  assessment,
+  aiPrompt,
+  aiPromptLoading,
+  copied,
+  onCopy,
+  selectedLanguage,
+  onLanguageChange,
+}) {
   const fallbackPrompt = React.useMemo(() => {
-    return assessment ? generateAIPrompt(assessment) : "";
-  }, [assessment]);
+    return assessment ? generateAIPrompt(assessment, selectedLanguage) : "";
+  }, [assessment, selectedLanguage]);
+
+  const activeLangOption = LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage);
 
   return (
-    <div className={cn("p-4 rounded-lg bg-background text-foreground")}>
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <FaFileAlt className="text-white text-sm" />
-        <h3 className="text-lg font-semibold">AI Prompt Blueprint</h3>
-        {aiPrompt?.languageLabel && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-            <FaLanguage /> Questions in {aiPrompt.languageLabel}
-          </span>
-        )}
-        <button
-          type="button"
-          onClick={onCopy}
-          disabled={!assessment}
-          className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <FaCopy /> {copied ? "Copied!" : "Copy Full Prompt"}
-        </button>
+    <div className="animate-fadeIn">
+      <div className="mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                <FaFileAlt className="text-indigo-400 text-sm" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+                AI Prompt Blueprint
+              </h2>
+              {aiPrompt?.languageLabel && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                  <FaLanguage /> {aiPrompt.languageLabel}
+                </span>
+              )}
+            </div>
+            <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>
+              Exact instruction payload configured for AI generation in your selected language
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Multi-language Selector Box */}
+            <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Prompt language">
+              {LANGUAGE_OPTIONS.map((lang) => (
+                <button
+                  key={lang.value}
+                  type="button"
+                  onClick={() => onLanguageChange?.(lang.value)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
+                    selectedLanguage === lang.value
+                      ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+                      : "bg-btn-secondary border border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
+                  )}
+                >
+                  <span className="text-sm leading-none">{lang.label.split(" ")[0]}</span>
+                  <span>{lang.label.replace(/^\S+\s/, "")}</span>
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={onCopy}
+              disabled={!assessment || aiPromptLoading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FaCopy /> {copied ? "Copied!" : "Copy Full Prompt"}
+            </button>
+          </div>
+        </div>
       </div>
 
       {aiPromptLoading ? (
-        <div className="flex items-center justify-center py-10">
-          <span className="text-sm text-muted-foreground">Building AI prompt...</span>
+        <div className="flex flex-col items-center justify-center py-28 gap-4">
+          <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+            <LoadingSpinner size="lg" type="dots" color="blue" />
+          </div>
+          <p className={cn("text-muted-foreground", "text-sm")}>
+            Building full AI prompt in {activeLangOption?.label?.replace(/^\S+\s/, "") || selectedLanguage}...
+          </p>
         </div>
       ) : aiPrompt?.unifiedPrompt ? (
         <div className="space-y-4">
           <p className={cn("text-xs text-muted-foreground")}>
-            The unified execution prompt sent to the AI for generating the complete assignment (instructions, question items, marks distribution, and answer key):
+            The unified execution prompt sent to the AI for generating the complete assignment in{" "}
+            <span className="font-semibold text-foreground">{aiPrompt.languageLabel || selectedLanguage}</span>{" "}
+            (instructions, question items, marks distribution, and answer key):
           </p>
           <div className="rounded-lg border border-border overflow-hidden">
             <div className="px-3.5 py-2.5 bg-input text-xs font-semibold text-secondary-foreground flex items-center justify-between border-b border-border">
-              <span>Unified Assignment Generation Prompt</span>
+              <span>Unified Assignment Generation Prompt ({aiPrompt.languageLabel || selectedLanguage})</span>
               <span className="text-muted-foreground font-mono text-[11px]">Single Pipeline Execution</span>
             </div>
             <pre className="whitespace-pre-wrap text-xs text-muted-foreground p-3.5 bg-muted max-h-[500px] overflow-y-auto font-mono leading-relaxed">
@@ -69,7 +124,8 @@ export default function PromptTab({ assessment, aiPrompt, aiPromptLoading, copie
       ) : aiPrompt?.blocks?.length > 0 ? (
         <div className="space-y-4">
           <p className={cn("text-xs text-muted-foreground")}>
-            The prompt the system sends to the AI for each question block, with the full reference material from your linked documents and links:
+            The prompt the system sends to the AI for each question block in{" "}
+            <span className="font-semibold text-foreground">{aiPrompt.languageLabel || selectedLanguage}</span>:
           </p>
           {aiPrompt.blocks.map((block, i) => (
             <details key={block.id ?? i} open={aiPrompt.blocks.length === 1} className="rounded-lg border border-border overflow-hidden">
@@ -85,7 +141,8 @@ export default function PromptTab({ assessment, aiPrompt, aiPromptLoading, copie
       ) : (
         <>
           <p className={cn("text-xs text-muted-foreground mb-2")}>
-            Showing unified preview based on assessment configuration (live prompt blueprint):
+            Showing preview based on assessment configuration in{" "}
+            <span className="font-semibold text-foreground">{activeLangOption?.label?.replace(/^\S+\s/, "") || selectedLanguage}</span>:
           </p>
           <pre className="whitespace-pre-wrap text-xs font-mono text-muted-foreground p-3.5 bg-muted rounded border border-border max-h-96 overflow-y-auto">
             {fallbackPrompt || assessment?.prompt || "No prompt generated yet."}

@@ -176,11 +176,19 @@ export default async function assessmentsModule(app: FastifyInstance) {
   // GET /api/assessments/:id/ai-prompt
   f.get("/:id/ai-prompt", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: IdParamSchema },
+    schema: {
+      params: IdParamSchema,
+      querystring: z.object({ language: z.string().optional() }),
+    },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };
-      const data = await getAssessmentAIPromptService(request.params.id, user.id, user.role);
+      const data = await getAssessmentAIPromptService(
+        request.params.id,
+        user.id,
+        user.role,
+        request.query.language
+      );
       return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);

@@ -160,6 +160,18 @@ export function generatePhysicalPaperPdf(
 
   const isRtlText = (str: string): boolean => RTL_REGEX.test(str);
 
+  const toNativeDigits = (val: string | number, lang?: string): string => {
+    const str = String(val);
+    const l = (lang || "").toLowerCase();
+    if (l === "ur" || l === "fa" || l === "ps" || l === "sd") {
+      return str.replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)] ?? d);
+    }
+    if (l === "ar") {
+      return str.replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[Number(d)] ?? d);
+    }
+    return str;
+  };
+
   // Tokenizes line into logical chunks:
   // Pure LTR runs (Latin letters, numbers, code symbols, inner spaces) stay together as single atomic tokens
   // RTL words are separated
@@ -171,8 +183,8 @@ export function generatePhysicalPaperPdf(
     for (const word of words) {
       if (!word) continue;
 
-      const isQuestionNumber = /^[:.]\d+$|^\d+[:.]$/.test(word);
-      const isParenthesizedNumber = /^\(\d+\)$|^\[\d+\]$/.test(word);
+      const isQuestionNumber = /^[:.]?[\d\u0660-\u0669\u06F0-\u06F9]+[:.]?$/.test(word) && /[:.]/.test(word);
+      const isParenthesizedNumber = /^\([\d\u0660-\u0669\u06F0-\u06F9]+\)$|^\[[\d\u0660-\u0669\u06F0-\u06F9]+\]$/.test(word);
 
       if (isRtlText(word)) {
         if (currentLtr.trim()) {
@@ -185,7 +197,7 @@ export function generatePhysicalPaperPdf(
           tokens.push(currentLtr.trim());
           currentLtr = "";
         }
-        if (/^[:.]\d+$/.test(word)) {
+        if (/^[:.]/.test(word)) {
           tokens.push(" " + word);
         } else {
           tokens.push(word);
@@ -348,7 +360,8 @@ export function generatePhysicalPaperPdf(
     const nextY = Math.max(doc.y, startY + doc.currentLineHeight() + 6);
     applyFont(false);
     // Right col: Total Marks
-    printRTLText(`${lbl.total} ${totalMarks}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "right" });
+    const displayTotalMarks = toNativeDigits(totalMarks, langKey);
+    printRTLText(`${lbl.total} ${displayTotalMarks}`, contentLeft + contentWidth / 2, nextY, { width: contentWidth / 2, align: "right" });
     // Left col: Duration
     printRTLText(`${lbl.duration} ${paperDuration}`, contentLeft, nextY, { width: contentWidth / 2, align: "left" });
     doc.y = nextY + doc.currentLineHeight() + 6;
@@ -401,7 +414,8 @@ export function generatePhysicalPaperPdf(
       .trim();
 
     if (isRTL && fontLoaded) {
-      const questionFullText = `${lbl.question} :${q.questionNumber} ${cleanQuestionText}`;
+      const localizedNum = toNativeDigits(q.questionNumber, langKey);
+      const questionFullText = `${lbl.question} :${localizedNum} ${cleanQuestionText}`;
       printRTLText(questionFullText, { align: "right" });
 
       if (q.options && q.options.length > 0) {

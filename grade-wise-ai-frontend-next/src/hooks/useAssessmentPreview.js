@@ -13,6 +13,8 @@ function useAssessmentPreview(assessmentId) {
   const [aiPrompt, setAiPrompt] = useState(null);
   const [aiPromptLoading, setAiPromptLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [promptLanguage, setPromptLanguage] = useState(null);
+  const [aiPromptsByLang, setAiPromptsByLang] = useState({});
 
   // Load assessment data
   useEffect(() => {
@@ -21,7 +23,9 @@ function useAssessmentPreview(assessmentId) {
       try {
         const data = await getAssessmentById(assessmentId);
         setAssessment(data);
-        setSelectedLanguage((prev) => prev || data?.language || "en");
+        const defaultLang = data?.language || "en";
+        setSelectedLanguage((prev) => prev || defaultLang);
+        setPromptLanguage((prev) => prev || defaultLang);
         setError(null);
       } catch {
         setError("Failed to load assessment. Please try again.");
@@ -32,19 +36,35 @@ function useAssessmentPreview(assessmentId) {
     loadData();
   }, [assessmentId, getAssessmentById]);
 
-  // Load real AI prompt blueprint (the exact prompt sent to the AI)
-  const loadAIPrompt = useCallback(async () => {
-    if (!assessmentId || aiPrompt || aiPromptLoading) return;
+  // Load real AI prompt blueprint (the exact prompt sent to the AI) in the target language
+  const loadAIPrompt = useCallback(async (language) => {
+    if (!assessmentId) return;
+    const targetLang = language || promptLanguage || selectedLanguage || "en";
+
+    // Instant return if cached
+    if (aiPromptsByLang[targetLang]) {
+      setAiPrompt(aiPromptsByLang[targetLang]);
+      return;
+    }
+
     setAiPromptLoading(true);
     try {
-      const data = await getAIPrompt(assessmentId);
+      const data = await getAIPrompt(assessmentId, targetLang);
       setAiPrompt(data);
+      if (data) {
+        setAiPromptsByLang((prev) => ({ ...prev, [targetLang]: data }));
+      }
     } catch {
       setAiPrompt(null); // fallback to local generator
     } finally {
       setAiPromptLoading(false);
     }
-  }, [assessmentId, aiPrompt, aiPromptLoading, getAIPrompt]);
+  }, [assessmentId, promptLanguage, selectedLanguage, aiPromptsByLang, getAIPrompt]);
+
+  const selectPromptLanguage = useCallback((language) => {
+    setPromptLanguage(language);
+    loadAIPrompt(language);
+  }, [loadAIPrompt]);
 
   // Load preview questions in the given language
   const loadPreviewQuestions = useCallback(async (language) => {
@@ -85,8 +105,10 @@ function useAssessmentPreview(assessmentId) {
     aiPromptLoading,
     selectedLanguage,
     selectLanguage,
+    promptLanguage,
+    selectPromptLanguage,
     loadPreviewQuestions,
-    loadAIPrompt
+    loadAIPrompt,
   };
 }
 

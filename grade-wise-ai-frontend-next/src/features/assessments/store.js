@@ -215,9 +215,9 @@ const useAssessmentStore = create((set) => ({
     }
   },
 
-  getAIPrompt: async (assessmentId) => {
+  getAIPrompt: async (assessmentId, language) => {
     try {
-      const response = await fetchAIPromptApi(assessmentId);
+      const response = await fetchAIPromptApi(assessmentId, language);
       return response.data.data;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to load AI prompt";

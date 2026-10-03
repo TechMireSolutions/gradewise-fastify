@@ -474,7 +474,8 @@ export async function previewQuestionsService(
 export async function getAssessmentAIPromptService(
   assessmentId: number,
   userId: number,
-  role: string
+  role: string,
+  targetLanguage?: string
 ): Promise<{
   language: string;
   languageLabel: string;
@@ -492,15 +493,16 @@ export async function getAssessmentAIPromptService(
     throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
   }
 
+  const effectiveLang = (targetLanguage || assessment.language || "en").toLowerCase();
   const context = await gatherAssessmentContext(assessment.id);
-  const langLabel = mapLanguageCode(assessment.language ?? "en");
+  const langLabel = mapLanguageCode(effectiveLang);
   const instructorPrompt = assessment.prompt ?? "";
 
   const unifiedPrompt = buildUnifiedAssignmentPrompt(
     blocks,
     instructorPrompt,
     context,
-    assessment.language ?? "en",
+    effectiveLang,
     langLabel,
     assessment.title,
     50_000
@@ -513,7 +515,7 @@ export async function getAssessmentAIPromptService(
     prompt: buildBlockPrompt(block, instructorPrompt, context, langLabel, 50_000),
   }));
 
-  return { language: assessment.language ?? "en", languageLabel: langLabel, unifiedPrompt, blocks: mapped };
+  return { language: effectiveLang, languageLabel: langLabel, unifiedPrompt, blocks: mapped };
 }
 
 // Re-export for backward compatibility

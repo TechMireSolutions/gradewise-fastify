@@ -53,5 +53,7 @@ export const fetchPreviewQuestionsApi = (assessmentId, language) =>
     params: language ? { language } : undefined,
   });
 
-export const fetchAIPromptApi = (assessmentId) =>
-  apiClient.get(`/assessments/${assessmentId}/ai-prompt`);
+export const fetchAIPromptApi = (assessmentId, language) =>
+  apiClient.get(`/assessments/${assessmentId}/ai-prompt`, {
+    params: language ? { language } : undefined,
+  });
