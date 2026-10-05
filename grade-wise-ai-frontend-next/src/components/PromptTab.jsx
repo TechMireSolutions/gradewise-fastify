@@ -5,6 +5,18 @@ import { generateAIPrompt } from "../utils/promptGenerator.js";
 import { LANGUAGE_OPTIONS } from "@/utils/translations.js";
 import LoadingSpinner from "./ui/LoadingSpinner.jsx";
 
+const QUESTION_TYPE_LABELS = {
+  multiple_choice: { en: "Multiple Choice", ur: "کثیر الانتخابی سوالات (MCQs)", ar: "أسئلة الاختيار من متعدد", fa: "سوالات چند گزینه‌ای" },
+  short_answer: { en: "Short Answer", ur: "مختصر جوابات", ar: "أسئلة الإجابة القصيرة", fa: "سوالات پاسخ کوتاه" },
+  true_false: { en: "True / False", ur: "درست یا غلط", ar: "الصواب والخطأ", fa: "صحیح / غلط" },
+  matching: { en: "Matching", ur: "جوڑے ملائیں", ar: "المطابقة والتوصيل", fa: "وصل‌کردنی / تطبیقی" },
+  fill_in_the_blank: { en: "Fill in the Blank", ur: "خالی جگہیں پر کریں", ar: "ملء الفراغات", fa: "جای خالی" },
+};
+
+function getSectionTypeLabel(qType, lang = "en") {
+  return QUESTION_TYPE_LABELS[qType]?.[lang] || QUESTION_TYPE_LABELS[qType]?.en || (qType || "").replace(/_/g, " ");
+}
+
 export default function PromptTab({
   assessment,
   aiPrompt,
@@ -110,7 +122,7 @@ export default function PromptTab({
                 {aiPrompt.blocks.map((block, i) => (
                   <div key={block.id ?? i} className="p-2 border border-border/40 rounded bg-background/50">
                     <p className="font-semibold text-secondary-foreground mb-1">
-                      Section {i + 1} — {block.questionType.replace(/_/g, " ")} × {block.questionCount} questions
+                      Section {i + 1} — {getSectionTypeLabel(block.questionType, selectedLanguage)} × {block.questionCount} questions
                     </p>
                     <pre className="whitespace-pre-wrap text-[11px] text-muted-foreground max-h-40 overflow-y-auto">
                       {block.prompt}
@@ -130,7 +142,7 @@ export default function PromptTab({
           {aiPrompt.blocks.map((block, i) => (
             <details key={block.id ?? i} open={aiPrompt.blocks.length === 1} className="rounded-lg border border-border overflow-hidden">
               <summary className="px-3 py-2.5 bg-input cursor-pointer text-sm font-semibold text-secondary-foreground">
-                Block {i + 1} — {block.questionType.replace(/_/g, " ")} × {block.questionCount} questions
+                Block {i + 1} — {getSectionTypeLabel(block.questionType, selectedLanguage)} × {block.questionCount} questions
               </summary>
               <pre className="whitespace-pre-wrap text-xs text-muted-foreground p-3 bg-muted max-h-96 overflow-y-auto">
                 {block.prompt}

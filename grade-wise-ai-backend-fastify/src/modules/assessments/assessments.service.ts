@@ -447,7 +447,7 @@ async function generatePreviewQuestions(
     const allQuestions: object[] = [];
     for (const block of blocks) {
       try {
-        const blockPrompt = buildBlockPrompt(block, prompt, context, langLabel);
+        const blockPrompt = buildBlockPrompt(block, prompt, context, language, langLabel);
         const raw = await generateContent(blockPrompt, { maxOutputTokens: 4096, temperature: 0.7 });
         const parsed = parseQuestionsFromAI(raw, block.questionType);
         allQuestions.push(...parsed);
@@ -512,7 +512,7 @@ export async function getAssessmentAIPromptService(
     id: block.id,
     questionType: block.questionType,
     questionCount: block.questionCount,
-    prompt: buildBlockPrompt(block, instructorPrompt, context, langLabel, 50_000),
+    prompt: buildBlockPrompt(block, instructorPrompt, context, effectiveLang, langLabel, 50_000),
   }));
 
   return { language: effectiveLang, languageLabel: langLabel, unifiedPrompt, blocks: mapped };
