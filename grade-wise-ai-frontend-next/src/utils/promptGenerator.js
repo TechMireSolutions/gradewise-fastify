@@ -363,8 +363,8 @@ export const generateAIPrompt = (assessment, targetLang) => {
 
   const blockDescriptions = blocks.map((b, idx) => {
     const qCount = b.question_count || 1;
-    const pMarks = b.positive_marks ?? 1;
-    const nMarks = b.negative_marks ?? 0.25;
+    const pMarks = Math.abs(Number(b.positive_marks ?? 1));
+    const nMarks = Math.abs(Number(b.negative_marks ?? 0.25));
     const dur = b.duration_per_question ?? 60;
     const { name: typeName, detail } = getQuestionTypeDetail(
       langPack,

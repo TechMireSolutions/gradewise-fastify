@@ -62,7 +62,11 @@ function CreateAssessment() {
                 : field === "positiveMarks"
                   ? value === "" || value === null
                     ? null
-                    : Math.max(Number.parseFloat(value) || 0, 0)
+                    : value === "-"
+                      ? "-"
+                      : isNaN(Number(value))
+                        ? 1
+                        : Math.abs(Number(value))
                   : field === "negativeMarks"
                     ? value === "" || value === null
                       ? null
@@ -128,12 +132,30 @@ function CreateAssessment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Sanitize question blocks before validation so negative values and intermediate strings are handled properly
+    const sanitizedBlocks = questionBlocks.map((b) => {
+      const pos = b.positiveMarks === "" || b.positiveMarks === "-" || b.positiveMarks == null
+        ? 1
+        : Math.abs(Number(b.positiveMarks) || 1);
+      const neg = b.negativeMarks === "" || b.negativeMarks === "-" || b.negativeMarks == null
+        ? 0
+        : (isNaN(Number(b.negativeMarks)) ? 0 : Number(b.negativeMarks));
+      return {
+        ...b,
+        questionCount: Math.max(1, Number(b.questionCount) || 1),
+        durationPerQuestion: Math.max(30, Number(b.durationPerQuestion) || 60),
+        numOptions: b.questionType === "multiple_choice" ? Math.max(2, Number(b.numOptions) || 4) : 4,
+        positiveMarks: pos,
+        negativeMarks: neg,
+      };
+    });
+
     const validationResult = createAssessmentSchema.safeParse({
       title: formData.title,
       prompt: formData.prompt,
       selectedResources,
       externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
-      questionBlocks,
+      questionBlocks: sanitizedBlocks,
     });
 
     if (!validationResult.success) {
@@ -149,13 +171,13 @@ function CreateAssessment() {
       language: "en",
       externalLinks: formData.externalLinks.filter((link) => link.trim()),
       selectedResources,
-      questionBlocks: questionBlocks.map((block) => ({
+      questionBlocks: sanitizedBlocks.map((block) => ({
         questionType: block.questionType,
-        questionCount: Number(block.questionCount),
-        durationPerQuestion: Number(block.durationPerQuestion),
-        ...(block.questionType === "multiple_choice" ? { numOptions: Number(block.numOptions) } : {}),
-        positiveMarks: Number(block.positiveMarks ?? 1),
-        negativeMarks: Number(block.negativeMarks ?? 0),
+        questionCount: block.questionCount,
+        durationPerQuestion: block.durationPerQuestion,
+        ...(block.questionType === "multiple_choice" ? { numOptions: block.numOptions } : {}),
+        positiveMarks: block.positiveMarks,
+        negativeMarks: block.negativeMarks,
       })),
     };
 
@@ -467,7 +489,6 @@ function CreateAssessment() {
                           type="number"
                           value={block.positiveMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
-                          min="0"
                           step="0.1"
                           placeholder="e.g. 1"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
@@ -482,10 +503,13 @@ function CreateAssessment() {
                           value={block.negativeMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
                           step="0.05"
-                          placeholder="e.g. 0.25 or -0.25"
+                          placeholder="e.g. -0.25 or 0.25"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />
+                        <span className="text-[11px] text-muted-foreground mt-1 block">
+                          Deduction must be less than total marks ({block.positiveMarks || 1})
+                        </span>
                       </div>
 
                       {block.questionType === "multiple_choice" && (

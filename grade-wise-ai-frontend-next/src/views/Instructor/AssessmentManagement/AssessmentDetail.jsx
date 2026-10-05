@@ -295,12 +295,12 @@ function AssessmentDetail() {
                             </td>
                             <td className="px-6 py-4 text-sm">
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                                +{b.positive_marks ?? "—"}
+                                +{b.positive_marks != null ? Math.abs(Number(b.positive_marks)) : "—"}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-sm">
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/20">
-                                -{b.negative_marks ?? "—"}
+                                -{b.negative_marks != null ? Math.abs(Number(b.negative_marks)) : "—"}
                               </span>
                             </td>
                           </tr>
@@ -356,9 +356,9 @@ function AssessmentDetail() {
                       <div>
                         <span className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest")}>+/- Marks</span>
                         <p className="font-semibold mt-0.5">
-                          <span className="text-emerald-400">+{b.positive_marks ?? "—"}</span>
+                          <span className="text-emerald-400">+{b.positive_marks != null ? Math.abs(Number(b.positive_marks)) : "—"}</span>
                           <span className={cn("text-muted-foreground", "mx-1")}>/</span>
-                          <span className="text-red-400">-{b.negative_marks ?? "—"}</span>
+                          <span className="text-red-400">-{b.negative_marks != null ? Math.abs(Number(b.negative_marks)) : "—"}</span>
                         </p>
                       </div>
                     </div>

@@ -163,8 +163,8 @@ ${langPack.schemaHeader}
     "question_text": "${langPack.schemaQuestion}",
     "question_type": "${block.questionType}",
 ${block.questionType === "multiple_choice" ? `    "options": ${langPack.schemaOptions},\n    "correct_answer": ${langPack.schemaCorrectAnswer},` : ""}${block.questionType === "true_false" ? `    "options": ${normLang === "ur" ? '["درست", "غلط"]' : normLang === "ar" ? '["صواب", "خطأ"]' : normLang === "fa" ? '["صحیح", "غلط"]' : '["True", "False"]'},\n    "correct_answer": ${normLang === "ur" ? '"درست"' : normLang === "ar" ? '"صواب"' : normLang === "fa" ? '"صحیح"' : '"True"'},` : ""}${block.questionType === "short_answer" ? `    "correct_answer": ${langPack.schemaCorrectAnswer},` : ""}${block.questionType === "fill_in_the_blank" ? `    "correct_answer": ${langPack.schemaCorrectAnswer},` : ""}${block.questionType === "matching" ? `    "left_items": ${langPack.schemaOptions},\n    "right_items": ${langPack.schemaOptions},\n    "correct_answer": ${normLang === "ur" ? '"جملہ جوڑوں کا درست مطابقت والا JSON"' : normLang === "ar" ? '"مطابقة الأزواج بصيغة JSON"' : normLang === "fa" ? '"تطابق جفت‌ها در قالب JSON"' : '"JSON match pairs"'},` : ""}
-    "positive_marks": ${block.positiveMarks ?? 1},
-    "negative_marks": ${block.negativeMarks ?? 0.25},
+    "positive_marks": ${Math.abs(Number(block.positiveMarks ?? 1))},
+    "negative_marks": ${Math.abs(Number(block.negativeMarks ?? 0.25))},
     "duration_per_question": ${block.durationPerQuestion ?? 60}
   }
 ]
@@ -509,8 +509,8 @@ export function buildUnifiedAssignmentPrompt(
   const baseInstruction = MULTILANGUAGE_PROMPTS[normLang] || MULTILANGUAGE_PROMPTS.en;
 
   const blockDescriptions = blocks.map((b, idx) => {
-    const pMarks = b.positiveMarks ?? 1;
-    const nMarks = b.negativeMarks ?? 0.25;
+    const pMarks = Math.abs(Number(b.positiveMarks ?? 1));
+    const nMarks = Math.abs(Number(b.negativeMarks ?? 0.25));
     const dur = b.durationPerQuestion ?? 60;
     const { name: typeName, detail } = getQuestionTypeDetail(
       langPack,

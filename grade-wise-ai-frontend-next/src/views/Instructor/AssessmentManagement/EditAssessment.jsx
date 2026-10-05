@@ -102,7 +102,11 @@ function EditAssessment() {
                 : field === "positive_marks"
                   ? value === "" || value === null
                     ? null
-                    : Math.max(Number.parseFloat(value) || 0, 0)
+                    : value === "-"
+                      ? "-"
+                      : isNaN(Number(value))
+                        ? 1
+                        : Math.abs(Number(value))
                   : field === "negative_marks"
                     ? value === "" || value === null
                       ? null
@@ -184,12 +188,30 @@ function EditAssessment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Sanitize question blocks before validation so negative values and intermediate strings are handled properly
+    const sanitizedBlocks = questionBlocks.map((b) => {
+      const pos = b.positive_marks === "" || b.positive_marks === "-" || b.positive_marks == null
+        ? 1
+        : Math.abs(Number(b.positive_marks) || 1);
+      const neg = b.negative_marks === "" || b.negative_marks === "-" || b.negative_marks == null
+        ? 0
+        : (isNaN(Number(b.negative_marks)) ? 0 : Number(b.negative_marks));
+      return {
+        ...b,
+        question_count: Math.max(1, Number(b.question_count) || 1),
+        duration_per_question: Math.max(30, Number(b.duration_per_question) || 60),
+        num_options: b.question_type === "multiple_choice" ? Math.max(2, Number(b.num_options) || 4) : 4,
+        positive_marks: pos,
+        negative_marks: neg,
+      };
+    });
+
     // Validate form using Zod
     const validation = validateAssessmentForm({
       title: formData.title,
       prompt: formData.prompt,
       externalLinks: formData.externalLinks,
-      questionBlocks,
+      questionBlocks: sanitizedBlocks,
       selectedResources,
       newFiles
     });
@@ -208,15 +230,15 @@ function EditAssessment() {
       externalLinks: formData.externalLinks.filter(l => l.trim()),
       selectedResources,
       ...(questionBlocksTouched && {
-        questionBlocks: questionBlocks.map(b => ({
+        questionBlocks: sanitizedBlocks.map(b => ({
           questionType: b.question_type,
-          questionCount: Number(b.question_count),
-          durationPerQuestion: Number(b.duration_per_question),
-          numOptions: b.question_type === "multiple_choice" ? (Number(b.num_options) || 4) : 4,
+          questionCount: b.question_count,
+          durationPerQuestion: b.duration_per_question,
+          numOptions: b.question_type === "multiple_choice" ? b.num_options : 4,
           leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
           rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
-          positiveMarks: Number(b.positive_marks ?? 1),
-          negativeMarks: b.negative_marks !== "" && b.negative_marks !== null && !isNaN(Number(b.negative_marks)) ? Number(b.negative_marks) : 0,
+          positiveMarks: b.positive_marks,
+          negativeMarks: b.negative_marks,
         })),
       }),
     };
@@ -607,6 +629,20 @@ function EditAssessment() {
                         />
                       </div>
 
+                      {/* Positive Marks */}
+                      <div>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
+                        <input
+                          type="number"
+                          value={block.positive_marks ?? ""}
+                          onChange={(e) => handleBlockChange(index, "positive_marks", e.target.value)}
+                          step="0.1"
+                          placeholder="e.g. 1"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                          disabled={currentAssessment.is_executed}
+                        />
+                      </div>
+
                       {/* Negative Marks */}
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
@@ -615,10 +651,13 @@ function EditAssessment() {
                           value={block.negative_marks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
                           step="0.05"
-                          placeholder="e.g. 0.25 or -0.25"
+                          placeholder="e.g. -0.25 or 0.25"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />
+                        <span className="text-[11px] text-muted-foreground mt-1 block">
+                          Deduction must be less than total marks ({block.positive_marks || 1})
+                        </span>
                       </div>
 
                       {/* Number of Options (MCQ only) */}

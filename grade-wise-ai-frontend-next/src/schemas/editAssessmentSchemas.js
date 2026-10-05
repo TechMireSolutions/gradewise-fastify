@@ -27,31 +27,42 @@ export const questionBlockSchema = z.object({
   question_type: z.enum(ASSESSMENT_CONSTANTS.QUESTION_TYPES, {
     errorMap: () => ({ message: "Invalid question type" })
   }),
-  question_count: z.number()
+  question_count: z.coerce.number()
     .int("Question count must be an integer")
     .min(ASSESSMENT_CONSTANTS.MIN_QUESTION_COUNT, `Minimum ${ASSESSMENT_CONSTANTS.MIN_QUESTION_COUNT} question required`)
     .max(ASSESSMENT_CONSTANTS.MAX_QUESTION_COUNT, `Maximum ${ASSESSMENT_CONSTANTS.MAX_QUESTION_COUNT} questions allowed`),
-  duration_per_question: z.number()
+  duration_per_question: z.coerce.number()
     .int("Duration must be an integer")
     .min(ASSESSMENT_CONSTANTS.MIN_DURATION, `Minimum ${ASSESSMENT_CONSTANTS.MIN_DURATION} seconds required`)
     .max(ASSESSMENT_CONSTANTS.MAX_DURATION, `Maximum ${ASSESSMENT_CONSTANTS.MAX_DURATION} seconds allowed`),
-  num_options: z.number()
+  num_options: z.coerce.number()
     .int("Number of options must be an integer")
     .min(ASSESSMENT_CONSTANTS.MIN_OPTIONS, `Minimum ${ASSESSMENT_CONSTANTS.MIN_OPTIONS} options required`)
     .max(ASSESSMENT_CONSTANTS.MAX_OPTIONS, `Maximum ${ASSESSMENT_CONSTANTS.MAX_OPTIONS} options allowed`)
     .nullable()
     .optional(),
-  positive_marks: z.number()
-    .min(ASSESSMENT_CONSTANTS.MIN_MARKS, "Positive marks cannot be negative")
-    .max(ASSESSMENT_CONSTANTS.MAX_MARKS, `Maximum ${ASSESSMENT_CONSTANTS.MAX_MARKS} marks allowed`)
+  positive_marks: z.coerce.number()
+    .transform((v) => Math.abs(v))
+    .refine((v) => v > 0, "Positive marks must be greater than 0")
+    .refine((v) => v <= ASSESSMENT_CONSTANTS.MAX_MARKS, `Maximum ${ASSESSMENT_CONSTANTS.MAX_MARKS} marks allowed`)
     .nullable()
     .optional(),
-  negative_marks: z.number()
-    .min(ASSESSMENT_CONSTANTS.MIN_MARKS, "Negative marks cannot be negative")
-    .max(ASSESSMENT_CONSTANTS.MAX_MARKS, `Maximum ${ASSESSMENT_CONSTANTS.MAX_MARKS} marks allowed`)
+  negative_marks: z.coerce.number()
+    .refine((v) => Math.abs(v) <= ASSESSMENT_CONSTANTS.MAX_MARKS, `Maximum ${ASSESSMENT_CONSTANTS.MAX_MARKS} marks allowed`)
     .nullable()
     .optional()
 }).refine(
+  (data) => {
+    if (data.negative_marks != null && data.positive_marks != null) {
+      return Math.abs(Number(data.negative_marks)) <= Number(data.positive_marks);
+    }
+    return true;
+  },
+  {
+    message: "Negative marks deduction cannot exceed positive marks per question (total number)",
+    path: ["negative_marks"]
+  }
+).refine(
   (data) => {
     if (data.question_type === 'multiple_choice') {
       return data.num_options !== null && data.num_options !== undefined;
