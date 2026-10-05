@@ -235,7 +235,7 @@ export async function updateAssessmentService(
   input: UpdateAssessmentInput,
   userId: number,
   role?: string
-): Promise<Assessment> {
+): Promise<any> {
   const [existing] = await db
     .select()
     .from(assessments)
@@ -302,7 +302,7 @@ export async function updateAssessmentService(
     }
   }
 
-  return updated;
+  return getAssessmentService(assessmentId, userId, role ?? "instructor");
 }
 
 // ─── Delete ───────────────────────────────────────────────────────────────────

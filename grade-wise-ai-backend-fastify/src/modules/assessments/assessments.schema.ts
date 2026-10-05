@@ -40,7 +40,7 @@ export const CreateAssessmentSchema = z.object({
 
 export const UpdateAssessmentSchema = z.object({
   title: z.string().min(1).max(255).trim().optional(),
-  prompt: z.string().max(5000).optional(),
+  prompt: z.string().max(5000).optional().nullable(),
   externalLinks: z.array(z.string().url()).optional(),
   questionBlocks: z.array(QuestionBlockSchema).min(1).max(10).optional(),
   selectedResources: z.array(z.number().int().positive()).optional(),

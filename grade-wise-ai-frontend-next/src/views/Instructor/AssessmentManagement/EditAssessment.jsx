@@ -16,7 +16,7 @@ function EditAssessment() {
   const { id } = useParams();
   const router = useRouter();
   const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
-  const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
+  const { resources, fetchAllResources, uploadResources, loading: resourcesLoading } = useResourceStore();
   const { modal, showModal, closeModal } = useModal();
 
 
@@ -25,10 +25,10 @@ function EditAssessment() {
   }, [fetchAllResources]);
 
   useEffect(() => {
-    if (!currentAssessment || currentAssessment.id !== Number(id)) {
+    if (id) {
       getAssessmentById(id);
     }
-  }, [id, currentAssessment, getAssessmentById]);
+  }, [id, getAssessmentById]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -51,15 +51,16 @@ function EditAssessment() {
   const [selectedResources, setSelectedResources] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [questionBlocksTouched, setQuestionBlocksTouched] = useState(false);
 
   useEffect(() => {
-    if (currentAssessment) {
+    if (currentAssessment && currentAssessment.id === Number(id)) {
       setFormData({
         title: currentAssessment.title || "",
         prompt: currentAssessment.prompt || "",
         language: currentAssessment.language || "en",
-        externalLinks: Array.isArray(currentAssessment.external_links) ? currentAssessment.external_links : [""],
+        externalLinks: Array.isArray(currentAssessment.external_links) && currentAssessment.external_links.length > 0
+          ? currentAssessment.external_links
+          : [""],
       });
       setQuestionBlocks(
         Array.isArray(currentAssessment.question_blocks) && currentAssessment.question_blocks.length > 0
@@ -68,8 +69,10 @@ function EditAssessment() {
             question_count: Number(block.question_count) || 1,
             duration_per_question: Number(block.duration_per_question) || 120,
             num_options: Number(block.num_options) || 4,
-            positive_marks: Number(block.positive_marks) || 1,
-            negative_marks: Number(block.negative_marks) || 0,
+            num_first_side: Number(block.num_first_side) || 3,
+            num_second_side: Number(block.num_second_side) || 4,
+            positive_marks: block.positive_marks !== undefined && block.positive_marks !== null ? Number(block.positive_marks) : 1,
+            negative_marks: block.negative_marks !== undefined && block.negative_marks !== null ? Number(block.negative_marks) : 0,
           }))
           : [{ question_type: "multiple_choice", question_count: 1, duration_per_question: 120, num_options: 4, positive_marks: 1, negative_marks: 0 }]
       );
@@ -79,7 +82,7 @@ function EditAssessment() {
           : []
       );
     }
-  }, [currentAssessment]);
+  }, [currentAssessment, id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -90,7 +93,6 @@ function EditAssessment() {
   };
 
   const handleBlockChange = (index, field, value) => {
-    setQuestionBlocksTouched(true);
     setQuestionBlocks((prev) =>
       prev.map((block, i) =>
         i === index
@@ -123,7 +125,6 @@ function EditAssessment() {
   };
 
   const addQuestionBlock = () => {
-    setQuestionBlocksTouched(true);
     setQuestionBlocks((prev) => [
       ...prev,
       {
@@ -138,7 +139,6 @@ function EditAssessment() {
   };
 
   const removeQuestionBlock = (index) => {
-    setQuestionBlocksTouched(true);
     if (questionBlocks.length > 1) {
       setQuestionBlocks((prev) => prev.filter((_, i) => i !== index));
     }
@@ -223,24 +223,37 @@ function EditAssessment() {
 
     setIsProcessing(true);
 
+    let finalResources = [...selectedResources];
+    if (newFiles && newFiles.length > 0) {
+      try {
+        const uploaded = await uploadResources(newFiles);
+        const newIds = (Array.isArray(uploaded) ? uploaded : [])
+          .map((r) => r.id)
+          .filter(Boolean);
+        finalResources = [...new Set([...finalResources, ...newIds])];
+      } catch (uploadErr) {
+        showModal("error", "Resource Upload Failed", uploadErr.message || "Failed to upload new files.");
+        setIsProcessing(false);
+        return;
+      }
+    }
+
     const assessmentData = {
       title: formData.title.trim(),
-      ...(formData.prompt?.trim() && { prompt: formData.prompt.trim() }),
+      prompt: formData.prompt !== undefined ? formData.prompt.trim() : "",
       language: formData.language || "en",
-      externalLinks: formData.externalLinks.filter(l => l.trim()),
-      selectedResources,
-      ...(questionBlocksTouched && {
-        questionBlocks: sanitizedBlocks.map(b => ({
-          questionType: b.question_type,
-          questionCount: b.question_count,
-          durationPerQuestion: b.duration_per_question,
-          numOptions: b.question_type === "multiple_choice" ? b.num_options : 4,
-          leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
-          rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
-          positiveMarks: b.positive_marks,
-          negativeMarks: b.negative_marks,
-        })),
-      }),
+      externalLinks: (formData.externalLinks || []).filter((l) => l && l.trim()),
+      selectedResources: finalResources,
+      questionBlocks: sanitizedBlocks.map((b) => ({
+        questionType: b.question_type,
+        questionCount: b.question_count,
+        durationPerQuestion: b.duration_per_question,
+        numOptions: b.question_type === "multiple_choice" ? b.num_options : 4,
+        leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
+        rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
+        positiveMarks: b.positive_marks,
+        negativeMarks: b.negative_marks,
+      })),
     };
 
     try {
@@ -255,7 +268,7 @@ function EditAssessment() {
     }
   };
 
-  if (loading || !currentAssessment) {
+  if (loading || !currentAssessment || currentAssessment.id !== Number(id)) {
     return (
       <div className={cn(page, "flex", "flex-col", "justify-center", "items-center")}>
         <AmbientBackground />

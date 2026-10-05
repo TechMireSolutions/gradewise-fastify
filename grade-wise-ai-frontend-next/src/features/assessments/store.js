@@ -79,16 +79,17 @@ const useAssessmentStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await updateAssessmentApi(assessmentId, formData);
+      const updatedData = response.data?.data || response.data;
       set((state) => ({
         assessments: state.assessments.map((a) =>
           a.id === assessmentId
-            ? { ...response.data.data, is_executed: a.is_executed }
+            ? { ...a, ...updatedData, is_executed: a.is_executed }
             : a
         ),
-        currentAssessment: response.data.data,
+        currentAssessment: updatedData,
         loading: false,
       }));
-      return response.data.data;
+      return updatedData;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to update assessment";
       set({ error: message, loading: false });
