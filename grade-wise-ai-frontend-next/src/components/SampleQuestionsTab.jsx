@@ -58,7 +58,7 @@ function SampleQuestionsTab({ questions, questionError, loading, selectedLanguag
       ) : questions && questions.length > 0 ? (
         <div className="space-y-4 sm:space-y-6">
           {questions.map((question, index) => (
-            <QuestionCard key={index} question={question} index={index} />
+            <QuestionCard key={index} question={question} index={index} selectedLanguage={selectedLanguage} />
           ))}
         </div>
       ) : (

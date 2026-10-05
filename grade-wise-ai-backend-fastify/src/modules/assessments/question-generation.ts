@@ -144,7 +144,9 @@ export function buildBlockPrompt(
     block.rightCount
   );
 
-  const localizedInstruction = normLang === "ur"
+  const localizedInstruction = normLang === "all"
+    ? `Generate exactly ${block.questionCount} ${typeName} (${block.questionType}) ${detail} covering all 4 languages: English, Urdu (اردو), Arabic (العربية), and Persian (فارسی).\nEvery question text, option choice, and answer MUST be translated into all 4 languages. Do not include raw URLs, tracking code, or HTML artifacts.`
+    : normLang === "ur"
     ? `اردو زبان میں نوعیت "${typeName}" (${block.questionType}) کے بالکل ${block.questionCount} سوالات تیار کریں۔\nتمام سوالات کا متن، ممکنہ اختیارات اور جوابات لازماً اور صرف اردو زبان میں تحریر کریں۔ اگر حوالہ جاتی مواد کسی اور زبان میں ہو تو اس کا اردو میں ترجمہ کر کے سوالات بنائیں۔ کسی بھی قسم کا غیر متعلقہ ویب کوڈ یا HTML ٹیگز شامل نہ کریں۔`
     : normLang === "ar"
     ? `قم بإنشاء عدد ${block.questionCount} من أسئلة نوع "${typeName}" (${block.questionType}) باللغة العربية الفصحى.\nيجب صياغة جميع نصوص الأسئلة والخيارات والإجابات باللغة العربية الفصحى حصراً. إذا كانت المراجع بأي لغة أخرى، قم بترجمتها واستيعابها في الأسئلة. تجنب أي وسوم HTML أو أكواد تتبع تقنية.`
@@ -183,22 +185,101 @@ export function parseQuestionsFromAI(raw: string, _questionType: string): object
 // ─── Multi-Language Prompts & Comprehensive Language Packs ───────────────────
 
 export const MULTILANGUAGE_PROMPTS: Record<string, string> = {
+  all: `Generate a complete multi-language assignment covering all 4 supported languages: English, Urdu (اردو), Arabic (العربية), and Persian (فارسی).
+
+[English] Generate a complete assignment including instructions, question items, marks distribution, and answer key.
+[Urdu / اردو] ایک مکمل اسائنمنٹ تیار کریں جس میں ہدایات، سوالات، نمبروں کی تقسیم اور جوابات کی کلید شامل ہو۔
+[Arabic / العربية] إنشاء واجب كامل يتضمن التعليمات والأسئلة وتوزيع الدرجات ونموذج الإجابة.
+[Persian / فارسی] یک تکلیف کامل شامل دستورالعمل‌ها، سوالات، بارم‌بندی و کلید پاسخ‌ها ایجاد کنید.`,
   en: "Generate a complete assignment including instructions, question items, marks distribution, and answer key.",
   ur: "ایک مکمل اسائنمنٹ تیار کریں جس میں ہدایات، سوالات، نمبروں کی تقسیم اور جوابات کی کلید شامل ہو۔",
   ar: "إنشاء واجب كامل يتضمن التعليمات والأسئلة وتوزيع الدرجات ونموذج الإجابة.",
   fa: "یک تکلیف کامل شامل دستورالعمل‌ها، سوالات، بارم‌بندی و کلید پاسخ‌ها ایجاد کنید.",
 };
 
-function normalizeLang(lang?: string): "en" | "ur" | "ar" | "fa" {
-  if (!lang) return "en";
+function normalizeLang(lang?: string): "all" | "en" | "ur" | "ar" | "fa" {
+  if (!lang) return "all";
   const l = lang.toLowerCase();
+  if (l === "all" || l.includes("combined") || l.includes("multi")) return "all";
   if (l === "ur" || l.includes("urdu")) return "ur";
   if (l === "ar" || l.includes("arab")) return "ar";
   if (l === "fa" || l.includes("persian") || l.includes("farsi")) return "fa";
-  return "en";
+  if (l === "en" || l.includes("eng")) return "en";
+  return "all";
 }
 
 export const PROMPT_LANG_PACKS = {
+  all: {
+    targetLangName: "All 4 Languages (English, Urdu / اردو, Arabic / العربية, Persian / فارسی)",
+    directive: `CRITICAL ALL-4-LANGUAGES GENERATION REQUIREMENT:
+1. MULTI-LANGUAGE QUESTIONS: Every single question in the assignment MUST be generated with full content in all 4 languages: English, Urdu (اردو), Arabic (العربية), and Persian (فارسی).
+2. "question_text" FORMAT: In question_text, provide the question in all 4 languages separated by line breaks:
+   [English] <Question in English>
+   [اردو] <سوال اردو میں>
+   [العربية] <السؤال بالعربية الفصحى>
+   [فارسی] <سوال به زبان فارسی>
+3. "options" FORMAT: For multiple choice questions, every option MUST include all 4 translations:
+   "[EN] <Option text> | [UR] <اردو متن> | [AR] <النص العربي> | [FA] <متن فارسی>"
+4. "correct_answer" FORMAT: The correct answer matching the exact option string with all 4 languages.
+5. "translations" OBJECT: Each question item MUST include a structured "translations" object containing separated fields for each language:
+   "translations": {
+     "en": { "question_text": "...", "options": [...], "correct_answer": "..." },
+     "ur": { "question_text": "...", "options": [...], "correct_answer": "..." },
+     "ar": { "question_text": "...", "options": [...], "correct_answer": "..." },
+     "fa": { "question_text": "...", "options": [...], "correct_answer": "..." }
+   }
+6. NO CORRUPTED CODES: Do NOT output HTML fragments, tracking codes, or URLs into question items. Produce genuine educational questions across all 4 languages.`,
+    metadataLabels: {
+      title: "Assignment Title:",
+      instructions: "Instructor Instructions / Topic:",
+      context: "Reference Material (Translate and adapt into all 4 languages):",
+    },
+    reqHeader: "Assignment Requirements & Marks Distribution (All 4 Languages):",
+    totalQ: (count: number) => `Total Questions to Generate: ${count} (each generated across English, Urdu, Arabic, Persian)`,
+    sectionLine: (sNum: number, qCount: number, typeName: string, detail: string, pMarks: number | string, nMarks: number | string, dur: number) =>
+      `- Section ${sNum}: Exactly ${qCount} questions of type "${typeName}" ${detail} [Marks: +${pMarks} positive, ${nMarks} negative, Time: ${dur}s per question] (All 4 Languages required)`,
+    questionTypes: {
+      multiple_choice: {
+        name: "Multiple Choice Questions (multiple_choice / MCQs)",
+        detail: (opts: number) => `with exactly ${opts} options provided in all 4 languages (English, Urdu, Arabic, Persian)`,
+        rule: "For multiple_choice, every option must contain the translated choice in all 4 languages: [EN] ... | [UR] ... | [AR] ... | [FA] ..., and include the 'translations' object.",
+      },
+      short_answer: {
+        name: "Short Answer Questions (short_answer)",
+        detail: () => "concise 1-3 sentence model answers provided in all 4 languages",
+        rule: "For short_answer, correct_answer must contain the model answer in all 4 languages.",
+      },
+      true_false: {
+        name: "True/False Questions (true_false)",
+        detail: () => "true/false format with all 4 language labels",
+        rule: 'For true_false, options must be ["True / درست / صواب / صحیح", "False / غلط / خطأ / غلط"].',
+      },
+      matching: {
+        name: "Matching Questions (matching)",
+        detail: (l: number, r: number) => `with ${l} left items and ${r} right options in all 4 languages`,
+        rule: "For matching, include 'left_items' and 'right_items' translated into all 4 languages.",
+      },
+      fill_in_the_blank: {
+        name: "Fill-in-the-Blank Questions (fill_in_the_blank)",
+        detail: () => "clear missing phrase with [_______] blank indicator in all 4 languages",
+        rule: "For fill_in_the_blank, mark the blank with _______ in question_text across all 4 languages.",
+      },
+    },
+    schemaHeader: "Response Schema (All 4 Languages Unified Structure):\nReturn ONLY a valid JSON object matching this multi-language structure:",
+    schemaInstructions: "Read all questions carefully / تمام سوالات کو غور سے پڑھیں / اقرأ الأسئلة بعناية / سوالات را با دقت بخوانید",
+    schemaQuestion: `[English] Question text in English\\n[اردو] سوال کا متن اردو میں\\n[العربية] نص السؤال بالعربية\\n[فارسی] متن سوال به زبان فارسی`,
+    schemaOptions: `[
+        "[EN] Option A | [UR] آپشن الف | [AR] الخيار الأول | [FA] گزینه اول",
+        "[EN] Option B | [UR] آپشن ب | [AR] الخيار الثاني | [FA] گزینه دوم",
+        "[EN] Option C | [UR] آپشن ج | [AR] الخيار الثالث | [FA] گزینه سوم",
+        "[EN] Option D | [UR] آپشن د | [AR] الخيار الرابع | [FA] گزینه چهارم"
+      ]`,
+    schemaCorrectAnswer: '"[EN] Option A | [UR] آپشن الف | [AR] الخيار الأول | [FA] گزینه اول"',
+    rulesHeader: "Strict Multi-Language Rules:",
+    ruleOrder: "1. Provide questions in exact order of the sections defined above.",
+    ruleJsonOnly: "7. Return ONLY the JSON object. Do not include markdown or conversational prefixes.",
+  },
+
   ur: {
     targetLangName: "اردو (Urdu / ur)",
     directive: `اہم ہدایات برائے اردو زبان و تدریسی مواد:
@@ -467,7 +548,7 @@ export function buildUnifiedAssignmentPrompt(
 
   return `${baseInstruction}
 
-${normLang === "ur" ? "ہدف زبان: اردو (Urdu / ur)۔ تمام سوالات، آپشنز، ماڈل جوابات اور تفاصیل مکمل طور پر اردو میں ہوں گی۔" : normLang === "ar" ? "اللغة المستهدفة: العربية (Arabic / ar). يجب كتابة جميع الأسئلة والخيارات والإجابات باللغة العربية الفصحى." : normLang === "fa" ? "زبان هدف: فارسی (Persian / fa). تمامی صورت سوالات، گزینه‌ها و پاسخ‌ها منحصراً به زبان فارسی خواهند بود." : `Target Language: ${languageLabel} (${normLang}). All question text, options, and explanations MUST be written in ${languageLabel}.`}
+${normLang === "all" ? "Target Languages: All 4 Languages (English, Urdu / اردو, Arabic / العربية, Persian / فارسی).\nEvery question item, multiple choice option, and answer MUST be provided across all 4 languages." : normLang === "ur" ? "ہدف زبان: اردو (Urdu / ur)۔ تمام سوالات، آپشنز، ماڈل جوابات اور تفاصیل مکمل طور پر اردو میں ہوں گی۔" : normLang === "ar" ? "اللغة المستهدفة: العربية (Arabic / ar). يجب كتابة جميع الأسئلة والخيارات والإجابات باللغة العربية الفصحى." : normLang === "fa" ? "زبان هدف: فارسی (Persian / fa). تمامی صورت سوالات، گزینه‌ها و پاسخ‌ها منحصراً به زبان فارسی خواهند بود." : `Target Language: ${languageLabel} (${normLang}). All question text, options, and explanations MUST be written in ${languageLabel}.`}
 
 ${langPack.directive}
 
@@ -485,7 +566,12 @@ ${blockDescriptions}
 
 ${langPack.schemaHeader}
 {
-  "instructions": "${langPack.schemaInstructions}",
+  "instructions": ${normLang === "all" ? `{
+    "en": "Read all questions carefully and select the best answer for each choice.",
+    "ur": "تمام سوالات کو غور سے پڑھیں اور ہر سوال کے لیے بہترین جواب منتخب کریں۔",
+    "ar": "اقرأ جميع الأسئلة بعناية واختر أفضل إجابة لكل سؤال.",
+    "fa": "همه سوالات را به دقت بخوانید و بهترین گزینه را برای هر سوال انتخاب نمایید."
+  }` : `"${langPack.schemaInstructions}"`},
   "questions": [
     {
       "question_order": 1,
@@ -493,7 +579,29 @@ ${langPack.schemaHeader}
       "question_text": "${langPack.schemaQuestion}",
       "options": ${langPack.schemaOptions},
       "correct_answer": ${langPack.schemaCorrectAnswer},
-      "positive_marks": 1,
+${normLang === "all" ? `      "translations": {
+        "en": {
+          "question_text": "Question text in English",
+          "options": ["Option A", "Option B", "Option C", "Option D"],
+          "correct_answer": "Option A"
+        },
+        "ur": {
+          "question_text": "سوال کا متن اردو میں",
+          "options": ["آپشن الف", "آپشن ب", "آپشن ج", "آپشن د"],
+          "correct_answer": "آپشن الف"
+        },
+        "ar": {
+          "question_text": "نص السؤال بالعربية",
+          "options": ["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"],
+          "correct_answer": "الخيار الأول"
+        },
+        "fa": {
+          "question_text": "متن سوال به زبان فارسی",
+          "options": ["گزینه اول", "گزینه دوم", "گزینه سوم", "گزینه چهارم"],
+          "correct_answer": "گزینه اول"
+        }
+      },
+` : ""}      "positive_marks": 1,
       "negative_marks": 0.25,
       "duration_per_question": 60
     }
@@ -576,6 +684,7 @@ export function parseUnifiedAssignmentQuestionsFromAI(raw: string, blocks: Quest
         left_items: leftItems.length > 0 ? leftItems : undefined,
         right_items: rightItems.length > 0 ? rightItems : undefined,
         correct_answer: String(q["correct_answer"] ?? q["correctAnswer"] ?? ""),
+        translations: (q["translations"] && typeof q["translations"] === "object") ? (q["translations"] as Record<string, unknown>) : undefined,
         positive_marks: block.positiveMarks ?? 1,
         negative_marks: block.negativeMarks ?? 0.25,
         duration_per_question: block.durationPerQuestion ?? 60,

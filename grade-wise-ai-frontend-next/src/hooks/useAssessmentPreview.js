@@ -23,9 +23,9 @@ function useAssessmentPreview(assessmentId) {
       try {
         const data = await getAssessmentById(assessmentId);
         setAssessment(data);
-        const defaultLang = data?.language || "en";
+        const defaultLang = data?.language || "all";
         setSelectedLanguage((prev) => prev || defaultLang);
-        setPromptLanguage((prev) => prev || defaultLang);
+        setPromptLanguage((prev) => prev || "all");
         setError(null);
       } catch {
         setError("Failed to load assessment. Please try again.");
@@ -39,7 +39,7 @@ function useAssessmentPreview(assessmentId) {
   // Load real AI prompt blueprint (the exact prompt sent to the AI) in the target language
   const loadAIPrompt = useCallback(async (language) => {
     if (!assessmentId) return;
-    const targetLang = language || promptLanguage || selectedLanguage || "en";
+    const targetLang = language || promptLanguage || selectedLanguage || "all";
 
     // Instant return if cached
     if (aiPromptsByLang[targetLang]) {

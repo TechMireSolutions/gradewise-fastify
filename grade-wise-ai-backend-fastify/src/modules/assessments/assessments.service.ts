@@ -493,7 +493,7 @@ export async function getAssessmentAIPromptService(
     throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
   }
 
-  const effectiveLang = (targetLanguage || assessment.language || "en").toLowerCase();
+  const effectiveLang = (targetLanguage || "all").toLowerCase();
   const context = await gatherAssessmentContext(assessment.id);
   const langLabel = mapLanguageCode(effectiveLang);
   const instructorPrompt = assessment.prompt ?? "";

@@ -56,6 +56,7 @@ export async function generatePdfContent(
 
 export const mapLanguageCode = (lang: string): string => {
   const map: Record<string, string> = {
+    all: "All 4 Languages (Combined)",
     en: "English",
     ur: "Urdu",
     ar: "Arabic",

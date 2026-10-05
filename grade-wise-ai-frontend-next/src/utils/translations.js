@@ -263,6 +263,7 @@ export const TRANSLATIONS = {
 };
 
 export const LANGUAGE_OPTIONS = [
+  { value: "all", label: "🌐 All 4 Languages", rtl: false },
   { value: "en", label: "🇬🇧 English", rtl: false },
   { value: "ur", label: "🇵🇰 Urdu (اردو)", rtl: true },
   { value: "ar", label: "🇸🇦 Arabic (العربية)", rtl: true },
