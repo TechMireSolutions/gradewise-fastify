@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/cn.js";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Modal from "./ui/Modal";
 import LoadingSpinner from "./ui/LoadingSpinner";
 import { FaFilePdf, FaTimes, FaGlobe, FaArrowLeft, FaDownload } from "react-icons/fa";
@@ -11,6 +11,27 @@ import { LANGUAGE_OPTIONS, getTranslation, isRTLLanguage } from "../utils/transl
 import useAssessmentStore from "@/features/assessments/store.js";
 
 const STORAGE_KEY = "gradewise_paper_settings";
+
+export const sanitizeTimeValue = (val) => {
+  if (!val || typeof val !== "string") return "10:00";
+  const trimmed = val.trim();
+  if (/^([01]\d|2[0-3]):[0-5]\d$/.test(trimmed)) return trimmed;
+  if (/^[0-9]:[0-5]\d$/.test(trimmed)) return `0${trimmed}`;
+  const match12 = trimmed.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([aApP][mM])?$/);
+  if (match12) {
+    let hours = parseInt(match12[1], 10);
+    const minutes = match12[2];
+    const ampm = match12[3]?.toUpperCase();
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+    return `${String(hours).padStart(2, "0")}:${minutes}`;
+  }
+  if (trimmed.includes("T")) {
+    const timePart = trimmed.split("T")[1]?.slice(0, 5);
+    if (/^([01]\d|2[0-3]):[0-5]\d$/.test(timePart)) return timePart;
+  }
+  return "10:00";
+};
 
 const INITIAL_FORM = {
   instituteName: "",
@@ -42,25 +63,50 @@ const PhysicalPaperModal = ({
   const [loading, setLoading] = useState(false);
   const [notify, setNotify] = useState(INITIAL_NOTIFY);
 
-  const { generatePhysicalPaper } = useAssessmentStore();
+  const hasInitializedRef = useRef(false);
+  const userModifiedMarksRef = useRef(false);
+
+  const { generatePhysicalPaper, getAssessmentById, currentAssessment } = useAssessmentStore();
 
   const t = (key) => getTranslation(selectedLanguage, key);
   const isRTL = isRTLLanguage(selectedLanguage);
   const isQuranic = ["ar", "fa"].includes(selectedLanguage);
 
+  // Fetch full assessment data if question blocks are not included in the parent row
+  useEffect(() => {
+    if (!isOpen || !assessmentId) return;
+    if (!assessment?.question_blocks?.length) {
+      if (typeof getAssessmentById === "function") {
+        getAssessmentById(assessmentId).catch((err) => {
+          console.warn("[PhysicalPaperModal] Failed to fetch assessment details:", err);
+        });
+      }
+    }
+  }, [isOpen, assessmentId, assessment, getAssessmentById]);
+
+  // Target assessment with fallback to store's currentAssessment
+  const targetAssessment =
+    assessment?.question_blocks?.length
+      ? assessment
+      : currentAssessment?.id === Number(assessmentId) && currentAssessment?.question_blocks?.length
+      ? currentAssessment
+      : assessment;
+
   // Auto-calculated fallback total marks from assessment question blocks
-  const calculatedTotalMarks =
-    assessment?.question_blocks?.reduce(
+  const derivedMarks =
+    targetAssessment?.question_blocks?.reduce(
       (sum, b) =>
         sum +
         (Number(b.question_count || b.questionCount || 0) *
           Number(b.positive_marks ?? b.positiveMarks ?? 1)),
       0
-    ) || 100;
+    ) || 0;
+
+  const calculatedTotalMarks = derivedMarks > 0 ? derivedMarks : 100;
 
   // Auto-calculated estimated duration from question blocks
   const calculatedTotalSeconds =
-    assessment?.question_blocks?.reduce(
+    targetAssessment?.question_blocks?.reduce(
       (sum, b) =>
         sum +
         (Number(b.question_count || b.questionCount || 0) *
@@ -77,9 +123,16 @@ const PhysicalPaperModal = ({
         : `${defaultHours} Hour${defaultHours > 1 ? "s" : ""}`
       : `${defaultMins} Mins`;
 
-  // Initialize and persist form defaults across user sessions
+  // Initialize form defaults only once when modal opens to avoid locking user input
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      hasInitializedRef.current = false;
+      userModifiedMarksRef.current = false;
+      return;
+    }
+
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
 
     let saved = {};
     try {
@@ -91,18 +144,40 @@ const PhysicalPaperModal = ({
 
     const todayDate = new Date().toISOString().split("T")[0];
 
-    setForm((prev) => ({
-      ...prev,
-      instituteName: prev.instituteName || saved.instituteName || "",
-      teacherName: prev.teacherName || saved.teacherName || "",
-      subjectName: prev.subjectName || assessmentTitle || assessment?.title || saved.subjectName || "",
-      paperDate: prev.paperDate || todayDate,
-      paperTime: prev.paperTime || saved.paperTime || "10:00",
-      paperDuration: prev.paperDuration || saved.paperDuration || calculatedDurationStr || "1 Hour 30 Mins",
-      totalMarks: prev.totalMarks || (calculatedTotalMarks > 0 ? String(calculatedTotalMarks) : "100"),
-      pageSize: prev.pageSize || saved.pageSize || "A4",
-    }));
-  }, [isOpen, assessmentTitle, assessment, calculatedTotalMarks, calculatedDurationStr]);
+    const initialMarks =
+      saved.totalMarks ||
+      (derivedMarks > 0 ? String(derivedMarks) : "100");
+
+    const initialTime = sanitizeTimeValue(saved.paperTime);
+    const initialDuration = saved.paperDuration || calculatedDurationStr || "1 Hour 30 Mins";
+
+    setForm({
+      instituteName: saved.instituteName || "",
+      teacherName: saved.teacherName || "",
+      subjectName: assessmentTitle || assessment?.title || saved.subjectName || "",
+      paperDate: todayDate,
+      paperTime: initialTime,
+      paperDuration: initialDuration,
+      totalMarks: initialMarks,
+      notes: "",
+      pageSize: saved.pageSize || "A4",
+      headerFontSize: 18,
+      questionFontSize: 10,
+      optionFontSize: 9,
+    });
+  }, [isOpen, assessmentTitle, assessment, derivedMarks, calculatedDurationStr]);
+
+  // Update total marks if question blocks load asynchronously, but only if user hasn't edited the field
+  useEffect(() => {
+    if (!isOpen || userModifiedMarksRef.current) return;
+    if (derivedMarks > 0) {
+      setForm((prev) => ({
+        ...prev,
+        totalMarks: String(derivedMarks),
+        paperDuration: prev.paperDuration || calculatedDurationStr,
+      }));
+    }
+  }, [isOpen, derivedMarks, calculatedDurationStr]);
 
   const showNotify = (type, title, message) =>
     setNotify({ isOpen: true, type, title, message });
@@ -112,12 +187,34 @@ const PhysicalPaperModal = ({
     setStep("form");
   };
 
+  const updateSavedSettings = (updates) => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      const current = stored ? JSON.parse(stored) : {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...current, ...updates }));
+    } catch {
+      // Ignore localStorage write failures
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "totalMarks") {
+      userModifiedMarksRef.current = true;
+    }
+    if (["instituteName", "teacherName", "paperTime", "paperDuration", "pageSize"].includes(name)) {
+      updateSavedSettings({ [name]: value });
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSetField = (name, value) => {
+    if (name === "totalMarks") {
+      userModifiedMarksRef.current = true;
+    }
+    if (["instituteName", "teacherName", "paperTime", "paperDuration", "pageSize"].includes(name)) {
+      updateSavedSettings({ [name]: value });
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -132,26 +229,24 @@ const PhysicalPaperModal = ({
     if (!form.subjectName.trim())   { showNotify("warning", "Required", "Please enter the subject name."); return; }
 
     const finalDate = form.paperDate || new Date().toISOString().split("T")[0];
-    const finalTime = form.paperTime?.trim() || "10:00";
+    const finalTime = sanitizeTimeValue(form.paperTime);
     const finalDuration = form.paperDuration?.trim() || calculatedDurationStr || "1 Hour 30 Mins";
-    const finalMarks = Number(form.totalMarks) > 0 ? Math.round(Number(form.totalMarks)) : Math.round(calculatedTotalMarks);
+
+    // Validate standard numeric input, with graceful auto-calculation fallback if blank or non-numeric
+    const parsedMarks = form.totalMarks !== "" && form.totalMarks != null ? Number(form.totalMarks) : NaN;
+    const finalMarks = !isNaN(parsedMarks) && parsedMarks > 0
+      ? (parsedMarks % 1 === 0 ? Math.round(parsedMarks) : Number(parsedMarks.toFixed(2)))
+      : Math.round(calculatedTotalMarks > 0 ? calculatedTotalMarks : 100);
 
     // Persist settings for next user session
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          instituteName: form.instituteName,
-          teacherName: form.teacherName,
-          subjectName: form.subjectName,
-          paperTime: finalTime,
-          paperDuration: finalDuration,
-          pageSize: form.pageSize,
-        })
-      );
-    } catch {
-      // Ignore localStorage write failures
-    }
+    updateSavedSettings({
+      instituteName: form.instituteName,
+      teacherName: form.teacherName,
+      subjectName: form.subjectName,
+      paperTime: finalTime,
+      paperDuration: finalDuration,
+      pageSize: form.pageSize,
+    });
 
     setLoading(true);
     try {
@@ -199,6 +294,8 @@ const PhysicalPaperModal = ({
     setSelectedLanguage("en");
     setForm(INITIAL_FORM);
     setNotify(INITIAL_NOTIFY);
+    hasInitializedRef.current = false;
+    userModifiedMarksRef.current = false;
   };
 
   const handleClose = () => {
@@ -314,6 +411,7 @@ const PhysicalPaperModal = ({
                     onChange={handleChange}
                     onSetField={handleSetField}
                     calculatedMarks={calculatedTotalMarks}
+                    calculatedDuration={calculatedDurationStr}
                     language={selectedLanguage}
                   />
 

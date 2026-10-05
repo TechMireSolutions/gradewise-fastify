@@ -403,9 +403,6 @@ function CreateAssessment() {
                 <FiList className="text-white text-base" />
               </div>
               <h2 className="text-xl font-bold text-foreground">Question Configuration</h2>
-              <span className={cn("inline-flex", "items-center", "gap-1.5", "px-2.5", "py-1", "rounded-full", "text-xs", "font-semibold", "bg-btn-secondary", "text-muted-foreground", "border", "border-border", "ml-auto")}>
-                {questionBlocks.length} {questionBlocks.length === 1 ? "Block" : "Blocks"}
-              </span>
             </div>
             <div className="p-6 sm:p-8">
               <div className="space-y-5">
