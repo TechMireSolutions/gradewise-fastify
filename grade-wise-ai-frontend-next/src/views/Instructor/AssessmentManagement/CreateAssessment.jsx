@@ -50,6 +50,49 @@ function CreateAssessment() {
     }));
   };
 
+  const formatNegativeMarksInput = (value) => {
+    if (value === "" || value === null || value === undefined) {
+      return "";
+    }
+    let str = String(value).trim();
+    // Keep only numeric characters, dots, and minus
+    str = str.replace(/[^0-9.-]/g, "");
+    if (str === "") return "";
+    if (str === "-") return "-";
+
+    // Strip existing minus signs to work with raw digits
+    str = str.replace(/-/g, "");
+
+    // If only dot was entered, e.g. "." or "-."
+    if (str === ".") return "-0.";
+
+    // Prevent multiple dots: keep only the first decimal point
+    const parts = str.split(".");
+    if (parts.length > 2) {
+      str = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Always prefix with minus sign
+    return `-${str}`;
+  };
+
+  const handleNegativeMarksBlur = (index) => {
+    setQuestionBlocks((prev) =>
+      prev.map((block, i) => {
+        if (i !== index) return block;
+        const val = String(block.negativeMarks ?? "").trim();
+        if (val === "" || val === "-" || val === "-." || val === "-0.") {
+          return { ...block, negativeMarks: 0 };
+        }
+        const num = Number(val);
+        if (!isNaN(num)) {
+          return { ...block, negativeMarks: num === 0 ? 0 : -Math.abs(num) };
+        }
+        return { ...block, negativeMarks: 0 };
+      })
+    );
+  };
+
   const handleBlockChange = (index, field, value) => {
     setQuestionBlocks((prev) =>
       prev.map((block, i) =>
@@ -68,13 +111,7 @@ function CreateAssessment() {
                         ? 1
                         : Math.abs(Number(value))
                   : field === "negativeMarks"
-                    ? value === "" || value === null
-                      ? null
-                      : value === "-" || value.toString().endsWith(".")
-                        ? value
-                        : isNaN(Number(value))
-                          ? 0
-                          : Number(value)
+                    ? formatNegativeMarksInput(value)
                     : value,
           }
           : block
@@ -139,7 +176,7 @@ function CreateAssessment() {
         : Math.abs(Number(b.positiveMarks) || 1);
       const neg = b.negativeMarks === "" || b.negativeMarks === "-" || b.negativeMarks == null
         ? 0
-        : (isNaN(Number(b.negativeMarks)) ? 0 : Number(b.negativeMarks));
+        : (isNaN(Number(b.negativeMarks)) ? 0 : (Number(b.negativeMarks) === 0 ? 0 : -Math.abs(Number(b.negativeMarks))));
       return {
         ...b,
         questionCount: Math.max(1, Number(b.questionCount) || 1),
@@ -496,11 +533,23 @@ function CreateAssessment() {
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
                         <input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={block.negativeMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
-                          step="0.05"
-                          placeholder="e.g. -0.25 or 0.25"
+                          onBlur={() => handleNegativeMarksBlur(index)}
+                          onKeyDown={(e) => {
+                            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                              e.preventDefault();
+                              const current = Number(block.negativeMarks) || 0;
+                              const step = 0.05;
+                              const nextVal = e.key === "ArrowUp"
+                                ? Math.min(0, Number((current + step).toFixed(2)))
+                                : Math.max(-100, Number((current - step).toFixed(2)));
+                              handleBlockChange(index, "negativeMarks", nextVal === 0 ? 0 : nextVal);
+                            }
+                          }}
+                          placeholder="e.g. -0.25"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />

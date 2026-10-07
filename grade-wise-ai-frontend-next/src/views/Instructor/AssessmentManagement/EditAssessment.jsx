@@ -72,7 +72,9 @@ function EditAssessment() {
             num_first_side: Number(block.num_first_side) || 3,
             num_second_side: Number(block.num_second_side) || 4,
             positive_marks: block.positive_marks !== undefined && block.positive_marks !== null ? Number(block.positive_marks) : 1,
-            negative_marks: block.negative_marks !== undefined && block.negative_marks !== null ? Number(block.negative_marks) : 0,
+            negative_marks: block.negative_marks !== undefined && block.negative_marks !== null
+              ? (Number(block.negative_marks) === 0 ? 0 : -Math.abs(Number(block.negative_marks)))
+              : 0,
           }))
           : [{ question_type: "multiple_choice", question_count: 1, duration_per_question: 120, num_options: 4, positive_marks: 1, negative_marks: 0 }]
       );
@@ -90,6 +92,49 @@ function EditAssessment() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const formatNegativeMarksInput = (value) => {
+    if (value === "" || value === null || value === undefined) {
+      return "";
+    }
+    let str = String(value).trim();
+    // Keep only numeric characters, dots, and minus
+    str = str.replace(/[^0-9.-]/g, "");
+    if (str === "") return "";
+    if (str === "-") return "-";
+
+    // Strip existing minus signs to work with raw digits
+    str = str.replace(/-/g, "");
+
+    // If only dot was entered, e.g. "." or "-."
+    if (str === ".") return "-0.";
+
+    // Prevent multiple dots: keep only the first decimal point
+    const parts = str.split(".");
+    if (parts.length > 2) {
+      str = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Always prefix with minus sign
+    return `-${str}`;
+  };
+
+  const handleNegativeMarksBlur = (index) => {
+    setQuestionBlocks((prev) =>
+      prev.map((block, i) => {
+        if (i !== index) return block;
+        const val = String(block.negative_marks ?? "").trim();
+        if (val === "" || val === "-" || val === "-." || val === "-0.") {
+          return { ...block, negative_marks: 0 };
+        }
+        const num = Number(val);
+        if (!isNaN(num)) {
+          return { ...block, negative_marks: num === 0 ? 0 : -Math.abs(num) };
+        }
+        return { ...block, negative_marks: 0 };
+      })
+    );
   };
 
   const handleBlockChange = (index, field, value) => {
@@ -110,13 +155,7 @@ function EditAssessment() {
                         ? 1
                         : Math.abs(Number(value))
                   : field === "negative_marks"
-                    ? value === "" || value === null
-                      ? null
-                      : value === "-" || value.toString().endsWith(".")
-                        ? value
-                        : isNaN(Number(value))
-                          ? 0
-                          : Number(value)
+                    ? formatNegativeMarksInput(value)
                     : value,
           }
           : block
@@ -195,7 +234,7 @@ function EditAssessment() {
         : Math.abs(Number(b.positive_marks) || 1);
       const neg = b.negative_marks === "" || b.negative_marks === "-" || b.negative_marks == null
         ? 0
-        : (isNaN(Number(b.negative_marks)) ? 0 : Number(b.negative_marks));
+        : (isNaN(Number(b.negative_marks)) ? 0 : (Number(b.negative_marks) === 0 ? 0 : -Math.abs(Number(b.negative_marks))));
       return {
         ...b,
         question_count: Math.max(1, Number(b.question_count) || 1),
@@ -660,13 +699,25 @@ function EditAssessment() {
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
                         <input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={block.negative_marks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
-                          step="0.05"
-                          placeholder="e.g. -0.25 or 0.25"
+                          onBlur={() => handleNegativeMarksBlur(index)}
+                          onKeyDown={(e) => {
+                            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                              e.preventDefault();
+                              const current = Number(block.negative_marks) || 0;
+                              const step = 0.05;
+                              const nextVal = e.key === "ArrowUp"
+                                ? Math.min(0, Number((current + step).toFixed(2)))
+                                : Math.max(-100, Number((current - step).toFixed(2)));
+                              handleBlockChange(index, "negative_marks", nextVal === 0 ? 0 : nextVal);
+                            }
+                          }}
+                          placeholder="e.g. -0.25"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
+                          disabled={currentAssessment.is_executed || isProcessing}
                         />
                         <span className="text-[11px] text-muted-foreground mt-1 block">
                           Deduction must be less than total marks ({block.positive_marks || 1})

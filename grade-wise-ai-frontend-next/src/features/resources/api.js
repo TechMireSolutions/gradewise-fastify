@@ -8,7 +8,8 @@ export const fetchAllResourcesAPI = () =>
 
 export const uploadResourcesAPI = (files) => {
   const formData = new FormData();
-  files.forEach((file) => formData.append("files", file));
+  const fileList = Array.isArray(files) ? files : files ? Array.from(files) : [];
+  fileList.forEach((file) => formData.append("files", file));
 
   return apiClient.post("/resources", formData, {
     headers: {

@@ -125,7 +125,7 @@ function InstructorDashboard() {
 
   const statsData = [
     {
-      value: overview.assessments || 0,
+      value: overview?.assessments || 0,
       label: "My Assessments",
       icon: <FaClipboardList className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4 sm:p-5",
@@ -133,7 +133,7 @@ function InstructorDashboard() {
       valueClass: "text-2xl sm:text-3xl font-bold text-foreground leading-none",
     },
     {
-      value: overview.resources || 0,
+      value: overview?.resources || 0,
       label: "Resources",
       icon: <FaBook className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 sm:p-5",
@@ -141,7 +141,7 @@ function InstructorDashboard() {
       valueClass: "text-2xl sm:text-3xl font-bold text-foreground leading-none",
     },
     {
-      value: overview.executedAssessments || 0,
+      value: overview?.executedAssessments || 0,
       label: "Executed Assessments",
       icon: <FaChartBar className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-amber-500/30 rounded-xl p-4 sm:p-5",
@@ -242,7 +242,7 @@ function InstructorDashboard() {
             </div>
           </div>
           <div className="p-4 sm:p-6 lg:p-8">
-            {!assessments || assessments.length === 0 ? (
+            {!Array.isArray(assessments) || assessments.length === 0 ? (
               <EmptyState
                 icon={FaPen}
                 title="No assessments yet"
@@ -276,7 +276,7 @@ function InstructorDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                      {assessments.slice(0, 5).map((assessment) => (
+                      {(Array.isArray(assessments) ? assessments : []).slice(0, 5).map((assessment) => (
                         <tr key={assessment.id} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors", "duration-150")}>
                           <td className={cn("px-6", "py-4", "text-sm", "text-secondary-foreground")}>
                             <div className="flex items-center gap-3">
@@ -379,7 +379,7 @@ function InstructorDashboard() {
 
                 {/* Mobile/Tablet Cards */}
                 <div className="lg:hidden space-y-4">
-                  {assessments.slice(0, 5).map((assessment) => (
+                  {(Array.isArray(assessments) ? assessments : []).slice(0, 5).map((assessment) => (
                     <div
                       key={assessment.id}
                       className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"

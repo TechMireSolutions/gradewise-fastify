@@ -163,10 +163,13 @@ export const validateQuestionBlock = (block) => {
 
 export const validateFiles = (files) => {
   try {
+    if (!files || (typeof files !== "object" && !Array.isArray(files))) {
+      return { success: true, data: [] };
+    }
     const fileObjects = Array.from(files).map(file => ({
-      name: file.name,
-      size: file.size,
-      type: file.type
+      name: file?.name || "",
+      size: file?.size || 0,
+      type: file?.type || ""
     }));
     
     fileObjects.forEach(file => fileValidationSchema.parse(file));
@@ -176,6 +179,6 @@ export const validateFiles = (files) => {
     if (fieldErrors) {
       return { success: false, error: Object.values(fieldErrors)[0] };
     }
-    return { success: false, error: "File validation failed" };
+    return { success: false, error: error?.message || "File validation failed" };
   }
 };
