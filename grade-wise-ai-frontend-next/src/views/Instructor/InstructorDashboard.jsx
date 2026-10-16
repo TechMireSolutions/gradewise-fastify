@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
-import EmptyState from "../../components/ui/EmptyState.jsx";
-import Modal from "../../components/ui/Modal.jsx";
-import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
+import EmptyState from "@/components/ui/EmptyState.jsx";
+import Modal from "@/components/ui/Modal.jsx";
+import WelcomeBanner from "@/components/layout/WelcomeBanner.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import {
   FaEye,
   FaEdit,
@@ -28,8 +28,8 @@ import {
 } from "react-icons/fa";
 
 // Physical Paper Modal
-import PhysicalPaperModal from "../../components/PhysicalPaperModal.jsx";
-import useModal from "../../hooks/useModal.js";
+import PhysicalPaperModal from "@/components/PhysicalPaperModal.jsx";
+import useModal from "@/hooks/useModal.js";
 
 function InstructorDashboard() {
   const router = useRouter();

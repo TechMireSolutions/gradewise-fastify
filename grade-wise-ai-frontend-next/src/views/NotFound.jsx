@@ -2,7 +2,7 @@ import { cn } from "@/lib/cn.js";
 import { accentPanel, btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import Link from "next/link";
 import { FaHome, FaArrowLeft, FaQuestionCircle, FaBookOpen } from "react-icons/fa"
-import AmbientBackground from "../components/layout/AmbientBackground.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 
 function NotFound() {
   return (

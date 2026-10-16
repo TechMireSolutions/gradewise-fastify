@@ -3,7 +3,7 @@ import { btn, card, cardInteractive, eyebrowPill, headingGradient, heroTitle, ic
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import Link from "next/link"
 import useAuthStore from "@/features/auth/store.js"
-import AmbientBackground from "../components/layout/AmbientBackground.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import {
   FaRocket,
   FaChartLine,

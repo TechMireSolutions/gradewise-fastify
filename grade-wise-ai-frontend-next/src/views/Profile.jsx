@@ -3,7 +3,7 @@ import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
-import AmbientBackground from "../components/layout/AmbientBackground.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import {
   FaUser,
   FaEnvelope,

@@ -17,7 +17,7 @@ import {
   parseUnifiedAssignmentQuestionsFromAI,
 } from "../assessments/question-generation.js";
 
-function createFallbackQuestion(questionType: string, index: number) {
+export function createFallbackQuestion(questionType: string, index: number) {
   return {
     question_text: `Question ${index} (generation failed)`,
     question_type: questionType,
@@ -29,7 +29,7 @@ function createFallbackQuestion(questionType: string, index: number) {
   };
 }
 
-function sanitizeQuestion(q: GeneratedQuestion) {
+export function sanitizeQuestion(q: GeneratedQuestion) {
   return {
     id: q.id,
     questionOrder: q.questionOrder,
@@ -179,5 +179,3 @@ export async function countAttemptQuestions(attemptId: number): Promise<number> 
     .where(eq(generatedQuestions.attemptId, attemptId));
   return questions.length;
 }
-
-export { sanitizeQuestion };

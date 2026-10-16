@@ -3,12 +3,12 @@ import { accentPanel, card, cardHeader, cardInteractive, iconBadge, page, tableH
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
-import LoadingSpinner from "../../../components/ui/LoadingSpinner";
-import Modal from "../../../components/ui/Modal";
-import AddStudent from "../AddStudent.jsx";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Modal from "@/components/ui/Modal";
+import AddStudent from "@/views/Instructor/AddStudent.jsx";
 import { FaUserGraduate, FaUserMinus, FaUsers } from "react-icons/fa";
-import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
-import useModal from "../../../hooks/useModal.js";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import useModal from "@/hooks/useModal.js";
 
 function EnrollStudents() {
   const params = useParams();

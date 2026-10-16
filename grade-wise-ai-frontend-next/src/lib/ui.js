@@ -55,19 +55,19 @@ export const eyebrowPill =
   "inline-flex items-center gap-2 rounded-full border border-indigo-500/22 bg-indigo-500/10 px-4 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-indigo-700 dark:border-indigo-500/25 dark:bg-indigo-500/12 dark:text-indigo-300";
 
 export const pageTitle =
-  "text-[clamp(1.75rem,4vw,2.25rem)] font-bold leading-tight tracking-tight text-foreground";
+  "text-[clamp(1.75rem,4vw,2.25rem)] font-bold leading-tight tracking-tight text-foreground text-balance";
 
 export const heroTitle =
-  "text-[clamp(1.875rem,5vw,4.5rem)] font-extrabold leading-tight tracking-tight text-foreground";
+  "text-[clamp(1.875rem,5vw,4.5rem)] font-extrabold leading-tight tracking-tight text-foreground text-balance";
 
 export const pageDesc =
-  "max-w-xl text-[0.9375rem] leading-relaxed text-muted-foreground";
+  "max-w-xl text-[0.9375rem] leading-relaxed text-muted-foreground text-pretty";
 
 export const headingGradient =
   "inline text-indigo-700 dark:text-indigo-300 bg-gradient-to-br from-indigo-600 via-violet-600 to-teal-600 bg-clip-text [-webkit-text-fill-color:transparent] dark:from-indigo-400 dark:via-violet-400 dark:to-teal-400";
 
 export const sectionTitle =
-  "flex items-center gap-3 text-xl font-bold text-foreground";
+  "flex items-center gap-3 text-xl font-bold text-foreground text-balance";
 
 export const iconBadge =
   "flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 p-2.5 text-white shadow-lg shadow-indigo-500/45";

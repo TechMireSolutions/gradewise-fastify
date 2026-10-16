@@ -150,12 +150,16 @@ src/features/<domain>/
 - **Client state**: Zustand (auth user, theme, assessment-taking state, UI state)
 - **Forms**: react-hook-form + Zod resolver
 
-### Tailwind v4
+### Tailwind v4 & Modern Web Standards
 
 - No `tailwind.config.js` — CSS-first config in `globals.css`
-- `@theme inline {}` block with custom tokens (edu-navy, edu-teal, edu-sky, edu-gold)
-- Dark mode via `.dark` class on `<html>`
+- `@theme inline {}` block with semantic color tokens
+- Dark mode via `.dark` class on `<html>` (`color-scheme: light/dark` synced)
 - `cn()` utility for class merging
+- **Typography (`improve-text-layout-and-legibility`)**: `text-wrap: balance` on headings ($\le 6$ lines); `text-wrap: pretty` on paragraphs.
+- **Forms & A11y (`validate-input-after-interaction`, `accessible-error-announcement`)**: Use `:user-invalid` / `:user-valid` and sync with `aria-invalid` and `aria-errormessage`.
+- **Modals (`prevent-page-scroll-under-modal-dialog`)**: Pure CSS scroll containment via `overscroll-behavior: contain` on `<dialog>` and `::backdrop`; never lock body scroll with `overflow: hidden`.
+- **Performance (`defer-rendering-heavy-content`)**: `content-visibility: auto` + `contain-intrinsic-size` on long question lists or heavy tables.
 
 ---
 

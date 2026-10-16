@@ -13,7 +13,7 @@ import {
 
 export type { ProviderType, PurposeType };
 
-function maskKey(key: string): string {
+export function maskKey(key: string): string {
   if (key.length <= 8) return "••••••••";
   return `${key.substring(0, 6)}••••${key.substring(key.length - 4)}`;
 }

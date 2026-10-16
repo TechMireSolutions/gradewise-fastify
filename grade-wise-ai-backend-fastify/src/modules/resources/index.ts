@@ -9,6 +9,7 @@ import {
 } from "./resources.service.js";
 import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
 import { ResourceIdParamSchema } from "../../schemas/common.js";
+import { type ResourceVisibility } from "./resources.schema.js";
 import { toHttpError } from "../../utils/errors.js";
 
 export default async function resourcesRoutes(app: FastifyInstance) {
@@ -23,7 +24,7 @@ export default async function resourcesRoutes(app: FastifyInstance) {
       const files: Array<{ buffer: Buffer; filename: string; mimetype: string }> = [];
       let name: string | undefined;
       let url: string | undefined;
-      let visibility: "private" | "public" = "private";
+      let visibility: ResourceVisibility = "private";
 
       const parts = request.parts();
       for await (const part of parts) {

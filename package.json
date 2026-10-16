@@ -1,0 +1,21 @@
+{
+  "name": "gradewiseai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GradeWise AI - Intelligent Assessment Platform Monorepo",
+  "scripts": {
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "npm --prefix grade-wise-ai-backend-fastify test",
+    "test:frontend": "npm --prefix grade-wise-ai-frontend-next run test:unit",
+    "test:e2e": "npm --prefix grade-wise-ai-frontend-next run test:e2e",
+    "typecheck": "npm --prefix grade-wise-ai-backend-fastify run typecheck",
+    "lint": "npm --prefix grade-wise-ai-frontend-next run lint",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "npm --prefix grade-wise-ai-backend-fastify run build",
+    "build:frontend": "npm --prefix grade-wise-ai-frontend-next run build",
+    "check:all": "npm run typecheck && npm run lint && npm run test"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

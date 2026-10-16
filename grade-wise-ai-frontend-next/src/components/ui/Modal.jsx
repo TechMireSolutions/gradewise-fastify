@@ -50,12 +50,6 @@ function Modal({
     };
   }, [isOpen, isConfirmModal, handleClose]);
 
-  // Prevent background scroll
-  useEffect(() => {
-    if (isOpen) document.body.style.overflow = "hidden";
-    return () => (document.body.style.overflow = "unset");
-  }, [isOpen]);
-
   // Escape key handler
   useEffect(() => {
     if (!isOpen) return;
@@ -121,7 +115,7 @@ function Modal({
 
   return (
     <div className={`fixed inset-0 ${zIndex} pointer-events-none`}>
-      <div className="fixed top-4 right-4 left-1 sm:left-auto sm:right-6 md:right-8 pointer-events-auto w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
+      <div className="fixed top-4 right-4 left-1 sm:left-auto sm:right-6 md:right-8 pointer-events-auto w-full sm:max-w-md md:max-w-lg lg:max-w-xl overscroll-contain">
         <div
           role={ariaRole}
           aria-modal={isConfirmModal ? "true" : undefined}

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
-const VerifyEmail = dynamic(() => import("@/views/VerifyEmail"), { ssr: false });
+const VerifyEmail = dynamic(() => import("@/views/Auth/VerifyEmail"), { ssr: false });
 
 export default function Page() {
   return (

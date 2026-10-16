@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import LoadingSpinner from "../../../components/ui/LoadingSpinner";
-import Modal from "../../../components/ui/Modal";
-import { validateAssessmentForm, validateFiles } from "../../../schemas/editAssessmentSchemas.js";
-import { assessmentLanguages } from "../../../schemas/assessmentSchemas.js";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Modal from "@/components/ui/Modal";
+import { validateAssessmentForm, validateFiles } from "@/schemas/editAssessmentSchemas.js";
+import { assessmentLanguages } from "@/schemas/assessmentSchemas.js";
 import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave, FaChevronDown } from "react-icons/fa";
-import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
-import useModal from "../../../hooks/useModal.js";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import useModal from "@/hooks/useModal.js";
 
 function EditAssessment() {
   const { id } = useParams();

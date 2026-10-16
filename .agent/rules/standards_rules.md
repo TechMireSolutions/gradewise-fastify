@@ -359,5 +359,6 @@ Before marking work complete:
 - [ ] Names follow Policy 3 tables
 - [ ] No duplicate logic when shared module exists (Policy 4)
 - [ ] Auth uses cookies, not localStorage tokens (Policy 5)
+- [ ] Modern web standards verified (`ui.md` & `frontend_rules.md`: text-wrap balance/pretty, :user-invalid, CSS dialog overscroll containment, accessible errors)
 - [ ] `npm run build` + `npm run lint` (frontend) pass
 - [ ] `npm run typecheck` + `npm run build` + `npm test` (backend) pass

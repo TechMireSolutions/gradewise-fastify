@@ -2,8 +2,8 @@ import { cn } from "@/lib/cn.js";
 import { accentPanel, card as uiCard, iconBadge, page, tableHead, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
-import Modal from "../../components/ui/Modal.jsx";
+import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
+import Modal from "@/components/ui/Modal.jsx";
 import {
   listAiKeys,
   getAiSummary,
@@ -13,8 +13,8 @@ import {
   testStoredAiKey,
   testInlineAiKey,
 } from "@/features/ai-config/api.js";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
-import useModal from "../../hooks/useModal.js";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import useModal from "@/hooks/useModal.js";
 import {
   FaKey,
   FaFileAlt,

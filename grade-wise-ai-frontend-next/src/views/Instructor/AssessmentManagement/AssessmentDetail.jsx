@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
-import LoadingSpinner from "../../../components/ui/LoadingSpinner";
-import Modal from "../../../components/ui/Modal";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Modal from "@/components/ui/Modal";
 import { FaInfoCircle, FaCalendarAlt, FaLink, FaQuestionCircle, FaFileAlt, FaExclamationCircle, FaEdit, FaUsers, FaPrint, FaArrowLeft, FaCheckCircle, FaLock, FaGlobe } from "react-icons/fa";
-import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 
 // THIS IS THE MISSING IMPORT — NOW ADDED
-import PhysicalPaperModal from "../../../components/PhysicalPaperModal.jsx";
-import useModal from "../../../hooks/useModal.js";
+import PhysicalPaperModal from "@/components/PhysicalPaperModal.jsx";
+import useModal from "@/hooks/useModal.js";
 
 
 function AssessmentDetail() {

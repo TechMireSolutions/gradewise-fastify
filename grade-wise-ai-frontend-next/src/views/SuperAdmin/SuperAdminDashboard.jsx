@@ -2,11 +2,11 @@ import { cn } from "@/lib/cn.js";
 import { card, iconBadge, page } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Link from "next/link";
-import Modal from "../../components/ui/Modal.jsx";
-import PageLoader from "../../components/ui/PageLoader.jsx";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
-import UserManagementTable, { UserStatsGrid } from "../../components/admin/UserManagementTable.jsx";
-import useUserManagement from "../../hooks/useUserManagement.js";
+import Modal from "@/components/ui/Modal.jsx";
+import PageLoader from "@/components/ui/PageLoader.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import UserManagementTable, { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
+import useUserManagement from "@/hooks/useUserManagement.js";
 import {
   FaUsers,
   FaCrown,

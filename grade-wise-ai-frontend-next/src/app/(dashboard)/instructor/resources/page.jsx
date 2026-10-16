@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 
-const ProtectedRoute = dynamic(() => import("@/components/ProtectedRoutes"), { ssr: false });
-const ResourceManagement = dynamic(() => import("@/views/Instructor/AssessmentManagement/ResourceManagement"), { ssr: false });
+const ProtectedRoute = dynamic(() => import("@/components/auth/ProtectedRoute"), { ssr: false });
+const ResourceManagement = dynamic(() => import("@/views/Instructor/ResourceManagement"), { ssr: false });
 
 export default function Page() {
   return (

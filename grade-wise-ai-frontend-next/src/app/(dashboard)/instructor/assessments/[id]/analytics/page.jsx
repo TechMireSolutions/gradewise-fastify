@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-const ProtectedRoute = dynamic(() => import("@/components/ProtectedRoutes"), { ssr: false });
+const ProtectedRoute = dynamic(() => import("@/components/auth/ProtectedRoute"), { ssr: false });
 const AssessmentAnalytics = dynamic(() => import("@/views/Instructor/AssessmentManagement/AssessmentAnalytics"), { ssr: false });
 
 export default function Page() {

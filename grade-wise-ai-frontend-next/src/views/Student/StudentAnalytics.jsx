@@ -3,12 +3,12 @@ import { cn } from "@/lib/cn.js";
 
 import { card, page } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
-import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import apiClient from "@/lib/apiClient.js";
-import Modal from "../../components/ui/Modal.jsx";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
-import useModal from "../../hooks/useModal.js";
+import Modal from "@/components/ui/Modal.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import useModal from "@/hooks/useModal.js";
 
 const StudentAnalytics = () => {
   const {

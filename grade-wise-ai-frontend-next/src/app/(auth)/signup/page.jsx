@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-const Signup = dynamic(() => import("@/views/Signup"), { ssr: false });
+const Signup = dynamic(() => import("@/views/Auth/Signup"), { ssr: false });
 
 export default function Page() {
   return <Signup />;

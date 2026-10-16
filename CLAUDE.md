@@ -106,6 +106,7 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 - **RTL support** — exam layout supports RTL via `dir="rtl"` and `font-quran` font family
 - **Google Auth** — Firebase redirect flow (`signInWithRedirect` on click + `getRedirectResult` in `Login`/`Signup` `useEffect`) → `getIdToken()` → POST to `/api/auth/google-auth` → instant role-based redirect (`router.replace`, no success modal/delay)
 - **Auto logout** — 1h inactivity idle timer in `src/components/AutoLogout.jsx`, mounted in `Providers.jsx`
+- **Modern Web Standards** — `text-wrap: balance` for headings, `text-wrap: pretty` for body paragraphs, `:user-invalid` for form feedback, pure CSS overscroll containment on dialogs (`overscroll-behavior: contain`), no body scroll locking, and `content-visibility: auto` for heavy question rendering
 
 ---
 

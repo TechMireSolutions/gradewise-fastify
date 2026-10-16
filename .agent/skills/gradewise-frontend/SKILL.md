@@ -153,6 +153,9 @@ Use `utils/roleDisplay.js` + `StatusBadge` — dual-theme contrast (`text-*-700 
 - **Add custom CSS classes** or shadcn components
 - **Import `cn` from `ui.js`** (only from `cn.js`)
 - Duplicate gradient button strings (use `btn.primary`)
+- Lock page scroll by modifying `overflow` on `body`/`html` for modals (use CSS `overscroll-behavior: contain`)
+- Set `user-select: none` on readable body copy or questions
+- Use raw `:invalid` for visual form validation (use `:user-invalid`)
 
 ## Async Assessment UI
 

@@ -1,9 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
 import { IdParamSchema } from "../../schemas/common.js";
+import { StudentPerformanceQuerySchema } from "./student-analytics.schema.js";
 import { toHttpError } from "../../utils/errors.js";
 import {
   getStudentOverview,
@@ -45,9 +45,7 @@ export default async function studentAnalyticsModule(app: FastifyInstance) {
   f.get("/performance", {
     preHandler: [authenticate],
     schema: {
-      querystring: z.object({
-        timeRange: z.enum(["7d", "30d", "90d", "all"]).optional().default("30d"),
-      }),
+      querystring: StudentPerformanceQuerySchema,
     },
   }, async (request, reply) => {
     try {

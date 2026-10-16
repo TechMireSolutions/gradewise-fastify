@@ -5,8 +5,8 @@ import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import useAuthStore from "@/features/auth/store.js";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
-import WelcomeBanner from "../../components/layout/WelcomeBanner.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import WelcomeBanner from "@/components/layout/WelcomeBanner.jsx";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import {
   FaClipboardList,

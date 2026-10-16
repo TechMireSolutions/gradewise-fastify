@@ -3,7 +3,10 @@ import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
 import { INSTRUCTOR_ROLES } from "../../constants/roles.js";
-import { IdParamSchema, IdStudentIdParamSchema } from "../../schemas/common.js";
+import {
+  AssessmentIdParamsSchema,
+  AssessmentStudentParamsSchema,
+} from "./instructor-analytics.schema.js";
 import { toHttpError } from "../../utils/errors.js";
 import {
   getInstructorOverview,
@@ -43,7 +46,7 @@ export default async function instructorAnalyticsModule(app: FastifyInstance) {
 
   f.get("/assessment/:id/students", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: IdParamSchema },
+    schema: { params: AssessmentIdParamsSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };
@@ -57,7 +60,7 @@ export default async function instructorAnalyticsModule(app: FastifyInstance) {
 
   f.get("/assessment/:id/student/:studentId/questions", {
     preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
-    schema: { params: IdStudentIdParamSchema },
+    schema: { params: AssessmentStudentParamsSchema },
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number; role: string };

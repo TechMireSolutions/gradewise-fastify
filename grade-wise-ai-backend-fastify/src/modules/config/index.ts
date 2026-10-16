@@ -1,6 +1,5 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
 import { toHttpError } from "../../utils/errors.js";
@@ -16,9 +15,14 @@ import {
 } from "./config.service.js";
 import { buildConfigKey } from "../../ai/constants.js";
 import { decryptSecret } from "../../utils/crypto.js";
-
-const ProviderEnum = z.enum(["gemini", "groq", "openai", "claude", "mistral", "deepseek"]);
-const PurposeEnum = z.enum(["text", "pdf"]);
+import {
+  BulkUpdateConfigsSchema,
+  AddAiKeysSchema,
+  SetProviderModelSchema,
+  DeleteAiKeySchema,
+  TestAiKeySchema,
+  TestInlineAiKeySchema,
+} from "./config.schema.js";
 
 export default async function configModule(app: FastifyInstance) {
   const f = app.withTypeProvider<ZodTypeProvider>();
@@ -39,9 +43,7 @@ export default async function configModule(app: FastifyInstance) {
   f.post("/bulk-update", {
     preHandler: superAdminOnly,
     schema: {
-      body: z.object({
-        configs: z.array(z.object({ key: z.string(), value: z.string() })),
-      }),
+      body: BulkUpdateConfigsSchema,
     },
   }, async (request, reply) => {
     try {
@@ -79,12 +81,7 @@ export default async function configModule(app: FastifyInstance) {
   f.post("/ai-keys/add", {
     preHandler: superAdminOnly,
     schema: {
-      body: z.object({
-        provider: ProviderEnum,
-        purpose: PurposeEnum,
-        keys: z.array(z.string().min(1)),
-        model: z.string().min(1).optional(),
-      }),
+      body: AddAiKeysSchema,
     },
   }, async (request, reply) => {
     try {
@@ -103,11 +100,7 @@ export default async function configModule(app: FastifyInstance) {
   f.post("/ai-keys/model", {
     preHandler: superAdminOnly,
     schema: {
-      body: z.object({
-        provider: ProviderEnum,
-        purpose: PurposeEnum,
-        model: z.string().min(1),
-      }),
+      body: SetProviderModelSchema,
     },
   }, async (request, reply) => {
     try {
@@ -123,11 +116,7 @@ export default async function configModule(app: FastifyInstance) {
   f.delete("/ai-keys", {
     preHandler: superAdminOnly,
     schema: {
-      body: z.object({
-        provider: ProviderEnum,
-        purpose: PurposeEnum,
-        keyIndex: z.number().int().min(0),
-      }),
+      body: DeleteAiKeySchema,
     },
   }, async (request, reply) => {
     try {
@@ -143,11 +132,7 @@ export default async function configModule(app: FastifyInstance) {
   f.post("/ai-keys/test", {
     preHandler: superAdminOnly,
     schema: {
-      body: z.object({
-        provider: ProviderEnum,
-        purpose: PurposeEnum,
-        keyIndex: z.number().int().min(0),
-      }),
+      body: TestAiKeySchema,
     },
   }, async (request, reply) => {
     try {
@@ -178,11 +163,7 @@ export default async function configModule(app: FastifyInstance) {
   f.post("/ai-keys/test-inline", {
     preHandler: superAdminOnly,
     schema: {
-      body: z.object({
-        provider: ProviderEnum,
-        apiKey: z.string().min(1),
-        model: z.string().optional(),
-      }),
+      body: TestInlineAiKeySchema,
     },
   }, async (request, reply) => {
     try {

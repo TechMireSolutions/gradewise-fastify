@@ -110,12 +110,48 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 | `AuthPageLayout` | Auth pages + theme toggle |
 | `AmbientBackground` | Decorative blobs |
 
-## Light / dark mode
+## Light / dark mode & browser theming
 
 - Default: **`system`** (respects `prefers-color-scheme` on first visit).
-- Toggle sets explicit `light` \| `dark` (stored in `theme-storage`).
+- Toggle sets explicit `light` | `dark` (stored in `theme-storage`).
 - **Never hardcode** `bg-slate-800`, `text-white`, `hover:text-white` — use semantic tokens.
 - Status colors: `text-emerald-700 dark:text-emerald-400` pattern (see `StatusBadge.jsx`).
+- **`color-scheme`**: Maintain `color-scheme: light` in `:root` and `color-scheme: dark` in `.dark` so native form controls, dialogs, and scrollbars adapt without custom CSS (`browser-ui-theming`).
+- **`accent-color`**: Bound to `--app-accent` for native controls (checkboxes, radio buttons, sliders).
+- **Text selection**: Style `::selection` with brand tokens (`bg-indigo-500/25 text-foreground`). **Never** apply `user-select: none` to readable content text (breaks copy-paste, translation tools, and screen reader "read from here" gestures); restrict `user-select: none` strictly to UI chrome (drag handles, action chips).
+- **Scrollbars**: Use standard `scrollbar-color` and `scrollbar-width: thin`. Ensure $\ge 3:1$ contrast between thumb and track. **Never** set `scrollbar-width: none` or `overflow: hidden` on scrollable regions without providing an alternate scrolling affordance.
+
+## Modern typography & text wrapping
+
+Per `modern-web-guidance` (`improve-text-layout-and-legibility`):
+- **Headings & Titles**: Apply `text-wrap: balance` to headings (`h1`–`h6`, `pageTitle`, `heroTitle`, card headers) up to 6 lines to ensure symmetrical line breaks and eliminate awkward hanging single words.
+- **DO NOT** apply `text-wrap: balance` globally (e.g., `* { text-wrap: balance; }`) — it uses a binary-search algorithm that is computationally expensive for large content blocks.
+- **Body copy & Paragraphs**: Apply `text-wrap: pretty` to multi-line paragraphs, questions text, and blockquotes (`p`, `blockquote`, `li`) to prevent orphaned words ("runts") on the final line.
+
+## Modals, dialogs & top layer
+
+Per `modern-web-guidance` (`prevent-page-scroll-under-modal-dialog`, `animate-to-from-top-layer`):
+- **Pure CSS scroll containment**:
+  ```css
+  dialog:modal { overscroll-behavior: contain; }
+  dialog::backdrop { overflow: hidden; overscroll-behavior: contain; }
+  ```
+  `::backdrop` defaults to `overflow: visible` (not a scroll container); setting `overflow: hidden` makes it a non-scrollable scroll container that honors `overscroll-behavior`.
+- **DO NOT** lock background page scrolling by setting `overflow: hidden` or `position: fixed` on `<html>` or `<body>` when opening dialogs. Mutating root overflow removes the scrollbar (causing horizontal layout shift), can jump scroll position, and breaks `position: sticky` on the underlying page.
+- **Top-layer transitions**: Modals and popovers entering/exiting the top layer must declare `transition-behavior: allow-discrete` and include `overlay` and `display` in their transition property list, paired with `@starting-style` and `prefers-reduced-motion` fallbacks.
+
+## Modern form states & validation
+
+Per `modern-web-guidance` (`validate-input-after-interaction`, `accessible-error-announcement`):
+- **Validation state**: Use `:user-invalid` and `:user-valid` rather than raw `:invalid` / `:valid` for visual validity indicators. This avoids the hostile pattern of flagging required-empty fields as invalid on initial page load.
+- **Accessibility synchronization**: Screen readers do not automatically sync `:user-invalid`. Synchronize `aria-invalid="true"` and link `aria-errormessage` (or `aria-describedby`) to the error message element upon user blur/input.
+- **IME-safe submission**: In input `onKeyDown` handlers for Enter-submit, always guard against IME composition sessions (`if (event.nativeEvent.isComposing) return;`) to prevent premature submission for multilingual users (Urdu, Arabic, Persian, CJK).
+
+## Component-level responsiveness & performance
+
+Per `modern-web-guidance` (`size-aware-styling`, `defer-rendering-heavy-content`):
+- **Container queries**: Prefer `@container` (Tailwind 4 container queries) over viewport media queries for encapsulated components (question cards, analytics metric cards, modal sidebars) so components respond to their container width.
+- **Heavy list rendering**: On long lists of questions (e.g. 50+ item exam sheets) or large tables, apply `content-visibility: auto` with `contain-intrinsic-size` to defer layout and paint for off-screen items, dramatically optimizing Largest Contentful Paint (LCP) and Interaction to Next Paint (INP).
 
 ## Accessibility (required)
 
@@ -140,8 +176,12 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 - ❌ Duplicating `btn.primary` gradient string in views
 - ❌ `style={{ backgroundColor: … }}` for theme colors (use tokens)
 - ❌ Importing `cn` from `ui.js` (only from `cn.js`)
+- ❌ `overflow: hidden` on `body` for modals (use CSS `overscroll-behavior: contain`)
+- ❌ `user-select: none` on readable body text or question items
+- ❌ `:invalid` styling applied prematurely on load (use `:user-invalid`)
 
 ## Icons
 
 - SVG only: `react-icons/fa` or `lucide-react`.
 - No emojis in navigation or structural UI.
+

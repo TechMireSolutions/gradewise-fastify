@@ -13,7 +13,7 @@ export async function getResourcesService(userId: number): Promise<Resource[]> {
     .orderBy(sql`${resources.createdAt} DESC`);
 }
 
-async function extractTextFromFile(file: {
+export async function extractTextFromFile(file: {
   buffer: Buffer;
   filename: string;
   mimetype: string;

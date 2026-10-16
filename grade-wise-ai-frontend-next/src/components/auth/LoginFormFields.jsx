@@ -10,22 +10,35 @@ export default function LoginFormFields({
   emailPlaceholder = "Enter your email address",
   passwordPlaceholder = "Enter your password",
 }) {
+  const handleKeyDown = (event) => {
+    // Guard against IME composition session (Urdu, Arabic, Persian keyboards)
+    if (event.nativeEvent?.isComposing) {
+      return;
+    }
+  };
+
   return (
     <>
       <div>
-        <label className={label}>{emailLabel}</label>
+        <label htmlFor="login-email" className={label}>
+          {emailLabel}
+        </label>
         <div className="relative">
           <FaEnvelope className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
+            id="login-email"
             {...register("email")}
             type="email"
             autoComplete="email"
+            aria-invalid={Boolean(errors.email) ? "true" : undefined}
+            aria-errormessage={errors.email ? "login-email-error" : undefined}
+            onKeyDown={handleKeyDown}
             className={cn(input, errors.email && inputError)}
             placeholder={emailPlaceholder}
           />
         </div>
         {errors.email && (
-          <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+          <p id="login-email-error" role="alert" className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
             <FaExclamationTriangle className="flex-shrink-0" />
             {errors.email.message}
           </p>
@@ -33,19 +46,25 @@ export default function LoginFormFields({
       </div>
 
       <div>
-        <label className={label}>{passwordLabel}</label>
+        <label htmlFor="login-password" className={label}>
+          {passwordLabel}
+        </label>
         <div className="relative">
           <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
           <input
+            id="login-password"
             {...register("password")}
             type="password"
             autoComplete="current-password"
+            aria-invalid={Boolean(errors.password) ? "true" : undefined}
+            aria-errormessage={errors.password ? "login-password-error" : undefined}
+            onKeyDown={handleKeyDown}
             className={cn(input, errors.password && inputError)}
             placeholder={passwordPlaceholder}
           />
         </div>
         {errors.password && (
-          <p className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
+          <p id="login-password-error" role="alert" className="mt-1.5 text-xs text-red-400 flex items-center gap-1.5">
             <FaExclamationTriangle className="flex-shrink-0" />
             {errors.password.message}
           </p>

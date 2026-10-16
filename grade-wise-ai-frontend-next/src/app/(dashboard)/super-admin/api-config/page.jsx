@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-const ProtectedRoute = dynamic(() => import("@/components/ProtectedRoutes"), { ssr: false });
+const ProtectedRoute = dynamic(() => import("@/components/auth/ProtectedRoute"), { ssr: false });
 const SuperAdminApiConfig = dynamic(() => import("@/views/SuperAdmin/SuperAdminApiConfig"), { ssr: false });
 
 export default function Page() {

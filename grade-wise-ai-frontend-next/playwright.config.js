@@ -11,11 +11,9 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: process.env.CI
-    ? {
-        command: "npm run start",
-        port: 3000,
-        reuseExistingServer: false,
-      }
-    : undefined,
+  webServer: {
+    command: "npm run start",
+    port: 3000,
+    reuseExistingServer: !process.env.CI,
+  },
 });

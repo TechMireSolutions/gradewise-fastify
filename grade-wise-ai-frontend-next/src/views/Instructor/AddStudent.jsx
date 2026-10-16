@@ -4,16 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useAuthStore from "@/features/auth/store.js";
-import LoadingSpinner from "../../components/ui/LoadingSpinner";
-import Modal from "../../components/ui/Modal";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Modal from "@/components/ui/Modal";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaArrowLeft, FaUserGraduate, FaUserShield } from "react-icons/fa";
 import {
   registerStudentSchema,
   enrollStudentSchema,
-} from "../../schemas/studentSchemas.js";
-import useModal from "../../hooks/useModal.js";
-import { parseZodFieldErrors } from "../../utils/parseZodFieldErrors.js";
+} from "@/schemas/studentSchemas.js";
+import useModal from "@/hooks/useModal.js";
+import { parseZodFieldErrors } from "@/utils/parseZodFieldErrors.js";
 
 
 function AddUser({ assessmentId, onStudentAdded, compact = false }) {

@@ -52,7 +52,7 @@ export function validateFiles(files) {
   } catch (error) {
     return {
       success: false,
-      error: error.errors?.[0]?.message || "Invalid file selection",
+      error: error.issues?.[0]?.message || error.errors?.[0]?.message || "Invalid file selection",
     };
   }
 }

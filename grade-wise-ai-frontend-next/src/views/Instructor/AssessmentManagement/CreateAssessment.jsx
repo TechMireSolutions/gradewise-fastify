@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import LoadingSpinner from "../../../components/ui/LoadingSpinner";
-import Modal from "../../../components/ui/Modal";
-import { createAssessmentSchema } from "../../../schemas/assessmentSchemas.js";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import Modal from "@/components/ui/Modal";
+import { createAssessmentSchema } from "@/schemas/assessmentSchemas.js";
 import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft, FiChevronDown } from "react-icons/fi";
-import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
-import useModal from "../../../hooks/useModal.js";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import useModal from "@/hooks/useModal.js";
 
 function CreateAssessment() {
   const router = useRouter();

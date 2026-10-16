@@ -1,7 +1,15 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const FIREBASE_AUTH_DOMAIN = "grade-wise-ai-v2.firebaseapp.com";
 
 const nextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   // output: "standalone"
   async rewrites() {
     return [

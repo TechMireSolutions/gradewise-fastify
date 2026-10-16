@@ -1,6 +1,5 @@
 import type { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { authenticate } from "../../hooks/authenticate.js";
 import { authorize } from "../../hooks/authorize.js";
 import { toHttpError } from "../../utils/errors.js";
@@ -8,6 +7,11 @@ import {
   AssessmentIdParamSchema,
   SubmissionIdParamSchema,
 } from "../../schemas/common.js";
+import {
+  StartAssessmentSchema,
+  SubmitAssessmentSchema,
+  AttemptStatusParamSchema,
+} from "./student-assessments.schema.js";
 import {
   startAssessmentService,
   submitAssessmentService,
@@ -23,7 +27,7 @@ export default async function studentAssessmentsModule(app: FastifyInstance) {
     preHandler: [authenticate, authorize("student")],
     schema: {
       params: AssessmentIdParamSchema,
-      body: z.object({ language: z.string().optional().default("en") }),
+      body: StartAssessmentSchema,
     },
   }, async (request, reply) => {
     try {
@@ -45,15 +49,7 @@ export default async function studentAssessmentsModule(app: FastifyInstance) {
     preHandler: [authenticate, authorize("student")],
     schema: {
       params: AssessmentIdParamSchema,
-      body: z.object({
-        attemptId: z.number().int().positive(),
-        answers: z.array(
-          z.object({
-            questionId: z.number().int().positive(),
-            answer: z.string(),
-          })
-        ),
-      }),
+      body: SubmitAssessmentSchema,
     },
   }, async (request, reply) => {
     try {
@@ -75,9 +71,7 @@ export default async function studentAssessmentsModule(app: FastifyInstance) {
   f.get("/assessments/:assessmentId/attempts/:attemptId/status", {
     preHandler: [authenticate, authorize("student")],
     schema: {
-      params: AssessmentIdParamSchema.extend({
-        attemptId: z.coerce.number().int().positive(),
-      }),
+      params: AttemptStatusParamSchema,
     },
   }, async (request, reply) => {
     try {

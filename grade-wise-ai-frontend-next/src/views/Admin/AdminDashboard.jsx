@@ -1,10 +1,10 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card, iconBadge, page } from "@/lib/ui.js";
 import { useEffect } from "react";
-import Modal from "../../components/ui/Modal.jsx";
-import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
-import UserManagementTable, { UserStatsGrid } from "../../components/admin/UserManagementTable.jsx";
-import useUserManagement from "../../hooks/useUserManagement.js";
+import Modal from "@/components/ui/Modal.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import UserManagementTable, { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
+import useUserManagement from "@/hooks/useUserManagement.js";
 import { FaUsers, FaCrown, FaSync } from "react-icons/fa";
 
 function AdminDashboard() {

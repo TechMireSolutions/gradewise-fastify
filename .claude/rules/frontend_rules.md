@@ -110,7 +110,19 @@ Views in `src/views/` may import `react-router-dom` — aliased to `react-router
 
 - `react-hook-form` + Zod from `src/schemas/` via `@hookform/resolvers/zod`.
 - Field errors via `parseZodFieldErrors` or RHF `errors.field.message`.
+- Accessibility: Link input errors to error messages via `aria-errormessage` or `aria-describedby` (`accessible-error-announcement`).
+- Modern validity: Use `:user-invalid` / `:user-valid` for field feedback to avoid premature error flags before interaction (`validate-input-after-interaction`).
+- IME-safe submit: On Enter keydown in inputs, guard with `if (event.nativeEvent?.isComposing) return;` for RTL and non-Latin input methods (`ime-safe-enter-submit`).
 - `react-hot-toast` or `Modal` — never `alert()`.
+
+## Performance & Web Guidance (CWV)
+
+Per `modern-web-guidance`:
+- **LCP Optimization:** Apply `fetchPriority="high"` on critical above-the-fold hero images; use `loading="lazy"` on below-the-fold media (`optimize-image-priority`).
+- **Offscreen List Rendering:** Long question blocks and data tables use `content-visibility: auto` with `contain-intrinsic-size` to defer off-screen rendering (`defer-rendering-heavy-content`).
+- **Typography:** Headings use `text-wrap: balance`; paragraphs and descriptions use `text-wrap: pretty` (`improve-text-layout-and-legibility`).
+- **Modal Scrolling:** Pure CSS scroll containment (`overscroll-behavior: contain`) on `<dialog>` and `::backdrop`; **never** lock scrolling by modifying `overflow` on `body`/`html` (`prevent-page-scroll-under-modal-dialog`).
+- **Long Tasks:** Heavy client data processing or PDF transforms broken up using `scheduler.yield()` or microtasks (`break-up-long-tasks`).
 
 ## Async Assessment Taking
 

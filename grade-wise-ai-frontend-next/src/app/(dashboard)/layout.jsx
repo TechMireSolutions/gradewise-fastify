@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 
-const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
-const Footer = dynamic(() => import("@/components/Footer"), { ssr: false });
+const Navbar = dynamic(() => import("@/components/layout/Navbar"), { ssr: false });
+const Footer = dynamic(() => import("@/components/layout/Footer"), { ssr: false });
 
 export default function DashboardLayout({ children }) {
   return (

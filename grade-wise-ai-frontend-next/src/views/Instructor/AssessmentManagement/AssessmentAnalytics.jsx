@@ -2,10 +2,10 @@ import { cn } from "@/lib/cn.js";
 import { accentPanel, btn, card, cardInteractive, iconBadge, page, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import LoadingSpinner from "../../../components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
 import { FaList, FaTable, FaCalendarAlt, FaCheckCircle, FaEye, FaChartBar, FaArrowUp, FaUsers, FaExclamationTriangle } from "react-icons/fa";
-import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 
 function AssessmentAnalytics() {
   const { assessmentId } = useParams();

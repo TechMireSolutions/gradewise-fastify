@@ -2,9 +2,9 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import ThemeProvider from "./ThemeProvider.jsx";
+import ThemeProvider from "./theme/ThemeProvider.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";
-import AutoLogout from "./AutoLogout.jsx";
+import AutoLogout from "./auth/AutoLogout.jsx";
 
 export default function Providers({ children }) {
   const [queryClient] = useState(

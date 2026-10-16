@@ -1,4 +1,4 @@
-import ProtectedRoute from "@/components/ProtectedRoutes";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import StudentDashboard from "@/views/Student/StudentDashboard";
 
 // Force Next.js to bypass static site generation directly on the server level

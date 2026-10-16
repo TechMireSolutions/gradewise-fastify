@@ -159,3 +159,198 @@ Removed files with zero references:
 ### Full AI Prompt blueprint
 
 - `buildBlockPrompt` gained `maxContextChars = 4000` default; the blueprint prompt service passes `50_000`, and `getAssessmentService` returns resource `chunks` so the **Full AI Prompt now includes full document content**.
+
+---
+
+## Phase 8 — Structural Reorganization, Modular Schemas & Standards (2026-10)
+
+### 1. Tooling & Workspace Cleanup
+- Removed lingering empty legacy directories `src/api` and `src/store` in `grade-wise-ai-frontend-next`.
+- Established `tsconfig.json` as single source of truth (deleted redundant `jsconfig.json`).
+- Fixed Next.js 16 / Turbopack root directory resolution (`turbopack: { root: __dirname }`).
+- Archived one-time migration scripts to `scripts/archive/`.
+
+### 2. Frontend Component Modularization & Architectural Barrels
+- Organized components into domain-driven subdirectories with backward-compatible re-exports:
+  - `components/layout/` (`Navbar`, `Footer`, `PageShell`, `AuthPageLayout`, `AmbientBackground`, `MainLandmark`, `SkipLink`, `WelcomeBanner`, `index.js`)
+  - `components/auth/` (`ProtectedRoute`, `AutoLogout`, `LoginFormFields`, `RememberedAccountCard`, `index.js`)
+  - `components/paper/` (`PhysicalPaperModal`, `PaperFormFields`, `FormattingOptions`, `index.js`)
+  - `components/assessments/` (`AssessmentHeader`, `AssessmentInfoCard`, `PromptTab`, `SampleQuestionsTab`, `QuestionCard`, `index.js`)
+  - `components/theme/` (`ThemeProvider`, `ThemeToggle`, `index.js`)
+  - `components/ui/index.js` (re-exports all 14 UI primitives)
+  - `schemas/index.js`, `hooks/index.js`, `utils/index.js`, and `views/index.js`
+  - Canonical domain barrels under `features/` (`auth`, `assessments`, `resources`, `student-assessment`, `instructor-analytics`, `student-analytics`, `ai-config`, `theme`)
+
+### 3. Modern Web Standards, CWV & Accessibility
+- **Modern Typography (CWV)**: Applied `text-balance` to headings/page titles and `text-pretty` to body descriptions in `src/lib/ui.js`.
+- **Pure CSS Modal Scroll Containment**: Eliminated `document.body.style.overflow = "hidden"` mutation in `Modal.jsx`, adopting `overscroll-contain` per `ui.md`.
+- **Off-Screen Rendering**: Added `[content-visibility:auto] [contain-intrinsic-size:1px_180px]` to `QuestionCard.jsx` to defer layout and paint for off-screen items on long assessments.
+- **IME-Safe Multilingual Input**: Added composition session checks (`if (event.nativeEvent?.isComposing) return;`) to `Input.jsx` and `LoginFormFields.jsx` for Urdu, Arabic, and Persian input methods.
+- **Accessible Form States**: Synchronized `aria-invalid` and `aria-errormessage` attributes across input primitives.
+
+### 4. Backend Modular Architecture & Test Suite Expansion
+- Enforced Policy 2 (`index.ts` thin routes + `<name>.service.ts` + `<name>.schema.ts`) across all modules:
+  - `config.schema.ts`, `resources.schema.ts`, `student-assessments.schema.ts`, `student-analytics.schema.ts`, `instructor-analytics.schema.ts`.
+- Expanded backend Vitest test suite from 1 to **13 test suites (77 tests, 100% passing)**:
+  - `errors.test.ts`, `crypto.test.ts`, `auth-cookie.test.ts`, `common.test.ts`
+  - `constants.test.ts`, `question-generation.test.ts`, `captcha.test.ts`
+  - `auth.schema.test.ts`, `assessments.schema.test.ts`, `resources.schema.test.ts`
+  - `student-assessments.schema.test.ts`, `config.schema.test.ts`, `instructor-analytics.schema.test.ts`
+- Expanded Playwright E2E smoke suite from 2 to **7 tests** covering all public routes and theme toggle.
+
+---
+
+## Phase 9 — Native Frontend Testing, Health & PDF Validation & CI Pipeline Alignment (2026-10)
+
+### 1. Zero-Dependency Frontend Unit Testing
+- Integrated native Node.js test runner (`node --test`) in `grade-wise-ai-frontend-next/package.json`:
+  - `"test:unit": "node --test 'src/utils/*.test.js'"`
+  - `"test": "npm run test:unit && npm run test:e2e"`
+  - `"type": "module"` configured for ESM resolution.
+- Created 5 unit test suites covering 43 test cases in ~50ms:
+  - `formatDate.test.js` (null safety, invalid date guards, Intl options, datetime formatting)
+  - `parseZodFieldErrors.test.js` (error/issue parsing, path extraction, null error handling)
+  - `redirectByRole.test.js` (all role destinations and profile fallback)
+  - `roleDisplay.test.js` (semantic color mapping, avatar gradients, Title Case formatting)
+  - `parseQuestionOptions.test.js` (JSON option parsing, array validation, question mapping)
+
+### 2. Backend Health & PDF Generation Unit Tests
+- Created `src/health.test.ts` (5 tests):
+  - Database connectivity check and error handling
+  - `getHealthStatus` "ok" vs "degraded" reporting
+  - Redis and feature flag environment integration
+- Created `src/utils/pdf.test.ts` (6 tests):
+  - PDF signature and EOF trailer marker validation
+  - Corrupt stream detection and option constraint checking
+  - End-to-end PDF streaming generation with PDFKit
+- Total backend test coverage: **15 test files, 88 unit tests (100% passing)**.
+
+### 3. GitHub Actions CI Pipeline Modernization
+- Corrected `.github/workflows/ci.yml` from invalid `v6` action tags to stable `actions/checkout@v4` and `actions/setup-node@v4`.
+- Integrated `npm run test:unit` in the frontend CI job before Playwright E2E smoke execution.
+
+---
+
+## Phase 10 — Fastify App Integration, RBAC Hooks Testing & Full Schema Validation (2026-10)
+
+### 1. Fastify Server Integration & Core RBAC Hooks Testing
+- Created `src/app.test.ts` (4 tests):
+  - Fastify `app.inject()` in-memory integration testing.
+  - Root `/` discovery metadata verification.
+  - Not Found 404 handler standard envelope verification.
+  - Global error handler integration.
+  - Health check endpoint integration.
+  - Protected route 401 gate verification.
+- Created `src/hooks/authenticate.test.ts` (3 tests):
+  - Valid decoded JWT token payload pass-through.
+  - Missing user id or role rejection with 401 `"Invalid token payload"`.
+  - Verification rejection with 401 `"Unauthorized — invalid or missing token"`.
+- Created `src/hooks/authorize.test.ts` (4 tests):
+  - Missing user rejection with 401 `"Unauthorized"`.
+  - Single allowed role and multi-role allowance pass-through.
+  - Mismatched role rejection with 403 `"Access denied. Required role: ..."`.
+- Created `src/lib/redis.test.ts` (6 tests):
+  - `isRedisEnabled`, `getRedis`, and `pingRedis` tests under enabled and disabled states.
+- Created `src/queue/index.test.ts` (4 tests):
+  - BullMQ queue initialization, job enqueueing, and worker instantiation.
+- Total backend test suite: **20 test files, 109 unit tests (100% passing in 1.19s)**.
+
+### 2. Frontend Schema Validation & Contract Parity
+- **Contract Parity**: Added `.max(128)` constraint to `passwordField` in `src/schemas/fields.js` to match backend `auth.schema.ts`.
+- **Bug Fix**: Resolved Zod 4 `error.issues` compatibility in `src/schemas/fileSchemas.js` `validateFiles`.
+- **Full Client Schema Test Suite** (`src/schemas/*.test.js`):
+  - `authSchemas.test.js`: `loginSchema` and `signupSchema` validation (complexity, length bounds, email format).
+  - `passwordSchemas.test.js`: `resetPasswordSchema` and `setNewPasswordSchema` confirmation match refinement.
+  - `fileSchemas.test.js`: `fileSchema`, `filesArraySchema`, and `validateFiles` (MIME types, 10MB limit, file counts).
+  - `resourceSchemas.test.js`: `resourceSchema` (file, link, text types, URL format, character boundaries).
+  - `studentSchemas.test.js`: `registerStudentSchema` and `enrollStudentSchema`.
+- **Theme Resolver Unit Tests**:
+  - `src/features/theme/resolveTheme.test.js` (`getSystemTheme` SSR and matchMedia resolution, explicit theme overrides).
+- Total frontend unit test suite: **11 test files, 105 unit tests (100% passing in 156ms)**.
+
+---
+
+## Phase 11 — Monorepo Task Orchestration, App Router Streaming UX & AI Factory Tests (2026-10)
+
+### 1. Root Monorepo Developer Experience & CI Orchestration
+- Created root `package.json` unifying commands across frontend and backend:
+  - `npm run check:all`: runs typecheck, lint, and all backend/frontend tests in one command.
+  - `npm test`: executes backend Vitest suite and frontend Node test runner.
+  - `npm run build`: builds Fastify backend and Next.js frontend production bundles.
+  - `npm run test:e2e`: runs Playwright E2E smoke tests.
+- Modernized `playwright.config.js`: auto-manages webServer lifecycle and server reuse.
+
+### 2. Next.js App Router Streaming Fallback
+- Upgraded `src/app/loading.js` from `return null;` to an accessible, centered `LoadingSpinner` with semantic theme styling and `role="status"` accessibility attributes.
+
+### 3. Frontend Assessment Creation Schema Validation
+- Created `src/schemas/assessmentSchemas.test.js` (11 tests):
+  - Valid assessment creation with prompt, resources, or links.
+  - superRefine validation requiring at least one content source.
+  - Duration per question bounds (30s minimum, 600s maximum).
+  - Positive marks constraints (1–100) and negative marks deduction ceiling ($\le$ positive marks).
+  - Language options validation (`assessmentLanguages`).
+- Frontend test coverage: **12 test files, 118 unit tests (100% passing in 135ms)**.
+
+### 4. Backend AI Model Factory & Analytics Queries Unit Tests
+- Created `src/ai/build-model.test.ts` (6 tests):
+  - Model initialization for all 6 providers: `gemini`, `openai`, `claude`, `groq`, `mistral`, and `deepseek` custom baseURL.
+- Created `src/ai/generate.test.ts` (6 tests):
+  - `mapLanguageCode` mapping for all 4 languages (`en`, `ur`, `ar`, `fa`, `all`, and English fallback).
+- Created `src/modules/analytics/shared.test.ts` (3 tests):
+  - `getCompletedAttempt` error throwing and record retrieval.
+  - `getAttemptQuestionsWithAnswers` query execution.
+- Backend test coverage: **23 test files, 124 unit tests (100% passing in 1.12s)**.
+- Monorepo unit test total: **242 unit tests (100% passing)**.
+
+---
+
+## Phase 12 — Design System Token Contracts, Multilingual/RTL Verification, Exam Privacy & Full Monorepo Milestone (2026-10)
+
+### 1. Comprehensive Frontend Schema & UI Token Verification
+- **Edit Assessment Schema Test Suite** (`src/schemas/editAssessmentSchemas.test.js`, 27 tests):
+  - `ASSESSMENT_CONSTANTS`: boundaries on title, prompt, duration (30–600s), options (2–6), marks (0–100), and allowed file types.
+  - `questionBlockSchema`: integer coercions, required options on multiple choice, negative marks $\le$ positive marks refinement.
+  - `assessmentFormSchema`: title bounds, content source requirements (prompt, resources, links, or files).
+  - `fileValidationSchema` and validation helpers: `validateAssessmentForm`, `validateQuestionBlock`, and `validateFiles`.
+- **Design System Token & Accessibility Contracts** (`src/lib/ui.test.js`, 16 tests):
+  - Verification of surfaces (`page`, `pageInner`, `card`, `cardHeader`, `cardInteractive`, `cardGlow`, `nav`).
+  - Strict WCAG 44×44px touch target enforcement (`min-h-11`) on all `btn.*` variants.
+  - Focus-visible ring accessibility verification on interactive actions.
+  - Modern typography standards verification: `text-balance` on `pageTitle`, `heroTitle`, `sectionTitle`, and `text-pretty` on `pageDesc`.
+- **ClassName Merger Utility Tests** (`src/lib/cn.test.js`, 6 tests):
+  - Concatenation, whitespace trimming, filtering of falsy values (`false`, `null`, `undefined`, `""`, `0`), and conditional expressions.
+- **Physical Exam Paper Utilities** (`src/utils/paperUtils.test.js`, 12 tests):
+  - `PAGE_DIMENSIONS` and `getPageDimensions` for A4, A5, and Letter formats.
+  - `sanitizeFileName` character stripping and space-to-underscore replacement.
+  - LTR and RTL line wrapping with `wrapText`.
+- **Multilingual & RTL Translation Contracts** (`src/utils/translations.test.js`, 12 tests):
+  - `isRTLLanguage` recognition for `ar`, `ur`, `fa`, `he`.
+  - `LANGUAGE_OPTIONS` validation with RTL flags.
+  - `getTranslation` with language fallback and raw key fallback.
+  - Dictionary key completeness verification across English, Urdu, Arabic, and Persian locales.
+- **Central Utils Barrel Expansion** (`src/utils/index.js`):
+  - Re-exported `translations.js` (`translations`, `LANGUAGE_OPTIONS`, `RTL_LANGUAGES`, `isRTLLanguage`, `getTranslation`) and `paperUtils.js` (`PAGE_DIMENSIONS`, `getPageDimensions`, `sanitizeFileName`, `wrapText`).
+- **Frontend Test Suite Total**: **17 test files, 191 unit tests (100% passing in 184ms)**.
+
+### 2. Backend Modular Architecture, Service Testing & Exam Privacy
+- **Student Analytics Schema Tests** (`src/modules/student-analytics/student-analytics.schema.test.ts`, 5 tests):
+  - Dedicated validation for `TimeRangeEnum` and query defaults (`30d`).
+- **Exam Question Sanitization & Privacy Tests** (`src/modules/student-assessments/generation.test.ts`, 4 tests):
+  - `createFallbackQuestion` generation for multiple choice (4 options), true/false, and short answer.
+  - `sanitizeQuestion` verification: completely strips `correctAnswer`, `attemptId`, and metadata to prevent cheating or data leakage before student submission.
+- **Config Service Key Masking Tests** (`src/modules/config/config.service.test.ts`, 3 tests):
+  - `maskKey` verification for short keys ($\le$ 8 chars) and standard API keys (preserving first 6 and last 4 chars).
+- **Resource Text Extraction Tests** (`src/modules/resources/resources.service.test.ts`, 6 tests):
+  - `extractTextFromFile` validation for plain text, markdown, JSON, null-byte stripping, and unsupported binary fallback.
+- **Backend Test Suite Total**: **27 test files, 142 unit tests (100% passing in 1.15s)**.
+
+### 3. Full Monorepo Quality State
+- **Total Unit Test Count**: **333 tests passing (100%)** (142 backend + 191 frontend).
+- **Playwright E2E Smoke Tests**: **7/7 passing (1.9s)**.
+- **TypeScript**: **0 errors** across both projects (`tsc --noEmit`).
+- **ESLint**: **0 errors, 0 warnings** across both projects.
+- **Production Build**: **100% successful** (Fastify API + Next.js 16.2.9 App Router with 20/20 static pages).
+
+
+
