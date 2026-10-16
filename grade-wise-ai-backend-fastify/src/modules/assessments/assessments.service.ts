@@ -15,16 +15,46 @@ import {
   type NewAssessment,
 } from "../../db/schema.js";
 import { eq, and, inArray, sql } from "drizzle-orm";
-import { AppError, NotFoundError, ForbiddenError } from "../../utils/errors.js";
+import { AppError, NotFoundError, ForbiddenError, ConflictError } from "../../utils/errors.js";
 import { generateContent, mapLanguageCode } from "../../ai/generate.js";
 import type { CreateAssessmentInput, UpdateAssessmentInput, PhysicalPaperInput } from "./assessments.schema.js";
 import {
   gatherAssessmentContext,
   buildBlockPrompt,
   parseQuestionsFromAI,
+  buildUnifiedAssignmentPrompt,
+  parseUnifiedAssignmentQuestionsFromAI,
 } from "./question-generation.js";
-import { generatePhysicalPaperPdf } from "../../utils/pdf.js";
+import { generatePhysicalPaperPdf, validateAndProcessPdf } from "../../utils/pdf.js";
 import { PassThrough } from "stream";
+
+// ─── Access control ───────────────────────────────────────────────────────────
+
+function assertCanManageAssessment(
+  assessment: Assessment,
+  userId: number,
+  role: string
+): void {
+  if (["admin", "super_admin"].includes(role)) return;
+  if (assessment.instructorId !== userId) {
+    throw new ForbiddenError("Access denied to this assessment");
+  }
+}
+
+async function loadAssessmentForManagement(
+  assessmentId: number,
+  userId: number,
+  role: string
+): Promise<Assessment> {
+  const [assessment] = await db
+    .select()
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+  if (!assessment) throw new NotFoundError("Assessment");
+  assertCanManageAssessment(assessment, userId, role);
+  return assessment;
+}
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
@@ -32,7 +62,7 @@ export async function createAssessmentService(
   input: CreateAssessmentInput,
   instructorId: number
 ): Promise<Assessment> {
-  const { title, prompt, externalLinks, questionBlocks: blocks, selectedResources } = input;
+  const { title, prompt, externalLinks, questionBlocks: blocks, selectedResources, language } = input;
 
   const hasLinks = externalLinks && externalLinks.length > 0;
   const hasResources = selectedResources && selectedResources.length > 0;
@@ -53,6 +83,7 @@ export async function createAssessmentService(
         externalLinks: hasLinks ? externalLinks : null,
         instructorId,
         isExecuted: false,
+        language: language ?? "en",
       } satisfies Omit<NewAssessment, "id" | "createdAt" | "updatedAt">)
       .returning();
 
@@ -114,6 +145,7 @@ function mapAssessment(a: Assessment) {
     external_links: a.externalLinks,
     instructor_id: a.instructorId,
     is_executed: a.isExecuted,
+    language: a.language ?? "en",
     created_at: a.createdAt,
     updated_at: a.updatedAt,
   };
@@ -167,9 +199,18 @@ export async function getAssessmentService(
     db.select().from(questionBlocks).where(eq(questionBlocks.assessmentId, assessmentId)),
     db.select({ count: sql<number>`count(*)` }).from(enrollments).where(eq(enrollments.assessmentId, assessmentId)),
     db
-      .select({ id: resources.id, name: resources.name, url: resources.url, fileType: resources.fileType, contentType: resources.contentType, createdAt: resources.createdAt })
+      .select({
+        id: resources.id,
+        name: resources.name,
+        url: resources.url,
+        fileType: resources.fileType,
+        contentType: resources.contentType,
+        createdAt: resources.createdAt,
+        chunkText: resourceChunks.chunkText,
+      })
       .from(assessmentResources)
       .innerJoin(resources, eq(assessmentResources.resourceId, resources.id))
+      .leftJoin(resourceChunks, eq(resourceChunks.resourceId, resources.id))
       .where(eq(assessmentResources.assessmentId, assessmentId)),
   ]);
 
@@ -177,7 +218,13 @@ export async function getAssessmentService(
     ...mapAssessment(assessment),
     question_blocks: blocks.map(mapBlock),
     enrolled_count: countResult[0]?.count ?? 0,
-    resources: linkedResources.map((r) => ({ ...r, created_at: r.createdAt, file_type: r.fileType, content_type: r.contentType })),
+    resources: linkedResources.map(({ chunkText, createdAt, fileType, contentType, ...rest }) => ({
+      ...rest,
+      created_at: createdAt,
+      file_type: fileType,
+      content_type: contentType,
+      chunks: chunkText ? [{ chunk_text: chunkText, chunk_index: 0 }] : [],
+    })),
   };
 }
 
@@ -186,15 +233,17 @@ export async function getAssessmentService(
 export async function updateAssessmentService(
   assessmentId: number,
   input: UpdateAssessmentInput,
-  userId: number
-): Promise<Assessment> {
-  const existing = await db
+  userId: number,
+  role?: string
+): Promise<any> {
+  const [existing] = await db
     .select()
     .from(assessments)
-    .where(and(eq(assessments.id, assessmentId), eq(assessments.instructorId, userId)))
+    .where(eq(assessments.id, assessmentId))
     .limit(1);
 
-  if (!existing[0]) throw new NotFoundError("Assessment");
+  if (!existing) throw new NotFoundError("Assessment");
+  assertCanManageAssessment(existing, userId, role ?? "instructor");
 
   const hasAttempt = await db
     .select({ id: assessmentAttempts.id })
@@ -214,6 +263,7 @@ export async function updateAssessmentService(
   if (input.title) updateData.title = input.title.trim();
   if (input.prompt !== undefined) updateData.prompt = input.prompt?.trim() ?? null;
   if (input.externalLinks !== undefined) updateData.externalLinks = input.externalLinks;
+  if (input.language !== undefined) updateData.language = input.language;
 
   const [updated] = await db
     .update(assessments)
@@ -252,7 +302,7 @@ export async function updateAssessmentService(
     }
   }
 
-  return updated;
+  return getAssessmentService(assessmentId, userId, role ?? "instructor");
 }
 
 // ─── Delete ───────────────────────────────────────────────────────────────────
@@ -298,41 +348,56 @@ export async function deleteAssessmentService(
 
 export async function enrollStudentService(
   assessmentId: number,
-  studentId: number,
-  instructorId: number
+  email: string,
+  userId: number,
+  role: string
 ): Promise<void> {
-  const assessment = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment[0]) throw new NotFoundError("Assessment");
+  await loadAssessmentForManagement(assessmentId, userId, role);
 
   const student = await db
     .select({ id: users.id, role: users.role })
     .from(users)
-    .where(eq(users.id, studentId))
+    .where(eq(users.email, email))
     .limit(1);
   if (!student[0] || student[0].role !== "student") {
-    throw new AppError("INVALID_STUDENT", "User is not a student", 400);
+    throw new AppError("INVALID_STUDENT", "User is not a student or not found", 400);
+  }
+
+  const studentId = student[0].id;
+
+  const existing = await db
+    .select({ id: enrollments.id })
+    .from(enrollments)
+    .where(and(eq(enrollments.assessmentId, assessmentId), eq(enrollments.studentId, studentId)))
+    .limit(1);
+
+  if (existing.length > 0) {
+    throw new ConflictError("Student is already enrolled in this assessment.");
   }
 
   await db
     .insert(enrollments)
-    .values({ assessmentId, studentId })
-    .onConflictDoNothing();
+    .values({ assessmentId, studentId });
 }
 
 export async function unenrollStudentService(
   assessmentId: number,
-  studentId: number
+  studentId: number,
+  userId: number,
+  role: string
 ): Promise<void> {
+  await loadAssessmentForManagement(assessmentId, userId, role);
   await db
     .delete(enrollments)
     .where(and(eq(enrollments.assessmentId, assessmentId), eq(enrollments.studentId, studentId)));
 }
 
-export async function getEnrolledStudentsService(assessmentId: number) {
+export async function getEnrolledStudentsService(
+  assessmentId: number,
+  userId: number,
+  role: string
+) {
+  await loadAssessmentForManagement(assessmentId, userId, role);
   return db
     .select({
       id: users.id,
@@ -348,16 +413,76 @@ export async function getEnrolledStudentsService(assessmentId: number) {
 
 // ─── Preview questions ────────────────────────────────────────────────────────
 
+async function generatePreviewQuestions(
+  assessment: Assessment,
+  language: string
+): Promise<object[]> {
+  const blocks = await db
+    .select()
+    .from(questionBlocks)
+    .where(eq(questionBlocks.assessmentId, assessment.id));
+
+  if (blocks.length === 0) {
+    throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
+  }
+
+  const context = await gatherAssessmentContext(assessment.id);
+  const langLabel = mapLanguageCode(language);
+  const prompt = assessment.prompt ?? "";
+
+  const unifiedPrompt = buildUnifiedAssignmentPrompt(
+    blocks,
+    prompt,
+    context,
+    language,
+    langLabel,
+    assessment.title
+  );
+
+  try {
+    const raw = await generateContent(unifiedPrompt, { maxOutputTokens: 8192, temperature: 0.7 });
+    return parseUnifiedAssignmentQuestionsFromAI(raw, blocks);
+  } catch (err) {
+    console.warn("[PreviewQuestions] Unified generation encountered error, falling back to block prompt:", err);
+    const allQuestions: object[] = [];
+    for (const block of blocks) {
+      try {
+        const blockPrompt = buildBlockPrompt(block, prompt, context, language, langLabel);
+        const raw = await generateContent(blockPrompt, { maxOutputTokens: 4096, temperature: 0.7 });
+        const parsed = parseQuestionsFromAI(raw, block.questionType);
+        allQuestions.push(...parsed);
+      } catch (blockErr) {
+        console.error(`[PreviewQuestions] Block ${block.id} generation failed:`, blockErr);
+      }
+    }
+    return allQuestions;
+  }
+}
+
 export async function previewQuestionsService(
   assessmentId: number,
-  language = "en"
+  language = "en",
+  userId?: number,
+  role?: string
 ): Promise<object[]> {
-  const assessment = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment[0]) throw new NotFoundError("Assessment");
+  const assessment = await loadAssessmentForManagement(assessmentId, userId ?? -1, role ?? "instructor");
+  return generatePreviewQuestions(assessment, language);
+}
+
+// ─── AI prompt blueprint ──────────────────────────────────────────────────────
+
+export async function getAssessmentAIPromptService(
+  assessmentId: number,
+  userId: number,
+  role: string,
+  targetLanguage?: string
+): Promise<{
+  language: string;
+  languageLabel: string;
+  unifiedPrompt: string;
+  blocks: Array<{ id: number | null; questionType: string; questionCount: number; prompt: string }>;
+}> {
+  const assessment = await loadAssessmentForManagement(assessmentId, userId, role);
 
   const blocks = await db
     .select()
@@ -368,20 +493,29 @@ export async function previewQuestionsService(
     throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
   }
 
-  const context = await gatherAssessmentContext(assessmentId);
-  const langLabel = mapLanguageCode(language);
-  const prompt = assessment[0].prompt ?? "";
+  const effectiveLang = (targetLanguage || "all").toLowerCase();
+  const context = await gatherAssessmentContext(assessment.id);
+  const langLabel = mapLanguageCode(effectiveLang);
+  const instructorPrompt = assessment.prompt ?? "";
 
-  const allQuestions: object[] = [];
+  const unifiedPrompt = buildUnifiedAssignmentPrompt(
+    blocks,
+    instructorPrompt,
+    context,
+    effectiveLang,
+    langLabel,
+    assessment.title,
+    50_000
+  );
 
-  for (const block of blocks) {
-    const blockPrompt = buildBlockPrompt(block, prompt, context, langLabel);
-    const raw = await generateContent(blockPrompt, { maxOutputTokens: 4096, temperature: 0.7 });
-    const parsed = parseQuestionsFromAI(raw, block.questionType);
-    allQuestions.push(...parsed);
-  }
+  const mapped = blocks.map((block) => ({
+    id: block.id,
+    questionType: block.questionType,
+    questionCount: block.questionCount,
+    prompt: buildBlockPrompt(block, instructorPrompt, context, effectiveLang, langLabel, 50_000),
+  }));
 
-  return allQuestions;
+  return { language: effectiveLang, languageLabel: langLabel, unifiedPrompt, blocks: mapped };
 }
 
 // Re-export for backward compatibility
@@ -391,14 +525,11 @@ export { parseQuestionsFromAI } from "./question-generation.js";
 
 export async function generatePhysicalPaperService(
   assessmentId: number,
-  options: PhysicalPaperInput
+  options: PhysicalPaperInput,
+  userId?: number,
+  role?: string
 ): Promise<Buffer> {
-  const assessment = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment[0]) throw new NotFoundError("Assessment");
+  const assessment = await loadAssessmentForManagement(assessmentId, userId ?? -1, role ?? "instructor");
 
   const blocks = await db
     .select()
@@ -407,7 +538,7 @@ export async function generatePhysicalPaperService(
   if (blocks.length === 0) throw new AppError("NO_BLOCKS", "No question blocks configured", 400);
 
   // Generate preview questions to populate the paper
-  const questions = await previewQuestionsService(assessmentId);
+  const questions = await generatePreviewQuestions(assessment, options.language);
   const paperQuestions = questions.map((q, i) => {
     const question = q as Record<string, unknown>;
     return {
@@ -419,7 +550,7 @@ export async function generatePhysicalPaperService(
     };
   });
 
-  return new Promise((resolve, reject) => {
+  const pdfBuffer: Buffer = await new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     const stream = new PassThrough();
     stream.on("data", (chunk: Buffer) => chunks.push(chunk));
@@ -427,4 +558,12 @@ export async function generatePhysicalPaperService(
     stream.on("error", reject);
     generatePhysicalPaperPdf({ ...options, questions: paperQuestions }, stream);
   });
+
+  // Automated PDF check and validation pipeline
+  const validation = validateAndProcessPdf(pdfBuffer, options);
+  if (!validation.isValid) {
+    console.warn("[PhysicalPaper] PDF check pipeline reported formatting warnings:", validation.issues);
+  }
+
+  return validation.buffer;
 }

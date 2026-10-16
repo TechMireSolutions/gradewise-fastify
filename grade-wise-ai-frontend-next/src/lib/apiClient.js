@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || ""}/api`;
+
 
 const inflightRequests = new Map();
 
@@ -121,6 +122,7 @@ apiClient.interceptors.response.use(
       "/auth/login",
       "/auth/signup",
       "/auth/google-auth",
+      "/auth/remembered-login",
       "/auth/verify",
       "/auth/forgot-password",
       "/auth/change-password",

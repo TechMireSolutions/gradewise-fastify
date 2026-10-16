@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { accentPanel, card as uiCard, iconBadge, page, tableHead, tableRowHover } from "@/lib/ui.js";
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import {
@@ -91,7 +91,7 @@ const ALL_PROVIDERS = ["gemini", "groq", "openai", "claude", "mistral", "deepsee
 
 const defaultModelMap = {
   gemini:   "gemini-2.0-flash",
-  groq:     "llama-3.3-70b-versatile",
+  groq:     "openai/gpt-oss-120b",
   openai:   "gpt-4o-mini",
   claude:   "claude-sonnet-4-6",
   mistral:  "mistral-large-latest",
@@ -117,15 +117,14 @@ const modelOptions = {
     { value: "gemini-1.5-flash-8b",   label: "Gemini 1.5 Flash 8B" },
   ],
   groq: [
-    { value: "llama-3.3-70b-versatile",       label: "Llama 3.3 70B Versatile" },
-    { value: "llama-3.1-70b-versatile",       label: "Llama 3.1 70B Versatile" },
-    { value: "llama-3.1-8b-instant",          label: "Llama 3.1 8B Instant" },
-    { value: "llama3-70b-8192",               label: "Llama 3 70B (8K ctx)" },
-    { value: "llama3-8b-8192",                label: "Llama 3 8B (8K ctx)" },
-    { value: "mixtral-8x7b-32768",            label: "Mixtral 8x7B" },
-    { value: "gemma2-9b-it",                  label: "Gemma 2 9B IT" },
-    { value: "gemma-7b-it",                   label: "Gemma 7B IT" },
-    { value: "deepseek-r1-distill-llama-70b", label: "DeepSeek R1 Distill Llama 70B" },
+    { value: "openai/gpt-oss-120b",               label: "GPT-OSS 120B (recommended)" },
+    { value: "openai/gpt-oss-20b",                label: "GPT-OSS 20B" },
+    { value: "qwen/qwen3.6-27b",                  label: "Qwen 3.6 27B" },
+    { value: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B" },
+    { value: "meta-llama/llama-4-maverick-17b-128e-instruct", label: "Llama 4 Maverick 17B" },
+    { value: "allam-2-7b",                        label: "Allam 2 7B" },
+    { value: "groq/compound",                     label: "Groq Compound" },
+    { value: "groq/compound-mini",                label: "Groq Compound Mini" },
   ],
   openai: [
     { value: "gpt-5",         label: "GPT-5" },
@@ -262,15 +261,27 @@ function SuperAdminApiConfig() {
   const [actionLoading, setActionLoading]   = useState(null);
   const { modal, showModal, closeModal } = useModal();
 
-  useEffect(() => { refreshAllKeyLists(); }, []);
-
-  const patchPP = (purpose, provider, patch) =>
+  const patchPP = useCallback((purpose, provider, patch) =>
     setAiState(prev => ({
       ...prev,
       [purpose]: { ...prev[purpose], [provider]: { ...prev[purpose][provider], ...patch } },
-    }));
+    })), []);
 
-  const refreshAllKeyLists = async () => {
+  const refreshKeyList = useCallback(async (purpose, provider) => {
+    try {
+      const r = await listAiKeys(purpose, provider);
+      if (r.success) {
+        patchPP(purpose, provider, {
+          list:  r.keys  || [],
+          model: r.model || defaultModelMap[provider],
+        });
+      }
+    } catch (e) {
+      console.error(`Failed to load ${purpose}/${provider} keys:`, e);
+    }
+  }, [patchPP]);
+
+  const refreshAllKeyLists = useCallback(async () => {
     try {
       const summary = await getAiSummary();
       if (!summary.success) return;
@@ -287,21 +298,9 @@ function SuperAdminApiConfig() {
     } catch (e) {
       console.error("Failed to load AI summary:", e);
     }
-  };
+  }, [patchPP, refreshKeyList]);
 
-  const refreshKeyList = async (purpose, provider) => {
-    try {
-      const r = await listAiKeys(purpose, provider);
-      if (r.success) {
-        patchPP(purpose, provider, {
-          list:  r.keys  || [],
-          model: r.model || defaultModelMap[provider],
-        });
-      }
-    } catch (e) {
-      console.error(`Failed to load ${purpose}/${provider} keys:`, e);
-    }
-  };
+  useEffect(() => { refreshAllKeyLists(); }, [refreshAllKeyLists]);
 
   const updateActiveCard = (field, value) => {
     const pur  = configSubTab;
@@ -470,7 +469,7 @@ function SuperAdminApiConfig() {
         {/* ── Page Header ───────────────────────────────────── */}
         <div className="mb-8">
           <Link
-            to="/super-admin/dashboard"
+            href="/super-admin/dashboard"
             className={cn("inline-flex", "items-center", "gap-2", "text-muted-foreground", "hover:text-foreground", "text-sm", "font-medium", "mb-6", "transition-colors", "duration-150", "group")}
           >
             <FaArrowLeft className="w-3 h-3 transition-transform duration-150 group-hover:-translate-x-0.5" />

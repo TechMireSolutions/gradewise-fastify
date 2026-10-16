@@ -17,7 +17,7 @@ export const PurposeEnum = z.enum(["text", "pdf"]);
 
 export const AI_DEFAULT_MODELS: Record<ProviderType, string> = {
   gemini: "gemini-2.5-flash",
-  groq: "llama-3.3-70b-versatile",
+  groq: "openai/gpt-oss-120b",
   openai: "gpt-4o-mini",
   claude: "claude-sonnet-4-6",
   mistral: "mistral-small-latest",

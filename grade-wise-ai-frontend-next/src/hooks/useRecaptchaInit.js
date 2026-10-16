@@ -4,6 +4,8 @@ import { loadRecaptcha } from "../config/captcha";
 
 export default function useRecaptchaInit(siteKey) {
   useEffect(() => {
-    if (siteKey) loadRecaptcha(siteKey).catch(console.error);
+    if (siteKey && siteKey !== "dummy-key" && siteKey !== "undefined") {
+      loadRecaptcha(siteKey).catch(() => {});
+    }
   }, [siteKey]);
 }

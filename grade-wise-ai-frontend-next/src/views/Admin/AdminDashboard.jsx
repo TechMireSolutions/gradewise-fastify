@@ -2,7 +2,6 @@ import { cn } from "@/lib/cn.js";
 import { btn, card, iconBadge, page } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Modal from "../../components/ui/Modal.jsx";
-import PageLoader from "../../components/ui/PageLoader.jsx";
 import AmbientBackground from "../../components/layout/AmbientBackground.jsx";
 import UserManagementTable, { UserStatsGrid } from "../../components/admin/UserManagementTable.jsx";
 import useUserManagement from "../../hooks/useUserManagement.js";
@@ -12,7 +11,6 @@ function AdminDashboard() {
   const {
     user,
     users,
-    loading,
     actionLoading,
     modal,
     closeModal,
@@ -24,8 +22,6 @@ function AdminDashboard() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
-  if (loading) return <PageLoader message="Loading users..." />;
 
   return (
     <div className={page}>

@@ -1,22 +1,23 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { validateAssessmentForm, validateFiles } from "../../../schemas/editAssessmentSchemas.js";
-import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
+import { assessmentLanguages } from "../../../schemas/assessmentSchemas.js";
+import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave, FaChevronDown } from "react-icons/fa";
 import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
 import useModal from "../../../hooks/useModal.js";
 
 function EditAssessment() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
-  const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
-    const { modal, showModal, closeModal } = useModal();
+  const { resources, fetchAllResources, uploadResources, loading: resourcesLoading } = useResourceStore();
+  const { modal, showModal, closeModal } = useModal();
 
 
   useEffect(() => {
@@ -24,14 +25,15 @@ function EditAssessment() {
   }, [fetchAllResources]);
 
   useEffect(() => {
-    if (!currentAssessment || currentAssessment.id !== Number(id)) {
+    if (id) {
       getAssessmentById(id);
     }
-  }, [id, currentAssessment, getAssessmentById]);
+  }, [id, getAssessmentById]);
 
   const [formData, setFormData] = useState({
     title: "",
     prompt: "",
+    language: "en",
     externalLinks: [""],
   });
 
@@ -49,14 +51,16 @@ function EditAssessment() {
   const [selectedResources, setSelectedResources] = useState([]);
   const [newFiles, setNewFiles] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [questionBlocksTouched, setQuestionBlocksTouched] = useState(false);
 
   useEffect(() => {
-    if (currentAssessment) {
+    if (currentAssessment && currentAssessment.id === Number(id)) {
       setFormData({
         title: currentAssessment.title || "",
         prompt: currentAssessment.prompt || "",
-        externalLinks: Array.isArray(currentAssessment.external_links) ? currentAssessment.external_links : [""],
+        language: currentAssessment.language || "en",
+        externalLinks: Array.isArray(currentAssessment.external_links) && currentAssessment.external_links.length > 0
+          ? currentAssessment.external_links
+          : [""],
       });
       setQuestionBlocks(
         Array.isArray(currentAssessment.question_blocks) && currentAssessment.question_blocks.length > 0
@@ -65,8 +69,12 @@ function EditAssessment() {
             question_count: Number(block.question_count) || 1,
             duration_per_question: Number(block.duration_per_question) || 120,
             num_options: Number(block.num_options) || 4,
-            positive_marks: Number(block.positive_marks) || 1,
-            negative_marks: Number(block.negative_marks) || 0,
+            num_first_side: Number(block.num_first_side) || 3,
+            num_second_side: Number(block.num_second_side) || 4,
+            positive_marks: block.positive_marks !== undefined && block.positive_marks !== null ? Number(block.positive_marks) : 1,
+            negative_marks: block.negative_marks !== undefined && block.negative_marks !== null
+              ? (Number(block.negative_marks) === 0 ? 0 : -Math.abs(Number(block.negative_marks)))
+              : 0,
           }))
           : [{ question_type: "multiple_choice", question_count: 1, duration_per_question: 120, num_options: 4, positive_marks: 1, negative_marks: 0 }]
       );
@@ -76,7 +84,7 @@ function EditAssessment() {
           : []
       );
     }
-  }, [currentAssessment]);
+  }, [currentAssessment, id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,29 +94,76 @@ function EditAssessment() {
     }));
   };
 
+  const formatNegativeMarksInput = (value) => {
+    if (value === "" || value === null || value === undefined) {
+      return "";
+    }
+    let str = String(value).trim();
+    // Keep only numeric characters, dots, and minus
+    str = str.replace(/[^0-9.-]/g, "");
+    if (str === "") return "";
+    if (str === "-") return "-";
+
+    // Strip existing minus signs to work with raw digits
+    str = str.replace(/-/g, "");
+
+    // If only dot was entered, e.g. "." or "-."
+    if (str === ".") return "-0.";
+
+    // Prevent multiple dots: keep only the first decimal point
+    const parts = str.split(".");
+    if (parts.length > 2) {
+      str = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Always prefix with minus sign
+    return `-${str}`;
+  };
+
+  const handleNegativeMarksBlur = (index) => {
+    setQuestionBlocks((prev) =>
+      prev.map((block, i) => {
+        if (i !== index) return block;
+        const val = String(block.negative_marks ?? "").trim();
+        if (val === "" || val === "-" || val === "-." || val === "-0.") {
+          return { ...block, negative_marks: 0 };
+        }
+        const num = Number(val);
+        if (!isNaN(num)) {
+          return { ...block, negative_marks: num === 0 ? 0 : -Math.abs(num) };
+        }
+        return { ...block, negative_marks: 0 };
+      })
+    );
+  };
+
   const handleBlockChange = (index, field, value) => {
-    setQuestionBlocksTouched(true);
     setQuestionBlocks((prev) =>
       prev.map((block, i) =>
         i === index
           ? {
-              ...block,
-              [field]:
-                field === "question_count" || field === "duration_per_question" || field === "num_options"
-                  ? Math.max(Number.parseInt(value) || 1, 1)
-                  : field === "positive_marks" || field === "negative_marks"
-                    ? value === "" || value === null
-                      ? null
-                      : Math.max(Number.parseFloat(value) || 0, 0)
+            ...block,
+            [field]:
+              field === "question_count" || field === "duration_per_question" || field === "num_options"
+                ? Math.max(Number.parseInt(value) || 1, 1)
+                : field === "positive_marks"
+                  ? value === "" || value === null
+                    ? null
+                    : value === "-"
+                      ? "-"
+                      : isNaN(Number(value))
+                        ? 1
+                        : Math.abs(Number(value))
+                  : field === "negative_marks"
+                    ? formatNegativeMarksInput(value)
                     : value,
-            }
+          }
           : block
       )
     );
   };
 
   const addQuestionBlock = () => {
-    setQuestionBlocksTouched(true);
     setQuestionBlocks((prev) => [
       ...prev,
       {
@@ -123,7 +178,6 @@ function EditAssessment() {
   };
 
   const removeQuestionBlock = (index) => {
-    setQuestionBlocksTouched(true);
     if (questionBlocks.length > 1) {
       setQuestionBlocks((prev) => prev.filter((_, i) => i !== index));
     }
@@ -173,12 +227,30 @@ function EditAssessment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Sanitize question blocks before validation so negative values and intermediate strings are handled properly
+    const sanitizedBlocks = questionBlocks.map((b) => {
+      const pos = b.positive_marks === "" || b.positive_marks === "-" || b.positive_marks == null
+        ? 1
+        : Math.abs(Number(b.positive_marks) || 1);
+      const neg = b.negative_marks === "" || b.negative_marks === "-" || b.negative_marks == null
+        ? 0
+        : (isNaN(Number(b.negative_marks)) ? 0 : (Number(b.negative_marks) === 0 ? 0 : -Math.abs(Number(b.negative_marks))));
+      return {
+        ...b,
+        question_count: Math.max(1, Number(b.question_count) || 1),
+        duration_per_question: Math.max(30, Number(b.duration_per_question) || 60),
+        num_options: b.question_type === "multiple_choice" ? Math.max(2, Number(b.num_options) || 4) : 4,
+        positive_marks: pos,
+        negative_marks: neg,
+      };
+    });
+
     // Validate form using Zod
     const validation = validateAssessmentForm({
       title: formData.title,
       prompt: formData.prompt,
       externalLinks: formData.externalLinks,
-      questionBlocks,
+      questionBlocks: sanitizedBlocks,
       selectedResources,
       newFiles
     });
@@ -190,29 +262,43 @@ function EditAssessment() {
 
     setIsProcessing(true);
 
+    let finalResources = [...selectedResources];
+    if (newFiles && newFiles.length > 0) {
+      try {
+        const uploaded = await uploadResources(newFiles);
+        const newIds = (Array.isArray(uploaded) ? uploaded : [])
+          .map((r) => r.id)
+          .filter(Boolean);
+        finalResources = [...new Set([...finalResources, ...newIds])];
+      } catch (uploadErr) {
+        showModal("error", "Resource Upload Failed", uploadErr.message || "Failed to upload new files.");
+        setIsProcessing(false);
+        return;
+      }
+    }
+
     const assessmentData = {
       title: formData.title.trim(),
-      ...(formData.prompt?.trim() && { prompt: formData.prompt.trim() }),
-      externalLinks: formData.externalLinks.filter(l => l.trim()),
-      selectedResources,
-      ...(questionBlocksTouched && {
-        questionBlocks: questionBlocks.map(b => ({
-          questionType: b.question_type,
-          questionCount: Number(b.question_count),
-          durationPerQuestion: Number(b.duration_per_question),
-          numOptions: b.question_type === "multiple_choice" ? (Number(b.num_options) || 4) : 4,
-          leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
-          rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
-          positiveMarks: Number(b.positive_marks) || 1,
-          negativeMarks: Number(b.negative_marks) || 0,
-        })),
-      }),
+      prompt: formData.prompt !== undefined ? formData.prompt.trim() : "",
+      language: formData.language || "en",
+      externalLinks: (formData.externalLinks || []).filter((l) => l && l.trim()),
+      selectedResources: finalResources,
+      questionBlocks: sanitizedBlocks.map((b) => ({
+        questionType: b.question_type,
+        questionCount: b.question_count,
+        durationPerQuestion: b.duration_per_question,
+        numOptions: b.question_type === "multiple_choice" ? b.num_options : 4,
+        leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
+        rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
+        positiveMarks: b.positive_marks,
+        negativeMarks: b.negative_marks,
+      })),
     };
 
     try {
       await updateAssessment(parseInt(id), assessmentData);
       showModal("success", "Success!", "Assessment updated!");
-      setTimeout(() => navigate("/instructor/assessments"), 1500);
+      setTimeout(() => router.push("/instructor/assessments"), 1500);
     } catch (err) {
       console.error("DEBUG: Frontend EditAssessment - Update error:", err);
       showModal("error", "Error", err.message || "Update failed");
@@ -221,7 +307,7 @@ function EditAssessment() {
     }
   };
 
-  if (loading || !currentAssessment) {
+  if (loading || !currentAssessment || currentAssessment.id !== Number(id)) {
     return (
       <div className={cn(page, "flex", "flex-col", "justify-center", "items-center")}>
         <AmbientBackground />
@@ -248,7 +334,7 @@ function EditAssessment() {
               <h1 className="text-3xl font-bold text-foreground mb-4">Error</h1>
               <p className={cn("text-muted-foreground", "mb-8")}>{error}</p>
               <button
-                onClick={() => navigate("/instructor/assessments")}
+                onClick={() => router.push("/instructor/assessments")}
                 className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
               >
                 <FaArrowLeft />
@@ -279,7 +365,7 @@ function EditAssessment() {
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-5">
             <button
-              onClick={() => navigate("/instructor/assessments")}
+              onClick={() => router.push("/instructor/assessments")}
               className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
             >
               <FaArrowLeft className="text-xs" />
@@ -338,6 +424,25 @@ function EditAssessment() {
                   placeholder="e.g., Data Structures Final Exam"
                   disabled={currentAssessment.is_executed}
                 />
+              </div>
+
+              {/* Language Selector */}
+              <div>
+                <label htmlFor="language" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                  Questions Language <span className={cn("text-muted-foreground", "font-normal")}>(AI will generate questions in this language)</span>
+                </label>
+                <select
+                  name="language"
+                  id="language"
+                  value={formData.language}
+                  onChange={handleInputChange}
+                  className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                  disabled={currentAssessment.is_executed}
+                >
+                  {assessmentLanguages.map((lang) => (
+                    <option key={lang.value} value={lang.value}>{lang.label}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Prompt Textarea */}
@@ -467,7 +572,7 @@ function EditAssessment() {
                             >
                               <span className="font-medium">{resource.name}</span>
                               <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>
-                                {resource.content_type}
+                                {resource.contentType}
                               </span>
                             </label>
                           </div>
@@ -511,6 +616,7 @@ function EditAssessment() {
                           {block.question_type === "multiple_choice" && "Multiple Choice"}
                           {block.question_type === "short_answer" && "Short Answer"}
                           {block.question_type === "true_false" && "True / False"}
+                          {block.question_type === "fill_in_the_blank" && "Fill in the Blank"}
                         </h3>
                       </div>
                       {questionBlocks.length > 1 && (
@@ -530,16 +636,20 @@ function EditAssessment() {
                       {/* Question Type */}
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
-                        <select
-                          value={block.question_type}
-                          onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
-                          className={cn("w-full", "appearance-none", "bg-input", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="true_false">True/False</option>
-                        </select>
+                        <div className="relative">
+                          <select
+                            value={block.question_type}
+                            onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
+                            className={cn("w-full", "appearance-none", "bg-input", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "pr-10", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                            disabled={currentAssessment.is_executed}
+                          >
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="true_false">True/False</option>
+                            <option value="fill_in_the_blank">Fill in the Blank</option>
+                          </select>
+                          <FaChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-subtle-foreground text-xs" />
+                        </div>
                       </div>
 
                       {/* Question Count */}
@@ -564,10 +674,54 @@ function EditAssessment() {
                           value={block.duration_per_question}
                           onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
                           min="30"
+                          max="600"
                           placeholder="e.g. 120"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed}
                         />
+                      </div>
+
+                      {/* Positive Marks */}
+                      <div>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
+                        <input
+                          type="number"
+                          value={block.positive_marks ?? ""}
+                          onChange={(e) => handleBlockChange(index, "positive_marks", e.target.value)}
+                          step="0.1"
+                          placeholder="e.g. 1"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                          disabled={currentAssessment.is_executed}
+                        />
+                      </div>
+
+                      {/* Negative Marks */}
+                      <div>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={block.negative_marks ?? ""}
+                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
+                          onBlur={() => handleNegativeMarksBlur(index)}
+                          onKeyDown={(e) => {
+                            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                              e.preventDefault();
+                              const current = Number(block.negative_marks) || 0;
+                              const step = 0.05;
+                              const nextVal = e.key === "ArrowUp"
+                                ? Math.min(0, Number((current + step).toFixed(2)))
+                                : Math.max(-100, Number((current - step).toFixed(2)));
+                              handleBlockChange(index, "negative_marks", nextVal === 0 ? 0 : nextVal);
+                            }
+                          }}
+                          placeholder="e.g. -0.25"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+                          disabled={currentAssessment.is_executed || isProcessing}
+                        />
+                        <span className="text-[11px] text-muted-foreground mt-1 block">
+                          Deduction must be less than total marks ({block.positive_marks || 1})
+                        </span>
                       </div>
 
                       {/* Number of Options (MCQ only) */}
@@ -586,21 +740,6 @@ function EditAssessment() {
                           />
                         </div>
                       )}
-
-                      {/* Negative Marks */}
-                      <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
-                        <input
-                          type="number"
-                          value={block.negative_marks || ""}
-                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
-                          min="0"
-                          step="0.1"
-                          placeholder="e.g. 0.25"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
-                        />
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -623,7 +762,7 @@ function EditAssessment() {
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
             <button
               type="button"
-              onClick={() => navigate("/instructor/assessments")}
+              onClick={() => router.push("/instructor/assessments")}
               className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1", "disabled:opacity-50", "disabled:cursor-not-allowed")}
               disabled={isProcessing}
             >

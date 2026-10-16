@@ -1,6 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 import {
@@ -64,7 +65,7 @@ const DASHBOARD_MAP = {
 
 function Profile() {
   const { user } = useAuthStore();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const theme    = user ? (ROLE_THEME[user.role] ?? DEFAULT_THEME) : DEFAULT_THEME;
   const RoleIcon = theme.Icon;
@@ -72,7 +73,7 @@ function Profile() {
   const getDashboardLink = () => (user ? (DASHBOARD_MAP[user.role] ?? "/") : "/");
 
   const handleChangePassword = () => {
-    if (user) navigate("/forgot-password");
+    if (user) router.push("/forgot-password");
   };
 
   return (
@@ -235,7 +236,7 @@ function Profile() {
                         </h4>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <Link
-                            to={getDashboardLink()}
+                            href={getDashboardLink()}
                             className={cn(btn.primary, "flex items-center justify-center gap-2 px-5 py-3", "min-h-[44px]")}
                           >
                             <FaTachometerAlt />
@@ -271,7 +272,7 @@ function Profile() {
               Please log in to view your profile.
             </p>
             <Link
-              to="/login"
+              href="/login"
               className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "min-h-[44px]")}
             >
               <FaUser />

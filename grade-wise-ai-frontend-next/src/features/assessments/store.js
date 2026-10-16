@@ -8,50 +8,37 @@ import {
   fetchEnrolledStudentsApi,
   enrollStudentApi,
   unenrollStudentApi,
-  fetchStudentAssessmentsApi,
   fetchPreviewQuestionsApi,
+  fetchAIPromptApi,
   generatePhysicalPaperApi,
 } from "./api.js";
 
 const useAssessmentStore = create((set) => ({
   assessments: [],
-  studentAssessments: [],
   currentAssessment: null,
   enrolledStudents: [],
   loading: false,
+  hasLoaded: false,
   error: null,
-
-  /* =========================
-     Student
-  ========================= */
-
-  getStudentAssessments: async () => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetchStudentAssessmentsApi();
-      set({ studentAssessments: response.data.data || [], loading: false });
-    } catch (error) {
-      const message = error.response?.data?.message || "Failed to fetch assessments";
-      set({ error: message, loading: false });
-      throw error;
-    }
-  },
 
   /* =========================
      Instructor
   ========================= */
 
-  getInstructorAssessments: async () => {
-    set({ loading: true, error: null });
+  getInstructorAssessments: async (silent = false) => {
+    if (!silent) set({ loading: true, error: null });
     try {
       const response = await fetchInstructorAssessments();
+      const list = (response.data?.data || []).map((a) => ({
+        ...a,
+        is_executed: a.is_executed || false,
+      }));
       set({
-        assessments: response.data.data.map((a) => ({
-          ...a,
-          is_executed: a.is_executed || false,
-        })),
+        assessments: list,
         loading: false,
+        hasLoaded: true,
       });
+      return list;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to fetch assessments";
       set({ error: message, loading: false });
@@ -92,16 +79,17 @@ const useAssessmentStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const response = await updateAssessmentApi(assessmentId, formData);
+      const updatedData = response.data?.data || response.data;
       set((state) => ({
         assessments: state.assessments.map((a) =>
           a.id === assessmentId
-            ? { ...response.data.data, is_executed: a.is_executed }
+            ? { ...a, ...updatedData, is_executed: a.is_executed }
             : a
         ),
-        currentAssessment: response.data.data,
+        currentAssessment: updatedData,
         loading: false,
       }));
-      return response.data.data;
+      return updatedData;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to update assessment";
       set({ error: message, loading: false });
@@ -215,16 +203,26 @@ const useAssessmentStore = create((set) => ({
      AI Preview
   ========================= */
 
-  fetchPreviewQuestions: async (assessmentId) => {
+  fetchPreviewQuestions: async (assessmentId, language) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchPreviewQuestionsApi(assessmentId);
+      const response = await fetchPreviewQuestionsApi(assessmentId, language);
       set({ loading: false });
       return response.data.questions;
     } catch (error) {
       const message = error.response?.data?.message || "Failed to generate preview questions";
       set({ error: message, loading: false });
       throw error;
+    }
+  },
+
+  getAIPrompt: async (assessmentId, language) => {
+    try {
+      const response = await fetchAIPromptApi(assessmentId, language);
+      return response.data.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to load AI prompt";
+      throw new Error(message);
     }
   },
 

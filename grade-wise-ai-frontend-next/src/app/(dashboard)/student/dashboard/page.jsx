@@ -1,9 +1,9 @@
-"use client";
+import ProtectedRoute from "@/components/ProtectedRoutes";
+import StudentDashboard from "@/views/Student/StudentDashboard";
 
-import dynamic from "next/dynamic";
-
-const ProtectedRoute = dynamic(() => import("@/components/ProtectedRoutes"), { ssr: false });
-const StudentDashboard = dynamic(() => import("@/views/Student/StudentDashboard"), { ssr: false });
+// Force Next.js to bypass static site generation directly on the server level
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default function Page() {
   return (

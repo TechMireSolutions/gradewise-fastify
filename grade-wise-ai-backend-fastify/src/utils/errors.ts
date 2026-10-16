@@ -50,7 +50,7 @@ export function toHttpError(err: unknown): { statusCode: number; message: string
     return { statusCode: err.statusCode, message: err.message, code: err.code };
   }
   if (err instanceof Error) {
-    return { statusCode: 500, message: err.message, code: "INTERNAL_ERROR" };
+    return { statusCode: 500, message: "Internal server error", code: "INTERNAL_ERROR" };
   }
   return { statusCode: 500, message: "An unexpected error occurred", code: "INTERNAL_ERROR" };
 }

@@ -7,12 +7,15 @@ import { toHttpError } from "../../utils/errors.js";
 import {
   getAllConfigs,
   getAiKeysSummary,
+  getRawConfigValue,
   addAiKeys,
   setProviderModel,
   deleteAiKey,
   testAiKey,
   bulkUpdateConfigs,
 } from "./config.service.js";
+import { buildConfigKey } from "../../ai/constants.js";
+import { decryptSecret } from "../../utils/crypto.js";
 
 const ProviderEnum = z.enum(["gemini", "groq", "openai", "claude", "mistral", "deepseek"]);
 const PurposeEnum = z.enum(["text", "pdf"]);
@@ -80,11 +83,15 @@ export default async function configModule(app: FastifyInstance) {
         provider: ProviderEnum,
         purpose: PurposeEnum,
         keys: z.array(z.string().min(1)),
+        model: z.string().min(1).optional(),
       }),
     },
   }, async (request, reply) => {
     try {
       const { added } = await addAiKeys(request.body.provider, request.body.purpose, request.body.keys);
+      if (request.body.model) {
+        await setProviderModel(request.body.provider, request.body.purpose, request.body.model);
+      }
       return reply.send({ success: true, message: `Keys added for ${request.body.provider} (${request.body.purpose}).`, added });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -144,13 +151,23 @@ export default async function configModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      const { getAllConfigs: getRaw } = await import("./config.service.js");
-      const configs = await getRaw();
-      const keysConfig = configs.find(
-        (c) => c.key === `${request.body.purpose.toUpperCase()}_${request.body.provider.toUpperCase()}_KEYS`
-      );
-      // Note: masked values returned — we need raw. Re-read from DB directly.
-      return reply.send({ success: false, message: "Use test-inline to test a key directly." });
+      const configKey = buildConfigKey(request.body.purpose, request.body.provider, "KEYS");
+      const raw = await getRawConfigValue(configKey);
+      const keys = (raw ?? "")
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+      const storedKey = keys[request.body.keyIndex];
+      if (!storedKey) {
+        return reply.code(404).send({ success: false, message: "No key found at that index." });
+      }
+      const result = await testAiKey(request.body.provider, decryptSecret(storedKey));
+      return reply.send({
+        success: result.success,
+        message: result.error,
+        latencyMs: result.latencyMs,
+        modelUsed: result.model,
+      });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });
@@ -170,7 +187,12 @@ export default async function configModule(app: FastifyInstance) {
   }, async (request, reply) => {
     try {
       const result = await testAiKey(request.body.provider, request.body.apiKey, request.body.model);
-      return reply.send({ success: true, data: result });
+      return reply.send({
+        success: result.success,
+        message: result.error,
+        latencyMs: result.latencyMs,
+        modelUsed: result.model,
+      });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });

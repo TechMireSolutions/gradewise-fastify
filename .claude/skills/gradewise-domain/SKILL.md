@@ -9,7 +9,7 @@ description: "Gradewise AI business domain — RBAC, assessments, async generati
 
 - Role-based features (super_admin, admin, instructor, student)
 - Assessment creation, execution, enrollment, analytics
-- Question block configuration (MCQ, short answer, true/false, matching)
+- Question block configuration (MCQ, short answer, fill in the blank, true/false, matching)
 - Student exam flow, async generation, scoring, XAI feedback
 - Physical paper generation (PDF/DOCX)
 - Multilingual + RTL (EN, UR, AR, FA)
@@ -52,6 +52,7 @@ description: "Gradewise AI business domain — RBAC, assessments, async generati
 |------|-------------|
 | MCQ | option count (default 4) |
 | Short answer | — |
+| Fill in the blank | correct_answer = missing word/phrase (exact match) |
 | True/false | — |
 | Matching | left count (3), right count (4) |
 

@@ -58,6 +58,7 @@
 
 @theme inline {
   --font-sans: var(--font-outfit), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-quran: var(--font-amiri), "Amiri", "Scheherazade New", "Noto Naskh Arabic", serif;
 
   --color-background: var(--app-bg);
   --color-foreground: var(--app-text);

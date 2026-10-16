@@ -1,28 +1,27 @@
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 /** @type {import('next').NextConfig} */
+const FIREBASE_AUTH_DOMAIN = "grade-wise-ai-v2.firebaseapp.com";
+
 const nextConfig = {
-  output: "standalone",
+  // output: "standalone"
   async rewrites() {
     return [
       {
         source: "/api/:path*",
         destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005"}/api/:path*`,
       },
+      {
+        source: "/__/auth",
+        destination: `https://${FIREBASE_AUTH_DOMAIN}/__/auth`,
+      },
+      {
+        source: "/__/auth/:path*",
+        destination: `https://${FIREBASE_AUTH_DOMAIN}/__/auth/:path*`,
+      },
+      {
+        source: "/__/firebase/init.json",
+        destination: `https://${FIREBASE_AUTH_DOMAIN}/__/firebase/init.json`,
+      },
     ];
-  },
-  webpack: (config) => {
-    config.resolve.alias["react-router-dom"] = path.resolve(__dirname, "src/lib/react-router-dom-mock.js");
-    return config;
-  },
-  turbopack: {
-    resolveAlias: {
-      "react-router-dom": "./src/lib/react-router-dom-mock.js",
-    },
   },
 };
 

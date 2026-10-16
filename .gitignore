@@ -33,3 +33,5 @@ Thumbs.db
 *.local
 coverage/
 .turbo/
+test-results/
+playwright-report/

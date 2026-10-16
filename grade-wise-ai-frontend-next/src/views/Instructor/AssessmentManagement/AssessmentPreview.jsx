@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner.jsx";
 import AssessmentHeader from "../../../components/AssessmentHeader.jsx";
@@ -24,20 +25,43 @@ function AssessmentPreview() {
     error,
     questionError,
     questionsLoading,
-    loadPreviewQuestions
+    aiPrompt,
+    aiPromptLoading,
+    selectedLanguage,
+    selectLanguage,
+    promptLanguage,
+    selectPromptLanguage,
+    loadPreviewQuestions,
+    loadAIPrompt
   } = useAssessmentPreview(id);
 
   // Load questions when switching to assessment tab
   useEffect(() => {
-    if (tab === "assessment" && assessment) {
-      loadPreviewQuestions();
+    if (tab === "assessment" && assessment && selectedLanguage) {
+      loadPreviewQuestions(selectedLanguage);
     }
-  }, [tab, assessment]);
+  }, [tab, assessment, selectedLanguage, loadPreviewQuestions]);
+
+  // Load the real AI prompt when switching to prompt tab
+  useEffect(() => {
+    if (tab === "prompt" && assessment && promptLanguage) {
+      loadAIPrompt(promptLanguage);
+    }
+  }, [tab, assessment, promptLanguage, loadAIPrompt]);
 
   const handleCopyPrompt = () => {
     if (!assessment) return;
 
-    const promptText = generateAIPrompt(assessment);
+    let promptText;
+    if (aiPrompt?.unifiedPrompt) {
+      promptText = aiPrompt.unifiedPrompt;
+    } else if (aiPrompt?.blocks?.length > 0) {
+      promptText = aiPrompt.blocks
+        .map((b, i) => `--- Block ${i + 1} (${b.questionType} x${b.questionCount}) ---\n${b.prompt}`)
+        .join("\n\n");
+    } else {
+      promptText = generateAIPrompt(assessment, promptLanguage || selectedLanguage);
+    }
     navigator.clipboard.writeText(promptText);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -68,7 +92,7 @@ function AssessmentPreview() {
           <h2 className="text-xl font-bold text-foreground mb-2">Unable to Load Assessment</h2>
           <p className={cn("text-muted-foreground", "mb-6")}>{error}</p>
           <Link
-            to="/instructor/assessments"
+            href="/instructor/assessments"
             className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "cursor-pointer")}
           >
             <FaArrowLeft />
@@ -119,8 +143,12 @@ function AssessmentPreview() {
             {tab === "prompt" && (
               <PromptTab
                 assessment={assessment}
+                aiPrompt={aiPrompt}
+                aiPromptLoading={aiPromptLoading}
                 copied={copied}
                 onCopy={handleCopyPrompt}
+                selectedLanguage={promptLanguage || selectedLanguage || "en"}
+                onLanguageChange={selectPromptLanguage}
               />
             )}
 
@@ -129,6 +157,8 @@ function AssessmentPreview() {
                 questions={questions}
                 questionError={questionError}
                 loading={questionsLoading || (questions.length === 0 && !questionError)}
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={selectLanguage}
               />
             )}
           </div>
@@ -137,7 +167,7 @@ function AssessmentPreview() {
         {/* Back Button */}
         <div className="mt-6 sm:mt-8 text-center">
           <Link
-            to="/instructor/assessments"
+            href="/instructor/assessments"
             className={cn("inline-flex", "items-center", "gap-2", "px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
           >
             <FaArrowLeft />

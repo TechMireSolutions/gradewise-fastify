@@ -1,10 +1,14 @@
-import { ZodError } from "zod";
-
 export function parseZodFieldErrors(error) {
-  if (!(error instanceof ZodError)) return null;
+  if (!error) return null;
+  const issues = Array.isArray(error.errors)
+    ? error.errors
+    : Array.isArray(error.issues)
+    ? error.issues
+    : [];
+  if (issues.length === 0) return null;
   const fieldErrors = {};
-  error.errors.forEach((err) => {
-    const key = err.path[0];
+  issues.forEach((err) => {
+    const key = err.path?.[0];
     if (key) fieldErrors[key] = err.message;
   });
   return fieldErrors;

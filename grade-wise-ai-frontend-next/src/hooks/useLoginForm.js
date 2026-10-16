@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import useAuthStore from "@/features/auth/store.js";
 import useRecaptchaInit from "./useRecaptchaInit.js";
@@ -8,6 +8,7 @@ import useModal from "./useModal.js";
 import { getCaptchaToken } from "../config/captcha.js";
 import { loginSchema } from "../schemas/authSchemas.js";
 import { redirectByRole } from "../utils/redirectByRole.js";
+import { saveRememberedAccount } from "@/features/auth/rememberedAccounts.js";
 
 export default function useLoginForm({
   allowedRoles = null,
@@ -17,7 +18,7 @@ export default function useLoginForm({
   successMessage = (name) => `Welcome back, ${name}!`,
   redirectDelay = 1500,
 } = {}) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login } = useAuthStore();
   const { modal, showModal, closeModal } = useModal();
   const [loading, setLoading] = useState(false);
@@ -44,8 +45,10 @@ export default function useLoginForm({
         return;
       }
 
+      saveRememberedAccount(response);
+
       showModal("success", successTitle, successMessage(response.name));
-      setTimeout(() => redirectByRole(response.role, navigate), redirectDelay);
+      setTimeout(() => redirectByRole(response.role, (to) => router.push(to)), redirectDelay);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
       showModal("error", "Login Failed", errorMessage);

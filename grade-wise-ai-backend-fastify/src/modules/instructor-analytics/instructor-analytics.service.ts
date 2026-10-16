@@ -6,7 +6,24 @@ import {
   enrollments,
 } from "../../db/schema.js";
 import { eq, and, sql } from "drizzle-orm";
+import { ForbiddenError, NotFoundError } from "../../utils/errors.js";
 import { getCompletedAttempt, getAttemptQuestionsWithAnswers } from "../analytics/shared.js";
+
+async function assertCanViewAssessment(
+  assessmentId: number,
+  userId: number,
+  role: string
+): Promise<void> {
+  const [assessment] = await db
+    .select({ id: assessments.id, instructorId: assessments.instructorId })
+    .from(assessments)
+    .where(eq(assessments.id, assessmentId))
+    .limit(1);
+  if (!assessment) throw new NotFoundError("Assessment");
+  if (!["admin", "super_admin"].includes(role) && assessment.instructorId !== userId) {
+    throw new ForbiddenError("Access denied to this assessment");
+  }
+}
 
 export async function getInstructorOverview(instructorId: number) {
   const [totalAssessments] = await db
@@ -68,7 +85,12 @@ export async function getInstructorExecutedAssessments(instructorId: number) {
     .orderBy(sql`${assessments.createdAt} DESC`);
 }
 
-export async function getAssessmentStudents(assessmentId: number) {
+export async function getAssessmentStudents(
+  assessmentId: number,
+  userId: number,
+  role: string
+) {
+  await assertCanViewAssessment(assessmentId, userId, role);
   return db
     .select({
       studentId: users.id,
@@ -95,8 +117,11 @@ export async function getAssessmentStudents(assessmentId: number) {
 
 export async function getStudentAttemptQuestions(
   assessmentId: number,
-  studentId: number
+  studentId: number,
+  userId: number,
+  role: string
 ) {
+  await assertCanViewAssessment(assessmentId, userId, role);
   const attempt = await getCompletedAttempt(assessmentId, studentId);
   const questions = await getAttemptQuestionsWithAnswers(attempt.id);
 

@@ -52,12 +52,19 @@ Run the **Compliance checklist** at the bottom of `standards_rules.md` before ev
 
 ## Local Dev Checklist
 
-1. `docker compose up -d postgres redis minio` (optional but recommended)
-2. Backend `.env` from `.env.example` (`JWT_SECRET`, `ENCRYPTION_KEY`, `FIREBASE_PROJECT_ID`)
-3. `npm run db:push && npm run db:seed` (backend)
-4. `npm run dev` (backend) + `npm run dev:worker` if `USE_ASYNC_JOBS=true`
-5. Frontend `.env.local` with `NEXT_PUBLIC_API_URL=http://localhost:5005`
-6. `npm run dev` (frontend)
+1. Backend `.env` from `.env.example` (`JWT_SECRET`, `DATABASE_URL`, `ENCRYPTION_KEY`, `FIREBASE_PROJECT_ID`)
+2. `npm run db:push && npm run db:seed` (backend)
+3. `npm run dev` (backend) + `npm run dev:worker` if `USE_ASYNC_JOBS=true`
+4. Frontend `.env.local` with `NEXT_PUBLIC_API_URL=http://localhost:5005`
+5. `npm run dev` (frontend)
+
+## Production
+
+```bash
+npm run build              # in both apps
+pm2 start ecosystem.config.cjs
+pm2 save && pm2 startup
+```
 
 ## Git
 

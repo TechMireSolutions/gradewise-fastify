@@ -1,15 +1,33 @@
 import { z } from "zod";
 
-export const QuestionBlockSchema = z.object({
-  questionType: z.enum(["multiple_choice", "short_answer", "true_false", "matching"]),
-  questionCount: z.number().int().min(1).max(50).default(5),
-  durationPerQuestion: z.number().int().min(30).max(600).default(60),
-  numOptions: z.number().int().min(2).max(6).optional().default(4),
-  leftCount: z.number().int().min(2).max(10).optional().default(3),
-  rightCount: z.number().int().min(2).max(10).optional().default(4),
-  positiveMarks: z.number().min(0).max(100).default(1),
-  negativeMarks: z.number().min(0).max(100).default(0.25),
-});
+export const QuestionBlockSchema = z
+  .object({
+    questionType: z.enum(["multiple_choice", "short_answer", "true_false", "matching", "fill_in_the_blank"]),
+    questionCount: z.coerce.number().int().min(1).max(50).default(5),
+    durationPerQuestion: z.coerce.number().int().min(30).max(600).default(60),
+    numOptions: z.coerce.number().int().min(2).max(6).optional().default(4),
+    leftCount: z.coerce.number().int().min(2).max(10).optional().default(3),
+    rightCount: z.coerce.number().int().min(2).max(10).optional().default(4),
+    positiveMarks: z.coerce
+      .number()
+      .transform((val) => Math.abs(val))
+      .refine((val) => val > 0, "Positive marks must be greater than 0")
+      .refine((val) => val <= 100, "Positive marks cannot exceed 100")
+      .default(1),
+    negativeMarks: z.coerce
+      .number()
+      .refine((val) => Math.abs(val) <= 100, "Negative marks deduction cannot exceed 100")
+      .default(0.25),
+  })
+  .refine(
+    (data) => Math.abs(Number(data.negativeMarks ?? 0)) <= Number(data.positiveMarks ?? 1),
+    {
+      message: "Negative marks deduction cannot exceed positive marks per question (total number)",
+      path: ["negativeMarks"],
+    }
+  );
+
+export const AssessmentLanguageSchema = z.enum(["en", "ur", "ar", "fa"]).default("en");
 
 export const CreateAssessmentSchema = z.object({
   title: z.string().min(1).max(255).trim(),
@@ -17,18 +35,20 @@ export const CreateAssessmentSchema = z.object({
   externalLinks: z.array(z.string().url()).optional().default([]),
   questionBlocks: z.array(QuestionBlockSchema).min(1).max(10),
   selectedResources: z.array(z.number().int().positive()).optional().default([]),
+  language: AssessmentLanguageSchema,
 });
 
 export const UpdateAssessmentSchema = z.object({
   title: z.string().min(1).max(255).trim().optional(),
-  prompt: z.string().max(5000).optional(),
+  prompt: z.string().max(5000).optional().nullable(),
   externalLinks: z.array(z.string().url()).optional(),
   questionBlocks: z.array(QuestionBlockSchema).min(1).max(10).optional(),
   selectedResources: z.array(z.number().int().positive()).optional(),
+  language: AssessmentLanguageSchema.optional(),
 });
 
 export const EnrollStudentSchema = z.object({
-  studentId: z.number().int().positive(),
+  email: z.string().email(),
 });
 
 export const PhysicalPaperSchema = z.object({
@@ -38,12 +58,14 @@ export const PhysicalPaperSchema = z.object({
   paperDate: z.string().min(1),
   paperTime: z.string().min(1),
   paperDuration: z.string().min(1),
-  totalMarks: z.number().int().positive(),
+  totalMarks: z.coerce.number().transform((val) => Math.abs(val)).refine((val) => val > 0, "Total marks must be greater than 0"),
   notes: z.string().optional(),
   pageSize: z.enum(["A4", "A5", "LETTER"]).default("A4"),
-  headerFontSize: z.number().int().min(8).max(32).default(14),
+  headerFontSize: z.number().int().min(8).max(40).default(14),
   bodyFontSize: z.number().int().min(8).max(24).default(11),
+  optionFontSize: z.number().int().min(8).max(24).optional(),
   outputFormat: z.enum(["pdf", "docx"]).default("pdf"),
+  language: z.string().default("en"),
 });
 
 export type CreateAssessmentInput = z.infer<typeof CreateAssessmentSchema>;

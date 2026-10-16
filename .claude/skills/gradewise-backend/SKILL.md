@@ -18,7 +18,7 @@ description: "Develop and debug the Gradewise Fastify backend (TypeScript, Drizz
 
 ## Stack
 
-Node ≥22 · Fastify 5 · TypeScript 6 · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 6 · Vitest
+Node ≥24 · Fastify 5 · TypeScript 6 · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 6 · Vitest
 
 ## Before You Code
 
@@ -96,7 +96,6 @@ grade-wise-ai-backend-fastify/src/
 ## Env & Infrastructure
 
 ```bash
-docker compose up -d postgres redis minio   # local infra
 cp .env.example .env
 ```
 

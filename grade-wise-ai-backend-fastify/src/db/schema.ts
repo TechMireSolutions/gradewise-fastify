@@ -29,6 +29,7 @@ export const questionTypeEnum = pgEnum("question_type", [
   "short_answer",
   "true_false",
   "matching",
+  "fill_in_the_blank",
 ]);
 
 export const attemptStatusEnum = pgEnum("attempt_status", [
@@ -65,7 +66,10 @@ export const users = pgTable(
   },
   (t) => [
     uniqueIndex("users_email_idx").on(t.email),
+    uniqueIndex("users_uid_idx").on(t.uid),
     index("users_role_idx").on(t.role),
+    index("users_verification_token_idx").on(t.verificationToken),
+    index("users_reset_token_idx").on(t.resetToken),
   ]
 );
 
@@ -80,6 +84,7 @@ export const assessments = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     isExecuted: boolean("is_executed").notNull().default(false),
+    language: text("language").notNull().default("en"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
@@ -105,7 +110,9 @@ export const questionBlocks = pgTable(
     negativeMarks: numeric("negative_marks", { precision: 5, scale: 2 })
       .notNull()
       .default("0.25"),
-    createdBy: integer("created_by").references(() => users.id),
+    createdBy: integer("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [index("question_blocks_assessment_idx").on(t.assessmentId)]
@@ -184,7 +191,6 @@ export const assessmentAttempts = pgTable(
     completedAt: timestamp("completed_at"),
     score: numeric("score", { precision: 8, scale: 2 }),
     status: attemptStatusEnum("status").notNull().default("pending"),
-    attemptNumber: integer("attempt_number").notNull().default(1),
     language: text("language").notNull().default("en"),
   },
   (t) => [
@@ -240,6 +246,7 @@ export const studentAnswers = pgTable(
     submittedAt: timestamp("submitted_at").notNull().defaultNow(),
   },
   (t) => [
+    uniqueIndex("student_answers_attempt_question_idx").on(t.attemptId, t.questionId),
     index("student_answers_attempt_idx").on(t.attemptId),
     index("student_answers_question_idx").on(t.questionId),
   ]
@@ -253,7 +260,6 @@ export const resourceChunks = pgTable(
       .notNull()
       .references(() => resources.id, { onDelete: "cascade" }),
     chunkText: text("chunk_text").notNull(),
-    embedding: text("embedding"),
     chunkIndex: integer("chunk_index").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },

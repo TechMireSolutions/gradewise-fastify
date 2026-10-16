@@ -10,7 +10,7 @@ export function setAuthCookie(reply: FastifyReply, token: string): void {
     path: "/",
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "strict" : "lax",
+    sameSite: "lax",
     maxAge: ONE_DAY_SECONDS,
   });
 }

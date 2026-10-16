@@ -46,7 +46,8 @@ export default async function instructorAnalyticsModule(app: FastifyInstance) {
     schema: { params: IdParamSchema },
   }, async (request, reply) => {
     try {
-      const data = await getAssessmentStudents(request.params.id);
+      const user = request.user as { id: number; role: string };
+      const data = await getAssessmentStudents(request.params.id, user.id, user.role);
       return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -59,9 +60,12 @@ export default async function instructorAnalyticsModule(app: FastifyInstance) {
     schema: { params: IdStudentIdParamSchema },
   }, async (request, reply) => {
     try {
+      const user = request.user as { id: number; role: string };
       const data = await getStudentAttemptQuestions(
         request.params.id,
-        request.params.studentId
+        request.params.studentId,
+        user.id,
+        user.role
       );
       return reply.send({ success: true, data });
     } catch (err) {

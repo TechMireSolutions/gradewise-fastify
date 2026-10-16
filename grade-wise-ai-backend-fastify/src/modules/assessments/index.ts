@@ -20,6 +20,7 @@ import {
   unenrollStudentService,
   getEnrolledStudentsService,
   previewQuestionsService,
+  getAssessmentAIPromptService,
   generatePhysicalPaperService,
 } from "./assessments.service.js";
 
@@ -82,8 +83,8 @@ export default async function assessmentsModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      const user = request.user as { id: number };
-      const data = await updateAssessmentService(request.params.id, request.body, user.id);
+      const user = request.user as { id: number; role: string };
+      const data = await updateAssessmentService(request.params.id, request.body, user.id, user.role);
       return reply.send({ success: true, message: "Assessment updated.", data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -115,8 +116,8 @@ export default async function assessmentsModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      const user = request.user as { id: number };
-      await enrollStudentService(request.params.id, request.body.studentId, user.id);
+      const user = request.user as { id: number; role: string };
+      await enrollStudentService(request.params.id, request.body.email, user.id, user.role);
       return reply.send({ success: true, message: "Student enrolled." });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -130,7 +131,8 @@ export default async function assessmentsModule(app: FastifyInstance) {
     schema: { params: IdStudentIdParamSchema },
   }, async (request, reply) => {
     try {
-      await unenrollStudentService(request.params.id, request.params.studentId);
+      const user = request.user as { id: number; role: string };
+      await unenrollStudentService(request.params.id, request.params.studentId, user.id, user.role);
       return reply.send({ success: true, message: "Student unenrolled." });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -144,7 +146,8 @@ export default async function assessmentsModule(app: FastifyInstance) {
     schema: { params: IdParamSchema },
   }, async (request, reply) => {
     try {
-      const data = await getEnrolledStudentsService(request.params.id);
+      const user = request.user as { id: number; role: string };
+      const data = await getEnrolledStudentsService(request.params.id, user.id, user.role);
       return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
@@ -161,8 +164,32 @@ export default async function assessmentsModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      const questions = await previewQuestionsService(request.params.id, request.query.language);
+      const user = request.user as { id: number; role: string };
+      const questions = await previewQuestionsService(request.params.id, request.query.language, user.id, user.role);
       return reply.send({ success: true, questions });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
+  // GET /api/assessments/:id/ai-prompt
+  f.get("/:id/ai-prompt", {
+    preHandler: [authenticate, authorize(...INSTRUCTOR_ROLES)],
+    schema: {
+      params: IdParamSchema,
+      querystring: z.object({ language: z.string().optional() }),
+    },
+  }, async (request, reply) => {
+    try {
+      const user = request.user as { id: number; role: string };
+      const data = await getAssessmentAIPromptService(
+        request.params.id,
+        user.id,
+        user.role,
+        request.query.language
+      );
+      return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
       return reply.code(statusCode).send({ success: false, message });
@@ -178,7 +205,8 @@ export default async function assessmentsModule(app: FastifyInstance) {
     },
   }, async (request, reply) => {
     try {
-      const pdfBuffer = await generatePhysicalPaperService(request.params.id, request.body);
+      const user = request.user as { id: number; role: string };
+      const pdfBuffer = await generatePhysicalPaperService(request.params.id, request.body, user.id, user.role);
       reply.header("Content-Type", "application/pdf");
       reply.header("Content-Disposition", `attachment; filename="assessment-${request.params.id}.pdf"`);
       return reply.send(pdfBuffer);

@@ -52,7 +52,7 @@ export default async function studentAnalyticsModule(app: FastifyInstance) {
   }, async (request, reply) => {
     try {
       const user = request.user as { id: number };
-      const data = await getStudentPerformance(user.id);
+      const data = await getStudentPerformance(user.id, request.query.timeRange);
       return reply.send({ success: true, data });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);

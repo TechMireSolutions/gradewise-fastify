@@ -1,18 +1,18 @@
 import { cn } from "@/lib/cn.js";
 import { accentPanel, btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
 import Modal from "../../../components/ui/Modal";
 import { createAssessmentSchema } from "../../../schemas/assessmentSchemas.js";
-import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
+import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft, FiChevronDown } from "react-icons/fi";
 import AmbientBackground from "../../../components/layout/AmbientBackground.jsx";
 import useModal from "../../../hooks/useModal.js";
 
 function CreateAssessment() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { createAssessment, loading } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
     const { modal, showModal, closeModal } = useModal();
@@ -40,6 +40,7 @@ function CreateAssessment() {
   ]);
 
   const [selectedResources, setSelectedResources] = useState([]);
+  const [sourceMode, setSourceMode] = useState("links");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -47,6 +48,49 @@ function CreateAssessment() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const formatNegativeMarksInput = (value) => {
+    if (value === "" || value === null || value === undefined) {
+      return "";
+    }
+    let str = String(value).trim();
+    // Keep only numeric characters, dots, and minus
+    str = str.replace(/[^0-9.-]/g, "");
+    if (str === "") return "";
+    if (str === "-") return "-";
+
+    // Strip existing minus signs to work with raw digits
+    str = str.replace(/-/g, "");
+
+    // If only dot was entered, e.g. "." or "-."
+    if (str === ".") return "-0.";
+
+    // Prevent multiple dots: keep only the first decimal point
+    const parts = str.split(".");
+    if (parts.length > 2) {
+      str = parts[0] + "." + parts.slice(1).join("");
+    }
+
+    // Always prefix with minus sign
+    return `-${str}`;
+  };
+
+  const handleNegativeMarksBlur = (index) => {
+    setQuestionBlocks((prev) =>
+      prev.map((block, i) => {
+        if (i !== index) return block;
+        const val = String(block.negativeMarks ?? "").trim();
+        if (val === "" || val === "-" || val === "-." || val === "-0.") {
+          return { ...block, negativeMarks: 0 };
+        }
+        const num = Number(val);
+        if (!isNaN(num)) {
+          return { ...block, negativeMarks: num === 0 ? 0 : -Math.abs(num) };
+        }
+        return { ...block, negativeMarks: 0 };
+      })
+    );
   };
 
   const handleBlockChange = (index, field, value) => {
@@ -58,11 +102,17 @@ function CreateAssessment() {
             [field]:
               field === "questionCount" || field === "durationPerQuestion" || field === "numOptions"
                 ? Math.max(Number.parseInt(value) || 1, 1)
-                : field === "positiveMarks" || field === "negativeMarks"
+                : field === "positiveMarks"
                   ? value === "" || value === null
                     ? null
-                    : Math.max(Number.parseFloat(value) || 0, 0)
-                  : value,
+                    : value === "-"
+                      ? "-"
+                      : isNaN(Number(value))
+                        ? 1
+                        : Math.abs(Number(value))
+                  : field === "negativeMarks"
+                    ? formatNegativeMarksInput(value)
+                    : value,
           }
           : block
       )
@@ -119,12 +169,30 @@ function CreateAssessment() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Sanitize question blocks before validation so negative values and intermediate strings are handled properly
+    const sanitizedBlocks = questionBlocks.map((b) => {
+      const pos = b.positiveMarks === "" || b.positiveMarks === "-" || b.positiveMarks == null
+        ? 1
+        : Math.abs(Number(b.positiveMarks) || 1);
+      const neg = b.negativeMarks === "" || b.negativeMarks === "-" || b.negativeMarks == null
+        ? 0
+        : (isNaN(Number(b.negativeMarks)) ? 0 : (Number(b.negativeMarks) === 0 ? 0 : -Math.abs(Number(b.negativeMarks))));
+      return {
+        ...b,
+        questionCount: Math.max(1, Number(b.questionCount) || 1),
+        durationPerQuestion: Math.max(30, Number(b.durationPerQuestion) || 60),
+        numOptions: b.questionType === "multiple_choice" ? Math.max(2, Number(b.numOptions) || 4) : 4,
+        positiveMarks: pos,
+        negativeMarks: neg,
+      };
+    });
+
     const validationResult = createAssessmentSchema.safeParse({
       title: formData.title,
       prompt: formData.prompt,
       selectedResources,
       externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
-      questionBlocks,
+      questionBlocks: sanitizedBlocks,
     });
 
     if (!validationResult.success) {
@@ -137,15 +205,16 @@ function CreateAssessment() {
     const payload = {
       title: formData.title.trim(),
       prompt: formData.prompt.trim(),
+      language: "en",
       externalLinks: formData.externalLinks.filter((link) => link.trim()),
       selectedResources,
-      questionBlocks: questionBlocks.map((block) => ({
+      questionBlocks: sanitizedBlocks.map((block) => ({
         questionType: block.questionType,
-        questionCount: Number(block.questionCount),
-        durationPerQuestion: Number(block.durationPerQuestion),
-        ...(block.questionType === "multiple_choice" ? { numOptions: Number(block.numOptions) } : {}),
-        positiveMarks: Number(block.positiveMarks ?? 1),
-        negativeMarks: Number(block.negativeMarks ?? 0),
+        questionCount: block.questionCount,
+        durationPerQuestion: block.durationPerQuestion,
+        ...(block.questionType === "multiple_choice" ? { numOptions: block.numOptions } : {}),
+        positiveMarks: block.positiveMarks,
+        negativeMarks: block.negativeMarks,
       })),
     };
 
@@ -155,7 +224,7 @@ function CreateAssessment() {
       showModal("success", "Success", "Assessment created successfully!");
 
       setTimeout(() => {
-        navigate("/instructor/assessments");
+        router.push("/instructor/assessments");
       }, 1500);
     } catch (err) {
       showModal("error", "Error", err.message || "Failed to create assessment");
@@ -179,7 +248,7 @@ function CreateAssessment() {
           </div>
           <button
             type="button"
-            onClick={() => navigate("/instructor/assessments")}
+            onClick={() => router.push("/instructor/assessments")}
             className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "self-start", "sm:self-auto")}
           >
             <FiArrowLeft className="text-base" />
@@ -231,47 +300,124 @@ function CreateAssessment() {
                   />
                 </div>
 
-                {/* Resources Section */}
+                {/* Content Source (External Links or Existing Resources) */}
                 <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <FiBook className="text-indigo-400 text-sm" />
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>Select Existing Resources</label>
-                    {selectedResources.length > 0 && (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
-                        {selectedResources.length} selected
-                      </span>
-                    )}
+                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>Content Source <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using Prompt)</span></label>
                   </div>
-                  {resourcesLoading ? (
+
+                  {/* Ask the user which source type to add */}
+                  <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Content source type">
+                    <button
+                      type="button"
+                      onClick={() => setSourceMode("links")}
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer",
+                        sourceMode === "links"
+                          ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+                          : "bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground"
+                      )}
+                      disabled={isProcessing}
+                    >
+                      <FiLink className="text-base" />
+                      Add External Link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSourceMode("resources")}
+                      className={cn(
+                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer",
+                        sourceMode === "resources"
+                          ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
+                          : "bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground"
+                      )}
+                      disabled={isProcessing}
+                    >
+                      <FiBook className="text-base" />
+                      Select Existing Resource
+                    </button>
+                  </div>
+
+                  {sourceMode === "links" ? (
+                    <div>
+                      <div className="space-y-3">
+                        {formData.externalLinks.map((link, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <FiLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
+                              <input
+                                type="url"
+                                value={link}
+                                onChange={(e) => handleLinkChange(index, e.target.value)}
+                                placeholder="https://example.com/resource"
+                                className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
+                                disabled={isProcessing}
+                              />
+                            </div>
+                            {formData.externalLinks.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeExternalLink(index)}
+                                className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                disabled={isProcessing}
+                              >
+                                <FiX className="text-base" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={addExternalLink}
+                        className={cn("mt-4", "inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
+                        disabled={isProcessing}
+                      >
+                        <FiPlus className="text-base" />
+                        Add Link
+                      </button>
+                    </div>
+                  ) : resourcesLoading ? (
                     <div className="flex justify-center py-8">
                       <LoadingSpinner size="sm" type="dots" color="blue" />
                     </div>
                   ) : resources.length > 0 ? (
-                    <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                      {resources.map((resource) => (
-                        <div
-                          key={resource.id}
-                          className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
-                            selectedResources.includes(resource.id)
-                              ? "bg-indigo-500/10 border-indigo-500/30"
-                              : "bg-slate-900/30 border-border hover:bg-indigo-500/5 hover:border-indigo-500/20"
-                          }`}
-                          onClick={() => !isProcessing && handleResourceToggle(resource.id)}
-                        >
-                          <input
-                            type="checkbox"
-                            id={`resource-${resource.id}`}
-                            checked={selectedResources.includes(resource.id)}
-                            onChange={() => handleResourceToggle(resource.id)}
-                            className="h-4 w-4 accent-indigo-500 border-slate-600 rounded focus:ring-indigo-500 cursor-pointer"
-                            disabled={isProcessing}
-                          />
-                          <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
-                            <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
-                            <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.content_type}</span>
-                          </label>
-                        </div>
-                      ))}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn("text-muted-foreground", "text-xs")}>Select one or more uploaded documents:</span>
+                        {selectedResources.length > 0 && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
+                            {selectedResources.length} selected
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                        {resources.map((resource) => (
+                          <div
+                            key={resource.id}
+                            className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
+                              selectedResources.includes(resource.id)
+                                ? "bg-indigo-500/10 border-indigo-500/30"
+                                : "bg-slate-900/30 border-border hover:bg-indigo-500/5 hover:border-indigo-500/20"
+                            }`}
+                            onClick={() => !isProcessing && handleResourceToggle(resource.id)}
+                          >
+                            <input
+                              type="checkbox"
+                              id={`resource-${resource.id}`}
+                              checked={selectedResources.includes(resource.id)}
+                              onChange={() => handleResourceToggle(resource.id)}
+                              className="h-4 w-4 accent-indigo-500 border-slate-600 rounded focus:ring-indigo-500 cursor-pointer"
+                              disabled={isProcessing}
+                            />
+                            <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
+                              <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
+                              <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.contentType}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
@@ -282,50 +428,6 @@ function CreateAssessment() {
                       <p className={cn("text-muted-foreground", "text-xs", "mt-1")}>Upload them from the Resources page.</p>
                     </div>
                   )}
-                </div>
-
-                {/* External Links */}
-                <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FiLink className="text-indigo-400 text-sm" />
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>External Links</label>
-                  </div>
-                  <div className="space-y-3">
-                    {formData.externalLinks.map((link, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div className="relative flex-1">
-                          <FiLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
-                          <input
-                            type="url"
-                            value={link}
-                            onChange={(e) => handleLinkChange(index, e.target.value)}
-                            placeholder="https://example.com/resource"
-                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
-                            disabled={isProcessing}
-                          />
-                        </div>
-                        {formData.externalLinks.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeExternalLink(index)}
-                            className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
-                            disabled={isProcessing}
-                          >
-                            <FiX className="text-base" />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addExternalLink}
-                    className={cn("mt-4", "inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
-                    disabled={isProcessing}
-                  >
-                    <FiPlus className="text-base" />
-                    Add Link
-                  </button>
                 </div>
               </div>
             </div>
@@ -338,9 +440,6 @@ function CreateAssessment() {
                 <FiList className="text-white text-base" />
               </div>
               <h2 className="text-xl font-bold text-foreground">Question Configuration</h2>
-              <span className={cn("inline-flex", "items-center", "gap-1.5", "px-2.5", "py-1", "rounded-full", "text-xs", "font-semibold", "bg-btn-secondary", "text-muted-foreground", "border", "border-border", "ml-auto")}>
-                {questionBlocks.length} {questionBlocks.length === 1 ? "Block" : "Blocks"}
-              </span>
             </div>
             <div className="p-6 sm:p-8">
               <div className="space-y-5">
@@ -352,7 +451,10 @@ function CreateAssessment() {
                           Block {index + 1}
                         </span>
                         <h3 className={cn("text-base", "font-semibold", "text-secondary-foreground")}>
-                          {block.questionType === "multiple_choice" ? "Multiple Choice" : "True / False"}
+                          {block.questionType === "multiple_choice" && "Multiple Choice"}
+                          {block.questionType === "short_answer" && "Short Answer"}
+                          {block.questionType === "true_false" && "True / False"}
+                          {block.questionType === "fill_in_the_blank" && "Fill in the Blank"}
                         </h3>
                       </div>
                       {questionBlocks.length > 1 && (
@@ -370,15 +472,20 @@ function CreateAssessment() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
-                        <select
-                          value={block.questionType}
-                          onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
-                          disabled={isProcessing}
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="true_false">True/False</option>
-                        </select>
+                        <div className="relative">
+                          <select
+                            value={block.questionType}
+                            onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
+                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "pr-10", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
+                            disabled={isProcessing}
+                          >
+                            <option value="multiple_choice">Multiple Choice</option>
+                            <option value="short_answer">Short Answer</option>
+                            <option value="true_false">True/False</option>
+                            <option value="fill_in_the_blank">Fill in the Blank</option>
+                          </select>
+                          <FiChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-subtle-foreground" />
+                        </div>
                       </div>
 
                       <div>
@@ -402,11 +509,53 @@ function CreateAssessment() {
                           value={block.durationPerQuestion}
                           onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
                           min="30"
+                          max="600"
                           placeholder="e.g. 120"
                           className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           required
                           disabled={isProcessing}
                         />
+                      </div>
+
+                      <div>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
+                        <input
+                          type="number"
+                          value={block.positiveMarks ?? ""}
+                          onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
+                          step="0.1"
+                          placeholder="e.g. 1"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
+                          disabled={isProcessing}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={block.negativeMarks ?? ""}
+                          onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
+                          onBlur={() => handleNegativeMarksBlur(index)}
+                          onKeyDown={(e) => {
+                            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                              e.preventDefault();
+                              const current = Number(block.negativeMarks) || 0;
+                              const step = 0.05;
+                              const nextVal = e.key === "ArrowUp"
+                                ? Math.min(0, Number((current + step).toFixed(2)))
+                                : Math.max(-100, Number((current - step).toFixed(2)));
+                              handleBlockChange(index, "negativeMarks", nextVal === 0 ? 0 : nextVal);
+                            }
+                          }}
+                          placeholder="e.g. -0.25"
+                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
+                          disabled={isProcessing}
+                        />
+                        <span className="text-[11px] text-muted-foreground mt-1 block">
+                          Deduction must be less than total marks ({block.positiveMarks || 1})
+                        </span>
                       </div>
 
                       {block.questionType === "multiple_choice" && (
@@ -425,34 +574,6 @@ function CreateAssessment() {
                           />
                         </div>
                       )}
-
-                      <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
-                        <input
-                          type="number"
-                          value={block.positiveMarks || ""}
-                          onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
-                          min="0"
-                          step="0.1"
-                          placeholder="e.g. 1"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
-                          disabled={isProcessing}
-                        />
-                      </div>
-
-                      <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
-                        <input
-                          type="number"
-                          value={block.negativeMarks || ""}
-                          onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
-                          min="0"
-                          step="0.1"
-                          placeholder="e.g. 0.25"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
-                          disabled={isProcessing}
-                        />
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -474,7 +595,7 @@ function CreateAssessment() {
           <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 pb-4">
             <button
               type="button"
-              onClick={() => navigate("/instructor/assessments")}
+              onClick={() => router.push("/instructor/assessments")}
               className={cn("px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1")}
               disabled={isProcessing}
             >

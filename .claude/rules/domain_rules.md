@@ -58,6 +58,7 @@ Each assessment is composed of one or more typed blocks. Every block is fully co
 |------|--------------------------|
 | **MCQ** (Multiple Choice) | Number of choices (default: 4) |
 | **Short Answer** | — |
+| **Fill in the Blank** | `correct_answer` = the missing word/phrase (exact match) |
 | **True / False** | — |
 | **Matching** | Left-side option count (default: 3), Right-side option count (default: 4) |
 
@@ -94,7 +95,7 @@ When `USE_ASYNC_JOBS=true` and Redis is available:
 
 - All roles authenticate via **httpOnly cookie** (`gradewise_token`) — not JWT in browser storage.
 - Google sign-in: frontend sends Firebase **idToken**; backend verifies before creating session.
-- Protected frontend routes: Next.js `middleware.js` + `ProtectedRoute` + `GET /api/auth/me`.
+- Protected frontend routes: Next.js `proxy.js` + `ProtectedRoute` + `GET /api/auth/me`.
 
 ---
 

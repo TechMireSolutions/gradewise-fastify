@@ -1,9 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const ProtectedRoute = dynamic(() => import("@/components/ProtectedRoutes"), { ssr: false });
-const StudentAnalytics = dynamic(() => import("@/views/Student/StudentAnalytics"), { ssr: false });
+import ProtectedRoute from "@/components/ProtectedRoutes";
+import StudentAnalytics from "@/views/Student/StudentAnalytics";
 
 export default function Page() {
   return (

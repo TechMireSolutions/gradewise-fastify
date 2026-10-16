@@ -1,18 +1,19 @@
-export const redirectByRole = (role, navigate) => {
+export const getDestinationRoute = (role) => {
   switch (role) {
     case "super_admin":
-      navigate("/super-admin/dashboard");
-      break;
+      return "/super-admin/dashboard";
     case "admin":
-      navigate("/admin/dashboard");
-      break;
+      return "/admin/dashboard";
     case "instructor":
-      navigate("/instructor/dashboard");
-      break;
+      return "/instructor/dashboard";
     case "student":
-      navigate("/student/dashboard");
-      break;
+      return "/student/dashboard";
     default:
-      navigate("/profile");
+      return "/profile";
   }
 };
+
+export const redirectByRole = (role, navigate) => {
+  navigate(getDestinationRoute(role));
+};
+

@@ -6,6 +6,8 @@ const PUBLIC_PATHS = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/auth/callback",
+  "/callback",
   "/",
 ];
 
@@ -15,11 +17,13 @@ function isPublicPath(pathname) {
   );
 }
 
-export function middleware(request) {
+export function proxy(request) {
   const { pathname } = request.nextUrl;
 
   if (
     pathname.startsWith("/_next") ||
+    pathname.startsWith("/__/auth") ||
+    pathname.startsWith("/__/firebase") ||
     pathname.startsWith("/api") ||
     pathname.includes(".")
   ) {

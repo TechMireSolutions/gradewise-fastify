@@ -18,7 +18,7 @@ Five mandatory policies for every change. Agents must apply all five before subm
 
 | Area | Location | Current stack |
 |------|----------|---------------|
-| Backend | `grade-wise-ai-backend-fastify/` | Node ≥22 · Fastify 5 · TS 6 · Drizzle · PostgreSQL (pgvector) · Redis · BullMQ · AI SDK 6 · Zod 4 · Vitest |
+| Backend | `grade-wise-ai-backend-fastify/` | Node ≥24 · Fastify 5 · TS 6 · Drizzle · PostgreSQL (pgvector) · Redis · BullMQ · AI SDK 6 · Zod 4 · Vitest |
 | Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query 5 · ESLint 10 · Zod 4 · Playwright |
 
 ### Upgrade cadence
@@ -72,15 +72,15 @@ npm install && npm run build && npm run lint
 
 ```
 gradewiseai/
-├── docker-compose.yml               # Postgres (pgvector), Redis, MinIO, api, worker, web
-├── .github/workflows/ci.yml         # CI gates
-├── MIGRATION.md                     # Modernization changelog
-├── grade-wise-ai-backend-fastify/ # API + worker
-├── grade-wise-ai-frontend-next/     # Web app
-├── .agent/rules/                    # Antigravity rules (mirrored)
-├── .claude/rules/                   # Claude rules (mirrored)
-├── .agent/skills/                   # Agent skills (mirrored)
-└── .cursorrules                     # Cursor index
+├── ecosystem.config.cjs          # PM2 — api + worker
+├── .github/workflows/ci.yml      # CI gates
+├── MIGRATION.md                  # Modernization changelog
+├── grade-wise-ai-backend-fastify/  # API + worker
+├── grade-wise-ai-frontend-next/  # Web app
+├── .agent/rules/                 # Antigravity rules (mirrored)
+├── .claude/rules/                # Claude rules (mirrored)
+├── .agent/skills/                # Agent skills (mirrored)
+└── .cursorrules                  # Cursor index
 ```
 
 ### Backend structure (`grade-wise-ai-backend-fastify/src/`)
@@ -108,7 +108,7 @@ modules/<domain>/
 drizzle/                  # Migrations + init-pgvector.sql
 ```
 
-**Module domains:** `auth`, `assessments`, `resources`, `config`, `student-assessments`, `instructor-analytics`, `student-analytics`
+**Module domains:** `auth`, `assessments`, `resources`, `config`, `student-assessments`, `instructor-analytics`, `student-analytics` (+ `analytics` shared query module used by both analytics modules)
 
 **Rules:**
 
@@ -124,7 +124,7 @@ drizzle/                  # Migrations + init-pgvector.sql
 app/                      # Next.js App Router — thin page shells
   loading.js, error.js, not-found.jsx
   (auth)/ (dashboard)/ (exam)/
-middleware.js             # Cookie-based route protection
+proxy.js                  # Cookie-based route protection (Next.js 16 proxy)
 features/<domain>/        # api.js + store.js
 views/                    # Page UI (react-router-dom mock OK during migration)
 components/
@@ -198,7 +198,7 @@ e2e/                      # Playwright smoke tests
 | Zod schemas | `<area>Schemas.js` | `authSchemas.js` under `schemas/` |
 | Shared field schemas | `fields.js`, `fileSchemas.js` | under `schemas/` |
 | Next.js pages | `page.jsx` | App Router convention |
-| Next.js middleware | `middleware.js` | root of `src/` |
+| Next.js proxy (middleware) | `proxy.js` | root of `src/` |
 
 ### Functions & handlers
 
@@ -318,8 +318,8 @@ e2e/                      # Playwright smoke tests
 ### Infrastructure
 
 ```bash
-docker compose up -d postgres redis minio   # local infra
-npm run dev:worker                            # BullMQ worker (backend)
+npm run dev:worker                  # BullMQ worker (backend, separate terminal)
+pm2 start ecosystem.config.cjs      # production: api + worker under PM2
 ```
 
 | Service | Env | Purpose |
@@ -346,7 +346,7 @@ CI defined in `.github/workflows/ci.yml`.
 
 - Prefer **`npm run db:generate`** + commit `drizzle/` + **`npm run db:migrate`** in production.
 - `db:push` OK for local dev only.
-- pgvector enabled via `drizzle/init-pgvector.sql` in Docker.
+- pgvector extension: run `CREATE EXTENSION IF NOT EXISTS vector;` on the target DB once.
 
 ---
 

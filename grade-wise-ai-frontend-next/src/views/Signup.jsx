@@ -1,7 +1,8 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card, headingGradient, iconBadge } from "@/lib/ui.js";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import LoadingSpinner from "../components/ui/LoadingSpinner.jsx";
 import Modal from "../components/ui/Modal.jsx";
@@ -15,8 +16,8 @@ import { signupSchema } from "../schemas/authSchemas.js";
 import { parseZodFieldErrors } from "../utils/parseZodFieldErrors.js";
 
 function Signup() {
-  const navigate = useNavigate();
-  const { signup, googleAuth } = useAuthStore();
+  const router = useRouter();
+  const { signup, googleAuth, completeGoogleRedirect } = useAuthStore();
 
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -26,6 +27,27 @@ function Signup() {
 
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "dummy-key";
   useRecaptchaInit(siteKey);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    (async () => {
+      try {
+        const user = await completeGoogleRedirect();
+        if (isMounted && user) {
+          redirectByRole(user.role, (to) => router.replace(to));
+        }
+      } catch (error) {
+        if (isMounted) {
+          const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
+          showModal("error", "Google Signup Failed", errorMessage);
+        }
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [completeGoogleRedirect, router, showModal]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +66,7 @@ function Signup() {
       const response = await signup({ ...formData, captchaToken });
       showModal("success", "Registration Successful!", response.message);
       setFormData({ name: "", email: "", password: "" });
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => router.push("/login"), 2000);
     } catch (error) {
       const fieldErrors = parseZodFieldErrors(error);
       if (fieldErrors) {
@@ -61,14 +83,12 @@ function Signup() {
   const handleGoogleSignup = async () => {
     setGoogleLoading(true);
     try {
-      const captchaToken = await getCaptchaToken(siteKey, "google_signup");
-      const user = await googleAuth({ captchaToken });
-      showModal("success", "Welcome!", `Successfully signed up with Google! Welcome, ${user.name}!`);
-      setTimeout(() => redirectByRole(user.role, navigate), 2000);
+      await getCaptchaToken(siteKey, "google_signup");
+      const user = await googleAuth();
+      redirectByRole(user.role, (to) => router.replace(to));
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
       showModal("error", "Google Signup Failed", errorMessage);
-    } finally {
       setGoogleLoading(false);
     }
   };
@@ -239,7 +259,7 @@ function Signup() {
               <p className={cn("text-sm", "text-muted-foreground")}>
                 Already have an account?{" "}
                 <Link
-                  to="/login"
+                  href="/login"
                   className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors duration-150 cursor-pointer"
                 >
                   Sign in here

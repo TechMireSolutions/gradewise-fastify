@@ -41,6 +41,10 @@ export const ChangePasswordSchema = z.object({
   newPassword: password,
 });
 
+export const RememberedLoginSchema = z.object({
+  email,
+});
+
 export const UserResponseSchema = z.object({
   id: z.number(),
   name: z.string(),

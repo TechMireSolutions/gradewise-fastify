@@ -6,5 +6,6 @@ export default fp(async function helmetPlugin(app: FastifyInstance) {
   await app.register(helmet, {
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   });
 });

@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
 import { btn, card, cardInteractive, eyebrowPill, headingGradient, heroTitle, iconBadgeTeal, page } from "@/lib/ui.js";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import useAuthStore from "@/features/auth/store.js"
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
 import {
@@ -150,12 +150,12 @@ function Home() {
                     </span>
                   </p>
                   <div className="space-y-3">
-                    <Link to={dashboardLink} className={cn(btn.primary, "w-full")}>
+                    <Link href={dashboardLink} className={cn(btn.primary, "w-full")}>
                       <FaTachometerAlt />
                       Go to Dashboard
                       <FaArrowRight />
                     </Link>
-                    <Link to="/profile" className={cn(btn.secondary, "w-full")}>
+                    <Link href="/profile" className={cn(btn.secondary, "w-full")}>
                       <FaUserCircle />
                       View Profile
                     </Link>
@@ -164,12 +164,12 @@ function Home() {
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-stretch sm:items-center px-4 animate-fade-in max-w-lg mx-auto sm:max-w-none">
-                <Link to="/login" className={cn(btn.primary, "px-8", "py-4", "text-base", "w-full", "sm:w-auto")}>
+                <Link href="/login" className={cn(btn.primary, "px-8", "py-4", "text-base", "w-full", "sm:w-auto")}>
                   <FaRocket />
                   Get Started
                   <FaArrowRight />
                 </Link>
-                <Link to="/signup" className={cn(btn.secondary, "px-8", "py-4", "text-base", "w-full", "sm:w-auto")}>
+                <Link href="/signup" className={cn(btn.secondary, "px-8", "py-4", "text-base", "w-full", "sm:w-auto")}>
                   <FaUsers />
                   Sign Up Free
                 </Link>
@@ -239,7 +239,7 @@ function Home() {
             Join educators using Gradewise AI to enhance teaching and save valuable time.
           </p>
           {!user && (
-            <Link to="/signup" className={cn(btn.primary, "px-8", "sm:px-12", "py-4", "text-base")}>
+            <Link href="/signup" className={cn(btn.primary, "px-8", "sm:px-12", "py-4", "text-base")}>
               <FaRocket />
               Start Your Free Trial
               <FaArrowRight />

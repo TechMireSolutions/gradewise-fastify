@@ -7,7 +7,7 @@ const AdminDashboard = dynamic(() => import("@/views/Admin/AdminDashboard"), { s
 
 export default function Page() {
   return (
-    <ProtectedRoute requiredRole={"admin"}>
+    <ProtectedRoute requiredRole={["admin", "super_admin"]}>
       <AdminDashboard />
     </ProtectedRoute>
   );

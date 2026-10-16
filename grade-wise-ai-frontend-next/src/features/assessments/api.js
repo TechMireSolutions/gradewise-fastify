@@ -23,7 +23,7 @@ export const deleteAssessmentApi = (assessmentId) =>
    Physical Paper
 ========================= */
 export const generatePhysicalPaperApi = (assessmentId, payload, config = {}) =>
-  apiClient.post(`/assessments/${assessmentId}/print`, payload, config);
+  apiClient.post(`/assessments/${assessmentId}/print`, payload, { ...config, responseType: "blob" });
 
 /* =========================
    Enrollment
@@ -44,12 +44,16 @@ export const unenrollStudentApi = (assessmentId, studentId) =>
    Student Side
 ========================= */
 
-export const fetchStudentAssessmentsApi = () =>
-  apiClient.get("/taking/assessments");
-
 /* =========================
    Preview / AI
 ========================= */
 
-export const fetchPreviewQuestionsApi = (assessmentId) =>
-  apiClient.get(`/assessments/${assessmentId}/preview-questions`);
+export const fetchPreviewQuestionsApi = (assessmentId, language) =>
+  apiClient.get(`/assessments/${assessmentId}/preview-questions`, {
+    params: language ? { language } : undefined,
+  });
+
+export const fetchAIPromptApi = (assessmentId, language) =>
+  apiClient.get(`/assessments/${assessmentId}/ai-prompt`, {
+    params: language ? { language } : undefined,
+  });

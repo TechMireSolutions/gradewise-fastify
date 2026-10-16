@@ -1,5 +1,5 @@
-import "dotenv/config";
-import bcrypt from "bcrypt";
+import "../lib/load-env.js";
+import bcrypt from "bcryptjs";
 import { db, users, systemConfigs } from "./index.js";
 import { eq } from "drizzle-orm";
 
@@ -18,7 +18,7 @@ async function seedSuperAdmin() {
     return;
   }
 
-  const hashedPassword = await bcrypt.hash(SUPER_ADMIN_PASSWORD, 10);
+  const hashedPassword = await bcrypt.hash(SUPER_ADMIN_PASSWORD, 12);
   await db.insert(users).values({
     name: "Super Admin",
     email: SUPER_ADMIN_EMAIL,

@@ -134,7 +134,7 @@ export default function UserManagementTable({
                 <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>
                   <div className="flex items-center gap-2">
                     <FaCalendarAlt className={"text-muted-foreground"} />
-                    {formatDate(userData.created_at)}
+                    {formatDate(userData.createdAt || userData.created_at)}
                   </div>
                 </td>
                 <td className="px-6 py-4">
@@ -166,6 +166,10 @@ export default function UserManagementTable({
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${getRoleBadgeColor(userData.role)}`}>
                   {formatRole(userData.role)}
                 </span>
+                <div className={cn("flex", "items-center", "gap-2", "text-xs", "text-muted-foreground", "mt-2")}>
+                  <FaCalendarAlt />
+                  Joined: {formatDate(userData.createdAt || userData.created_at)}
+                </div>
               </div>
             </div>
             <RoleActions
@@ -189,7 +193,7 @@ export function UserStatsGrid({ stats, totalUsers }) {
     { value: stats.admin, label: "Admins", icon: FaCrown, gradient: "from-red-500 to-rose-600", border: "border-red-500/30", bg: "from-red-500/20 to-rose-500/20" },
     { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, gradient: "from-violet-500 to-purple-600", border: "border-violet-500/30", bg: "from-violet-500/20 to-purple-500/20" },
     { value: stats.student, label: "Students", icon: FaUserGraduate, gradient: "from-emerald-500 to-teal-600", border: "border-emerald-500/30", bg: "from-emerald-500/20 to-teal-500/20" },
-    { value: stats.verified, label: "Verified", icon: FaCheckCircle, gradient: "from-sky-500 to-blue-600", border: "border-sky-500/30", bg: "from-sky-500/20 to-sky-50 dark:to-sky-950/300/20" },
+    { value: stats.verified, label: "Verified", icon: FaCheckCircle, gradient: "from-sky-500 to-blue-600", border: "border-sky-500/30", bg: "from-sky-50 dark:to-sky-950/300/20" },
   ];
 
   return (

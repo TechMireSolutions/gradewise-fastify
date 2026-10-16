@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { signInWithPopup } from "firebase/auth";
+import { getRedirectResult, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "@/config/firebase.js";
+
 
 import {
   loginApi,
@@ -43,7 +44,27 @@ const useAuthStore = create(
 
       googleAuth: async () => {
         try {
+          if (!auth) {
+            throw {
+              message:
+                "Google sign-in is not configured. Please set up Firebase environment variables.",
+            };
+          }
           const result = await signInWithPopup(auth, googleProvider);
+          const idToken = await result.user.getIdToken();
+          const response = await googleAuthApi({ idToken });
+          set({ user: response.data.user });
+          return response.data.user;
+        } catch (error) {
+          throw error.response?.data || error;
+        }
+      },
+
+      completeGoogleRedirect: async () => {
+        if (!auth) return null;
+        try {
+          const result = await getRedirectResult(auth);
+          if (!result?.user) return null;
           const idToken = await result.user.getIdToken();
           const response = await googleAuthApi({ idToken });
           set({ user: response.data.user });
@@ -135,11 +156,51 @@ const useAuthStore = create(
         }
       },
 
+      cachedUsers: [],
+      hasLoadedUsers: false,
+      aiSummary: null,
+      isBootstrapped: false,
+
+      setIsBootstrapped: (isBootstrapped) => set({ isBootstrapped }),
+
+      fetchAndCacheUsers: async () => {
+        try {
+          const response = await fetchUsersApi();
+          const users = response.data?.users || [];
+          set({ cachedUsers: users, hasLoadedUsers: true });
+          return users;
+        } catch (error) {
+          throw error.response?.data || error;
+        }
+      },
+
+      clearSession: async () => {
+        try {
+          await logoutApi();
+        } catch {
+          // ignore network error on logout
+        } finally {
+          set({
+            user: null,
+            cachedUsers: [],
+            hasLoadedUsers: false,
+            aiSummary: null,
+            isBootstrapped: false,
+          });
+        }
+      },
+
       logout: async () => {
         try {
           await logoutApi();
         } finally {
-          set({ user: null });
+          set({
+            user: null,
+            cachedUsers: [],
+            hasLoadedUsers: false,
+            aiSummary: null,
+            isBootstrapped: false,
+          });
         }
       },
 

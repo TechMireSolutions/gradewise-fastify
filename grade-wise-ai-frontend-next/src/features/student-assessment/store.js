@@ -3,10 +3,8 @@ import {
   startAssessmentApi,
   getAssessmentStatusApi,
   submitAssessmentApi,
-  printAssessmentApi,
   getSubmissionDetailsApi,
 } from "./api.js";
-import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import { mapQuestionsWithParsedOptions } from "@/utils/parseQuestionOptions.js";
 
 const useStudentAssessmentStore = create((set, get) => ({
@@ -126,48 +124,12 @@ const useStudentAssessmentStore = create((set, get) => ({
         submission: response.data.data,
         loading: false,
       });
-
-      // Sync analytics
-      const analytics = useStudentAnalyticsStore.getState();
-      analytics.fetchOverview();
-      analytics.fetchPerformance();
-      analytics.fetchRecommendations();
     } catch (error) {
       set({
         error:
           error.response?.data?.message ||
           error.message ||
           "Failed to submit assessment",
-        loading: false,
-      });
-    }
-  },
-
-  /* =========================
-     Print Assessment
-  ========================= */
-
-  printPaper: async (assessmentId) => {
-    set({ loading: true, error: null });
-
-    try {
-      const response = await printAssessmentApi(assessmentId);
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `assessment_${assessmentId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      set({ loading: false });
-    } catch (error) {
-      set({
-        error:
-          error.response?.data?.message ||
-          error.message ||
-          "Failed to print assessment",
         loading: false,
       });
     }

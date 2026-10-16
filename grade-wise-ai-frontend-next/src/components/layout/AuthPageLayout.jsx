@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { focusRing, page } from "@/lib/ui.js";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "./AmbientBackground.jsx";
 import MainLandmark from "./MainLandmark.jsx";
@@ -21,7 +21,7 @@ export default function AuthPageLayout({
       <MainLandmark className={`relative w-full ${maxWidth}`}>
         <div className="mb-6">
           <Link
-            to={backTo}
+            href={backTo}
             className={cn(
               "group inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:text-accent",
               focusRing

@@ -14,6 +14,7 @@ export default fp(async function rateLimitPlugin(app: FastifyInstance) {
     ...(redis ? { redis: redis as never } : {}),
     errorResponseBuilder(_req, context) {
       return {
+        statusCode: context.statusCode,
         success: false,
         message: `Too many requests. Retry after ${Math.ceil(context.ttl / 1000)} seconds.`,
         retryAfter: context.ttl,

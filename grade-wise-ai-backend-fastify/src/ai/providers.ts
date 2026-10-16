@@ -178,13 +178,11 @@ export async function callWithRotation<T>(
     }
     try {
       return await fn(provider);
-    } catch (err) {
-      lastError = err;
-      if (isRateLimitError(err)) {
-        markCooldown(provider.id, 60_000);
-        continue;
-      }
-      throw err;
+    } catch (error) {
+      console.error(`[AI Rotation Error] Provider ${provider.type}/${provider.modelName} failed:`, error);
+      lastError = error;
+      markCooldown(provider.id, isRateLimitError(error) ? 60_000 : 15_000);
+      continue;
     }
   }
   throw lastError ?? new Error("AI generation failed after max attempts");

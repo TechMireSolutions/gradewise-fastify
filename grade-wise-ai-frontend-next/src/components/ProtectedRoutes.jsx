@@ -1,16 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import useHydrated from "../hooks/useHydrated.js";
-import LoadingSpinner from "./ui/LoadingSpinner.jsx";
 
 function ProtectedRoute({ requiredRole, children }) {
   const { user, fetchMe } = useAuthStore();
   const router = useRouter();
   const hydrated = useHydrated();
-  const [checking, setChecking] = useState(true);
+
+  const isRoleAuthorized = useCallback(
+    (role) => {
+      if (!requiredRole) return true;
+      if (role === "super_admin") return true;
+      const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+      return roles.includes(role);
+    },
+    [requiredRole]
+  );
+
+  const hasImmediateValidSession = Boolean(user?.role && isRoleAuthorized(user.role));
+  const [checking, setChecking] = useState(!hasImmediateValidSession);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -27,11 +38,8 @@ function ProtectedRoute({ requiredRole, children }) {
           return;
         }
 
-        if (requiredRole) {
-          const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-          if (!roles.includes(currentUser.role)) {
-            router.replace("/");
-          }
+        if (!isRoleAuthorized(currentUser.role)) {
+          router.replace("/");
         }
       } catch {
         if (!cancelled) router.replace("/login");
@@ -40,27 +48,23 @@ function ProtectedRoute({ requiredRole, children }) {
       }
     };
 
-    verifySession();
+    if (!hasImmediateValidSession) {
+      verifySession();
+    } else {
+      setChecking(false);
+    }
 
     return () => {
       cancelled = true;
     };
-  }, [hydrated, user, requiredRole, router, fetchMe]);
+  }, [hydrated, user, router, fetchMe, hasImmediateValidSession, isRoleAuthorized]);
 
-  if (!hydrated || checking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <LoadingSpinner size="lg" type="spinner" color="blue" />
-      </div>
-    );
+  if ((!hydrated || checking) && !hasImmediateValidSession) {
+    return null;
   }
 
   if (!user?.role) return null;
-
-  if (requiredRole) {
-    const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-    if (!roles.includes(user.role)) return null;
-  }
+  if (!isRoleAuthorized(user.role)) return null;
 
   return children;
 }

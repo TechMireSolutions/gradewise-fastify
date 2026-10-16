@@ -1,6 +1,6 @@
 "use client";
-
 import { cn } from "@/lib/cn.js";
+
 import { btn, card, iconBadge, page } from "@/lib/ui.js";
 import { Component } from "react";
 import Link from "next/link";

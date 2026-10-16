@@ -8,39 +8,37 @@ import {
 } from "./api.js";
 
 const useInstructorAnalyticsStore = create((set) => ({
-  /* =========================
-     DASHBOARD (MERGED)
-     ========================= */
   overview: {
     assessments: 0,
     executedAssessments: 0,
     resources: 0,
   },
-
-  /* =========================
-     ANALYTICS STATE
-     ========================= */
   loading: false,
+  hasLoaded: false,
   error: null,
-
   assessments: [],
   students: [],
   studentQuestions: [],
-
   selectedAssessmentId: null,
   selectedStudentId: null,
 
-  /* =========================
-     DASHBOARD ACTIONS
-     ========================= */
-  getInstructorOverview: async () => {
+  getInstructorOverview: async (silent = false) => {
     try {
-      set({ loading: true, error: null });
+      if (!silent) set({ loading: true, error: null });
       const res = await fetchInstructorOverviewAPI();
+      const data = res.data.data || {};
+      
+      // Mapping Backend Keys to Frontend UI Keys
       set({
-        overview: res.data.data || {},
+        overview: {
+          assessments: data.totalAssessments || 0,
+          executedAssessments: data.completedAttempts || 0,
+          resources: data.totalResources || 0,
+        },
         loading: false,
+        hasLoaded: true,
       });
+      return data;
     } catch (err) {
       const msg = err.message || "Failed to fetch overview";
       set({ error: msg, loading: false });
@@ -49,25 +47,11 @@ const useInstructorAnalyticsStore = create((set) => ({
     }
   },
 
-  /* =========================
-     ANALYTICS ACTIONS
-     ========================= */
   fetchAssessments: async () => {
     try {
-      set({
-        loading: true,
-        error: null,
-        students: [],
-        studentQuestions: [],
-        selectedAssessmentId: null,
-        selectedStudentId: null,
-      });
-
+      set({ loading: true, error: null, students: [], studentQuestions: [], selectedAssessmentId: null, selectedStudentId: null });
       const res = await fetchInstructorAssessmentsAPI();
-      set({
-        assessments: res.data.data || [],
-        loading: false,
-      });
+      set({ assessments: res.data.data || [], loading: false });
     } catch (err) {
       const msg = err.message || "Failed to fetch assessments";
       set({ error: msg, loading: false });
@@ -77,20 +61,9 @@ const useInstructorAnalyticsStore = create((set) => ({
 
   fetchAssessmentStudents: async (assessmentId) => {
     try {
-      set({
-        loading: true,
-        error: null,
-        students: [],
-        studentQuestions: [],
-        selectedStudentId: null,
-      });
-
+      set({ loading: true, error: null, students: [], studentQuestions: [], selectedStudentId: null });
       const res = await fetchAssessmentStudentsAPI(assessmentId);
-      set({
-        students: res.data.data || [],
-        selectedAssessmentId: assessmentId,
-        loading: false,
-      });
+      set({ students: res.data.data || [], selectedAssessmentId: assessmentId, loading: false });
     } catch (err) {
       const msg = err.message || "Failed to fetch students";
       set({ error: msg, loading: false });
@@ -100,34 +73,16 @@ const useInstructorAnalyticsStore = create((set) => ({
 
   fetchStudentQuestions: async (assessmentId, studentId) => {
     try {
-      set({
-        loading: true,
-        error: null,
-        studentQuestions: [],
-        selectedStudentId: null,
-      });
-
+      set({ loading: true, error: null, studentQuestions: [], selectedStudentId: null });
       const res = await fetchStudentQuestionsAPI(assessmentId, studentId);
-      set({
-        studentQuestions: res.data.data || [],
-        selectedStudentId: studentId,
-        loading: false,
-      });
+      set({ studentQuestions: res.data.data || [], selectedStudentId: studentId, loading: false });
     } catch (err) {
       const msg = err.message || "Failed to load answers";
-      set({
-        error: msg,
-        studentQuestions: [],
-        selectedStudentId: null,
-        loading: false,
-      });
+      set({ error: msg, studentQuestions: [], selectedStudentId: null, loading: false });
       toast.error(msg);
     }
   },
 
-  /* =========================
-     HELPERS
-     ========================= */
   clearError: () => set({ error: null }),
 }));
 

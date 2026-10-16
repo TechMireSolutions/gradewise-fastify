@@ -13,10 +13,5 @@ export const getAssessmentStatusApi = (assessmentId, attemptId) =>
 export const submitAssessmentApi = (assessmentId, payload) =>
   apiClient.post(`/taking/assessments/${assessmentId}/submit`, payload);
 
-export const printAssessmentApi = (assessmentId) =>
-  apiClient.get(`/taking/assessments/${assessmentId}/print`, {
-    responseType: "blob",
-  });
-
 export const getSubmissionDetailsApi = (submissionId) =>
   apiClient.get(`/taking/submissions/${submissionId}`);

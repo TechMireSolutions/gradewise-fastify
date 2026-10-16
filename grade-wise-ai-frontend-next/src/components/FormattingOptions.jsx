@@ -6,7 +6,7 @@ const FormattingOptions = ({ form, onChange, language = "en" }) => {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 dark:from-slate-900/40 to-sky-50 dark:to-sky-950/30 p-4 sm:p-5 border-2 border-border rounded-2xl shadow-inner">
-      <h3 className="text-base sm:text-lg font-bold flex items-center gap-2 mb-4 text-foreground">
+      <h3 className="text-base sm:text-lg font-bold flex items-center gap-2 mb-4 text-slate-700">
         <div className="bg-indigo-600 text-white p-2 rounded-lg">
           <FaWrench className="text-base sm:text-lg" />
         </div>

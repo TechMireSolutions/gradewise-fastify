@@ -1,0 +1,88 @@
+name: GradeWise AI Live Production Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote Deployment via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 11092 }}
+          script: |
+            set -euo pipefail
+            echo "🚀 Pipeline Triggered Successfully..."
+
+            cd /www/wwwroot/gradewiseai.techmiresolutions.com
+
+            # Force sync to remote main (handles local drift)
+            git fetch origin main
+            git clean -fd -e .env -e .env.local -e .env.production -e node_modules -e .next -e .user.ini || true
+            git checkout origin/main -- . 2>/dev/null || git reset --hard origin/main
+            git clean -fd -e .env -e .env.local -e .env.production -e node_modules -e .next -e .user.ini || true
+
+            # ---------------------------------------------
+            # 1. BACKEND DEPLOYMENT (Fastify)
+            # ---------------------------------------------
+            echo "⚙️ Deploying Fastify Backend..."
+            cd grade-wise-ai-backend-fastify
+
+            [ -f .env ] || { echo "❌ ERROR: backend .env missing on server."; exit 1; }
+
+            # Ensure SKIP_CAPTCHA is set (reCAPTCHA not configured yet)
+            grep -q '^SKIP_CAPTCHA=true' .env || echo 'SKIP_CAPTCHA=true' >> .env
+
+            npm install --ignore-engines
+            npm run build
+            npm run db:migrate || npx drizzle-kit push || true
+            npm run db:patch
+            npm run db:seed || true
+
+            # Kill any orphaned process squatting on port 8000 (survives pm2 delete)
+            fuser -k 8000/tcp 2>/dev/null || true
+            sleep 1
+            npx pm2 restart gradewise-api || NODE_ENV=production npx pm2 start dist/index.js --name "gradewise-api"
+            cd ..
+
+            # ---------------------------------------------
+            # 2. FRONTEND DEPLOYMENT (Next.js)
+            # ---------------------------------------------
+            echo "📦 Deploying Next.js Frontend..."
+            cd grade-wise-ai-frontend-next
+
+            [ -f .env.production ] || [ -f .env.local ] || { echo "❌ ERROR: frontend .env.production/.env.local missing on server."; exit 1; }
+
+            npm install --ignore-engines
+            rm -rf .next
+            npm run build
+
+            # Kill orphaned next-server holding port 3000 (pm2 delete can't kill it)
+            fuser -k 3000/tcp 2>/dev/null || true
+            sleep 1
+            npx pm2 delete gradewise-frontend 2>/dev/null || true
+            npx pm2 start node_modules/next/dist/bin/next --name "gradewise-frontend" -- start -p 3000
+            cd ..
+
+            # ---------------------------------------------
+            # 3. HEALTH CHECKS
+            # ---------------------------------------------
+            sleep 8
+            curl -fsS http://127.0.0.1:8000/api/health || { echo "❌ Backend health check FAILED"; exit 1; }
+            curl -fsS -o /dev/null http://127.0.0.1:3000 || { echo "❌ Frontend check FAILED"; exit 1; }
+
+            echo "✅ Deployment complete and healthy!"

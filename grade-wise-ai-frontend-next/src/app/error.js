@@ -1,6 +1,6 @@
 "use client";
-
 import { cn } from "@/lib/cn.js";
+
 import { btn, card, eyebrow, page, pageDesc, pageTitle } from "@/lib/ui.js";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import Link from "next/link";
