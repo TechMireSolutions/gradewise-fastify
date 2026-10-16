@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { Link } from "react-router-dom"
 import { FaHome, FaArrowLeft, FaQuestionCircle, FaBookOpen } from "react-icons/fa"
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
@@ -18,8 +18,8 @@ function NotFound() {
 
             {/* Icon with gradient background */}
             <div className="relative mb-8">
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/10">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn(accentPanel, "w-28 h-28 sm:w-32 sm:h-32 rounded-2xl", "flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/10")}>
+                <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                   <FaBookOpen className="text-white text-4xl sm:text-5xl" />
                 </div>
               </div>
@@ -43,7 +43,7 @@ function NotFound() {
             <div className="space-y-3 sm:space-y-4 max-w-xs mx-auto">
               <Link
                 to="/"
-                className="group flex items-center justify-center gap-3 w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
+                className={cn(btn.primary, "group flex items-center justify-center gap-3 w-full px-5 py-3", "cursor-pointer")}
               >
                 <FaHome className="group-hover:scale-110 transition-transform" />
                 <span>Return to Dashboard</span>

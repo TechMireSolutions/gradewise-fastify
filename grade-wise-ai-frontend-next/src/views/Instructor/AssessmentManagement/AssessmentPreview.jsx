@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, page } from "@/lib/ui.js";
+import { btn, card, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
@@ -69,7 +69,7 @@ function AssessmentPreview() {
           <p className={cn("text-muted-foreground", "mb-6")}>{error}</p>
           <Link
             to="/instructor/assessments"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
+            className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "cursor-pointer")}
           >
             <FaArrowLeft />
             Back to Assessments

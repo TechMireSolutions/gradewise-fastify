@@ -133,7 +133,7 @@ function InstructorDashboard() {
       label: "My Assessments",
       icon: <FaClipboardList className="w-6 h-6 text-white" />,
       cardClass: "bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4 sm:p-5",
-      iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25",
+      iconClass: cn(iconBadge, "p-2.5 rounded-xl"),
       valueClass: "text-2xl sm:text-3xl font-bold text-foreground leading-none",
     },
     {
@@ -205,7 +205,7 @@ function InstructorDashboard() {
             <div className={cn(card, cardInteractive, "shadow-2xl", "mb-8", "sm:mb-10")}>
               <div className={cardHeader}>
                 <h2 className="text-xl font-bold text-foreground flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                  <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                     <FaSchool className="w-4 h-4 text-white" />
                   </div>
                   Quick Actions

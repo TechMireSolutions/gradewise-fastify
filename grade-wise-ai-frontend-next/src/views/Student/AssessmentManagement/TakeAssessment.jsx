@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { btn, card, cardHeader, chip, examBar, focusRing, panel, select, textarea } from "@/lib/ui.js";
+import { btn, card, cardHeader, chip, examBar, focusRing, iconBadge, panel, select, textarea } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
@@ -161,7 +161,7 @@ function TakeAssessment() {
             {/* Card Header */}
             <div className={cn(cardHeader, "text-center")}>
               <div className="flex justify-center mb-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <div className={cn("p-3", "rounded-xl", iconBadge)}>
                   <FaGraduationCap className="text-white text-2xl" />
                 </div>
               </div>

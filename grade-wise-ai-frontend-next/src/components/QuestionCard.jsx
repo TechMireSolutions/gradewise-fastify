@@ -22,7 +22,7 @@ function displayText(value) {
 function QuestionCard({ question, index }) {
   return (
     <div
-      className={cn(card, "p-4", "sm:p-6", "shadow-2xl", "hover:border-indigo-500/30", "transition-all", "duration-200", "animate-slideInUp")}
+      className={cn(card, "p-4", "sm:p-6", "shadow-2xl", "hover:border-indigo-500/30", "transition-all", "duration-200", "animate-slide-in-up")}
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="flex items-start gap-3 sm:gap-4">

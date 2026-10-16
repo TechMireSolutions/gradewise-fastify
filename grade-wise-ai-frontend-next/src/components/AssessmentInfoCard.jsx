@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive } from "@/lib/ui.js";
+import { card, cardInteractive, iconBadge } from "@/lib/ui.js";
 import { FaFileAlt } from "react-icons/fa";
 
 function AssessmentInfoCard({ assessment }) {
@@ -9,7 +9,7 @@ function AssessmentInfoCard({ assessment }) {
   return (
     <div className={cn("mb-6", card, cardInteractive, "shadow-2xl", "p-4", "sm:p-6")}>
       <div className="flex items-start gap-4">
-        <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+        <div className={cn("p-2.5", "rounded-xl", iconBadge, "flex-shrink-0")}>
           <FaFileAlt className="text-foreground text-xl" />
         </div>
         <div className="flex-1 min-w-0">

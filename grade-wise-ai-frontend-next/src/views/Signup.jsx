@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { btn, card, headingGradient } from "@/lib/ui.js";
+import { btn, card, headingGradient, iconBadge } from "@/lib/ui.js";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -78,7 +78,7 @@ function Signup() {
         <div className={cn(card, "p-8", "shadow-2xl")}>
           {/* Logo / brand header */}
           <div className="mb-8 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex items-center justify-center mx-auto mb-4">
+            <div className={cn("w-16", "h-16", "rounded-2xl", iconBadge, "flex", "items-center", "justify-center", "mx-auto", "mb-4")}>
               <FaGraduationCap className="text-white text-2xl" />
             </div>
             <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">
@@ -220,7 +220,7 @@ function Signup() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 min-h-[44px] bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className={cn(btn.primary, "w-full flex items-center justify-center gap-2 px-5 py-3 min-h-[44px]", "cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed")}
             >
               {loading ? (
                 <LoadingSpinner size="sm" color="white" type="dots" />

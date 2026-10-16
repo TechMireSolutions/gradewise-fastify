@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card } from "@/lib/ui.js";
+import { btn, card, iconBadge } from "@/lib/ui.js";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -73,7 +73,7 @@ function SetNewPassword() {
           {/* Brand header */}
           <div className="mb-8 text-center">
             <div className="flex items-center justify-center mb-5">
-              <div className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-3.5", "rounded-2xl", iconBadge)}>
                 <FaKey className="text-white text-2xl" />
               </div>
             </div>
@@ -161,7 +161,7 @@ function SetNewPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+              className={cn(btn.primary, "w-full px-5 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100")}
             >
               {loading ? (
                 <>

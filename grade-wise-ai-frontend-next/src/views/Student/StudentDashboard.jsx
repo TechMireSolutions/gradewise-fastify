@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, cardInteractive, iconBadgeTeal, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, iconBadgeAmber, iconBadgeEmerald, iconBadgeTeal, page, statSurface } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -91,22 +91,22 @@ const getAssessmentStatus = (assessment) => {
       value: stats.totalAssessments,
       label: "Total Assessments",
       icon: <FaClipboardList className="w-5 h-5 text-white" />,
-      cardClass: "bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4 sm:p-5",
-      iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25",
+      cardClass: statSurface.indigo,
+      iconClass: iconBadge,
     },
     {
       value: stats.completedAssessments,
       label: "Completed",
       icon: <FaCheckCircle className="w-5 h-5 text-white" />,
-      cardClass: "bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4 sm:p-5",
-      iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25",
+      cardClass: statSurface.emerald,
+      iconClass: iconBadgeEmerald,
     },
     {
       value: stats.pendingAssessments,
       label: "Pending",
       icon: <FaClock className="w-5 h-5 text-white" />,
-      cardClass: "bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-amber-500/30 rounded-xl p-4 sm:p-5",
-      iconClass: "p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25",
+      cardClass: statSurface.amber,
+      iconClass: iconBadgeAmber,
     }
   ];
 
@@ -155,7 +155,7 @@ const getAssessmentStatus = (assessment) => {
             <div className="p-6 sm:p-8 lg:p-10">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
                 <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                  <div className={cn("p-3", "rounded-xl", iconBadge, "flex-shrink-0")}>
                     <FaChartLine className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -169,7 +169,7 @@ const getAssessmentStatus = (assessment) => {
                 <div className="flex-shrink-0">
                   <Link
                     to="/student/analytics"
-                    className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                    className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer whitespace-nowrap")}
                   >
                     <FaChartLine />
                     View Analytics
@@ -186,7 +186,7 @@ const getAssessmentStatus = (assessment) => {
           {/* Available Assessments */}
           <div className={cn(card, cardInteractive, "shadow-2xl")}>
             <div className={cn(cardHeader, "flex", "items-center", "gap-3")}>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                 <FaBook className="w-4 h-4 text-white" />
               </div>
               <h2 className="text-xl font-bold text-foreground">Available Assessments</h2>
@@ -205,7 +205,7 @@ const getAssessmentStatus = (assessment) => {
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
                             status.status === "completed"
                               ? "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25"
-                              : "bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25"
+                              : iconBadge
                           }`}>
                             {status.status === "completed" ? <FaCheckCircle className="w-4 h-4 text-white" /> : <FaClipboardList className="w-4 h-4 text-white" />}
                           </div>
@@ -255,7 +255,7 @@ const getAssessmentStatus = (assessment) => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                  <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
                     <FaBook className="w-8 h-8 text-indigo-400" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">No assessments yet</h3>
@@ -323,7 +323,7 @@ const getAssessmentStatus = (assessment) => {
                 to="/profile"
                 className="flex items-center p-5 sm:p-6 bg-input border border-border rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 group"
               >
-                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                <div className={cn("p-3", "rounded-xl", iconBadge, "flex-shrink-0")}>
                   <FaUser className="w-5 h-5 text-white" />
                 </div>
                 <div className="ml-4 sm:ml-5">
@@ -336,7 +336,7 @@ const getAssessmentStatus = (assessment) => {
                 onClick={fetchOverview}
                 className="flex items-center p-5 sm:p-6 bg-input border border-border rounded-xl hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 text-left group cursor-pointer w-full"
               >
-                <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                <div className={cn("p-3", "rounded-xl", iconBadge, "flex-shrink-0")}>
                   <FaSync className="w-5 h-5 text-white" />
                 </div>
                 <div className="ml-4 sm:ml-5">

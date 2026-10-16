@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, page, tableRowHover } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardInteractive, iconBadge, page, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../../components/ui/LoadingSpinner";
@@ -126,7 +126,7 @@ function AssessmentAnalytics() {
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+            <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
               <FaChartBar className="text-foreground text-xl" />
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
@@ -181,7 +181,7 @@ function AssessmentAnalytics() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                  <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
                     <FaChartBar className="text-indigo-400 text-3xl" />
                   </div>
                   <h3 className="text-2xl font-bold text-foreground mb-2">No Executed Assessments</h3>
@@ -194,7 +194,7 @@ function AssessmentAnalytics() {
 
         {/* Student Results */}
         {assessmentId && !isNaN(assessmentId) && assessmentId !== ":assessmentId" && (
-          <div ref={studentsRef} className="scroll-mt-24 animate-fadeIn">
+          <div ref={studentsRef} className="scroll-mt-24 animate-fade-in">
             {/* Desktop Table */}
             <div className="hidden lg:block mb-10">
               <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
@@ -236,7 +236,7 @@ function AssessmentAnalytics() {
                             <td className="px-6 py-4">
                               <button
                                 onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
-                                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+                                className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
                               >
                                 <FaEye /> View Answers
                               </button>
@@ -248,7 +248,7 @@ function AssessmentAnalytics() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                    <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
                       <FaUsers className="text-indigo-400 text-3xl" />
                     </div>
                     <h3 className="text-2xl font-bold text-foreground mb-2">No Students Yet</h3>
@@ -263,10 +263,10 @@ function AssessmentAnalytics() {
               {students.length > 0 ? students.map((s, idx) => (
                 <div
                   key={s.student_id}
-                  className={cn(card, cardInteractive, "shadow-2xl", "p-5", "animate-slideInUp")}
+                  className={cn(card, cardInteractive, "shadow-2xl", "p-5", "animate-slide-in-up")}
                   style={{ animationDelay: `${idx * 0.1}s` }}
                 >
-                  <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 rounded-xl p-4 mb-4">
+                  <div className={cn(accentPanel, "rounded-xl p-4 mb-4")}>
                     <h4 className="font-bold text-lg text-white">{s.name || `Student ${s.student_id}`}</h4>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-sm mb-4">
@@ -289,7 +289,7 @@ function AssessmentAnalytics() {
                   </div>
                   <button
                     onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
-                    className="w-full py-3 px-5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                    className={cn(btn.primary, "w-full py-3 px-5", "flex items-center justify-center gap-2 cursor-pointer")}
                   >
                     <FaEye /> View Detailed Answers
                   </button>
@@ -297,7 +297,7 @@ function AssessmentAnalytics() {
               )) : (
                 <div className={cn(card, "shadow-2xl", "p-8")}>
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-4">
+                    <div className={cn(accentPanel, "w-16 h-16 rounded-2xl", "flex items-center justify-center mb-4")}>
                       <FaUsers className="text-indigo-400 text-2xl" />
                     </div>
                     <p className={cn("text-muted-foreground", "font-medium")}>No results yet</p>
@@ -310,7 +310,7 @@ function AssessmentAnalytics() {
 
         {/* STUDENT QUESTIONS — FINAL 100% ACCURATE */}
         {selectedStudentId && studentQuestions.length > 0 && (
-          <div ref={questionsRef} className="scroll-mt-24 animate-fadeIn">
+          <div ref={questionsRef} className="scroll-mt-24 animate-fade-in">
             {/* Floating Back Arrow */}
             <button
               onClick={() => {
@@ -318,7 +318,7 @@ function AssessmentAnalytics() {
                   assessmentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
               }}
-              className="fixed left-1/2 -translate-x-1/2 top-24 z-40 group animate-fadeIn"
+              className="fixed left-1/2 -translate-x-1/2 top-24 z-40 group animate-fade-in"
               aria-label="Back to assessments"
             >
               <div className="relative">
@@ -348,7 +348,7 @@ function AssessmentAnalytics() {
                     return (
                       <div
                         key={i}
-                        className="bg-input border border-border rounded-xl p-5 sm:p-6 hover:border-indigo-500/30 transition-all duration-200 animate-slideInUp"
+                        className="bg-input border border-border rounded-xl p-5 sm:p-6 hover:border-indigo-500/30 transition-all duration-200 animate-slide-in-up"
                         style={{ animationDelay: `${i * 0.1}s` }}
                       >
                         <div className="flex items-start justify-between mb-4">
@@ -422,47 +422,12 @@ function AssessmentAnalytics() {
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-full shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 transform hover:scale-110 transition-all duration-300 animate-fadeIn cursor-pointer"
+          className="fixed bottom-8 right-8 z-50 p-4 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-full shadow-2xl shadow-indigo-500/30 hover:shadow-indigo-500/50 transform hover:scale-110 transition-all duration-300 animate-fade-in cursor-pointer"
           aria-label="Scroll to top"
         >
           <FaArrowUp className="text-xl" />
         </button>
-      )}
-
-      {/* Custom CSS for animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
-
-        .animate-slideInUp {
-          animation: slideInUp 0.6s ease-out;
-        }
-
-        .scroll-mt-24 {
-          scroll-margin-top: 6rem;
-        }
-      ` }} />
+      )}undefined
     </div>
   );
 }

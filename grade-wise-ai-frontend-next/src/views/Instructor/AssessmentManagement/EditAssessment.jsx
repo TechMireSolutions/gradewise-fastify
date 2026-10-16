@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, page } from "@/lib/ui.js";
+import { btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -249,7 +249,7 @@ function EditAssessment() {
               <p className={cn("text-muted-foreground", "mb-8")}>{error}</p>
               <button
                 onClick={() => navigate("/instructor/assessments")}
-                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+                className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
               >
                 <FaArrowLeft />
                 Back to Assessments
@@ -288,7 +288,7 @@ function EditAssessment() {
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 w-fit">
+            <div className={cn("p-2.5", "rounded-xl", iconBadge, "w-fit")}>
               <FaClipboardList className="text-white text-lg" />
             </div>
             <div>
@@ -631,7 +631,7 @@ function EditAssessment() {
             </button>
             <button
               type="submit"
-              className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={cn(btn.primary, "px-5 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed")}
               disabled={loading || isProcessing || currentAssessment.is_executed}
             >
               {isProcessing ? (

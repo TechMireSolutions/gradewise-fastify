@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card as uiCard, page, tableHead, tableRowHover } from "@/lib/ui.js";
+import { accentPanel, card as uiCard, iconBadge, page, tableHead, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import LoadingSpinner from "../../components/ui/LoadingSpinner.jsx";
@@ -479,7 +479,7 @@ function SuperAdminApiConfig() {
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-3", "rounded-xl", iconBadge)}>
                 <FaKey className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -770,7 +770,7 @@ function SuperAdminApiConfig() {
               {card.list.length === 0 ? (
                 /* Empty state */
                 <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-5">
+                  <div className={cn(accentPanel, "w-16 h-16 rounded-2xl", "flex items-center justify-center mb-5")}>
                     <FaKey className="w-6 h-6 text-indigo-400" />
                   </div>
                   <h3 className="text-lg font-bold text-foreground mb-2">No keys stored yet</h3>

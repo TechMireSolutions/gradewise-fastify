@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, page, tableRowHover } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardInteractive, iconBadge, page, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -91,7 +91,7 @@ function AssessmentDetail() {
               </p>
               <Link
                 to="/instructor/assessments"
-                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+                className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
               >
                 <FaArrowLeft /> Back to Assessments
               </Link>
@@ -167,7 +167,7 @@ function AssessmentDetail() {
                 </Link>
                 <button
                   onClick={() => openPaperModal(currentAssessment)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+                  className={cn(btn.primary, "px-5 py-2.5", "inline-flex items-center gap-2 cursor-pointer")}
                 >
                   <FaPrint /> Print PDF
                 </button>
@@ -179,7 +179,7 @@ function AssessmentDetail() {
             {/* Basic Info */}
             <section>
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                   <FaInfoCircle className="text-white text-sm" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Basic Information</h3>
@@ -259,7 +259,7 @@ function AssessmentDetail() {
             {/* Question Blocks - Desktop */}
             <section className="hidden lg:block">
               <div className="flex items-center gap-3 mb-5">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                   <FaQuestionCircle className="text-white text-sm" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Question Blocks</h3>
@@ -310,7 +310,7 @@ function AssessmentDetail() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-4">
+                  <div className={cn(accentPanel, "w-16 h-16 rounded-2xl", "flex items-center justify-center mb-4")}>
                     <FaQuestionCircle className="text-indigo-400 text-2xl" />
                   </div>
                   <p className={cn("text-muted-foreground", "text-sm", "italic")}>No question blocks configured</p>
@@ -321,7 +321,7 @@ function AssessmentDetail() {
             {/* Question Blocks - Mobile */}
             <section className="lg:hidden space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                   <FaQuestionCircle className="text-white text-sm" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground">Question Blocks</h3>
@@ -365,7 +365,7 @@ function AssessmentDetail() {
                 ))
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-4">
+                  <div className={cn(accentPanel, "w-16 h-16 rounded-2xl", "flex items-center justify-center mb-4")}>
                     <FaQuestionCircle className="text-indigo-400 text-2xl" />
                   </div>
                   <p className={cn("text-muted-foreground", "text-sm", "italic")}>No question blocks configured</p>

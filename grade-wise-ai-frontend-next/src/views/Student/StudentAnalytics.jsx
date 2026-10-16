@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
@@ -146,7 +146,7 @@ const StudentAnalytics = () => {
         <div className="mb-8 sm:mb-10">
           <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8", "text-center")}>
             <div className="flex items-center justify-center mb-4">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-3", "rounded-xl", iconBadge)}>
                 <FaChartLine className="text-white text-2xl sm:text-3xl" />
               </div>
             </div>
@@ -190,7 +190,7 @@ const StudentAnalytics = () => {
                     <div className="flex flex-col sm:flex-row gap-3">
                       <button
                         onClick={() => handleSeeResults(a.id)}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
+                        className={cn(btn.success, "inline-flex items-center justify-center gap-2 px-5 py-3", "cursor-pointer")}
                       >
                         <FaTrophy />
                         <span>Results</span>
@@ -198,7 +198,7 @@ const StudentAnalytics = () => {
 
                       <button
                         onClick={() => handleSeeQuestions(a.id)}
-                        className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer"
+                        className={cn(btn.primary, "inline-flex items-center justify-center gap-2 px-5 py-3", "cursor-pointer")}
                       >
                         <FaEye />
                         <span>Questions</span>
@@ -210,7 +210,7 @@ const StudentAnalytics = () => {
             ))
           ) : (
             <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+              <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
                 <FaBook className="text-3xl text-indigo-400" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2">No assessments completed yet</h3>
@@ -247,7 +247,7 @@ const StudentAnalytics = () => {
 
                   {/* Time */}
                   <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-6 sm:p-8 flex flex-col items-center gap-3 hover:border-indigo-500/50 transition-all duration-200">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                    <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                       <FaClock className="text-foreground text-xl" />
                     </div>
                     <p className="text-3xl sm:text-4xl font-bold text-foreground leading-none">{formatTime(selectedAssessmentDetails.time_taken)}</p>
@@ -439,7 +439,7 @@ const StudentAnalytics = () => {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
                   <FaBook className="text-3xl text-indigo-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-2">No questions available</h3>
@@ -469,77 +469,7 @@ const StudentAnalytics = () => {
         >
           <FaArrowUp className="text-lg" />
         </button>
-      )}
-
-
-      {/* Custom CSS for animations */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slideInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes slideInLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.6s ease-out;
-        }
-
-        .animate-fade-in {
-          animation: fadeIn 0.6s ease-out;
-        }
-
-        .animate-slideInUp {
-          animation: slideInUp 0.6s ease-out;
-        }
-
-        .animate-slideInLeft {
-          animation: slideInLeft 0.6s ease-out;
-        }
-
-        .animate-slideInRight {
-          animation: slideInRight 0.6s ease-out;
-        }
-
-        .scroll-mt-24 {
-          scroll-margin-top: 6rem;
-        }
-      ` }} />
+      )}undefined
     </div>
   );
 };

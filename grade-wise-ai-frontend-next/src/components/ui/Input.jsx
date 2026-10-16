@@ -1,10 +1,20 @@
 import { cn } from "@/lib/cn.js";
-import { focusRing, input, inputError } from "@/lib/ui.js";
+import { focusRing, input, inputError, inputPlain } from "@/lib/ui.js";
 
-export default function Input({ className = "", error = false, ...props }) {
+export default function Input({
+  className = "",
+  error = false,
+  hasIcon = true,
+  ...props
+}) {
   return (
     <input
-      className={cn(input, error && inputError, focusRing, className)}
+      className={cn(
+        hasIcon ? input : inputPlain,
+        error && inputError,
+        focusRing,
+        className
+      )}
       {...props}
     />
   );

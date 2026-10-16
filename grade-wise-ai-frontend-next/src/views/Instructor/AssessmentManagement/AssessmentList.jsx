@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { btn, card, cardHeader, cardInteractive, eyebrow, pageDesc, pageTitle, tableHead } from "@/lib/ui.js";
+import { btn, card, cardHeader, cardInteractive, chip, chipTone, eyebrow, focusRing, iconBadge, pageDesc, pageTitle, tableHead } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -149,7 +149,7 @@ function AssessmentList() {
                         <tr key={assessment.id} className="hover:bg-indigo-500/5 transition-colors duration-150">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                              <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                                 <FaClipboardList className="w-4 h-4 text-white" />
                               </div>
                               <span className={cn("font-semibold", "text-secondary-foreground")}>{assessment.title}</span>
@@ -177,20 +177,20 @@ function AssessmentList() {
                             <div className="flex flex-wrap justify-end items-center gap-2">
                               <Link
                                 to={`/instructor/assessments/${assessment.id}`}
-                                className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-indigo-500/20", "border", "border-border", "hover:border-indigo-500/40", "text-secondary-foreground", "hover:text-indigo-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
+                                className={cn(chip, chipTone.indigo, focusRing)}
                               >
                                 <FaEye className="w-3 h-3" /> View
                               </Link>
                               <Link
                                 to={`/instructor/assessments/${assessment.id}/enroll`}
-                                className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-emerald-500/20", "border", "border-border", "hover:border-emerald-500/40", "text-secondary-foreground", "hover:text-emerald-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
+                                className={cn(chip, chipTone.emerald, focusRing)}
                               >
                                 <FaUserPlus className="w-3 h-3" /> Enroll
                               </Link>
                               {!assessment.is_executed && (
                                 <Link
                                   to={`/instructor/assessments/${assessment.id}/edit`}
-                                  className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-violet-500/20", "border", "border-border", "hover:border-violet-500/40", "text-secondary-foreground", "hover:text-violet-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
+                                  className={cn(chip, chipTone.violet, focusRing)}
                                 >
                                   <FaEdit className="w-3 h-3" /> Edit
                                 </Link>
@@ -198,7 +198,7 @@ function AssessmentList() {
                               {!assessment.is_executed && (
                                 <button
                                   onClick={() => handleDeleteAssessment(assessment.id, assessment.title)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer"
+                                  className={cn(chip, chipTone.danger, focusRing, "active:scale-95")}
                                 >
                                   <FaTrash className="w-3 h-3" /> Delete
                                 </button>
@@ -206,21 +206,21 @@ function AssessmentList() {
                               {assessment.is_executed && (
                                 <Link
                                   to={`/instructor/assessments/${assessment.id}/analytics`}
-                                  className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-violet-500/20", "border", "border-border", "hover:border-violet-500/40", "text-secondary-foreground", "hover:text-violet-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
+                                  className={cn(chip, chipTone.violet, focusRing)}
                                 >
                                   <FaChartBar className="w-3 h-3" /> Analytics
                                 </Link>
                               )}
                               <button
                                 onClick={() => openPaperModal(assessment)}
-                                className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-amber-500/20", "border", "border-border", "hover:border-amber-500/40", "text-secondary-foreground", "hover:text-amber-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
+                                className={cn(chip, chipTone.amber, focusRing, "active:scale-95")}
                               >
                                 <FaFilePdf className="w-3 h-3" /> Paper
                               </button>
                               {!assessment.is_executed && (
                                 <Link
                                   to={`/instructor/assessments/${assessment.id}/preview`}
-                                  className={cn("inline-flex", "items-center", "gap-1.5", "px-3", "py-1.5", "bg-btn-secondary", "hover:bg-sky-500/20", "border", "border-border", "hover:border-sky-500/40", "text-secondary-foreground", "hover:text-sky-300", "rounded-lg", "font-medium", "text-xs", "transition-all", "duration-200", "cursor-pointer")}
+                                  className={cn(chip, chipTone.sky, focusRing)}
                                 >
                                   <FaBinoculars className="w-3 h-3" /> Preview
                                 </Link>
@@ -244,7 +244,7 @@ function AssessmentList() {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                      <div className={cn("p-2.5", "rounded-xl", iconBadge, "flex-shrink-0")}>
                         <FaClipboardList className="w-4 h-4 text-white" />
                       </div>
                       <div className="min-w-0">

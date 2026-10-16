@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -191,7 +191,7 @@ function CreateAssessment() {
           {/* Assessment Details Card */}
           <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
             <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                 <FiFileText className="text-white text-base" />
               </div>
               <h2 className="text-xl font-bold text-foreground">Assessment Details</h2>
@@ -275,7 +275,7 @@ function CreateAssessment() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-10 text-center">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-3">
+                      <div className={cn(accentPanel, "w-12 h-12 rounded-xl", "flex items-center justify-center mb-3")}>
                         <FiBook className="text-indigo-400 text-lg" />
                       </div>
                       <p className={cn("text-muted-foreground", "text-sm")}>No resources available.</p>
@@ -482,7 +482,7 @@ function CreateAssessment() {
             </button>
             <button
               type="submit"
-              className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2"
+              className={cn(btn.primary, "px-6 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2")}
               disabled={loading || isProcessing}
             >
               {isProcessing ? (

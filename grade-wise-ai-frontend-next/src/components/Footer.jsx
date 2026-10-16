@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, headingGradient, nav } from "@/lib/ui.js";
+import { accentPanel, card, cardInteractive, headingGradient, nav } from "@/lib/ui.js";
 import useAuthStore from "@/features/auth/store.js";
 import {
   FaFacebookF,
@@ -98,7 +98,7 @@ function Footer() {
               <div className={cn(card, cardInteractive, "shadow-2xl", "p-5", "sm:p-6", "max-w-4xl", "mx-auto")}>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
                   <div className="flex items-center space-x-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 text-indigo-400 text-xl flex-shrink-0">
+                    <div className={cn(accentPanel, "p-3 rounded-xl", "text-indigo-400 text-xl flex-shrink-0")}>
                       <UserRoleIcon />
                     </div>
                     <div>

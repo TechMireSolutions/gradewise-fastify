@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, page } from "@/lib/ui.js";
+import { btn, card, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
@@ -60,7 +60,7 @@ function VerifyEmail() {
 
         <div className={cn("relative", "w-full", "max-w-md", card, "p-8", "shadow-2xl", "text-center")}>
           <div className="mb-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-4 mx-auto">
+            <div className={cn("inline-flex", "items-center", "justify-center", "w-16", "h-16", "rounded-2xl", iconBadge, "mb-4", "mx-auto")}>
               <FaEnvelope className="text-white text-2xl" />
             </div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
@@ -90,7 +90,7 @@ function VerifyEmail() {
 
       <div className={cn("relative", "w-full", "max-w-md", card, "p-8", "shadow-2xl", "text-center")}>
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 mb-4 mx-auto">
+          <div className={cn("inline-flex", "items-center", "justify-center", "w-16", "h-16", "rounded-2xl", iconBadge, "mb-4", "mx-auto")}>
             <FaEnvelope className="text-white text-2xl" />
           </div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
@@ -135,7 +135,7 @@ function VerifyEmail() {
 
             <Link
               to="/login"
-              className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center gap-2 cursor-pointer"
+              className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
             >
               <span>Go to Login</span>
               <FaArrowRight />
@@ -177,7 +177,7 @@ function VerifyEmail() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 to="/login"
-                className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
+                className={cn(btn.primary, "px-5 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer")}
               >
                 Try Login
               </Link>

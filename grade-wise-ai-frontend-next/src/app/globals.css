@@ -77,12 +77,13 @@
   --color-toast: var(--app-toast-bg);
   --color-toast-border: var(--app-toast-border);
 
-  --color-edu-navy: #0a0f1e;
-  --color-edu-teal: #14b8a6;
-  --color-edu-sky: #38bdf8;
-  --color-edu-gold: #fbbf24;
+  --color-brand-navy: #0a0f1e;
+  --color-brand-teal: #14b8a6;
+  --color-brand-sky: #38bdf8;
+  --color-brand-gold: #fbbf24;
 
   --animate-blob: blob 7s infinite;
+  --animate-slide-in-up: slide-in-up 0.5s ease-out forwards;
   --animate-float: float 3s ease-in-out infinite;
   --animate-gradient: gradient 3s linear infinite;
   --animate-fade-in: fade-in 0.6s ease-out;
@@ -126,6 +127,11 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes slide-in-right {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
@@ -160,6 +166,7 @@ body {
   .animate-float,
   .animate-gradient,
   .animate-fade-in,
+  .animate-slide-in-up,
   .animate-slide-in-right,
   .animate-spin,
   .animate-pulse,

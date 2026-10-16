@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "@/features/auth/store.js";
 import AmbientBackground from "../components/layout/AmbientBackground.jsx";
@@ -89,7 +89,7 @@ function Profile() {
             <div className="mb-8 sm:mb-10">
               <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8")}>
                 <div className="flex items-center gap-4">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                  <div className={cn("p-2.5", "rounded-xl", iconBadge, "flex-shrink-0")}>
                     <RoleIcon className="text-foreground text-xl" />
                   </div>
                   <div>
@@ -112,7 +112,7 @@ function Profile() {
 
                   {/* Avatar area */}
                   <div className="px-6 py-8 text-center border-b border-border bg-input">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <div className={cn(accentPanel, "w-20 h-20 sm:w-24 sm:h-24 rounded-full", "flex items-center justify-center mx-auto mb-4 shadow-lg")}>
                       <RoleIcon className="text-4xl text-indigo-400" />
                     </div>
                     <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 leading-tight">
@@ -236,7 +236,7 @@ function Profile() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <Link
                             to={getDashboardLink()}
-                            className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 min-h-[44px]"
+                            className={cn(btn.primary, "flex items-center justify-center gap-2 px-5 py-3", "min-h-[44px]")}
                           >
                             <FaTachometerAlt />
                             <span>Go to Dashboard</span>
@@ -272,7 +272,7 @@ function Profile() {
             </p>
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 min-h-[44px]"
+              className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "min-h-[44px]")}
             >
               <FaUser />
               <span>Go to Login</span>

@@ -1,3 +1,5 @@
+import { iconBadge } from "@/lib/ui.js";
+import { cn } from "@/lib/cn.js";
 import { FaCopy, FaCheckCircle } from "react-icons/fa";
 import { generateAIPrompt } from "../utils/promptGenerator";
 
@@ -5,11 +7,11 @@ function PromptTab({ assessment, copied, onCopy }) {
   const promptText = generateAIPrompt(assessment);
 
   return (
-    <div className="animate-fadeIn">
+    <div className="animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+            <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
               <FaFileAlt className="text-white text-sm" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold text-foreground">Exact Prompt Sent to AI Model</h2>

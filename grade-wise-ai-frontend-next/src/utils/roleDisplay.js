@@ -11,7 +11,7 @@ export function getRoleBadgeColor(role) {
   };
   return (
     colors[role] ||
-    "bg-slate-500/15 text-slate-700 border-slate-500/25 dark:text-secondary-foreground dark:border-slate-500/30"
+    "bg-muted/30 text-muted-foreground border-border"
   );
 }
 

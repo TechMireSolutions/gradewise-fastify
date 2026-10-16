@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, page } from "@/lib/ui.js";
+import { btn, card, iconBadge, page } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Modal from "../../components/ui/Modal.jsx";
 import PageLoader from "../../components/ui/PageLoader.jsx";
@@ -38,7 +38,7 @@ function AdminDashboard() {
               <div>
                 <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-2")}>Admin Portal</p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2 sm:mb-3 flex items-center gap-3">
-                  <span className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 text-white">
+                  <span className={cn("p-2.5", "rounded-xl", iconBadge, "text-white")}>
                     <FaCrown className="w-5 h-5" />
                   </span>
                   Admin Dashboard
@@ -49,7 +49,7 @@ function AdminDashboard() {
               </div>
               <div className="hidden sm:block">
                 <div className="bg-input backdrop-blur-sm border border-border rounded-xl p-4 lg:p-6 text-center">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25 inline-flex items-center justify-center mb-3">
+                  <div className={cn("p-2.5", "rounded-xl", iconBadge, "inline-flex", "items-center", "justify-center", "mb-3")}>
                     <FaUsers className="w-8 h-8 lg:w-10 lg:h-10 text-white" />
                   </div>
                   <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">{users.length}</p>
@@ -74,7 +74,7 @@ function AdminDashboard() {
               </div>
               <button
                 onClick={fetchUsers}
-                className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer min-h-[44px]"
+                className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "cursor-pointer min-h-[44px]")}
               >
                 <FaSync />
                 Refresh

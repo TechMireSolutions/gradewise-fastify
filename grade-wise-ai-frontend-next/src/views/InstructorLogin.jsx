@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card } from "@/lib/ui.js";
+import { card, iconBadge } from "@/lib/ui.js";
 import Modal from "../components/ui/Modal.jsx";
 import AuthPageLayout from "../components/layout/AuthPageLayout.jsx";
 import LoginFormFields, { LoginSubmitButton } from "../components/auth/LoginFormFields.jsx";
@@ -21,7 +21,7 @@ function InstructorLogin() {
       <div className={cn("w-full", card, "p-8", "shadow-2xl")}>
         <div className="mb-8 text-center">
           <div className="flex items-center justify-center mb-5">
-            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+            <div className={cn("p-3.5", "rounded-2xl", iconBadge)}>
               <FaChalkboardTeacher className="text-2xl text-white" />
             </div>
           </div>

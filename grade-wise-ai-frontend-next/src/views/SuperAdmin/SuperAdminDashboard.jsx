@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, page } from "@/lib/ui.js";
+import { card, iconBadge, page } from "@/lib/ui.js";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import Modal from "../../components/ui/Modal.jsx";
@@ -51,7 +51,7 @@ function SuperAdminDashboard() {
                   System Control
                 </p>
                 <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight flex items-center gap-3 mb-2">
-                  <span className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                  <span className={cn("p-2.5", "rounded-xl", iconBadge)}>
                     <FaCrown className="w-5 h-5 text-yellow-300" />
                   </span>
                   Super Admin Dashboard
@@ -95,7 +95,7 @@ function SuperAdminDashboard() {
           <div className="px-6 py-4 border-b border-border bg-input">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+                <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                   <FaUsers className="w-4 h-4 text-white" />
                 </div>
                 <div>

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
+import { btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -128,7 +128,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
   };
 
   const inputClass =
-    "w-full bg-input backdrop-blur-sm border border-border hover:border-accent/40 focus:border-indigo-500 rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30";
+    "INPUT_ICON_TAIL";
   const labelClass = "block text-muted-foreground text-sm font-medium mb-1.5";
 
   const formContent = mode === "register" ? (
@@ -227,7 +227,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className={cn(btn.primary, "inline-flex items-center justify-center gap-2 px-5 py-3", "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer")}
         >
           {isLoading ? (
             <>
@@ -273,7 +273,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
         <button
           type="submit"
           disabled={enrollLoading}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className={cn(btn.success, "inline-flex items-center justify-center gap-2 px-5 py-3", "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer")}
         >
           {enrollLoading ? (
             <>
@@ -301,7 +301,7 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
           {/* Page header */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                 <FaUserPlus className="text-white text-lg" />
               </div>
               <div>

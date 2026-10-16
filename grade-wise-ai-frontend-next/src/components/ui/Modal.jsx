@@ -1,5 +1,7 @@
 "use client";
 
+import { iconBadge } from "@/lib/ui.js";
+import { cn } from "@/lib/cn.js";
 import { useEffect, useState } from "react";
 import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 
@@ -99,7 +101,7 @@ function Modal({
         return {
           borderAccent: "border-l-indigo-500",
           icon: <FaInfoCircle className="w-4 h-4" />,
-          iconBg: "bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25",
+          iconBg: iconBadge,
           titleText: "text-indigo-300",
           progressBg: "bg-gradient-to-r from-indigo-500 to-violet-600",
           confirmBtn: "bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 focus-visible:ring-indigo-400",

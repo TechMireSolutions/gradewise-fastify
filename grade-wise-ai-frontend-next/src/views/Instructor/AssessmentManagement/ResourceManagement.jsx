@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, cardInteractive, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useResourceStore from "@/features/resources/store.js";
@@ -143,7 +143,7 @@ function ResourceManagement() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+            <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
               <FaBook className="text-white text-lg" />
             </div>
             <div>
@@ -185,7 +185,7 @@ function ResourceManagement() {
         <div className={cn(card, cardInteractive, "shadow-2xl", "mb-8")}>
           <div className={cardHeader}>
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/25">
+              <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
                 <FaUpload className="text-white text-sm" />
               </div>
               <h2 className="text-xl font-bold text-foreground">Upload New Resources</h2>
@@ -214,7 +214,7 @@ function ResourceManagement() {
                   id="file-upload"
                 />
                 <div className="pointer-events-none">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-5">
+                  <div className={cn(accentPanel, "w-16 h-16 rounded-2xl", "flex items-center justify-center mx-auto mb-5")}>
                     <FaUpload className={`text-2xl transition-colors duration-200 ${dragActive ? 'text-indigo-300' : 'text-indigo-400'}`} />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -223,7 +223,7 @@ function ResourceManagement() {
                   <p className={cn("text-muted-foreground", "mb-5", "text-sm")}>or click to browse your device</p>
                   <label
                     htmlFor="file-upload"
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-xl font-semibold text-sm shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 active:scale-95 cursor-pointer pointer-events-auto"
+                    className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "cursor-pointer pointer-events-auto")}
                   >
                     <FaUpload className="text-xs" />
                     Choose Files
@@ -269,7 +269,7 @@ function ResourceManagement() {
           <div className="p-6 sm:p-8">
             {resources.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center mb-6">
+                <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
                   <FaFolder className="text-indigo-400 text-3xl" />
                 </div>
                 <h3 className="text-2xl font-bold text-foreground mb-2">No resources yet</h3>

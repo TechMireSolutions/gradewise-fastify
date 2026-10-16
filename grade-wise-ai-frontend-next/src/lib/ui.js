@@ -1,10 +1,13 @@
 /**
  * Design-system Tailwind class compositions.
- * Use these constants or the matching UI primitives — no custom CSS classes.
+ * Use these constants or matching UI primitives — no custom CSS classes.
  */
 
+const fieldBase =
+  "w-full rounded-xl border border-border bg-input text-sm text-foreground transition-[border-color,box-shadow] duration-200 placeholder:text-subtle-foreground hover:border-accent/30 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15";
+
 export const page =
-  "relative min-h-screen bg-gradient-to-br from-sky-50 via-slate-50 to-indigo-100 text-foreground dark:from-[#0a0f1e] dark:via-slate-950 dark:to-indigo-950";
+  "relative min-h-screen bg-gradient-to-br from-sky-50 via-slate-50 to-indigo-100 text-foreground dark:from-brand-navy dark:via-slate-950 dark:to-indigo-950";
 
 export const pageInner =
   "relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8";
@@ -30,10 +33,12 @@ export const btn = {
     "flex min-h-11 w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-border bg-input px-4 py-3 text-sm font-medium text-secondary-foreground transition-all duration-200 hover:border-teal-500/30 hover:text-foreground active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/25 disabled:cursor-not-allowed disabled:opacity-50",
   success:
     "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition-all duration-200 hover:brightness-110 active:scale-[0.98] motion-reduce:active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/25",
+  danger:
+    "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/15 px-5 py-3 text-sm font-semibold text-red-700 transition-all duration-200 hover:bg-red-500/25 active:scale-[0.98] motion-reduce:active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25 dark:text-red-400",
 };
 
-export const input =
-  "w-full rounded-xl border border-border bg-input px-4 py-3 pl-11 text-sm text-foreground transition-[border-color,box-shadow] duration-200 placeholder:text-subtle-foreground hover:border-slate-400/55 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 dark:hover:border-slate-600/55";
+export const input = `${fieldBase} px-4 py-3 pl-11`;
+export const inputPlain = `${fieldBase} px-4 py-3`;
 
 export const inputError =
   "border-red-500/55 focus:border-red-500 focus:ring-red-500/15";
@@ -70,6 +75,27 @@ export const iconBadge =
 export const iconBadgeTeal =
   "flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-sky-400 p-2.5 text-white shadow-lg shadow-teal-500/40";
 
+export const iconBadgeEmerald =
+  "flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-lg shadow-emerald-500/25";
+
+export const iconBadgeAmber =
+  "flex shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-2.5 text-white shadow-lg shadow-amber-500/25";
+
+export const statSurface = {
+  indigo:
+    "rounded-xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 p-4 backdrop-blur-sm sm:p-5",
+  emerald:
+    "rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 p-4 backdrop-blur-sm sm:p-5",
+  amber:
+    "rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4 backdrop-blur-sm sm:p-5",
+};
+
+export const accentPanel =
+  "rounded-xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 p-4 backdrop-blur-sm";
+
+export const emptyStateIcon =
+  "mx-auto flex size-20 items-center justify-center rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/20 to-violet-500/20 sm:size-24";
+
 export const tableHead = "bg-card-header [&_th]:border-b [&_th]:border-border";
 
 export const tableRowHover =
@@ -87,17 +113,35 @@ export const focusRing =
 export const panel =
   "rounded-xl border border-border bg-card/60 p-4 sm:p-5";
 
-export const select =
-  "w-full cursor-pointer appearance-none rounded-xl border border-border bg-input px-4 py-3 text-sm text-foreground transition-all duration-200 hover:border-slate-400/55 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 dark:hover:border-slate-600/55";
+export const select = `${fieldBase} cursor-pointer appearance-none px-4 py-3`;
 
-export const textarea =
-  "w-full resize-none rounded-xl border border-border bg-input px-4 py-3 text-sm text-foreground placeholder:text-subtle-foreground transition-all duration-200 hover:border-slate-400/55 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 dark:hover:border-slate-600/55";
+export const textarea = `${fieldBase} resize-none px-4 py-3`;
+
+export const fileInput =
+  "w-full cursor-pointer rounded-xl border border-dashed border-border bg-input px-4 py-4 text-sm text-muted-foreground transition-all duration-200 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-500/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-600 hover:border-indigo-500/50 hover:file:bg-indigo-500/25 dark:file:text-indigo-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15";
 
 export const examBar =
   "sticky top-0 z-50 border-b border-border bg-nav/95 shadow-lg backdrop-blur-md";
 
 export const chip =
   "inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border bg-btn-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-all duration-200 hover:border-teal-500/30 hover:text-foreground active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/25 disabled:cursor-not-allowed disabled:opacity-50";
+
+export const chipTone = {
+  indigo:
+    "hover:border-indigo-500/40 hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-indigo-300",
+  emerald:
+    "hover:border-emerald-500/40 hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-300",
+  violet:
+    "hover:border-violet-500/40 hover:bg-violet-500/20 hover:text-violet-700 dark:hover:text-violet-300",
+  amber:
+    "hover:border-amber-500/40 hover:bg-amber-500/20 hover:text-amber-700 dark:hover:text-amber-300",
+  sky: "hover:border-sky-500/40 hover:bg-sky-500/20 hover:text-sky-700 dark:hover:text-sky-300",
+  danger:
+    "border-red-500/20 bg-red-500/15 text-red-700 hover:bg-red-500/25 dark:text-red-400",
+};
+
+export const fab =
+  "fixed bottom-8 right-8 z-50 flex size-12 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-2xl shadow-indigo-500/30 transition-all duration-300 hover:scale-110 motion-reduce:transform-none motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/25";
 
 export const dividerLine = "border-t border-border";
 
