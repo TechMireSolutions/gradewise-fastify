@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/cn.js";
-import { btn, card, cardHeader, chip, examBar, focusRing, iconBadge, input, panel, select, textarea } from "@/lib/ui.js";
+import { btn, card, chip, examBar, focusRing, input, panel, select, textarea } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
