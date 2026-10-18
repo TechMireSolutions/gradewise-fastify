@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
-import AssessmentHeader from "@/components/AssessmentHeader.jsx";
-import AssessmentInfoCard from "@/components/AssessmentInfoCard.jsx";
-import PromptTab from "@/components/PromptTab.jsx";
-import SampleQuestionsTab from "@/components/SampleQuestionsTab.jsx";
+import {
+  AssessmentHeader,
+  AssessmentInfoCard,
+  PromptTab,
+  SampleQuestionsTab,
+} from "@/components/assessments";
 import useAssessmentPreview from "@/hooks/useAssessmentPreview.js";
 import { generateAIPrompt } from "@/utils/promptGenerator.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";

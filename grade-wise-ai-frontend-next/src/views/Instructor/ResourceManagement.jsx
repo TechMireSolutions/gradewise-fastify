@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import Modal from "@/components/ui/Modal";
-import { validateFiles } from "@/schemas/resourceSchema.js";
+import { validateFiles } from "@/schemas/resourceSchemas.js";
 import { FaFilePdf, FaFileWord, FaFilePowerpoint, FaFileAlt, FaImage, FaFolder, FaUpload, FaBook, FaInfoCircle, FaTrash, FaArrowLeft, FaDatabase } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useModal from "@/hooks/useModal.js";

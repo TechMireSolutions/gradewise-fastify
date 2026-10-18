@@ -8,6 +8,7 @@ const PUBLIC_PATHS = [
   "/verify-email",
   "/auth/callback",
   "/callback",
+  "/_not-found",
   "/",
 ];
 

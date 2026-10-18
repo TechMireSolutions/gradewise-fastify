@@ -9,8 +9,8 @@ import Modal from "@/components/ui/Modal";
 import { FaInfoCircle, FaCalendarAlt, FaLink, FaQuestionCircle, FaFileAlt, FaExclamationCircle, FaEdit, FaUsers, FaPrint, FaArrowLeft, FaCheckCircle, FaLock, FaGlobe } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 
-// THIS IS THE MISSING IMPORT — NOW ADDED
-import PhysicalPaperModal from "@/components/PhysicalPaperModal.jsx";
+// Physical Paper Modal
+import { PhysicalPaperModal } from "@/components/paper";
 import useModal from "@/hooks/useModal.js";
 
 

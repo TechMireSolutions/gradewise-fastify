@@ -43,3 +43,15 @@ test("theme toggle switches theme mode", async ({ page }) => {
   const hasDarkNow = (await html.getAttribute("class"))?.includes("dark") ?? false;
   expect(hasDarkNow).toBe(!hadDark);
 });
+
+test("404 not found page loads with home link", async ({ page }) => {
+  await page.goto("/_not-found");
+  await expect(page.getByText(/404/)).toBeVisible();
+  await expect(page.getByRole("link", { name: /Back to home/i })).toBeVisible();
+});
+
+test("unauthenticated student exam access redirects to login", async ({ page }) => {
+  await page.goto("/student/assessments/999/take");
+  await expect(page).toHaveURL(/\/login/);
+  await expect(page.getByText(/Sign in to your Gradewise AI account/i)).toBeVisible();
+});

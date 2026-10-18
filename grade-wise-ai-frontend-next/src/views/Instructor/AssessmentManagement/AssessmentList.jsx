@@ -19,7 +19,7 @@ import {
   FaFilePdf,
   FaBinoculars
 } from "react-icons/fa";
-import PhysicalPaperModal from "@/components/PhysicalPaperModal.jsx";
+import { PhysicalPaperModal } from "@/components/paper";
 
 export default function AssessmentList() {
   const {

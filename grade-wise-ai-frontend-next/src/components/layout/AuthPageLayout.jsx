@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "./AmbientBackground.jsx";
 import MainLandmark from "./MainLandmark.jsx";
-import ThemeToggle from "@/components/ThemeToggle.jsx";
+import { ThemeToggle } from "@/components/theme";
 
 export default function AuthPageLayout({
   children,

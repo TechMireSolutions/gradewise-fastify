@@ -1,7 +1,7 @@
 import { Outfit, Amiri } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Providers from "@/components/Providers.jsx";
-import { ThemeScript } from "@/components/ThemeProvider.jsx";
+import { ThemeScript } from "@/components/theme";
 import SkipLink from "@/components/layout/SkipLink.jsx";
 import "./globals.css";
 

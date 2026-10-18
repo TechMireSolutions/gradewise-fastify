@@ -28,7 +28,7 @@ import {
 } from "react-icons/fa";
 
 // Physical Paper Modal
-import PhysicalPaperModal from "@/components/PhysicalPaperModal.jsx";
+import { PhysicalPaperModal } from "@/components/paper";
 import useModal from "@/hooks/useModal.js";
 
 function InstructorDashboard() {

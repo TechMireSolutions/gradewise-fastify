@@ -6,7 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
-import ThemeToggle from "@/components/ThemeToggle.jsx";
+import { ThemeToggle } from "@/components/theme";
 import {
   FaHome,
   FaUser,
