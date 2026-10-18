@@ -91,5 +91,6 @@ jobs:
             curl -fsS http://127.0.0.1:8000/api/health || { echo "❌ Backend health check FAILED"; exit 1; }
             curl -fsS -o /dev/null http://127.0.0.1:3000 || { echo "❌ Frontend check FAILED"; exit 1; }
             curl -fsS -o /dev/null -H "Host: gradewiseai.techmiresolutions.com" http://127.0.0.1 || echo "⚠️ Domain proxy check note"
+            curl -kfsS -o /dev/null -H "Host: gradewiseai.techmiresolutions.com" https://127.0.0.1 || echo "⚠️ HTTPS local proxy check note"
 
             echo "✅ Deployment complete and healthy!"
