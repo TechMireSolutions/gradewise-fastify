@@ -42,7 +42,7 @@ Workspace guide for humans and AI agents (Cursor, Claude Code, Antigravity).
 
 | Component | Path | Stack |
 |-----------|------|-------|
-| **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle ORM · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
+| **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle ORM · PostgreSQL · Redis · BullMQ · Vercel AI SDK 7 (`ai ^7.0`) · Vitest |
 | **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query 5 · Zod 4 · Playwright |
 | **Process manager** | `ecosystem.config.cjs` | PM2 — api (port 5005) + worker |
 | **CI/CD** | `.github/workflows/deploy.yml` | SSH deploy to production |
@@ -87,7 +87,7 @@ npm run dev          # API — http://localhost:5005
 npm run dev:worker   # BullMQ worker (USE_ASYNC_JOBS=true)
 npm run typecheck    # tsc --noEmit (strict mode)
 npm run build        # tsc + copy fonts to dist/assets/fonts/
-npm test             # Vitest (src/**/*.test.ts)
+npm test             # Vitest (157 tests in src/**/*.test.ts)
 npm run db:push      # push schema changes (local)
 npm run db:migrate   # run migrations (production)
 npm run db:seed      # seed super_admin + system_configs
@@ -97,6 +97,7 @@ npm run db:seed      # seed super_admin + system_configs
 
 ```bash
 npm run dev          # http://localhost:3000
+npm run test:unit    # Node:test (195 tests in src/**/*.test.js)
 npm run build        # Next.js production build
 npm run lint         # ESLint flat config
 npm run test:e2e     # Playwright E2E
@@ -107,7 +108,7 @@ npm run start        # serve production build
 
 ```bash
 cd grade-wise-ai-backend-fastify && npm run typecheck && npm run build && npm test
-cd grade-wise-ai-frontend-next && npm run build && npm run lint
+cd grade-wise-ai-frontend-next && npm run test:unit && npm run build && npm run lint
 ```
 
 ---
@@ -150,7 +151,7 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 - **UI primitives** — `components/ui/` (`Button`, `Card`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `Modal`, `StatusBadge`, `PageLoader`); build with `cn()` utility
 - **Views** — `views/<Role>/` contain page-level components; `app/` pages are thin wrappers
 - **Dark mode** — class-based (`.dark` on `<html>`); theme tokens in `globals.css` `@theme inline {}`
-- **RTL & Multilingual Layout** — Exam layout and instructor assessment preview/prompt components (`PromptTab`, `QuestionCard`) dynamically apply `dir="rtl"` for Urdu, Arabic, and Persian; use pure semantic border tokens (`border-border`) with zero raw grayscale classes (`border-slate-600` is forbidden)
+- **RTL & Multilingual Layout** — Exam layout and instructor assessment preview/prompt components (`PromptTab`, `QuestionCard`) dynamically apply `dir="rtl"` for Urdu, Arabic, and Persian; text displays and inputs must strictly use CSS logical properties (`text-start` / `text-end`, `ms-*`, `me-*`, `ps-*`, `pe-*`) without physical `text-left` or `text-right` classes; use pure semantic border tokens (`border-border`) with zero raw grayscale classes (`border-slate-600` is forbidden)
 - **Physical Paper Persistence** — User-configured font sizes (`headerFontSize`, `questionFontSize`, `optionFontSize`) saved to `localStorage` (`gradewise_paper_settings`)
 - **Google Auth** — Firebase redirect flow (`signInWithRedirect` on click + `getRedirectResult` in `Login`/`Signup` `useEffect`) → `getIdToken()` → POST to `/api/auth/google-auth` → instant role-based redirect (`router.replace`, no success modal/delay)
 - **Auto logout** — 1h inactivity idle timer in `src/components/AutoLogout.jsx`, mounted in `Providers.jsx`

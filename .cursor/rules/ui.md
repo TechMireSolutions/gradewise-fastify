@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "grade-wise-ai-frontend-next/**/*.{js,jsx,css}"
 description: "UI/UX design tokens — Tailwind v4 pure utilities, typography, accessibility, light/dark mode, and interaction standards."
+globs: "grade-wise-ai-frontend-next/**/*.{js,jsx,css}"
+glob: "grade-wise-ai-frontend-next/**/*.{js,jsx,css}"
+alwaysApply: true
+trigger: always_on
 ---
 
 # UI/UX & Styling Rules
@@ -193,6 +195,7 @@ Per `modern-web-guidance` (`size-aware-styling`, `defer-rendering-heavy-content`
 - ❌ `overflow: hidden` on `body` for modals (use CSS `overscroll-behavior: contain`)
 - ❌ `user-select: none` on readable body text or question items
 - ❌ `:invalid` styling applied prematurely on load (use `:user-invalid`)
+- ❌ Physical text alignment (`text-left`, `text-right`) — use CSS logical properties (`text-start`, `text-end`) with `dir`
 
 ## Icons
 

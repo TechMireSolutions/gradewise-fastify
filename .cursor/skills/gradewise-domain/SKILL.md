@@ -82,7 +82,7 @@ Shared: count (5), duration (60s), +marks (1), −marks (0.25)
 - Language chosen before exam starts; persists through attempt generation and scoring.
 - UI strings via `src/utils/translations.js`.
 - `ExamLayout` and instructor preview/prompt components (`PromptTab`, `QuestionCard`) apply dynamic `dir` (`ltr` or `rtl`) based on the assessment language.
-- Text displays and inputs align logically (`text-right` in RTL).
+- Text displays and inputs must strictly use CSS logical properties (`text-start` / `text-end`, `ms-*`, `me-*`, `ps-*`, `pe-*`) with dynamic `dir` to mirror alignment without physical `text-left` or `text-right` classes.
 - Question timers use `tabular-nums` for rock-steady countdowns across LTR and RTL.
 - Pure semantic border tokens (`border-border`) used throughout; hardcoded grayscale borders (`border-slate-600`) are strictly forbidden.
 

@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "**/*"
 description: "Quality gates, verification commands, and commit checklist. See standards_rules.md for full engineering policies."
+globs: "**/*"
+glob: "**/*"
+alwaysApply: true
+trigger: always_on
 ---
 
 # Workflow & Quality Rules
@@ -22,18 +24,19 @@ All checks must pass before committing or marking a task complete:
 
 | Step | Command | Directory |
 |------|---------|-----------|
+| Frontend unit tests | `npm run test:unit` (195 tests) | `grade-wise-ai-frontend-next/` |
 | Frontend build | `npm run build` | `grade-wise-ai-frontend-next/` |
 | Frontend lint | `npm run lint` | `grade-wise-ai-frontend-next/` |
 | Frontend E2E (major UI) | `npm run test:e2e` | `grade-wise-ai-frontend-next/` |
 | Backend typecheck | `npm run typecheck` | `grade-wise-ai-backend-fastify/` |
 | Backend build | `npm run build` | `grade-wise-ai-backend-fastify/` |
-| Backend unit tests | `npm test` | `grade-wise-ai-backend-fastify/` |
+| Backend unit tests | `npm test` (157 tests) | `grade-wise-ai-backend-fastify/` |
 
 ### Full local verification (recommended)
 
 ```bash
 cd grade-wise-ai-backend-fastify && npm run typecheck && npm run build && npm test
-cd grade-wise-ai-frontend-next && npm run build && npm run lint
+cd grade-wise-ai-frontend-next && npm run test:unit && npm run build && npm run lint
 ```
 
 CI runs the same gates in `.github/workflows/ci.yml`.
@@ -72,8 +75,8 @@ npx pm2 restart all        # reload PM2 after every frontend Next.js build
 ## CI & PR Readiness
 
 All PRs must satisfy the consolidated `ci-gate` job in `.github/workflows/ci.yml`:
-- Backend: typecheck, build, Vitest unit tests (142 tests), critical security audit
-- Frontend: build, ESLint flat config, unit tests (191 tests), critical security audit, Playwright E2E smoke tests (9 tests)
+- Backend: typecheck, build, Vitest unit tests (157 tests), critical security audit
+- Frontend: build, ESLint flat config, unit tests (195 tests), critical security audit, Playwright E2E smoke tests (9 tests)
 
 ## Git
 

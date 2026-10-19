@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "**/*"
 description: "Complete GradeWise AI domain model — roles, capabilities, assessment system, question blocks, multilingual support, XAI feedback, physical paper generation, and business rules."
+globs: "**/*"
+glob: "**/*"
+alwaysApply: true
+trigger: always_on
 ---
 
 # GradeWise AI — Domain Model & Business Rules
@@ -157,10 +159,11 @@ Student assessment interface supports four languages:
 **Implementation rules:**
 - Language selection appears before the assessment begins.
 - Switching language triggers full UI translation AND layout direction change (`dir="rtl"` / `dir="ltr"`).
-- RTL languages: mirror flex layouts, text-align, icon placement, and padding/margin where applicable.
+- **CSS Logical Alignment**: Text displays and inputs must strictly use CSS logical properties (`text-start` / `text-end`, `ms-*`, `me-*`, `ps-*`, `pe-*`) with `dir={isRtl ? 'rtl' : 'ltr'}` to automatically mirror alignment without physical `text-left` or `text-right` classes.
 - AI generates questions in the selected language.
-- All static UI strings (buttons, labels, instructions) must also switch language — use a translation map or i18n library.
-- `ExamLayout` wrapper must support the `dir` attribute dynamically based on the selected language.
+- All static UI strings (buttons, labels, instructions) must also switch language — use `src/utils/translations.js` (`getTranslation`, `getExamTranslation`).
+- `ExamLayout` wrapper and instructor assessment preview/prompt components (`PromptTab`, `QuestionCard`) must support the `dir` attribute dynamically based on the selected language.
+- Pure semantic border tokens (`border-border`) used throughout; hardcoded grayscale borders (`border-slate-600`) are strictly forbidden.
 
 ---
 

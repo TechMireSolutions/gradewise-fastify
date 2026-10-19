@@ -42,7 +42,7 @@
 
 | App | Path | Stack | Port |
 |-----|------|-------|------|
-| Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 (strict) · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest | 5005 |
+| Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 (strict) · Drizzle · PostgreSQL · Redis · BullMQ · Vercel AI SDK 7 (`ai ^7.0`) · Vitest | 5005 |
 | Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query · Zod 4 · Playwright | 3000 |
 | CI/CD | `.github/workflows/deploy.yml` | SSH deploy → PM2 restart → health check | — |
 
@@ -59,13 +59,14 @@ npm run dev              # API on :5005
 npm run dev:worker       # BullMQ worker (USE_ASYNC_JOBS=true)
 npm run typecheck        # tsc --noEmit
 npm run build            # tsc + fonts copy
-npm test                 # Vitest
+npm test                 # Vitest (157 tests)
 npm run db:push          # push schema (local)
 npm run db:seed          # seed super_admin
 
 # Frontend
 cd grade-wise-ai-frontend-next
 npm run dev              # Next.js on :3000
+npm run test:unit        # Node:test (195 tests)
 npm run build            # production build
 npm run lint             # ESLint flat config
 npm run test:e2e         # Playwright
@@ -78,7 +79,7 @@ npm run test:e2e         # Playwright
 npm run typecheck && npm run build && npm test
 
 # Frontend
-npm run build && npm run lint
+npm run test:unit && npm run build && npm run lint
 ```
 
 ---
@@ -202,6 +203,7 @@ src/features/<domain>/
 - **Typography (`improve-text-layout-and-legibility`)**: `text-wrap: balance` on headings ($\le 6$ lines); `text-wrap: pretty` on paragraphs.
 - **Forms & A11y (`validate-input-after-interaction`, `accessible-error-announcement`)**: Use `:user-invalid` / `:user-valid` and sync with `aria-invalid` and `aria-errormessage`. Form controls must link error messages to input fields via `aria-errormessage`.
 - **Password Policy**: 5-point standard ($\ge 8$ chars, uppercase, lowercase, number, special char `@$!%*?&`) with live visual requirement checklist.
+- **CSS Logical Alignment (`logical-layout-and-alignment`)**: Never use physical `text-left` or `text-right`. Strictly use `text-start` and `text-end` paired with dynamic `dir={isRtl ? 'rtl' : 'ltr'}` to automatically mirror layouts across English, Arabic, Urdu, and Persian.
 - **Timers**: Question and exam countdowns use `role="timer"` and `tabular-nums` for rock-steady numeral layout in LTR and RTL.
 - **Modals (`prevent-page-scroll-under-modal-dialog`)**: Pure CSS scroll containment via `overscroll-behavior: contain` on `<dialog>` and `::backdrop`; never lock body scroll with `overflow: hidden`.
 - **Performance (`defer-rendering-heavy-content`)**: `content-visibility: auto` + `contain-intrinsic-size` on long question lists or heavy tables.

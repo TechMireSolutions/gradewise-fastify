@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "**/*"
 description: "Google Antigravity SDK — agent architecture, model selection, MCP tools, safety, hooks, and observability."
+globs: "**/*"
+glob: "**/*"
+alwaysApply: true
+trigger: always_on
 ---
 
 # Google Antigravity (AGY) SDK Rules

@@ -50,9 +50,6 @@ grade-wise-ai-frontend-next/src/
   components/
     Providers.jsx         # QueryClient + ThemeProvider + ErrorBoundary
     ThemeProvider.jsx ThemeToggle.jsx
-  components/
-    Providers.jsx         # QueryClient + ThemeProvider + ErrorBoundary
-    ThemeProvider.jsx ThemeToggle.jsx
     ui/                   # Button, Input, PasswordInput, Select, Textarea, Label, SearchField, EmptyState, Card…
     layout/               # PageShell, MainLandmark, AuthPageLayout, AmbientBackground
     auth/ admin/ dashboard/ # LoginFormFields, PasswordRequirements, UserManagementTable…
@@ -154,7 +151,7 @@ import { Button, Input, PasswordInput, Select, Label, EmptyState } from "@/compo
 - **Form errors**: Link errors with `aria-errormessage` and use `:user-invalid` styling.
 - **IME safety**: On input Enter keydown, guard with `if (event.nativeEvent?.isComposing) return;` (for Urdu, Arabic, Persian, CJK).
 - **Exam Timer**: Must declare `role="timer"`, `aria-live="polite"`, and `font-mono tabular-nums`.
-- **Exam Directionality**: `ExamLayout` dynamically binds `dir="rtl"` vs `dir="ltr"` for selected language.
+- **Exam Directionality**: `ExamLayout` and instructor assessment preview/prompt components dynamically bind `dir={isRtl ? 'rtl' : 'ltr'}`. Text displays and inputs must strictly use CSS logical properties (`text-start` / `text-end`, `ms-*`, `me-*`, `ps-*`, `pe-*`) without physical `text-left` or `text-right` classes.
 
 ### Role badges
 
@@ -195,6 +192,7 @@ When start returns `{ status: "generating" }`:
 ## Testing
 
 ```bash
+npm run test:unit      # Node:test (195 tests)
 npm run test:e2e       # Playwright smoke
 npm run test:e2e:ui    # Interactive mode
 ```

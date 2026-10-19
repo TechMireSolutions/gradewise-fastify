@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "**/*"
 description: "Project overview — stack, repo layout, commands, routes, infrastructure, and pointers to specialized rule files."
+globs: "**/*"
+glob: "**/*"
+alwaysApply: true
+trigger: always_on
 ---
 
 # Gradewise AI — Project Overview
@@ -42,8 +44,8 @@ Grade Wise AI is an **intelligent assessment platform** for educational institut
 
 | Component | Path | Stack |
 |-----------|------|-------|
-| **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
-| **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Playwright |
+| **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle · PostgreSQL · Redis · BullMQ · Vercel AI SDK 7 · Vitest |
+| **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · Node:test · Playwright |
 | **Process manager** | `ecosystem.config.cjs` | PM2 — api + worker |
 | **CI** | `.github/workflows/ci.yml` | typecheck · build · test · lint · e2e |
 
@@ -70,7 +72,7 @@ pm2 stop all
 | Dev worker | `npm run dev:worker` (when `USE_ASYNC_JOBS=true`) |
 | Typecheck | `npm run typecheck` |
 | Build | `npm run build` |
-| Unit tests | `npm test` |
+| Unit tests | `npm test` (157 Vitest tests) |
 | DB push (local) | `npm run db:push` |
 | DB migrate (prod) | `npm run db:migrate` |
 | DB seed | `npm run db:seed` |
@@ -82,6 +84,7 @@ pm2 stop all
 | Dev | `npm run dev` → http://localhost:3000 |
 | Build | `npm run build` |
 | Lint | `npm run lint` |
+| Unit tests | `npm run test:unit` (195 tests) |
 | E2E smoke | `npm run test:e2e` |
 | Prod | `npm run start` |
 
@@ -129,7 +132,7 @@ pm2 stop all
 - **Backend:** cookie auth · async AI via BullMQ · encrypted AI keys · thin routes · fat services · decomposed services with facade pattern · default port 5005.
 - **Frontend:** httpOnly cookie session · `proxy.js` + `ProtectedRoute` · TanStack Query provider · `schemas/` for Zod · Next.js 16.4.2 · shared dashboard primitives (`DashboardStatCard`, `DashboardStatGrid`, `DashboardSectionCard`, `DashboardQuickActions`) · modular views (<200 lines).
 - **UI Primitives:** standardized `Button`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `SearchField`, `EmptyState` · zero raw grayscale classes.
-- **Styling:** `ui.md` + semantic palette (`statSurface`, `btn.*`, `card`, `input`).
+- **Styling & Layout:** `ui.md` + semantic palette (`statSurface`, `btn.*`, `card`, `input`) · CSS logical properties (`text-start`/`text-end`) with dynamic `dir` attribute for multilingual/RTL support.
 - **PM2:** reload via `npx pm2 restart all` after `npm run build`.
 - **Before commit:** `workflow_rules.md`.
 

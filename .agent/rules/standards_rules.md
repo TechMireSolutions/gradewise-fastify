@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "**/*"
 description: "Core engineering standards — dependencies, structure, naming, DRY, security, and infrastructure. Mandatory for all code changes."
+globs: "**/*"
+glob: "**/*"
+alwaysApply: true
+trigger: always_on
 ---
 
 # Gradewise Engineering Standards
@@ -18,7 +20,7 @@ Five mandatory policies for every change. Agents must apply all five before subm
 
 | Area | Location | Current stack |
 |------|----------|---------------|
-| Backend | `grade-wise-ai-backend-fastify/` | Node ≥24 · Fastify 5 · TS 6 · Drizzle · PostgreSQL (pgvector) · Redis · BullMQ · AI SDK 6 · Nodemailer ^10.1.7 · Zod 4 · Vitest |
+| Backend | `grade-wise-ai-backend-fastify/` | Node ≥24 · Fastify 5 · TS 6 · Drizzle · PostgreSQL (pgvector) · Redis · BullMQ · Vercel AI SDK 7 (`ai ^7.0`) · Nodemailer ^10.1.7 · Zod 4 · Vitest |
 | Frontend | `grade-wise-ai-frontend-next/` | Next.js 16.4.2 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query 5 · ESLint 10 · Zod 4 · Playwright |
 
 ### Upgrade cadence
@@ -375,9 +377,10 @@ npx pm2 restart all                 # restart all services after Next.js build
 
 | Check | Command | When |
 |-------|---------|------|
-| Backend unit tests | `npm test` | Every backend change |
+| Backend unit tests | `npm test` (157 Vitest tests) | Every backend change |
 | Backend typecheck | `npm run typecheck` | Every backend change |
 | Backend build | `npm run build` | Every backend change |
+| Frontend unit tests | `npm run test:unit` (195 tests) | Every frontend change |
 | Frontend build | `npm run build` | Every frontend change |
 | Frontend lint | `npm run lint` | Every frontend change |
 | E2E smoke | `npm run test:e2e` | CI + before major UI changes |
@@ -408,7 +411,7 @@ Before marking work complete:
 - [ ] Names follow Policy 3 tables
 - [ ] No duplicate logic when shared module exists (Policy 4)
 - [ ] Shared UI primitives used: `Button`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `SearchField`, `EmptyState`
-- [ ] UI/UX consistency verified (`ui-ux-consistency.md`: zero raw neutrals, WCAG AA dual-theme contrast $\ge 4.5:1$, `text-start`/`text-end` logical alignment, `<MainLandmark>` wrapper)
+- [ ] UI/UX consistency verified (`ui-ux-consistency.md`: zero raw neutrals, WCAG AA dual-theme contrast $\ge 4.5:1$, `text-start`/`text-end` CSS logical alignment + `dir` attribute, `<MainLandmark>` wrapper)
 - [ ] Auth uses cookies, not localStorage tokens (Policy 5)
 - [ ] Modern web standards verified (`ui.md` & `frontend_rules.md`: text-wrap balance/pretty, :user-invalid, CSS dialog overscroll containment, accessible errors)
 - [ ] UI stability verified: `cardInteractive` strictly on leaf cards (no container scale jitter), FOES avoided via skeleton placeholders (`loading && !hasLoaded`), decoupled modal states
@@ -416,5 +419,5 @@ Before marking work complete:
 - [ ] Assessment integrity verified: executed assessments immutable; cloning workflow available via `POST /api/assessments/:id/clone`
 - [ ] Form UX verified: accessible password show/hide, password checklist (`PasswordRequirements`), confirm match feedback, IME-safe submit (`if (event.nativeEvent?.isComposing) return;`), and $\ge 44\text{px}$ touch targets
 - [ ] Exam & timer accessibility verified (`role="timer"`, `aria-live="polite"`, `font-mono tabular-nums`, dynamic RTL/LTR directionality in exam and preview)
-- [ ] `npm run build` + `npm run lint` (frontend) pass
+- [ ] `npm run test:unit` + `npm run build` + `npm run lint` (frontend) pass
 - [ ] `npm run typecheck` + `npm run build` + `npm test` (backend) pass

@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "grade-wise-ai-frontend-next/**/*.{js,jsx,ts,tsx,css}"
 description: "UI/UX consistency, semantic Tailwind tokens, WCAG AA contrast, container queries, and RTL/LTR logical layouts."
+globs: "grade-wise-ai-frontend-next/**/*.{js,jsx,ts,tsx,css}"
+glob: "grade-wise-ai-frontend-next/**/*.{js,jsx,ts,tsx,css}"
+alwaysApply: true
+trigger: always_on
 ---
 
 # UI/UX Consistency & Modern Web Guidance Rules

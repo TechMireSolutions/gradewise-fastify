@@ -1,14 +1,16 @@
 ---
-trigger: always_on
-glob: "grade-wise-ai-backend-fastify/**/*.ts"
 description: "Fastify v5 + TypeScript + Drizzle ORM backend: structure, cookie auth, Redis, BullMQ, AI SDK, and DB patterns."
+globs: "grade-wise-ai-backend-fastify/**/*.ts"
+glob: "grade-wise-ai-backend-fastify/**/*.ts"
+alwaysApply: true
+trigger: always_on
 ---
 
 # Backend Rules — grade-wise-ai-backend-fastify
 
 > **Mandatory:** `standards_rules.md` Policies 1–5.
 
-**Stack:** Node ≥24 · Fastify 5 · TypeScript 6 (strict) · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 6 · Vitest
+**Stack:** Node ≥24 · Fastify 5 · TypeScript 6 (strict) · Drizzle ORM · PostgreSQL (pgvector) · Redis · BullMQ · Zod 4 · Vercel AI SDK 7 (`ai ^7.0`) · Vitest
 
 ## Module System & Imports
 
@@ -133,7 +135,7 @@ When `USE_ASYNC_JOBS=true` and `REDIS_URL` set:
 
 Run worker: `npm run dev:worker`.
 
-## AI SDK v6
+## AI SDK v7
 
 ```typescript
 const text = await generateContent(prompt, { maxOutputTokens: 4096, temperature: 0.7 });
@@ -167,11 +169,12 @@ const text = await generateContent(prompt, { maxOutputTokens: 4096, temperature:
 | `schemas/common.ts` | Param Zod schemas |
 | `modules/assessments/question-generation.ts` | AI prompt + parse |
 | `modules/student-assessments/generation.ts` | Question generation |
+| `modules/student-assessments/student-evaluation.service.ts` | Pure answer evaluation & matching normalization |
 | `queue/index.ts` | BullMQ enqueue/worker |
 
 ## Testing
 
-- Vitest: `npm test` · config: `vitest.config.ts`
+- Vitest: `npm test` (157 unit tests) · config: `vitest.config.ts`
 - Place tests alongside source: `*.test.ts`
 - CI runs tests on every push
 

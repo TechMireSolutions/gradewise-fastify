@@ -1,7 +1,9 @@
 ---
-trigger: always_on
-glob: "grade-wise-ai-frontend-next/**/*.{js,jsx,ts,tsx,css}"
 description: "Next.js frontend — routing, middleware, cookie auth, TanStack Query, feature modules, forms, and API client."
+globs: "grade-wise-ai-frontend-next/**/*.{js,jsx,ts,tsx,css}"
+glob: "grade-wise-ai-frontend-next/**/*.{js,jsx,ts,tsx,css}"
+alwaysApply: true
+trigger: always_on
 ---
 
 # Frontend Rules — grade-wise-ai-frontend-next
@@ -188,7 +190,7 @@ Per `modern-web-guidance`:
 
 - **Timer**: Declares `role="timer"`, `aria-live="polite"`, and `font-mono tabular-nums` to prevent layout reflows during countdowns.
 - **Input composition**: Guard against IME composition on Enter-submission (`if (event.nativeEvent?.isComposing) return;`).
-- **Directionality & Multilingual Layout**: Both `ExamLayout` and instructor assessment prompt/preview components (`PromptTab`, `QuestionCard`) must dynamically bind `dir={isRtl ? 'rtl' : 'ltr'}` based on the assessment's selected language. Text displays and inputs must align logically (`text-right` in RTL).
+- **Directionality & Multilingual Layout**: Both `ExamLayout` and instructor assessment prompt/preview components (`PromptTab`, `QuestionCard`) must dynamically bind `dir={isRtl ? 'rtl' : 'ltr'}` based on the assessment's selected language. Text displays and inputs must strictly use CSS logical properties (`text-start` / `text-end`, `ms-*`, `me-*`, `ps-*`, `pe-*`) to automatically mirror layout across English, Urdu, Arabic, and Persian without hardcoded `text-left` or `text-right` classes.
 - **Semantic borders**: Never use hardcoded grayscale borders such as `border-slate-600` or `border-gray-700`; always use `border-border` or `border-border/60`.
 - **Metric surfaces**: Use `statSurface.indigo`, `statSurface.emerald`, and `statSurface.amber` tokens from `src/lib/ui.js`.
 - **List controls**: Use `SearchField` and `EmptyState` for lists and filter results.
@@ -220,8 +222,9 @@ Per `modern-web-guidance`:
 
 ## Testing
 
-- Playwright: `npm run test:e2e` · tests in `e2e/`
-- CI runs smoke tests after build
+- Unit tests: `npm run test:unit` (195 tests) in `src/**/*.test.js`
+- Playwright E2E: `npm run test:e2e` · tests in `e2e/`
+- CI runs unit tests and E2E smoke tests after build
 
 ## TypeScript
 
