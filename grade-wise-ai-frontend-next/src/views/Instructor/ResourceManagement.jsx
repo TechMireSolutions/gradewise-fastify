@@ -1,9 +1,10 @@
 import { cn } from "@/lib/cn.js";
-import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page, statSurface } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useResourceStore from "@/features/resources/store.js";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import { validateFiles } from "@/schemas/resourceSchemas.js";
 import { FaFilePdf, FaFileWord, FaFilePowerpoint, FaFileAlt, FaImage, FaFolder, FaUpload, FaBook, FaInfoCircle, FaTrash, FaArrowLeft, FaDatabase } from "react-icons/fa";
@@ -163,17 +164,17 @@ function ResourceManagement() {
 
         {/* Stats bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-3 sm:p-4">
+          <div className={statSurface.indigo}>
             <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">{resources.length}</p>
             <p className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>Total Resources</p>
           </div>
-          <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3 sm:p-4">
+          <div className={statSurface.emerald}>
             <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">
               {resources.filter(r => (r.fileType || r.contentType)?.toLowerCase().includes('pdf')).length}
             </p>
             <p className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>PDF Documents</p>
           </div>
-          <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/20 backdrop-blur-sm border border-amber-500/30 rounded-xl p-3 sm:p-4">
+          <div className={statSurface.amber}>
             <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">
               {resources.filter(r => !(r.fileType || r.contentType)?.toLowerCase().includes('pdf')).length}
             </p>
@@ -268,15 +269,20 @@ function ResourceManagement() {
           </div>
           <div className="p-6 sm:p-8">
             {resources.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
-                  <FaFolder className="text-indigo-400 text-3xl" />
-                </div>
-                <h3 className="text-2xl font-bold text-foreground mb-2">No resources yet</h3>
-                <p className={cn("text-muted-foreground", "max-w-sm", "mb-8")}>
-                  Upload your first resource to start building your library for assessments
-                </p>
-              </div>
+              <EmptyState
+                icon={FaFolder}
+                title="No resources yet"
+                description="Upload your first resource to start building your library for assessments."
+                action={
+                  <label
+                    htmlFor="file-upload"
+                    className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-2.5 min-h-11 cursor-pointer")}
+                  >
+                    <FaUpload className="text-xs" />
+                    Choose Files
+                  </label>
+                }
+              />
             ) : (
               <div className="space-y-3">
                 {resources.map((resource) => (
@@ -302,8 +308,9 @@ function ResourceManagement() {
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
                       <button
+                        type="button"
                         onClick={() => handleDeleteClick(resource.id)}
-                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-2"
+                        className="flex-1 sm:flex-initial min-h-11 px-4 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center justify-center gap-2"
                       >
                         <FaTrash className="text-xs" />
                         Delete

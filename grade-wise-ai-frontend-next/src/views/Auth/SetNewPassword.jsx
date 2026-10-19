@@ -1,14 +1,16 @@
+"use client";
+
 import { cn } from "@/lib/cn.js";
-import { btn, card, iconBadge } from "@/lib/ui.js";
+import { card, iconBadge } from "@/lib/ui.js";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
-import Modal from "@/components/ui/Modal.jsx";
+import { Button, Label, LoadingSpinner, Modal, PasswordInput } from "@/components/ui/index.js";
+import { PasswordRequirements } from "@/components/auth/index.js";
 import AuthPageLayout from "@/components/layout/AuthPageLayout.jsx";
 import useModal from "@/hooks/useModal.js";
-import { FaLock, FaCheckCircle, FaArrowLeft, FaKey, FaExclamationTriangle, FaShieldAlt } from "react-icons/fa";
+import { FaCheckCircle, FaArrowLeft, FaKey, FaExclamationTriangle } from "react-icons/fa";
 import { setNewPasswordSchema } from "@/schemas/passwordSchemas.js";
 import { parseZodFieldErrors } from "@/utils/parseZodFieldErrors.js";
 
@@ -27,7 +29,7 @@ function SetNewPassword() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prevErrors) => ({ ...prevErrors, [name]: undefined }));
     }
@@ -35,13 +37,18 @@ function SetNewPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+
     try {
       setNewPasswordSchema.parse(formData);
-      setErrors({});
     } catch (error) {
       const fieldErrors = parseZodFieldErrors(error);
       if (fieldErrors) {
         setErrors(fieldErrors);
+        const firstKey = Object.keys(fieldErrors)[0];
+        if (firstKey) {
+          document.getElementById(firstKey)?.focus();
+        }
         return;
       }
     }
@@ -68,133 +75,133 @@ function SetNewPassword() {
     }
   };
 
+  const isPasswordsMatching =
+    formData.confirmPassword && formData.newPassword === formData.confirmPassword;
+  const isPasswordsMismatched =
+    formData.confirmPassword && formData.newPassword !== formData.confirmPassword;
+
   return (
     <AuthPageLayout backLabel="Back to Login" backTo="/login">
-        <div className={cn(card, "p-8", "shadow-2xl")}>
-          {/* Brand header */}
-          <div className="mb-8 text-center">
-            <div className="flex items-center justify-center mb-5">
-              <div className={cn("p-3.5", "rounded-2xl", iconBadge)}>
-                <FaKey className="text-white text-2xl" />
-              </div>
+      <div className={cn(card, "p-8", "shadow-2xl")}>
+        {/* Brand header */}
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center mb-5">
+            <div className={cn("p-3.5", "rounded-2xl", iconBadge)}>
+              <FaKey className="text-white text-2xl" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Set New Password</h1>
-            <p className={cn("text-muted-foreground", "text-sm")}>Enter your new password below to complete the reset</p>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* New Password field */}
-            <div>
-              <label htmlFor="newPassword" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
-                New Password
-              </label>
-              <div className="relative">
-                <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-                <input
-                  type="password"
-                  id="newPassword"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  className={`w-full bg-input backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.newPassword
-                      ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-border hover:border-accent/40 focus:border-indigo-500 focus:ring-indigo-500/30"
-                  }`}
-                  placeholder="Enter new password"
-                  required
-                />
-              </div>
-              {errors.newPassword && (
-                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
-                  <FaExclamationTriangle className="shrink-0" />
-                  {errors.newPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password field */}
-            <div>
-              <label htmlFor="confirmPassword" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
-                Confirm Password
-              </label>
-              <div className="relative">
-                <FaCheckCircle className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-                <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`w-full bg-input backdrop-blur-sm border rounded-xl pl-11 pr-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm transition-all duration-200 focus:outline-none focus:ring-2 ${
-                    errors.confirmPassword
-                      ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
-                      : "border-border hover:border-accent/40 focus:border-indigo-500 focus:ring-indigo-500/30"
-                  }`}
-                  placeholder="Confirm new password"
-                  required
-                />
-              </div>
-              {errors.confirmPassword && (
-                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
-                  <FaExclamationTriangle className="shrink-0" />
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Password requirements hint */}
-            <div className="bg-input rounded-xl border border-border p-4">
-              <div className="flex items-start gap-3">
-                <FaShieldAlt className="text-indigo-400 text-sm mt-0.5 shrink-0" />
-                <div>
-                  <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1.5")}>Password Requirements</p>
-                  <ul className="space-y-1">
-                    <li className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>At least 8 characters long</li>
-                    <li className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>Include uppercase letters</li>
-                    <li className={cn("text-xs", "text-muted-foreground", "leading-relaxed")}>Include numbers</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className={cn(btn.primary, "w-full px-5 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100")}
-            >
-              {loading ? (
-                <>
-                  <LoadingSpinner size="sm" color="white" type="dots" />
-                  <span>Setting New Password...</span>
-                </>
-              ) : (
-                <>
-                  <FaCheckCircle />
-                  <span>Set New Password</span>
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Footer links */}
-          <div className="mt-6 pt-6 border-t border-border flex flex-col items-center gap-3">
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
-            >
-              <FaArrowLeft className="text-xs" />
-              <span>Back to Login</span>
-            </Link>
-            <Link
-              href="/forgot-password"
-              className={cn("text-muted-foreground", "hover:text-muted-foreground", "text-xs", "font-medium", "transition-colors", "duration-150", "cursor-pointer")}
-            >
-              Request a new reset link
-            </Link>
-          </div>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight mb-2">Set New Password</h1>
+          <p className={cn("text-muted-foreground", "text-sm")}>Enter your new password below to complete the reset</p>
         </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+          {/* New Password field */}
+          <div>
+            <Label htmlFor="newPassword">New Password</Label>
+            <PasswordInput
+              id="newPassword"
+              name="newPassword"
+              autoComplete="new-password"
+              value={formData.newPassword}
+              onChange={handleChange}
+              error={Boolean(errors.newPassword)}
+              aria-describedby={errors.newPassword ? "newPassword-error" : "newPassword-rules"}
+              placeholder="Enter new password"
+              required
+            />
+            {errors.newPassword && (
+              <p id="newPassword-error" role="alert" className="text-red-500 dark:text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
+                <FaExclamationTriangle className="shrink-0" />
+                <span>{errors.newPassword}</span>
+              </p>
+            )}
+            <div id="newPassword-rules" className="mt-2.5">
+              <PasswordRequirements password={formData.newPassword} />
+            </div>
+          </div>
+
+          {/* Confirm Password field */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <Label htmlFor="confirmPassword" className="mb-0">
+                Confirm Password
+              </Label>
+              {isPasswordsMatching && (
+                <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  <FaCheckCircle className="w-3 h-3" />
+                  <span>Passwords match</span>
+                </span>
+              )}
+            </div>
+            <PasswordInput
+              id="confirmPassword"
+              name="confirmPassword"
+              autoComplete="new-password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              error={Boolean(errors.confirmPassword || isPasswordsMismatched)}
+              aria-describedby={
+                errors.confirmPassword
+                  ? "confirmPassword-error"
+                  : isPasswordsMismatched
+                  ? "confirmPassword-mismatch"
+                  : undefined
+              }
+              placeholder="Confirm new password"
+              required
+            />
+            {errors.confirmPassword && (
+              <p id="confirmPassword-error" role="alert" className="text-red-500 dark:text-red-400 text-xs mt-1.5 flex items-center gap-1.5">
+                <FaExclamationTriangle className="shrink-0" />
+                <span>{errors.confirmPassword}</span>
+              </p>
+            )}
+            {!errors.confirmPassword && isPasswordsMismatched && (
+              <p id="confirmPassword-mismatch" role="alert" className="text-amber-600 dark:text-amber-400 text-xs mt-1.5 flex items-center gap-1.5">
+                <FaExclamationTriangle className="shrink-0" />
+                <span>Passwords do not match yet</span>
+              </p>
+            )}
+          </div>
+
+          {/* Submit button */}
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={loading}
+            className="w-full"
+          >
+            {loading ? (
+              <>
+                <LoadingSpinner size="sm" color="white" type="dots" />
+                <span>Setting New Password...</span>
+              </>
+            ) : (
+              <>
+                <FaCheckCircle className="shrink-0" />
+                <span>Set New Password</span>
+              </>
+            )}
+          </Button>
+        </form>
+
+        {/* Footer links */}
+        <div className="mt-6 pt-6 border-t border-border flex flex-col items-center gap-3">
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
+          >
+            <FaArrowLeft className="text-xs" />
+            <span>Back to Login</span>
+          </Link>
+          <Link
+            href="/forgot-password"
+            className={cn("text-muted-foreground", "hover:text-foreground", "text-xs", "font-medium", "transition-colors", "duration-150", "cursor-pointer")}
+          >
+            Request a new reset link
+          </Link>
+        </div>
+      </div>
 
       <Modal isOpen={modal.isOpen} onClose={closeModal} type={modal.type} title={modal.title}>
         {modal.message}

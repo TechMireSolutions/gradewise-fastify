@@ -1,8 +1,9 @@
 import { cn } from "@/lib/cn.js";
-import { accentPanel, btn, card, cardInteractive, iconBadge, page, tableRowHover } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardInteractive, iconBadge, page, tableRowHover, tableHead, statSurface } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import EmptyState from "@/components/ui/EmptyState";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
 import { FaList, FaTable, FaCalendarAlt, FaCheckCircle, FaEye, FaChartBar, FaArrowUp, FaUsers, FaExclamationTriangle } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
@@ -180,13 +181,11 @@ function AssessmentAnalytics() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                  <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
-                    <FaChartBar className="text-indigo-400 text-3xl" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-foreground mb-2">No Executed Assessments</h3>
-                  <p className={cn("text-muted-foreground", "max-w-sm")}>Execute an assessment to see analytics here</p>
-                </div>
+                <EmptyState
+                  icon={FaChartBar}
+                  title="No Executed Assessments"
+                  description="Execute an assessment to see analytics here."
+                />
               )}
             </div>
           </div>
@@ -208,18 +207,18 @@ function AssessmentAnalytics() {
                   <div className="overflow-x-auto">
                     <table className="min-w-full">
                       <thead>
-                        <tr className="bg-input">
-                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Student</th>
-                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Questions</th>
-                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Correct</th>
-                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Score</th>
-                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Time Used</th>
-                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Actions</th>
+                        <tr className={tableHead}>
+                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider")}>Student</th>
+                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider")}>Questions</th>
+                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider")}>Correct</th>
+                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider")}>Score</th>
+                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider")}>Time Used</th>
+                          <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider")}>Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
                         {students.map((s) => (
-                          <tr key={s.student_id} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors", "duration-150")}>
+                          <tr key={s.student_id} className={cn(tableRowHover, "transition-colors", "duration-150")}>
                             <td className="px-6 py-4 font-semibold text-foreground text-sm">{s.name || `Student ${s.student_id}`}</td>
                             <td className={cn("px-6", "py-4", "text-secondary-foreground", "font-medium", "text-sm")}>{s.total_questions || 0}</td>
                             <td className="px-6 py-4">
@@ -235,8 +234,9 @@ function AssessmentAnalytics() {
                             <td className={cn("px-6", "py-4", "text-secondary-foreground", "text-sm")}>{s.time_used}</td>
                             <td className="px-6 py-4">
                               <button
+                                type="button"
                                 onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
-                                className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
+                                className={cn(btn.primary, "px-5 py-2.5 min-h-11", "inline-flex items-center gap-2 cursor-pointer")}
                               >
                                 <FaEye /> View Answers
                               </button>
@@ -247,13 +247,11 @@ function AssessmentAnalytics() {
                     </table>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-                    <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
-                      <FaUsers className="text-indigo-400 text-3xl" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-foreground mb-2">No Students Yet</h3>
-                    <p className={cn("text-muted-foreground", "max-w-sm")}>No students have completed this assessment</p>
-                  </div>
+                  <EmptyState
+                    icon={FaUsers}
+                    title="No Students Yet"
+                    description="No students have completed this assessment."
+                  />
                 )}
               </div>
             </div>
@@ -274,11 +272,11 @@ function AssessmentAnalytics() {
                       <span className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "block", "mb-1")}>Questions</span>
                       <span className="text-xl font-bold text-foreground">{s.total_questions}</span>
                     </div>
-                    <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3">
+                    <div className={cn(statSurface.emerald, "p-3")}>
                       <span className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "block", "mb-1")}>Correct</span>
                       <span className="text-xl font-bold text-emerald-400">{s.correct_answers}</span>
                     </div>
-                    <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-3">
+                    <div className={cn(statSurface.indigo, "p-3")}>
                       <span className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "block", "mb-1")}>Score</span>
                       <span className="text-xl font-bold text-indigo-400">{s.percentage}%</span>
                     </div>
@@ -288,21 +286,19 @@ function AssessmentAnalytics() {
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => fetchStudentQuestions(assessmentId, s.student_id)}
-                    className={cn(btn.primary, "w-full py-3 px-5", "flex items-center justify-center gap-2 cursor-pointer")}
+                    className={cn(btn.primary, "w-full py-3 px-5 min-h-11", "flex items-center justify-center gap-2 cursor-pointer")}
                   >
                     <FaEye /> View Detailed Answers
                   </button>
                 </div>
               )) : (
-                <div className={cn(card, "shadow-2xl", "p-8")}>
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className={cn(accentPanel, "w-16 h-16 rounded-2xl", "flex items-center justify-center mb-4")}>
-                      <FaUsers className="text-indigo-400 text-2xl" />
-                    </div>
-                    <p className={cn("text-muted-foreground", "font-medium")}>No results yet</p>
-                  </div>
-                </div>
+                <EmptyState
+                  icon={FaUsers}
+                  title="No Results Yet"
+                  description="No students have completed this assessment yet."
+                />
               )}
             </div>
           </div>
@@ -313,6 +309,7 @@ function AssessmentAnalytics() {
           <div ref={questionsRef} className="scroll-mt-24 animate-fade-in">
             {/* Floating Back Arrow */}
             <button
+              type="button"
               onClick={() => {
                 setTimeout(() => {
                   assessmentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -327,9 +324,9 @@ function AssessmentAnalytics() {
                   <FaArrowUp className="text-white text-2xl" />
                 </div>
               </div>
-              <div className={cn("absolute", "top-full", "mt-3", "left-1/2", "-translate-x-1/2", "bg-slate-900", "border", "border-border", "text-secondary-foreground", "px-4", "py-2", "rounded-xl", "text-sm", "font-semibold", "whitespace-nowrap", "opacity-0", "group-hover:opacity-100", "transition-all", "duration-300", "pointer-events-none", "transform", "group-hover:translate-y-1", "shadow-2xl")}>
+              <div className={cn("absolute", "top-full", "mt-3", "left-1/2", "-translate-x-1/2", "bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "px-4", "py-2", "rounded-xl", "text-sm", "font-semibold", "whitespace-nowrap", "opacity-0", "group-hover:opacity-100", "transition-all", "duration-300", "pointer-events-none", "transform", "group-hover:translate-y-1", "shadow-2xl")}>
                 Back to Assessments
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-slate-900"></div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-8 border-transparent border-b-border"></div>
               </div>
             </button>
 

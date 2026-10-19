@@ -2,8 +2,7 @@ import { cn } from "@/lib/cn.js";
 import { accentPanel, card as uiCard, iconBadge, page, tableHead, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
-import Modal from "@/components/ui/Modal.jsx";
+import { Label, Select, Textarea, LoadingSpinner, Modal } from "@/components/ui";
 import {
   listAiKeys,
   getAiSummary,
@@ -636,18 +635,18 @@ function SuperAdminApiConfig() {
                 {/* Model + stats row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                    <Label htmlFor="active-model">
                       Active Model
-                    </label>
-                    <select
+                    </Label>
+                    <Select
+                      id="active-model"
                       value={card.model}
                       onChange={e => updateActiveCard("model", e.target.value)}
-                      className={`w-full bg-input backdrop-blur-sm border border-border hover:border-accent/40 ${pStyle.focusBorder} rounded-xl px-4 py-3 text-secondary-foreground text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 appearance-none cursor-pointer min-h-[48px]`}
                     >
                       {(modelOptions[provider] || []).map(opt => (
-                        <option key={opt.value} value={opt.value} className={cn("bg-slate-800", "text-secondary-foreground")}>{opt.label}</option>
+                        <option key={opt.value} value={opt.value} className={cn("bg-card", "text-secondary-foreground")}>{opt.label}</option>
                       ))}
-                    </select>
+                    </Select>
                     <p className={cn("text-muted-foreground", "text-xs", "mt-1.5")}>
                       Applied to all keys in this provider pool.
                     </p>
@@ -674,21 +673,21 @@ function SuperAdminApiConfig() {
 
                 {/* Key textarea */}
                 <div>
-                  <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                  <Label htmlFor="new-keys">
                     Add New API Key
                     <span className={cn("ml-2", "text-xs", "font-normal", "text-muted-foreground")}>
                       comma-separate for bulk add
                     </span>
-                  </label>
-                  <textarea
+                  </Label>
+                  <Textarea
+                    id="new-keys"
                     value={card.newKeys}
                     onChange={e => updateActiveCard("newKeys", e.target.value)}
                     rows={3}
-                    className={`w-full bg-input backdrop-blur-sm border rounded-xl px-4 py-3 text-secondary-foreground placeholder:text-subtle-foreground text-sm font-mono transition-all duration-200 focus:outline-none resize-none ${
-                      card.keysDirty
-                        ? "border-indigo-500 ring-2 ring-indigo-500/30"
-                        : `border-border hover:border-accent/40 ${pStyle.focusBorder} focus:ring-2 focus:ring-indigo-500/30`
-                    }`}
+                    className={cn(
+                      "font-mono",
+                      card.keysDirty && "border-indigo-500 ring-2 ring-indigo-500/30"
+                    )}
                     placeholder={`Paste your ${providerLabels[provider]} API key — a key with a recognizable prefix auto-switches the provider sidebar`}
                   />
                   {card.keysDirty ? (

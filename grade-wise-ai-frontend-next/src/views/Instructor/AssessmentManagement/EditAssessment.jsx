@@ -4,11 +4,10 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import Modal from "@/components/ui/Modal";
+import { Input, Label, Select, Textarea, LoadingSpinner, Modal } from "@/components/ui";
 import { validateAssessmentForm, validateFiles } from "@/schemas/editAssessmentSchemas.js";
 import { assessmentLanguages } from "@/schemas/assessmentSchemas.js";
-import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave, FaChevronDown } from "react-icons/fa";
+import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useModal from "@/hooks/useModal.js";
 
@@ -411,54 +410,53 @@ function EditAssessment() {
             <div className="p-6 sm:p-8 space-y-6">
               {/* Title Input */}
               <div>
-                <label htmlFor="title" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                <Label htmlFor="title">
                   Assessment Title <span className="text-red-400">*</span>
-                </label>
-                <input
+                </Label>
+                <Input
                   type="text"
                   name="title"
                   id="title"
+                  hasIcon={false}
                   value={formData.title}
                   onChange={handleInputChange}
-                  className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                   placeholder="e.g., Data Structures Final Exam"
-                  disabled={currentAssessment.is_executed}
+                  disabled={currentAssessment.is_executed || isProcessing}
+                  required
                 />
               </div>
 
               {/* Language Selector */}
               <div>
-                <label htmlFor="language" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                <Label htmlFor="language">
                   Questions Language <span className={cn("text-muted-foreground", "font-normal")}>(AI will generate questions in this language)</span>
-                </label>
-                <select
+                </Label>
+                <Select
                   name="language"
                   id="language"
                   value={formData.language}
                   onChange={handleInputChange}
-                  className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                  disabled={currentAssessment.is_executed}
+                  disabled={currentAssessment.is_executed || isProcessing}
                 >
                   {assessmentLanguages.map((lang) => (
                     <option key={lang.value} value={lang.value}>{lang.label}</option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {/* Prompt Textarea */}
               <div>
-                <label htmlFor="prompt" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                <Label htmlFor="prompt">
                   AI Prompt <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using resources or links)</span>
-                </label>
-                <textarea
+                </Label>
+                <Textarea
                   name="prompt"
                   id="prompt"
                   value={formData.prompt}
                   onChange={handleInputChange}
                   rows={5}
-                  className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "resize-none", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                   placeholder="Provide a detailed prompt for question generation..."
-                  disabled={currentAssessment.is_executed}
+                  disabled={currentAssessment.is_executed || isProcessing}
                 />
               </div>
 
@@ -472,22 +470,24 @@ function EditAssessment() {
                   {formData.externalLinks.map((link, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="relative flex-1">
-                        <FaLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
-                        <input
+                        <FaLink className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
+                        <Input
                           type="url"
                           value={link}
+                          hasIcon={true}
                           onChange={(e) => handleLinkChange(index, e.target.value)}
                           placeholder="https://example.com/resource"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
+                          disabled={currentAssessment.is_executed || isProcessing}
+                          aria-label={`External link ${index + 1}`}
                         />
                       </div>
                       {formData.externalLinks.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeExternalLink(index)}
-                          className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/15 border border-transparent hover:border-red-500/20 transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={currentAssessment.is_executed}
+                          className="p-2 rounded-xl text-red-400 hover:text-red-300 bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-11 min-h-11 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
+                          disabled={currentAssessment.is_executed || isProcessing}
+                          aria-label={`Remove link ${index + 1}`}
                         >
                           <FaTimes />
                         </button>
@@ -498,8 +498,8 @@ function EditAssessment() {
                 <button
                   type="button"
                   onClick={addExternalLink}
-                  className={cn("mt-4", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "gap-2", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                  disabled={currentAssessment.is_executed}
+                  className={cn("mt-4", btn.secondary, "inline-flex items-center gap-2")}
+                  disabled={currentAssessment.is_executed || isProcessing}
                 >
                   <FaPlus className="text-xs" />
                   Add Link
@@ -635,72 +635,76 @@ function EditAssessment() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Question Type */}
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
-                        <div className="relative">
-                          <select
-                            value={block.question_type}
-                            onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
-                            className={cn("w-full", "appearance-none", "bg-input", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "pr-10", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                            disabled={currentAssessment.is_executed}
-                          >
-                            <option value="multiple_choice">Multiple Choice</option>
-                            <option value="short_answer">Short Answer</option>
-                            <option value="true_false">True/False</option>
-                            <option value="fill_in_the_blank">Fill in the Blank</option>
-                          </select>
-                          <FaChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-subtle-foreground text-xs" />
-                        </div>
+                        <Label htmlFor={`edit-block-${index}-type`}>Question Type</Label>
+                        <Select
+                          id={`edit-block-${index}-type`}
+                          value={block.question_type}
+                          onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
+                          disabled={currentAssessment.is_executed || isProcessing}
+                        >
+                          <option value="multiple_choice">Multiple Choice</option>
+                          <option value="short_answer">Short Answer</option>
+                          <option value="true_false">True/False</option>
+                          <option value="fill_in_the_blank">Fill in the Blank</option>
+                        </Select>
                       </div>
 
                       {/* Question Count */}
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Count</label>
-                        <input
+                        <Label htmlFor={`edit-block-${index}-count`}>Question Count</Label>
+                        <Input
+                          id={`edit-block-${index}-count`}
                           type="number"
+                          hasIcon={false}
                           value={block.question_count}
                           onChange={(e) => handleBlockChange(index, "question_count", e.target.value)}
                           min="1"
                           placeholder="e.g. 5"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
+                          disabled={currentAssessment.is_executed || isProcessing}
+                          required
                         />
                       </div>
 
                       {/* Duration */}
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Duration (seconds)</label>
-                        <input
+                        <Label htmlFor={`edit-block-${index}-duration`}>Duration (seconds)</Label>
+                        <Input
+                          id={`edit-block-${index}-duration`}
                           type="number"
+                          hasIcon={false}
                           value={block.duration_per_question}
                           onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
                           min="30"
                           max="600"
                           placeholder="e.g. 120"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
+                          disabled={currentAssessment.is_executed || isProcessing}
+                          required
                         />
                       </div>
 
                       {/* Positive Marks */}
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
-                        <input
+                        <Label htmlFor={`edit-block-${index}-pos-marks`}>Positive Marks</Label>
+                        <Input
+                          id={`edit-block-${index}-pos-marks`}
                           type="number"
+                          hasIcon={false}
                           value={block.positive_marks ?? ""}
                           onChange={(e) => handleBlockChange(index, "positive_marks", e.target.value)}
                           step="0.1"
                           placeholder="e.g. 1"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                          disabled={currentAssessment.is_executed}
+                          disabled={currentAssessment.is_executed || isProcessing}
                         />
                       </div>
 
                       {/* Negative Marks */}
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
-                        <input
+                        <Label htmlFor={`edit-block-${index}-neg-marks`}>Negative Marks</Label>
+                        <Input
+                          id={`edit-block-${index}-neg-marks`}
                           type="text"
                           inputMode="decimal"
+                          hasIcon={false}
                           value={block.negative_marks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
                           onBlur={() => handleNegativeMarksBlur(index)}
@@ -716,7 +720,6 @@ function EditAssessment() {
                             }
                           }}
                           placeholder="e.g. -0.25"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
                           disabled={currentAssessment.is_executed || isProcessing}
                         />
                         <span className="text-[11px] text-muted-foreground mt-1 block">
@@ -727,16 +730,18 @@ function EditAssessment() {
                       {/* Number of Options (MCQ only) */}
                       {block.question_type === "multiple_choice" && (
                         <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Number of Options</label>
-                          <input
+                          <Label htmlFor={`edit-block-${index}-options`}>Number of Options</Label>
+                          <Input
+                            id={`edit-block-${index}-options`}
                             type="number"
+                            hasIcon={false}
                             value={block.num_options}
                             onChange={(e) => handleBlockChange(index, "num_options", e.target.value)}
                             min="2"
                             max="6"
                             placeholder="2 to 6"
-                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                            disabled={currentAssessment.is_executed}
+                            disabled={currentAssessment.is_executed || isProcessing}
+                            required
                           />
                         </div>
                       )}
@@ -763,7 +768,7 @@ function EditAssessment() {
             <button
               type="button"
               onClick={() => router.push("/instructor/assessments")}
-              className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1", "disabled:opacity-50", "disabled:cursor-not-allowed")}
+              className={cn(btn.secondary, "order-2 sm:order-1")}
               disabled={isProcessing}
             >
               Cancel

@@ -9,6 +9,7 @@ export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as LoadingState } from "./LoadingState";
 export { default as Modal } from "./Modal";
 export { default as PageLoader } from "./PageLoader";
+export { default as PasswordInput } from "./PasswordInput";
 export { default as SearchField } from "./SearchField";
 export { default as Select } from "./Select";
 export { default as StatusBadge } from "./StatusBadge";

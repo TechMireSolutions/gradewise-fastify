@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import Modal from "@/components/ui/Modal";
+import { Input, Label, Select, Textarea, LoadingSpinner, Modal } from "@/components/ui";
 import { createAssessmentSchema } from "@/schemas/assessmentSchemas.js";
-import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft, FiChevronDown } from "react-icons/fi";
+import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useModal from "@/hooks/useModal.js";
 
@@ -269,34 +268,35 @@ function CreateAssessment() {
               <div className="space-y-6">
                 {/* Title Input */}
                 <div>
-                  <label htmlFor="title" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                  <Label htmlFor="title">
                     Assessment Title <span className="text-red-400">*</span>
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     type="text"
                     name="title"
                     id="title"
+                    hasIcon={false}
                     value={formData.title}
                     onChange={handleInputChange}
-                    className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                     placeholder="e.g., Data Structures Final Exam"
                     required
+                    disabled={isProcessing}
                   />
                 </div>
 
                 {/* Prompt Textarea */}
                 <div>
-                  <label htmlFor="prompt" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
+                  <Label htmlFor="prompt">
                     Prompt <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using resources or links)</span>
-                  </label>
-                  <textarea
+                  </Label>
+                  <Textarea
                     name="prompt"
                     id="prompt"
                     value={formData.prompt}
                     onChange={handleInputChange}
                     rows={5}
-                    className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "resize-none")}
                     placeholder="Provide a detailed prompt for question generation. Describe the topics, difficulty level, and any specific requirements..."
+                    disabled={isProcessing}
                   />
                 </div>
 
@@ -345,22 +345,24 @@ function CreateAssessment() {
                         {formData.externalLinks.map((link, index) => (
                           <div key={index} className="flex items-center gap-2">
                             <div className="relative flex-1">
-                              <FiLink className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm")} />
-                              <input
+                              <FiLink className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
+                              <Input
                                 type="url"
                                 value={link}
+                                hasIcon={true}
                                 onChange={(e) => handleLinkChange(index, e.target.value)}
                                 placeholder="https://example.com/resource"
-                                className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "pl-11", "pr-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                                 disabled={isProcessing}
+                                aria-label={`External link ${index + 1}`}
                               />
                             </div>
                             {formData.externalLinks.length > 1 && (
                               <button
                                 type="button"
                                 onClick={() => removeExternalLink(index)}
-                                className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-11 min-h-11 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
                                 disabled={isProcessing}
+                                aria-label={`Remove link ${index + 1}`}
                               >
                                 <FiX className="text-base" />
                               </button>
@@ -371,7 +373,7 @@ function CreateAssessment() {
                       <button
                         type="button"
                         onClick={addExternalLink}
-                        className={cn("mt-4", "inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
+                        className={cn("mt-4", btn.secondary, "inline-flex items-center gap-2")}
                         disabled={isProcessing}
                       >
                         <FiPlus className="text-base" />
@@ -471,70 +473,72 @@ function CreateAssessment() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Type</label>
-                        <div className="relative">
-                          <select
-                            value={block.questionType}
-                            onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
-                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "pr-10", "text-secondary-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "appearance-none", "cursor-pointer")}
-                            disabled={isProcessing}
-                          >
-                            <option value="multiple_choice">Multiple Choice</option>
-                            <option value="short_answer">Short Answer</option>
-                            <option value="true_false">True/False</option>
-                            <option value="fill_in_the_blank">Fill in the Blank</option>
-                          </select>
-                          <FiChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-subtle-foreground" />
-                        </div>
+                        <Label htmlFor={`block-${index}-type`}>Question Type</Label>
+                        <Select
+                          id={`block-${index}-type`}
+                          value={block.questionType}
+                          onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
+                          disabled={isProcessing}
+                        >
+                          <option value="multiple_choice">Multiple Choice</option>
+                          <option value="short_answer">Short Answer</option>
+                          <option value="true_false">True/False</option>
+                          <option value="fill_in_the_blank">Fill in the Blank</option>
+                        </Select>
                       </div>
 
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Question Count</label>
-                        <input
+                        <Label htmlFor={`block-${index}-count`}>Question Count</Label>
+                        <Input
+                          id={`block-${index}-count`}
                           type="number"
+                          hasIcon={false}
                           value={block.questionCount}
                           onChange={(e) => handleBlockChange(index, "questionCount", e.target.value)}
                           min="1"
                           placeholder="e.g. 5"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           required
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Duration (seconds)</label>
-                        <input
+                        <Label htmlFor={`block-${index}-duration`}>Duration (seconds)</Label>
+                        <Input
+                          id={`block-${index}-duration`}
                           type="number"
+                          hasIcon={false}
                           value={block.durationPerQuestion}
                           onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
                           min="30"
                           max="600"
                           placeholder="e.g. 120"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           required
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Positive Marks</label>
-                        <input
+                        <Label htmlFor={`block-${index}-pos-marks`}>Positive Marks</Label>
+                        <Input
+                          id={`block-${index}-pos-marks`}
                           type="number"
+                          hasIcon={false}
                           value={block.positiveMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
                           step="0.1"
                           placeholder="e.g. 1"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />
                       </div>
 
                       <div>
-                        <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Negative Marks</label>
-                        <input
+                        <Label htmlFor={`block-${index}-neg-marks`}>Negative Marks</Label>
+                        <Input
+                          id={`block-${index}-neg-marks`}
                           type="text"
                           inputMode="decimal"
+                          hasIcon={false}
                           value={block.negativeMarks ?? ""}
                           onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
                           onBlur={() => handleNegativeMarksBlur(index)}
@@ -550,7 +554,6 @@ function CreateAssessment() {
                             }
                           }}
                           placeholder="e.g. -0.25"
-                          className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                           disabled={isProcessing}
                         />
                         <span className="text-[11px] text-muted-foreground mt-1 block">
@@ -560,15 +563,16 @@ function CreateAssessment() {
 
                       {block.questionType === "multiple_choice" && (
                         <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>Number of Options</label>
-                          <input
+                          <Label htmlFor={`block-${index}-options`}>Number of Options</Label>
+                          <Input
+                            id={`block-${index}-options`}
                             type="number"
+                            hasIcon={false}
                             value={block.numOptions}
                             onChange={(e) => handleBlockChange(index, "numOptions", e.target.value)}
                             min="2"
                             max="6"
                             placeholder="2 to 6"
-                            className={cn("w-full", "bg-input", "backdrop-blur-sm", "border", "border-border", "hover:border-accent/40", "focus:border-indigo-500", "rounded-xl", "px-4", "py-3", "text-secondary-foreground", "placeholder:text-subtle-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30")}
                             required
                             disabled={isProcessing}
                           />

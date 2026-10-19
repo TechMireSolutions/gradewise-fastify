@@ -1,14 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card, pageTitle, pageDesc } from "@/lib/ui.js";
+import { card, pageTitle, pageDesc, tableHead, tableRowHover } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import useAssessmentsStore from "@/features/assessments/store.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { SearchField, EmptyState, LoadingSpinner, Button } from "@/components/ui";
 import {
   FaPlus,
-  FaSearch,
   FaChartBar,
   FaUserPlus,
   FaEdit,
@@ -87,7 +86,7 @@ export default function AssessmentList() {
           className={cn(
             "inline-flex items-center justify-center gap-2 px-5 py-2.5",
             "bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold",
-            "rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all text-sm"
+            "rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all text-sm min-h-11 cursor-pointer"
           )}
         >
           <FaPlus /> Create Assessment
@@ -96,31 +95,33 @@ export default function AssessmentList() {
 
       <div className={cn("mb-6", card, "shadow-xl", "p-5")}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:w-80">
-            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground text-xs" />
-            <input
-              type="text"
-              placeholder="Search assessments..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-input border border-border rounded-xl pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-indigo-500"
-            />
-          </div>
+          <SearchField
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search assessments..."
+            className="w-full sm:w-80"
+          />
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <button
+              type="button"
               onClick={() => setViewMode("table")}
+              aria-label="Table view"
+              aria-pressed={viewMode === "table"}
               className={cn(
-                "p-2.5 rounded-xl border border-border text-sm transition-colors",
-                viewMode === "table" ? "bg-indigo-500/10 border-indigo-500 text-indigo-400" : "text-muted-foreground hover:bg-input"
+                "min-h-11 min-w-11 inline-flex items-center justify-center rounded-xl border border-border text-sm transition-colors cursor-pointer",
+                viewMode === "table" ? "bg-indigo-500/15 border-indigo-500 text-indigo-400 font-semibold shadow-xs" : "text-muted-foreground hover:bg-input hover:text-foreground"
               )}
             >
               <FaList />
             </button>
             <button
+              type="button"
               onClick={() => setViewMode("grid")}
+              aria-label="Grid view"
+              aria-pressed={viewMode === "grid"}
               className={cn(
-                "p-2.5 rounded-xl border border-border text-sm transition-colors",
-                viewMode === "grid" ? "bg-indigo-500/10 border-indigo-500 text-indigo-400" : "text-muted-foreground hover:bg-input"
+                "min-h-11 min-w-11 inline-flex items-center justify-center rounded-xl border border-border text-sm transition-colors cursor-pointer",
+                viewMode === "grid" ? "bg-indigo-500/15 border-indigo-500 text-indigo-400 font-semibold shadow-xs" : "text-muted-foreground hover:bg-input hover:text-foreground"
               )}
             >
               <FaThLarge />
@@ -130,24 +131,47 @@ export default function AssessmentList() {
       </div>
 
       {filteredAssessments.length === 0 ? (
-        <div className={cn(card, "p-12 text-center text-muted-foreground")}>
-          No assessments found.
-        </div>
+        <EmptyState
+          title="No Assessments Found"
+          description={
+            searchTerm
+              ? "No assessments match your search criteria. Try a different query."
+              : "You haven't created any assessments yet. Click 'Create Assessment' to get started."
+          }
+          action={
+            searchTerm ? (
+              <Button variant="secondary" size="sm" onClick={() => setSearchTerm("")}>
+                Clear Search
+              </Button>
+            ) : (
+              <Link
+                href="/instructor/assessments/create"
+                className={cn(
+                  "inline-flex items-center justify-center gap-2 px-4 py-2",
+                  "bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold",
+                  "rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all text-sm min-h-11"
+                )}
+              >
+                <FaPlus /> Create Assessment
+              </Link>
+            )
+          }
+        />
       ) : viewMode === "table" ? (
         <div className={cn(card, "overflow-hidden shadow-xl")}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-input/50">
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Title</th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Created</th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Status</th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border pr-8">Actions</th>
+                <tr className={tableHead}>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Title</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Created</th>
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider pr-8">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filteredAssessments.map((assessment) => (
-                  <tr key={assessment.id} className="hover:bg-indigo-500/5 transition-colors">
+                  <tr key={assessment.id} className={tableRowHover}>
                     <td className="px-6 py-4 text-sm font-semibold text-foreground">
                       {assessment.title}
                     </td>

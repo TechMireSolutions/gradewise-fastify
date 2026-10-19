@@ -9,6 +9,8 @@ import {
   FaStar,
   FaCalculator,
 } from "react-icons/fa";
+import { cn } from "@/lib/cn.js";
+import { Label } from "@/components/ui";
 import { getTranslation } from "@/utils/translations.js";
 
 const DURATION_PRESETS = [
@@ -51,60 +53,63 @@ const PaperFormFields = ({
     <div className="space-y-4 sm:space-y-5">
       {/* Institute Name */}
       <div className="group">
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+        <Label htmlFor="instituteName">
           {t("instituteName")}
-        </label>
-        <div className="flex items-center gap-3 sm:gap-4 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-indigo-500 focus-within:shadow-lg focus-within:shadow-indigo-500/10 transition-all duration-200 h-[54px] sm:h-[60px]">
-          <div className="bg-indigo-600 text-white p-2 rounded-lg flex-shrink-0">
-            <FaUniversity className="text-lg" />
+        </Label>
+        <div className="flex items-center gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
+          <div className="bg-gradient-to-br from-indigo-500 to-violet-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <FaUniversity className="text-base" />
           </div>
           <input
+            id="instituteName"
             type="text"
             name="instituteName"
             placeholder={t("instituteNamePlaceholder")}
             value={form.instituteName || ""}
             onChange={onChange}
-            className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-slate-400 dark:placeholder-slate-500 font-medium text-slate-800 dark:text-slate-100"
+            className="w-full bg-transparent outline-none text-sm sm:text-base placeholder:text-subtle-foreground font-medium text-foreground"
           />
         </div>
       </div>
 
       {/* Teacher Name */}
       <div className="group">
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+        <Label htmlFor="teacherName">
           {t("teacherName")}
-        </label>
-        <div className="flex items-center gap-3 sm:gap-4 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-emerald-500 focus-within:shadow-lg focus-within:shadow-emerald-500/10 transition-all duration-200 h-[54px] sm:h-[60px]">
-          <div className="bg-emerald-600 text-white p-2 rounded-lg flex-shrink-0">
-            <FaChalkboardTeacher className="text-lg" />
+        </Label>
+        <div className="flex items-center gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <FaChalkboardTeacher className="text-base" />
           </div>
           <input
+            id="teacherName"
             type="text"
             name="teacherName"
             placeholder={t("teacherNamePlaceholder")}
             value={form.teacherName || ""}
             onChange={onChange}
-            className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-slate-400 dark:placeholder-slate-500 font-medium text-slate-800 dark:text-slate-100"
+            className="w-full bg-transparent outline-none text-sm sm:text-base placeholder:text-subtle-foreground font-medium text-foreground"
           />
         </div>
       </div>
 
       {/* Subject Name */}
       <div className="group">
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+        <Label htmlFor="subjectName">
           {t("subjectName")}
-        </label>
-        <div className="flex items-center gap-3 sm:gap-4 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-purple-500 focus-within:shadow-lg focus-within:shadow-purple-500/10 transition-all duration-200 h-[54px] sm:h-[60px]">
-          <div className="bg-purple-600 text-white p-2 rounded-lg flex-shrink-0">
-            <FaBook className="text-lg" />
+        </Label>
+        <div className="flex items-center gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
+          <div className="bg-gradient-to-br from-purple-500 to-violet-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <FaBook className="text-base" />
           </div>
           <input
+            id="subjectName"
             type="text"
             name="subjectName"
             placeholder={t("subjectNamePlaceholder")}
             value={form.subjectName || ""}
             onChange={onChange}
-            className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-slate-400 dark:placeholder-slate-500 font-medium text-slate-800 dark:text-slate-100"
+            className="w-full bg-transparent outline-none text-sm sm:text-base placeholder:text-subtle-foreground font-medium text-foreground"
           />
         </div>
       </div>
@@ -112,11 +117,11 @@ const PaperFormFields = ({
       {/* Date and Time with Presets */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <div className="group">
-          <label htmlFor="paperDate" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+          <Label htmlFor="paperDate">
             {t("paperDate")}
-          </label>
-          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-orange-500 focus-within:shadow-lg focus-within:shadow-orange-500/10 transition-all duration-200 h-[54px] sm:h-[60px]" dir="ltr">
-            <div className="bg-orange-600 text-white p-2 rounded-lg flex-shrink-0">
+          </Label>
+          <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/25 transition-all duration-200 h-[54px] sm:h-[60px]" dir="ltr">
+            <div className="bg-gradient-to-br from-orange-500 to-amber-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
               <FaCalendarAlt className="text-base" />
             </div>
             <input
@@ -125,20 +130,20 @@ const PaperFormFields = ({
               name="paperDate"
               value={form.paperDate || ""}
               onChange={onChange}
-              className="w-full bg-transparent outline-none text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 focus:outline-none [color-scheme:light] dark:[color-scheme:dark]"
+              className="w-full bg-transparent outline-none text-sm sm:text-base font-medium text-foreground focus:outline-none [color-scheme:light] dark:[color-scheme:dark]"
             />
           </div>
         </div>
 
         <div className="group">
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="paperTime" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <div className="flex items-center justify-between mb-1.5">
+            <Label htmlFor="paperTime" className="mb-0">
               {t("paperTime")}
-            </label>
-            <span className="text-xs text-slate-400">{t("quickSlots") || "Slots below"}</span>
+            </Label>
+            <span className="text-xs text-muted-foreground">{t("quickSlots") || "Slots below"}</span>
           </div>
-          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-red-500 focus-within:shadow-lg focus-within:shadow-red-500/10 transition-all duration-200 h-[54px] sm:h-[60px]" dir="ltr">
-            <div className="bg-red-600 text-white p-2 rounded-lg flex-shrink-0">
+          <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-500/25 transition-all duration-200 h-[54px] sm:h-[60px]" dir="ltr">
+            <div className="bg-gradient-to-br from-rose-500 to-red-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
               <FaClock className="text-base" />
             </div>
             <input
@@ -147,7 +152,7 @@ const PaperFormFields = ({
               name="paperTime"
               value={form.paperTime || "10:00"}
               onChange={onChange}
-              className="w-full bg-transparent outline-none text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 focus:outline-none [color-scheme:light] dark:[color-scheme:dark]"
+              className="w-full bg-transparent outline-none text-sm sm:text-base font-medium text-foreground focus:outline-none [color-scheme:light] dark:[color-scheme:dark]"
             />
           </div>
           {/* Quick Time Slots */}
@@ -161,11 +166,12 @@ const PaperFormFields = ({
                   key={val}
                   type="button"
                   onClick={() => updateField("paperTime", val)}
-                  className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer text-center font-medium ${
+                  className={cn(
+                    "text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer text-center font-medium min-h-8 inline-flex items-center justify-center",
                     isSelected
-                      ? "bg-red-600 text-white border-red-600 font-bold shadow-sm shadow-red-500/30"
-                      : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-red-400 hover:text-red-600 dark:hover:text-red-400"
-                  }`}
+                      ? "bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500 font-semibold shadow-sm shadow-rose-500/20"
+                      : "bg-btn-secondary border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
+                  )}
                 >
                   {label}
                 </button>
@@ -179,10 +185,10 @@ const PaperFormFields = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         {/* Responsive Duration Picker */}
         <div className="group">
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="paperDuration" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <div className="flex items-center justify-between mb-1.5">
+            <Label htmlFor="paperDuration" className="mb-0">
               {t("paperDuration") || "Paper Duration"}
-            </label>
+            </Label>
             {calculatedDuration ? (
               <button
                 type="button"
@@ -194,11 +200,11 @@ const PaperFormFields = ({
                 Auto: {calculatedDuration}
               </button>
             ) : (
-              <span className="text-xs text-slate-400">{t("quickSelect") || "Quick select"}</span>
+              <span className="text-xs text-muted-foreground">{t("quickSelect") || "Quick select"}</span>
             )}
           </div>
-          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-teal-500 focus-within:shadow-lg focus-within:shadow-teal-500/10 transition-all duration-200 h-[54px] sm:h-[60px]">
-            <div className="bg-teal-600 text-white p-2 rounded-lg flex-shrink-0">
+          <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
+            <div className="bg-gradient-to-br from-teal-500 to-emerald-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
               <FaHourglass className="text-base" />
             </div>
             <input
@@ -208,7 +214,7 @@ const PaperFormFields = ({
               placeholder="e.g. 1 Hour 30 Mins"
               value={form.paperDuration || ""}
               onChange={onChange}
-              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-slate-400 dark:placeholder-slate-500 font-medium text-slate-800 dark:text-slate-100"
+              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder:text-subtle-foreground font-medium text-foreground"
             />
           </div>
           {/* Duration Preset Chips */}
@@ -218,11 +224,12 @@ const PaperFormFields = ({
                 key={preset}
                 type="button"
                 onClick={() => updateField("paperDuration", preset)}
-                className={`text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer text-center font-medium ${
+                className={cn(
+                  "text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer text-center font-medium min-h-8 inline-flex items-center justify-center",
                   form.paperDuration === preset
-                    ? "bg-teal-600 text-white border-teal-600 font-bold shadow-sm shadow-teal-500/30"
-                    : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-400"
-                }`}
+                    ? "bg-gradient-to-r from-teal-500 to-emerald-600 text-white border-teal-500 font-semibold shadow-sm shadow-teal-500/20"
+                    : "bg-btn-secondary border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
+                )}
               >
                 {preset}
               </button>
@@ -232,10 +239,10 @@ const PaperFormFields = ({
 
         {/* Total Marks Input with Auto-Calculation Fallback */}
         <div className="group">
-          <div className="flex items-center justify-between mb-2">
-            <label htmlFor="totalMarks" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+          <div className="flex items-center justify-between mb-1.5">
+            <Label htmlFor="totalMarks" className="mb-0">
               {t("totalMarks") || "Total Marks"}
-            </label>
+            </Label>
             {calculatedMarks !== undefined && calculatedMarks > 0 && (
               <button
                 type="button"
@@ -248,8 +255,8 @@ const PaperFormFields = ({
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-violet-500 focus-within:shadow-lg focus-within:shadow-violet-500/10 transition-all duration-200 h-[54px] sm:h-[60px]">
-            <div className="bg-violet-600 text-white p-2 rounded-lg flex-shrink-0">
+          <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
+            <div className="bg-gradient-to-br from-violet-500 to-purple-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
               <FaStar className="text-base" />
             </div>
             <input
@@ -261,10 +268,10 @@ const PaperFormFields = ({
               step="any"
               value={form.totalMarks ?? ""}
               onChange={onChange}
-              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder-slate-400 dark:placeholder-slate-500 font-medium text-slate-800 dark:text-slate-100"
+              className="w-full bg-transparent outline-none text-sm sm:text-base placeholder:text-subtle-foreground font-medium text-foreground"
             />
           </div>
-          <p className="text-[11px] text-slate-400 mt-1.5">
+          <p className="text-[11px] text-muted-foreground mt-1.5">
             Enter total marks or use the auto-calculated score derived from questions.
           </p>
         </div>
@@ -272,20 +279,21 @@ const PaperFormFields = ({
 
       {/* Notes */}
       <div className="group">
-        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+        <Label htmlFor="notes">
           {t("notes")}
-        </label>
-        <div className="flex items-start gap-3 sm:gap-4 bg-slate-50 dark:bg-slate-950/40 p-3 rounded-xl border-2 border-slate-200 dark:border-slate-800 focus-within:border-yellow-500 focus-within:shadow-lg focus-within:shadow-yellow-500/10 transition-all duration-200">
-          <div className="bg-yellow-600 text-white p-2 rounded-lg mt-1 flex-shrink-0">
+        </Label>
+        <div className="flex items-start gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/25 transition-all duration-200">
+          <div className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-2.5 rounded-lg mt-1 flex-shrink-0 shadow-sm">
             <FaStickyNote className="text-base" />
           </div>
           <textarea
+            id="notes"
             name="notes"
             rows={3}
             value={form.notes || ""}
             onChange={onChange}
             placeholder={t("notesPlaceholder")}
-            className="w-full bg-transparent outline-none text-sm sm:text-base resize-none placeholder-slate-400 dark:placeholder-slate-500 font-medium text-slate-800 dark:text-slate-100"
+            className="w-full bg-transparent outline-none text-sm sm:text-base resize-none placeholder:text-subtle-foreground font-medium text-foreground"
           />
         </div>
       </div>

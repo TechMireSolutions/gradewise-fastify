@@ -1,14 +1,15 @@
 "use client";
 import { cn } from "@/lib/cn.js";
-
-import { card, page } from "@/lib/ui.js";
+import { card, page, pageTitle, pageDesc, statSurface, btn } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import EmptyState from "@/components/ui/EmptyState";
 import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import apiClient from "@/lib/apiClient.js";
 import Modal from "@/components/ui/Modal.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useModal from "@/hooks/useModal.js";
+import { FaGraduationCap } from "react-icons/fa";
 
 const StudentAnalytics = () => {
   const {
@@ -97,26 +98,36 @@ const StudentAnalytics = () => {
       <div className="relative w-full mx-auto px-4 py-8">
         <div className="mb-8">
           <div className={cn(card, "p-6 text-center shadow-2xl")}>
-            <h1 className="text-3xl font-bold text-foreground mb-2">My Analytics</h1>
-            <p className="text-muted-foreground text-sm">Review performance and track progress</p>
+            <h1 className={pageTitle}>My Analytics</h1>
+            <p className={cn(pageDesc, "mx-auto text-center mt-1")}>Review performance and track progress</p>
           </div>
         </div>
 
         <div className="space-y-4 max-w-5xl mx-auto">
           {Array.isArray(assessments) && assessments.length > 0 ? (
             assessments.map((a) => (
-              <div key={a.attemptId || a.id} className={cn("bg-card/60 backdrop-blur-sm border p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4", selectedAssessment === (a.attemptId || a.id) ? "border-indigo-500" : "border-border")}>
+              <div key={a.attemptId || a.id} className={cn("bg-card/60 backdrop-blur-sm border p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4", selectedAssessment === (a.attemptId || a.id) ? "border-indigo-500 shadow-md shadow-indigo-500/10" : "border-border")}>
                 <div>
                   <h3 className="text-lg font-bold text-foreground">{a.title || "Assessment"}</h3>
                   <p className="text-xs text-muted-foreground mt-1">Status: Completed</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => handleSeeResults(a.attemptId, a.id)} className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-xs font-semibold">Results</button>
+                  <button
+                    type="button"
+                    onClick={() => handleSeeResults(a.attemptId, a.id)}
+                    className={cn(btn.primary, "px-4 py-2 min-h-11 text-xs cursor-pointer")}
+                  >
+                    Results
+                  </button>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center py-20 text-muted-foreground">No assessments completed yet</div>
+            <EmptyState
+              icon={FaGraduationCap}
+              title="No Completed Assessments"
+              description="You have not completed any assessments yet. Visit your student dashboard to start an assigned assessment."
+            />
           )}
         </div>
 
@@ -129,15 +140,15 @@ const StudentAnalytics = () => {
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                  <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl p-6">
+                  <div className={statSurface.emerald}>
                     <p className="text-3xl font-bold text-foreground">{resScore}%</p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Score</p>
                   </div>
-                  <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 rounded-xl p-6">
+                  <div className={statSurface.indigo}>
                     <p className="text-3xl font-bold text-foreground">{formatTime(resTime)}</p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Time Taken</p>
                   </div>
-                  <div className="bg-gradient-to-br from-sky-500/20 to-blue-500/20 border border-sky-500/30 rounded-xl p-6">
+                  <div className={statSurface.amber}>
                     <p className="text-3xl font-bold text-foreground">{resCorrect} / {resTotal}</p>
                     <p className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Correct</p>
                   </div>
@@ -145,7 +156,13 @@ const StudentAnalytics = () => {
               </div>
             </div>
             <div className="text-center">
-              <button onClick={() => downloadReport(selectedAssessment, liveDetails)} className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold rounded-xl text-sm">Download Full Report (PDF)</button>
+              <button
+                type="button"
+                onClick={() => downloadReport(selectedAssessment, liveDetails)}
+                className={cn(btn.primary, "px-6 py-3 min-h-11 text-sm font-semibold cursor-pointer")}
+              >
+                Download Full Report (PDF)
+              </button>
             </div>
           </div>
         )}

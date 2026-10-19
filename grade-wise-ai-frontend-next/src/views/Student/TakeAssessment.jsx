@@ -1,10 +1,10 @@
 "use client";
 import { cn } from "@/lib/cn.js";
-import { btn, card, chip, examBar, focusRing, input, panel, select, textarea } from "@/lib/ui.js";
+import { card, chip, examBar, focusRing, panel } from "@/lib/ui.js";
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { Input, Label, Select, Textarea, Button, LoadingSpinner } from "@/components/ui";
 import toast from "react-hot-toast";
 import useModal from "@/hooks/useModal.js";
 
@@ -161,19 +161,29 @@ function TakeAssessment() {
           <div className={cn("w-full", "max-w-2xl", card, "shadow-2xl", "p-6 sm:p-8 space-y-6")}>
             <div className="text-center">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Welcome to Your Assessment</h1>
+              <p className="text-muted-foreground text-sm mt-1">Select your preferred exam language to begin.</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-muted-foreground block mb-2">Select Language</label>
-              <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className={cn(select, focusRing)}>
-                <option value="en">English</option>
-                <option value="ur">Urdu</option>
-                <option value="ar">Arabic</option>
-                <option value="fa">Persian</option>
-              </select>
+              <Label htmlFor="exam-language">Select Language</Label>
+              <Select
+                id="exam-language"
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+              >
+                <option value="en">English (LTR)</option>
+                <option value="ur">Urdu - اردو (RTL)</option>
+                <option value="ar">Arabic - العربية (RTL)</option>
+                <option value="fa">Persian - فارسی (RTL)</option>
+              </Select>
             </div>
-            <button type="button" onClick={handleStart} className={cn(btn.primary, "w-full py-3.5")}>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleStart}
+              className="w-full"
+            >
               Start Assessment
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -186,8 +196,12 @@ function TakeAssessment() {
                 <span className="font-semibold text-xs text-foreground uppercase tracking-wider">Assessment Session</span>
               </div>
               <div className="flex gap-2 text-xs font-semibold">
-                <span className="bg-amber-500/15 text-amber-400 px-3 py-1 rounded-full">Q Time: {formatTime(questionTimeLeft)}</span>
-                <span className={cn(chip, "rounded-full px-3")}>Total: {formatTime(timeRemaining)}</span>
+                <span role="timer" aria-live="polite" className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-full inline-flex items-center">
+                  Q Time: {formatTime(questionTimeLeft)}
+                </span>
+                <span role="timer" aria-live="polite" className={cn(chip, "rounded-full px-3 py-1.5")}>
+                  Total: {formatTime(timeRemaining)}
+                </span>
               </div>
             </div>
           </div>
@@ -196,7 +210,7 @@ function TakeAssessment() {
             <div className="w-full max-w-4xl space-y-6">
               <div className={cn(card, "p-6 sm:p-8 space-y-6 shadow-2xl")}>
                 <div className={cn(panel, "text-center py-6")}>
-                  <p className="text-xl font-semibold text-foreground">{rawText || "No Question Text Found"}</p>
+                  <p className="text-xl font-semibold text-foreground leading-relaxed">{rawText || "No Question Text Found"}</p>
                 </div>
 
                 {/* Multiple Choice Render */}
@@ -207,10 +221,11 @@ function TakeAssessment() {
                         key={i}
                         type="button"
                         onClick={() => handleAnswer(currentQuestion.id, opt)}
-                        className={cn(optionBase, currentQuestion.answer === opt ? optionSelected : optionIdle)}
+                        className={cn(optionBase, currentQuestion.answer === opt ? optionSelected : optionIdle, focusRing)}
+                        aria-pressed={currentQuestion.answer === opt}
                       >
-                        <span className="font-bold mr-2 text-indigo-400">{String.fromCharCode(65 + i)}.</span>
-                        {opt}
+                        <span className="font-bold mr-2 text-indigo-500 dark:text-indigo-400">{String.fromCharCode(65 + i)}.</span>
+                        <span>{opt}</span>
                       </button>
                     ))}
                   </div>
@@ -227,9 +242,11 @@ function TakeAssessment() {
                         className={cn(
                           "py-6 text-xl font-bold rounded-xl border transition-all text-center",
                           currentQuestion.answer === val
-                            ? "bg-indigo-500/25 border-indigo-500 text-indigo-400"
-                            : "bg-input border-border text-foreground"
+                            ? "bg-indigo-500/20 border-indigo-500 text-indigo-700 dark:text-indigo-300 shadow-md shadow-indigo-500/15"
+                            : "bg-input border-border text-foreground hover:bg-surface-elevated",
+                          focusRing
                         )}
+                        aria-pressed={currentQuestion.answer === val}
                       >
                         {val ? "True" : "False"}
                       </button>
@@ -239,24 +256,31 @@ function TakeAssessment() {
 
                 {/* Short Answer Render */}
                 {(rawType === "short_answer" || rawType === "short-answer") && (
-                  <textarea
-                    value={currentQuestion.answer || ""}
-                    onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
-                    placeholder="Type your answer here..."
-                    rows={6}
-                    className={cn(textarea, focusRing)}
-                  />
+                  <div>
+                    <Label htmlFor="short-answer-input">Your Answer</Label>
+                    <Textarea
+                      id="short-answer-input"
+                      value={currentQuestion.answer || ""}
+                      onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
+                      placeholder="Type your answer here..."
+                      rows={6}
+                    />
+                  </div>
                 )}
 
                 {/* Fill in the Blank Render */}
                 {(rawType === "fill_in_the_blank" || rawType === "fill-in-the-blank" || rawType === "fill_in_blank") && (
-                  <input
-                    type="text"
-                    value={currentQuestion.answer || ""}
-                    onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
-                    placeholder="Type the missing word/phrase here..."
-                    className={cn(input, focusRing)}
-                  />
+                  <div>
+                    <Label htmlFor="fill-blank-input">Missing Word / Phrase</Label>
+                    <Input
+                      id="fill-blank-input"
+                      type="text"
+                      hasIcon={false}
+                      value={currentQuestion.answer || ""}
+                      onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
+                      placeholder="Type the missing word or phrase here..."
+                    />
+                  </div>
                 )}
 
                 {/* Matching Render */}
@@ -298,16 +322,18 @@ function TakeAssessment() {
                         return (
                           <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-input rounded-xl border border-border">
                             <span className="font-semibold text-secondary-foreground flex-1 break-words">{left}</span>
-                            <select
-                              value={pair ? pair[1] : ""}
-                              onChange={(e) => handleMatchChange(left, e.target.value)}
-                              className={cn(select, focusRing, "sm:w-72")}
-                            >
-                              <option value="">Select match...</option>
-                              {rightItems.map((r, ri) => (
-                                <option key={ri} value={r}>{r}</option>
-                              ))}
-                            </select>
+                            <div className="sm:w-72">
+                              <Select
+                                value={pair ? pair[1] : ""}
+                                onChange={(e) => handleMatchChange(left, e.target.value)}
+                                aria-label={`Match for ${left}`}
+                              >
+                                <option value="">Select match...</option>
+                                {rightItems.map((r, ri) => (
+                                  <option key={ri} value={r}>{r}</option>
+                                ))}
+                              </Select>
+                            </div>
                           </div>
                         );
                       })}
@@ -316,18 +342,32 @@ function TakeAssessment() {
                 })()}
               </div>
 
-              <div className="flex justify-between items-center">
-                <button type="button" onClick={goPrevious} disabled={currentQuestionIndex === 0} className={cn(chip, "px-4 py-2.5")}>
+              <div className="flex justify-between items-center gap-3">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={goPrevious}
+                  disabled={currentQuestionIndex === 0}
+                >
                   Previous
-                </button>
+                </Button>
                 {currentQuestionIndex === assessmentQuestions.length - 1 ? (
-                  <button type="button" onClick={handleSubmit} disabled={isSubmitting} className={cn(btn.success)}>
+                  <Button
+                    type="button"
+                    variant="success"
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? "Submitting..." : "Submit Exam"}
-                  </button>
+                  </Button>
                 ) : (
-                  <button type="button" onClick={goNext} className={cn(btn.primary)}>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={goNext}
+                  >
                     Next Question
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

@@ -1,13 +1,30 @@
+"use client";
+
 import { cn } from "@/lib/cn.js";
-import { btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
+import { card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useAuthStore from "@/features/auth/store.js";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import Modal from "@/components/ui/Modal";
+import {
+  Button,
+  Input,
+  Label,
+  LoadingSpinner,
+  Modal,
+  PasswordInput,
+} from "@/components/ui/index.js";
+import { PasswordRequirements } from "@/components/auth/index.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
-import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaArrowLeft, FaUserGraduate, FaUserShield } from "react-icons/fa";
+import {
+  FaUser,
+  FaEnvelope,
+  FaUserPlus,
+  FaArrowLeft,
+  FaUserGraduate,
+  FaExclamationTriangle,
+  FaCheckCircle,
+} from "react-icons/fa";
 import {
   registerStudentSchema,
   enrollStudentSchema,
@@ -15,8 +32,7 @@ import {
 import useModal from "@/hooks/useModal.js";
 import { parseZodFieldErrors } from "@/utils/parseZodFieldErrors.js";
 
-
-function AddUser({ assessmentId, onStudentAdded, compact = false }) {
+function AddStudent({ assessmentId, onStudentAdded, compact = false }) {
   const router = useRouter();
   const { enrollStudent, loading: enrollLoading } = useAssessmentStore();
   const { registerStudent, user: currentUser } = useAuthStore();
@@ -27,14 +43,17 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "student",
   });
-
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { modal, showModal: openModal, closeModal } = useModal();
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const showModal = (type, title, message, redirect = false) => {
@@ -43,9 +62,9 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
     if (type === "success" && redirect) {
       setTimeout(() => {
         closeModal();
-        if (currentUser?.role === 'super_admin') {
+        if (currentUser?.role === "super_admin") {
           router.push("/super-admin/dashboard");
-        } else if (currentUser?.role === 'admin') {
+        } else if (currentUser?.role === "admin") {
           router.push("/admin/dashboard");
         } else {
           router.push("/instructor/dashboard");
@@ -60,21 +79,27 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "student",
     });
+    setErrors({});
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setErrors({});
+
     try {
       registerStudentSchema.parse(formData);
     } catch (err) {
       const fieldErrors = parseZodFieldErrors(err);
-      showModal(
-        "error",
-        "Invalid Input",
-        fieldErrors ? Object.values(fieldErrors)[0] : "Invalid form data"
-      );
+      if (fieldErrors) {
+        setErrors(fieldErrors);
+        const firstKey = Object.keys(fieldErrors)[0];
+        if (firstKey) {
+          document.getElementById(`student-${firstKey}`)?.focus();
+        }
+        return;
+      }
+      showModal("error", "Invalid Input", err.message || "Invalid form data");
       return;
     }
 
@@ -84,20 +109,21 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
         name: formData.name.trim(),
         email: formData.email.trim(),
         password: formData.password,
-        role: formData.role,
       });
 
       if (assessmentId) {
         await enrollStudent(assessmentId, formData.email.trim());
         onStudentAdded?.();
         resetForm();
-        showModal("success", "Success", "User registered and enrolled successfully!");
+        showModal("success", "Success", "Student registered and enrolled successfully!");
       } else {
         resetForm();
-        showModal("success", "Success", "User registered successfully!", true);
+        showModal("success", "Success", "Student registered successfully!", true);
       }
     } catch (err) {
-      showModal("error", "Error", err.message || "Registration failed");
+      const errorMessage =
+        err.response?.data?.message || err.message || "Registration failed. Please try again.";
+      showModal("error", "Registration Failed", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -105,129 +131,177 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
 
   const handleEnroll = async (e) => {
     e.preventDefault();
+    setErrors({});
+
     try {
       enrollStudentSchema.parse({ email: formData.email });
     } catch (err) {
       const fieldErrors = parseZodFieldErrors(err);
-      showModal(
-        "error",
-        "Invalid Input",
-        fieldErrors ? Object.values(fieldErrors)[0] : "Invalid email"
-      );
+      if (fieldErrors?.email) {
+        setErrors({ email: fieldErrors.email });
+        document.getElementById("enroll-email")?.focus();
+        return;
+      }
+      showModal("error", "Invalid Input", err.message || "Invalid email address");
       return;
     }
 
     try {
       await enrollStudent(assessmentId, formData.email.trim());
-      showModal("success", "Success", "User enrolled successfully!");
+      showModal("success", "Success", "Student enrolled successfully!");
       setFormData((prev) => ({ ...prev, email: "" }));
       onStudentAdded?.();
     } catch (err) {
-      showModal("error", "Error", err.message || "Enrollment failed");
+      const errorMessage =
+        err.response?.data?.message || err.message || "Enrollment failed. Please try again.";
+      showModal("error", "Enrollment Failed", errorMessage);
     }
   };
 
-  const inputClass =
-    "INPUT_ICON_TAIL";
-  const labelClass = "block text-muted-foreground text-sm font-medium mb-1.5";
+  const isPasswordsMatching =
+    formData.confirmPassword && formData.password === formData.confirmPassword;
+  const isPasswordsMismatched =
+    formData.confirmPassword && formData.password !== formData.confirmPassword;
 
   const formContent = mode === "register" ? (
-    <form onSubmit={handleRegister} className={compact ? "space-y-4" : "space-y-5"}>
+    <form onSubmit={handleRegister} className={compact ? "space-y-4" : "space-y-5"} noValidate>
+      {/* Full Name */}
       <div>
-        <label className={labelClass}>Full Name</label>
+        <Label htmlFor="student-name">Full Name</Label>
         <div className="relative">
-          <FaUser className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-          <input
+          <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
+          <Input
+            id="student-name"
             name="name"
+            type="text"
+            autoComplete="name"
             value={formData.name}
             onChange={handleChange}
-            required
-            className={inputClass}
+            error={Boolean(errors.name)}
+            aria-describedby={errors.name ? "student-name-error" : undefined}
             placeholder="John Doe"
+            required
           />
         </div>
+        {errors.name && (
+          <p id="student-name-error" role="alert" className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1.5">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>{errors.name}</span>
+          </p>
+        )}
       </div>
 
+      {/* Email Address */}
       <div>
-        <label className={labelClass}>Email</label>
+        <Label htmlFor="student-email">Email Address</Label>
         <div className="relative">
-          <FaEnvelope className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-          <input
+          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
+          <Input
+            id="student-email"
             name="email"
             type="email"
+            autoComplete="email"
             value={formData.email}
             onChange={handleChange}
+            error={Boolean(errors.email)}
+            aria-describedby={errors.email ? "student-email-error" : undefined}
+            placeholder="student@example.com"
             required
-            className={inputClass}
-            placeholder="user@example.com"
           />
         </div>
+        {errors.email && (
+          <p id="student-email-error" role="alert" className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1.5">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>{errors.email}</span>
+          </p>
+        )}
       </div>
 
-      {!assessmentId && (
-        <div>
-          <label className={labelClass}>User Role</label>
-          <div className="relative">
-            <FaUserShield className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className={`${inputClass} appearance-none cursor-pointer`}
-            >
-              <option value="student" className={cn("bg-slate-800", "text-secondary-foreground")}>Student</option>
-              <option value="instructor" className={cn("bg-slate-800", "text-secondary-foreground")}>Instructor</option>
-              <option value="admin" className={cn("bg-slate-800", "text-secondary-foreground")}>Admin</option>
-            </select>
-          </div>
-        </div>
-      )}
-
+      {/* Password */}
       <div>
-        <label className={labelClass}>Password</label>
-        <div className="relative">
-          <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-          <input
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className={inputClass}
-            placeholder="Min. 6 characters"
-          />
+        <Label htmlFor="student-password">Password</Label>
+        <PasswordInput
+          id="student-password"
+          name="password"
+          autoComplete="new-password"
+          value={formData.password}
+          onChange={handleChange}
+          error={Boolean(errors.password)}
+          aria-describedby={errors.password ? "student-password-error" : "student-password-rules"}
+          placeholder="Min. 8 chars (upper, lower, number)"
+          required
+        />
+        {errors.password && (
+          <p id="student-password-error" role="alert" className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1.5">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>{errors.password}</span>
+          </p>
+        )}
+        <div id="student-password-rules" className="mt-2.5">
+          <PasswordRequirements password={formData.password} />
         </div>
       </div>
 
+      {/* Confirm Password */}
       <div>
-        <label className={labelClass}>Confirm Password</label>
-        <div className="relative">
-          <FaLock className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-          <input
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            className={inputClass}
-            placeholder="Confirm password"
-          />
+        <div className="flex items-center justify-between mb-1.5">
+          <Label htmlFor="student-confirmPassword" className="mb-0">
+            Confirm Password
+          </Label>
+          {isPasswordsMatching && (
+            <span className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              <FaCheckCircle className="w-3 h-3" />
+              <span>Passwords match</span>
+            </span>
+          )}
         </div>
+        <PasswordInput
+          id="student-confirmPassword"
+          name="confirmPassword"
+          autoComplete="new-password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          error={Boolean(errors.confirmPassword || isPasswordsMismatched)}
+          aria-describedby={
+            errors.confirmPassword
+              ? "student-confirmPassword-error"
+              : isPasswordsMismatched
+              ? "student-confirmPassword-mismatch"
+              : undefined
+          }
+          placeholder="Re-enter password"
+          required
+        />
+        {errors.confirmPassword && (
+          <p id="student-confirmPassword-error" role="alert" className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1.5">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>{errors.confirmPassword}</span>
+          </p>
+        )}
+        {!errors.confirmPassword && isPasswordsMismatched && (
+          <p id="student-confirmPassword-mismatch" role="alert" className="mt-1.5 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>Passwords do not match yet</span>
+          </p>
+        )}
       </div>
 
+      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className={cn("inline-flex", "items-center", "justify-center", "gap-2", "px-5", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
-        >
-          <FaArrowLeft />
-          Cancel
-        </button>
-        <button
+        {!compact && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => router.back()}
+          >
+            <FaArrowLeft className="shrink-0" />
+            <span>Cancel</span>
+          </Button>
+        )}
+        <Button
           type="submit"
+          variant="primary"
           disabled={isLoading}
-          className={cn(btn.primary, "inline-flex items-center justify-center gap-2 px-5 py-3", "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer")}
         >
           {isLoading ? (
             <>
@@ -236,44 +310,60 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
             </>
           ) : (
             <>
-              <FaUserPlus />
-              <span>Register User</span>
+              <FaUserPlus className="shrink-0" />
+              <span>Register Student</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   ) : (
-    <form onSubmit={handleEnroll} className={compact ? "space-y-4" : "space-y-5"}>
+    <form onSubmit={handleEnroll} className={compact ? "space-y-4" : "space-y-5"} noValidate>
+      {/* Enroll by Email */}
       <div>
-        <label className={labelClass}>User Email</label>
+        <Label htmlFor="enroll-email">Student Email Address</Label>
         <div className="relative">
-          <FaEnvelope className={cn("absolute", "left-4", "top-1/2", "-translate-y-1/2", "text-muted-foreground", "text-sm", "pointer-events-none")} />
-          <input
+          <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
+          <Input
+            id="enroll-email"
             name="email"
             type="email"
+            autoComplete="email"
             value={formData.email}
             onChange={handleChange}
+            error={Boolean(errors.email)}
+            aria-describedby={errors.email ? "enroll-email-error" : undefined}
+            placeholder="student@example.com"
             required
-            className={inputClass}
-            placeholder="user@example.com"
           />
         </div>
+        {errors.email && (
+          <p id="enroll-email-error" role="alert" className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1.5">
+            <FaExclamationTriangle className="shrink-0" />
+            <span>{errors.email}</span>
+          </p>
+        )}
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          Enter the registered email address of the student to enroll them into this assessment.
+        </p>
       </div>
 
+      {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-border">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className={cn("inline-flex", "items-center", "justify-center", "gap-2", "px-5", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
-        >
-          <FaArrowLeft />
-          Cancel
-        </button>
-        <button
+        {!compact && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => router.back()}
+          >
+            <FaArrowLeft className="shrink-0" />
+            <span>Cancel</span>
+          </Button>
+        )}
+        <Button
           type="submit"
+          variant="success"
           disabled={enrollLoading}
-          className={cn(btn.success, "inline-flex items-center justify-center gap-2 px-5 py-3", "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer")}
         >
           {enrollLoading ? (
             <>
@@ -282,11 +372,11 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
             </>
           ) : (
             <>
-              <FaUserGraduate />
-              <span>Enroll User</span>
+              <FaUserGraduate className="shrink-0" />
+              <span>Enroll Student</span>
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -305,12 +395,16 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
                 <FaUserPlus className="text-white text-lg" />
               </div>
               <div>
-                <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>User Management</p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Add New User</h1>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
+                  Student Management
+                </p>
+                <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+                  {mode === "register" ? "Add New Student" : "Enroll Existing Student"}
+                </h1>
               </div>
             </div>
-            <p className={cn("text-muted-foreground", "leading-relaxed")}>
-              Register a new user or enroll an existing one into an assessment.
+            <p className="text-muted-foreground leading-relaxed">
+              Register a new student account or enroll an existing student into an assessment.
             </p>
           </div>
 
@@ -320,26 +414,33 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
             <div className={cardHeader}>
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-foreground">
-                  {mode === "register" ? "Register User" : "Enroll Existing User"}
+                  {mode === "register" ? "Register Student" : "Enroll Existing Student"}
                 </h2>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                  mode === "register"
-                    ? "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20"
-                    : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                }`}>
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border",
+                    mode === "register"
+                      ? "bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border-indigo-500/20"
+                      : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                  )}
+                >
                   {mode === "register" ? (
-                    <><FaUser className="text-xs" /> New User</>
+                    <>
+                      <FaUser className="text-xs" />
+                      <span>New Student</span>
+                    </>
                   ) : (
-                    <><FaUserGraduate className="text-xs" /> Existing User</>
+                    <>
+                      <FaUserGraduate className="text-xs" />
+                      <span>Existing Student</span>
+                    </>
                   )}
                 </span>
               </div>
             </div>
 
             {/* Card body */}
-            <div className="p-6 sm:p-8">
-              {formContent}
-            </div>
+            <div className="p-6 sm:p-8">{formContent}</div>
           </div>
         </div>
 
@@ -355,16 +456,22 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
     );
   }
 
-  // Compact mode
+  // Compact mode (modal embed)
   return (
     <>
       {assessmentId && (
         <div className="mb-4 -mt-2">
           <button
-            onClick={() => setMode((m) => (m === "enroll" ? "register" : "enroll"))}
-            className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
+            type="button"
+            onClick={() => {
+              setErrors({});
+              setMode((m) => (m === "enroll" ? "register" : "enroll"));
+            }}
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer"
           >
-            {mode === "enroll" ? "→ Register new user instead" : "→ Enroll existing instead"}
+            {mode === "enroll"
+              ? "→ Register new student instead"
+              : "→ Enroll existing student instead"}
           </button>
         </div>
       )}
@@ -381,4 +488,4 @@ function AddUser({ assessmentId, onStudentAdded, compact = false }) {
   );
 }
 
-export default AddUser;
+export default AddStudent;
