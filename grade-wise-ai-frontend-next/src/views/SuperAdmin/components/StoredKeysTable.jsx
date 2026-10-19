@@ -46,7 +46,7 @@ export default function StoredKeysTable({
         /* Empty State */
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
           <div className={cn(accentPanel, "w-16 h-16 rounded-2xl flex items-center justify-center mb-5")}>
-            <FaKey className="w-6 h-6 text-indigo-400" />
+            <FaKey className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">No keys stored yet</h3>
           <p className="text-muted-foreground text-sm max-w-xs">
@@ -59,19 +59,19 @@ export default function StoredKeysTable({
           <table className="w-full text-sm">
             <thead className={tableHead}>
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border w-12">
+                <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border w-12">
                   #
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                   Masked Key
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border hidden sm:table-cell">
+                <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border hidden sm:table-cell">
                   Model
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                   Status
                 </th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                <th className="px-6 py-3.5 text-end text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                   Actions
                 </th>
               </tr>
@@ -110,11 +110,11 @@ export default function StoredKeysTable({
                           onClick={() => onTestStoredKey(purpose, provider, k.index)}
                           disabled={status?.state === "testing"}
                           aria-label={`Test key ${k.index + 1}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
                         >
                           {status?.state === "testing" ? (
                             <>
-                              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" /> Testing
+                              <span className="w-2 h-2 rounded-full bg-indigo-500 dark:bg-indigo-400 animate-pulse" /> Testing
                             </>
                           ) : (
                             <>
@@ -127,11 +127,11 @@ export default function StoredKeysTable({
                           onClick={() => onDeleteStoredKey(purpose, provider, k.index, k.snippet)}
                           disabled={delLoading}
                           aria-label={`Delete key ${k.index + 1}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
                         >
                           {delLoading ? (
                             <>
-                              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" /> Deleting
+                              <span className="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400 animate-pulse" /> Deleting
                             </>
                           ) : (
                             <>

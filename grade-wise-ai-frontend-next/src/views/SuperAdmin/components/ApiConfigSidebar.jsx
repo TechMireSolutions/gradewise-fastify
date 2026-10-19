@@ -33,7 +33,7 @@ export default function ApiConfigSidebar({
                   key={id}
                   onClick={() => onSelectPurpose(id)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-200 min-h-[52px] cursor-pointer",
+                    "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-start transition-all duration-200 min-h-[52px] cursor-pointer",
                     isActive
                       ? "bg-gradient-to-r from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 text-white shadow-sm"
                       : "hover:bg-btn-secondary border border-transparent text-muted-foreground hover:text-foreground"
@@ -76,9 +76,9 @@ export default function ApiConfigSidebar({
                   key={p}
                   onClick={() => onSelectProvider(p)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 min-h-[48px] cursor-pointer group",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-start transition-all duration-150 min-h-[48px] cursor-pointer group",
                     isActive
-                      ? `${t.activeSidebar} bg-slate-700/40 border shadow-sm`
+                      ? `${t.activeSidebar} bg-btn-secondary border-border shadow-sm`
                       : "hover:bg-surface-elevated/40 border border-transparent text-muted-foreground hover:text-secondary-foreground"
                   )}
                 >
@@ -86,7 +86,7 @@ export default function ApiConfigSidebar({
                   <span
                     className={cn(
                       "w-2 h-2 rounded-full flex-shrink-0",
-                      count > 0 ? t.dot : "bg-slate-600"
+                      count > 0 ? t.dot : "bg-subtle-foreground/40"
                     )}
                   />
 

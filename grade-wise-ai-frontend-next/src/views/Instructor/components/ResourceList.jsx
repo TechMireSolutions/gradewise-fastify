@@ -41,7 +41,7 @@ function getFileIcon(fileName, fileType) {
   if (["jpg", "jpeg", "png", "webp"].includes(ext) || type.includes("image")) {
     return <FaImage className="text-emerald-500 text-lg shrink-0" aria-hidden="true" />;
   }
-  return <FaFileAlt className="text-indigo-400 text-lg shrink-0" aria-hidden="true" />;
+  return <FaFileAlt className="text-indigo-500 dark:text-indigo-400 text-lg shrink-0" aria-hidden="true" />;
 }
 
 export default function ResourceList({
@@ -74,16 +74,16 @@ export default function ResourceList({
             <table className="min-w-full">
               <thead className={tableHead}>
                 <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Resource Name
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Type
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Uploaded Date
                   </th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-end text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Actions
                   </th>
                 </tr>
@@ -113,7 +113,7 @@ export default function ResourceList({
                         <span>{formatDate(resource.createdAt || resource.created_at)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-right">
+                    <td className="px-6 py-4 text-sm text-end">
                       <button
                         type="button"
                         onClick={() => onOpenDelete(resource)}

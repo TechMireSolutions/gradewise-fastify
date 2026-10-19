@@ -45,7 +45,8 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 |-------|---------|
 | `page` | Full-page gradient shell |
 | `pageInner` | Centered max-width content |
-| `card` / `cardInteractive` / `cardHeader` / `cardGlow` | Glass cards |
+| `card` / `cardHeader` / `cardGlow` | Glass cards & container panels |
+| `cardInteractive` | Clickable cards (**leaf items only** — never on containers or form sections) |
 | `panel` | Inset panels, highlights |
 | `nav` | Sticky navbar |
 | `examBar` | Exam sticky header |
@@ -81,23 +82,28 @@ UI primitive (Button, Input, Card…) → ui.js token → Tailwind utility in JS
 |-------|---------|
 | `iconBadge` / `iconBadgeTeal` | Gradient icon containers |
 
-### Data display
-
 | Token | Use for |
 |-------|---------|
 | `tableHead` / `tableRowHover` | Tables |
 | `statCard` | Metric tiles |
+| `statSurface.indigo` / `emerald` / `amber` | Themed metric summary boxes with border & gradient |
 | `dividerLine` / `dividerLabel` | Section dividers |
 
 ## UI primitives (`src/components/ui/`)
 
 | Component | Wraps |
 |-----------|--------|
-| `Button` | `btn.*` variants (`primary`, `secondary`, `google`, `success`) |
-| `Input` | `input` + `inputError` via `error` prop |
+| `Button` | `btn.*` variants (`primary`, `secondary`, `google`, `success`) + min-h-11 hit target |
+| `Input` | `input` + `inputError` via `error` prop + left icon support |
+| `PasswordInput` | `input` with accessible show/hide toggle (`aria-pressed`, `aria-label`) & IME safety |
+| `Select` | `select` token with integrated `FiChevronDown` chevron, focus ring & error styling |
+| `Textarea` | `textarea` token with error states |
+| `Label` | Accessible form label with required indicator (`*`) |
 | `Card` / `CardHeader` / `CardContent` | `card`, `cardInteractive`, `cardGlow`, `cardHeader` |
 | `StatusBadge` | Semantic status pills |
-| `SearchField` / `EmptyState` / `LoadingState` / `LoadingSpinner` / `PageLoader` / `Modal` | Lists, async UI & overlays |
+| `SearchField` | Standardized search input with icon & sr-only label |
+| `EmptyState` | Standardized empty state with icon, heading, description, and action button |
+| `LoadingState` / `LoadingSpinner` / `PageLoader` / `Modal` | Async UI, loaders & overlays |
 
 ## Layout components (`src/components/layout/`)
 
@@ -145,7 +151,11 @@ Per `modern-web-guidance` (`prevent-page-scroll-under-modal-dialog`, `animate-to
 Per `modern-web-guidance` (`validate-input-after-interaction`, `accessible-error-announcement`):
 - **Validation state**: Use `:user-invalid` and `:user-valid` rather than raw `:invalid` / `:valid` for visual validity indicators. This avoids the hostile pattern of flagging required-empty fields as invalid on initial page load.
 - **Accessibility synchronization**: Screen readers do not automatically sync `:user-invalid`. Synchronize `aria-invalid="true"` and link `aria-errormessage` (or `aria-describedby`) to the error message element upon user blur/input.
+- **Password visibility**: Use `PasswordInput` with an accessible toggle button declaring `aria-label`, `aria-pressed`, and $\ge 44\text{px}$ hit target.
+- **Password criteria**: Auth registration forms must include `PasswordRequirements` (4-bar strength indicator + real-time 5-point checklist).
+- **Confirmation fields**: Confirm-password fields must provide real-time match feedback (e.g. checkmark vs mismatch note).
 - **IME-safe submission**: In input `onKeyDown` handlers for Enter-submit, always guard against IME composition sessions (`if (event.nativeEvent.isComposing) return;`) to prevent premature submission for multilingual users (Urdu, Arabic, Persian, CJK).
+- **Zero raw grayscale in forms**: Use `bg-input`, `text-foreground`, `border-border`, and `bg-surface-elevated` — never raw `slate-*` / `gray-*`.
 
 ## Component-level responsiveness & performance
 
@@ -157,7 +167,8 @@ Per `modern-web-guidance` (`size-aware-styling`, `defer-rendering-heavy-content`
 
 - `MainLandmark` on every route tree (dashboard, auth, exam, home, error, 404).
 - `focus-visible:ring-*` on all interactive elements (`focusRing` or `btn.*`).
-- `aria-label` / `aria-pressed` / `role="timer"` on exam controls.
+- Exam timer: Must declare `role="timer"`, `aria-live="polite"`, and `font-mono tabular-nums` to prevent layout reflows during countdowns.
+- Exam controls: `aria-label` / `aria-pressed` on navigation and option selection.
 - `sr-only` for icon-only buttons and search labels.
 - `prefers-reduced-motion`: global disable in `globals.css`; use `motion-reduce:*` on transforms.
 - WCAG contrast ≥ 4.5:1 in both themes.
@@ -173,6 +184,9 @@ Per `modern-web-guidance` (`size-aware-styling`, `defer-rendering-heavy-content`
 - ❌ New `.edu-*` or bespoke classes in `globals.css`
 - ❌ Inline `<style>` blocks in views (use global keyframes / Tailwind `animate-*`)
 - ❌ `bg-slate-*` / `text-gray-*` without `dark:` or semantic replacement
+- ❌ Hardcoded grayscale borders (`border-slate-600`, `border-gray-700`) — use `border-border` / `border-border/60`
+- ❌ `cardInteractive` on wrapper containers, form sections, or cards containing forms/buttons (causes container scale jitter on click; use `card` or `cardElevated` for containers)
+- ❌ Interactive filter tabs or action chips lacking `focusRing` or failing $\ge 44\text{px}$ touch target compliance
 - ❌ Duplicating `btn.primary` gradient string in views
 - ❌ `style={{ backgroundColor: … }}` for theme colors (use tokens)
 - ❌ Importing `cn` from `ui.js` (only from `cn.js`)

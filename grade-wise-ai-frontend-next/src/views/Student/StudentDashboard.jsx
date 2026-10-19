@@ -1,6 +1,6 @@
 "use client";
 
-import { page } from "@/lib/ui.js";
+import { page, pageInner } from "@/lib/ui.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useStudentDashboard from "./hooks/useStudentDashboard.js";
 import StudentHeader from "./components/StudentHeader.jsx";
@@ -14,7 +14,7 @@ function StudentDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className={pageInner}>
         <StudentHeader userName={user?.name} />
 
         <StudentStats

@@ -350,7 +350,58 @@ Removed files with zero references:
 - **Playwright E2E Smoke Tests**: **7/7 passing (1.9s)**.
 - **TypeScript**: **0 errors** across both projects (`tsc --noEmit`).
 - **ESLint**: **0 errors, 0 warnings** across both projects.
-- **Production Build**: **100% successful** (Fastify API + Next.js 16.2.9 App Router with 20/20 static pages).
+- **Production Build**: **100% successful** (Fastify API + Next.js App Router).
+
+---
+
+## Phase 13 — Tech Stack Upgrade, Nodemailer 10.1.7, Next.js 16.4.2, CI Workflow Hardening & Migration Parity (2026-10)
+
+### 1. Technology Stack & Dependency Modernization
+- **Backend Stack Upgraded**:
+  - Pinned `nodemailer` to `10.1.7` (`@types/nodemailer` to `^8.0.2`) resolving Node 24 stream handling deprecations.
+  - Upgraded `@fastify/cookie`, `@fastify/cors`, `@fastify/helmet`, `@fastify/jwt`, `@fastify/multipart`, `@fastify/rate-limit`, `ai`, `drizzle-orm`, `fastify`, and `zod` to latest stable releases.
+- **Frontend Stack Upgraded**:
+  - Pinned `next` and `@next/eslint-plugin-next` to exact matching version `16.4.2` to eliminate caret drift and Turbopack compiler warnings.
+  - Upgraded `@tanstack/react-query` to latest stable release.
+- **CI / CD Workflow Hardening**:
+  - Added dependency caching (`cache: 'npm'`) to `.github/workflows/ci.yml`.
+  - Added explicit production port validation (`PORT 5005`) and `/api/health` validation in deployment verification gates.
+
+### 2. Database Schema & Migration Parity
+- **Schema Parity Migration (`0001_dapper_silver_fox.sql`)**:
+  - Enforced `question_block_type` enum inclusion of `'fill_in_the_blank'`.
+  - Added `language` column (`varchar(10) DEFAULT 'en' NOT NULL`) to `assessments` table.
+  - Established strict migration parity standard: all future schema updates must run `npm run db:generate` to keep SQL migrations in `drizzle/` 100% synchronized with `src/db/schema.ts`.
+
+---
+
+## Phase 14 — Design System & Accessible Form Standardization Across All Portals (2026-10)
+
+### 1. Unified Form UI Primitives Suite (`src/components/ui/`)
+- Created and standardized design system primitives:
+  - `Input`: Enhanced with accessible error binding (`aria-errormessage`), icon slot, and `:user-invalid` styling.
+  - `PasswordInput`: Built-in password visibility toggle (`eye`/`eye-off`) and live 5-point password policy checklist (length $\ge 8$, uppercase, lowercase, number, special character).
+  - `Select`: Accessible dropdown component with chevron indicator, dark mode styles, and linked error handling.
+  - `Textarea`: Auto-expanding accessible text area with character counts and linked error handling.
+  - `Label`: Accessible form label with required indicator (`*`) and proper `htmlFor` binding.
+
+### 2. Comprehensive Multi-Portal Form Refactoring
+- **Auth & Onboarding**:
+  - `LoginView`, `SignupView`, `ForgotPasswordView`, `VerifyEmailView`, and `NewPasswordModal` standardized to use unified primitives and live password policy checkmarks.
+- **Super Admin**:
+  - `SuperAdminDashboardView` (user management modal) and `ApiConfigView` (API key insertion/edit modal) refactored with new form controls and accessible error announcements.
+- **Admin**:
+  - `AdminDashboardView`, `AdminQuestionTypesView`, and `UserModal` updated with consistent selects, labels, and validation feedback.
+- **Instructor**:
+  - `CreateAssessmentView`, `EditAssessmentView`, `ResourcesView`, `EnrollmentModal`, `PhysicalPaperModal`, and `ResourceUploadModal` refactored to use standard `Select`, `Input`, and `Textarea` controls with uniform padding, focus rings, and dark mode support.
+- **Student Exam & Analytics**:
+  - `StudentDashboardView` and `ExamLayoutView` modernized:
+    - Added `role="timer"` and `tabular-nums` to ensure stable countdown numeral layout across English (LTR) and Urdu/Arabic/Persian (RTL).
+    - Preserved RTL direction and font scaling without layout shift.
+    - Added pure CSS modal containment (`overscroll-behavior: contain`) on exam dialogs.
+- **Proxy Middleware Whitelist**:
+  - Updated `src/proxy.js` to whitelist `/_not-found` so Next.js internal 404 rendering is never trapped in an auth redirect loop.
+
 
 
 

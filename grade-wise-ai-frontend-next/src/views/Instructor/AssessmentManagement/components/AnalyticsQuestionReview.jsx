@@ -71,11 +71,12 @@ export default function AnalyticsQuestionReview({
             return (
               <div
                 key={i}
+                style={{ contentVisibility: "auto", containIntrinsicSize: "auto 180px" }}
                 className="bg-input border border-border rounded-xl p-5 sm:p-6 hover:border-indigo-500/30 transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-4">
                   <h4 className="font-bold text-lg text-foreground flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
                       Question {q.question_order || i + 1}
                     </span>
                     <span className="text-sm font-normal text-muted-foreground capitalize">
@@ -131,7 +132,7 @@ export default function AnalyticsQuestionReview({
                     <strong className="text-xs font-semibold text-muted-foreground uppercase tracking-widest block mb-2">
                       Student Answer
                     </strong>
-                    <p className={cn("font-bold text-base", isCorrect ? "text-emerald-400" : "text-red-400")}>
+                    <p className={cn("font-bold text-base", isCorrect ? "text-emerald-700 dark:text-emerald-400" : "text-red-700 dark:text-red-400")}>
                       {q.question_type === "true_false"
                         ? q.student_answer === true || q.student_answer === "true"
                           ? "True"

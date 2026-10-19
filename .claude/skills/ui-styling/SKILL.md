@@ -14,11 +14,12 @@ When working in **`grade-wise-ai-frontend-next/`**, **do not** use shadcn/ui, `@
 
 Instead follow:
 
-1. **`.claude/rules/ui.md`** — canonical pure Tailwind spec
+1. **`.agent/rules/ui.md`** (or `.claude/rules/ui.md`) — canonical pure Tailwind v4 spec
 2. **`gradewise-frontend` skill** — project patterns and examples
-3. **`src/lib/ui.js`** + **`src/components/ui/`** — design system primitives
+3. **`src/lib/ui.js`** — tokens (`statSurface`, `btn.*`, `card*`, `input`, `select`, `textarea`, `label`)
+4. **`src/components/ui/`** — design system primitives (`Button`, `Card`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `StatusBadge`, `Modal`, `PageLoader`)
 
-Use Tailwind v4 with `@theme inline` semantic tokens in `globals.css`. Compose with `cn()` + `ui.js` exports.
+Use Tailwind v4 with `@theme inline` semantic tokens in `globals.css`. Compose with `cn()` + `ui.js` exports. All forms must use shared primitives, accessible error linking (`aria-errormessage`), `:user-invalid` styling, and IME-safe Enter submissions.
 
 ---
 

@@ -22,22 +22,22 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
               <table className="min-w-full">
                 <thead>
                   <tr className="bg-input">
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Type
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Count
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Time/Q
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Options
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       +Marks
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       -Marks
                     </th>
                   </tr>
@@ -46,7 +46,7 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
                   {blocks.map((b, i) => (
                     <tr key={i} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors duration-150")}>
                       <td className="px-6 py-4 text-sm text-secondary-foreground">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 capitalize">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 capitalize">
                           {b.question_type?.replace(/_/g, " ") || b.questionType?.replace(/_/g, " ")}
                         </span>
                       </td>
@@ -64,12 +64,12 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
                             : "N/A"}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                           +{b.positive_marks ?? b.positiveMarks ?? "1"}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/20">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20">
                           -{Math.abs(Number(b.negative_marks ?? b.negativeMarks ?? 0))}
                         </span>
                       </td>

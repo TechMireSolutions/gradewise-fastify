@@ -12,6 +12,9 @@ export const page =
 export const pageInner =
   "relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8";
 
+export const pageInnerNarrow =
+  "relative mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8";
+
 export const card =
   "rounded-2xl border border-border bg-card/80 text-foreground shadow-lg shadow-indigo-500/10 backdrop-blur-md dark:shadow-black/25 [box-shadow:0_4px_24px_-6px_var(--shadow-accent),inset_0_1px_0_rgb(255_255_255/0.06)]";
 
@@ -88,6 +91,8 @@ export const statSurface = {
     "rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 p-4 backdrop-blur-sm sm:p-5",
   amber:
     "rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/20 to-orange-500/20 p-4 backdrop-blur-sm sm:p-5",
+  purple:
+    "rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-500/20 to-violet-500/20 p-4 backdrop-blur-sm sm:p-5",
 };
 
 export const accentPanel =
@@ -115,7 +120,7 @@ export const panel =
 
 export const select = `${fieldBase} cursor-pointer appearance-none px-4 py-3`;
 
-export const textarea = `${fieldBase} resize-none px-4 py-3`;
+export const textarea = `${fieldBase} resize-y px-4 py-3`;
 
 export const fileInput =
   "w-full cursor-pointer rounded-xl border border-dashed border-border bg-input px-4 py-4 text-sm text-muted-foreground transition-all duration-200 file:mr-4 file:rounded-lg file:border-0 file:bg-indigo-500/15 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-indigo-600 hover:border-indigo-500/50 hover:file:bg-indigo-500/25 dark:file:text-indigo-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15";
@@ -133,6 +138,8 @@ export const chipTone = {
     "hover:border-emerald-500/40 hover:bg-emerald-500/20 hover:text-emerald-700 dark:hover:text-emerald-300",
   violet:
     "hover:border-violet-500/40 hover:bg-violet-500/20 hover:text-violet-700 dark:hover:text-violet-300",
+  purple:
+    "hover:border-purple-500/40 hover:bg-purple-500/20 hover:text-purple-700 dark:hover:text-purple-300",
   amber:
     "hover:border-amber-500/40 hover:bg-amber-500/20 hover:text-amber-700 dark:hover:text-amber-300",
   sky: "hover:border-sky-500/40 hover:bg-sky-500/20 hover:text-sky-700 dark:hover:text-sky-300",

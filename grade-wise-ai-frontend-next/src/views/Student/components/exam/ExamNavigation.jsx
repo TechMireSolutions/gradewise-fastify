@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui";
+import useStudentAssessmentStore from "@/features/student-assessment/store.js";
+import { getExamTranslation } from "@/utils/translations.js";
 
 export default function ExamNavigation({
   currentIndex,
@@ -10,7 +12,13 @@ export default function ExamNavigation({
   onSubmit,
   isSubmitting,
 }) {
+  const language = useStudentAssessmentStore((s) => s.language) || "en";
   const isLastQuestion = currentIndex >= totalQuestions - 1;
+
+  const prevText = getExamTranslation(language, "previousQuestion");
+  const nextText = getExamTranslation(language, "nextQuestion");
+  const submitText = getExamTranslation(language, "submitExam");
+  const submittingText = getExamTranslation(language, "submittingExam");
 
   return (
     <div className="flex justify-between items-center gap-3 pt-2">
@@ -20,7 +28,7 @@ export default function ExamNavigation({
         onClick={onPrevious}
         disabled={currentIndex === 0 || isSubmitting}
       >
-        Previous Question
+        {prevText}
       </Button>
 
       {isLastQuestion ? (
@@ -31,7 +39,7 @@ export default function ExamNavigation({
           disabled={isSubmitting}
           className="px-6 font-bold"
         >
-          {isSubmitting ? "Submitting Exam..." : "Submit Exam"}
+          {isSubmitting ? submittingText : submitText}
         </Button>
       ) : (
         <Button
@@ -40,7 +48,7 @@ export default function ExamNavigation({
           onClick={onNext}
           disabled={isSubmitting}
         >
-          Next Question
+          {nextText}
         </Button>
       )}
     </div>

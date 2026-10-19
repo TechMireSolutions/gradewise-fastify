@@ -14,7 +14,7 @@ export default function PasswordInput({
   className = "",
   placeholder = "Enter password",
   autoComplete = "current-password",
-  required = true,
+  required = false,
   leftIcon: LeftIcon = FaLock,
   ...props
 }) {
@@ -33,7 +33,7 @@ export default function PasswordInput({
         id={id}
         name={name}
         type={showPassword ? "text" : "password"}
-        value={value}
+        {...(value !== undefined ? { value } : {})}
         onChange={onChange}
         error={error}
         autoComplete={autoComplete}

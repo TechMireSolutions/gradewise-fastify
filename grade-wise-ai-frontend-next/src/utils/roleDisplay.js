@@ -19,7 +19,7 @@ export function getRoleAvatarBg(role) {
   const colors = {
     super_admin: "from-purple-500 to-violet-600",
     admin: "from-red-500 to-rose-600",
-    instructor: "from-indigo-50 dark:from-indigo-950/300 to-indigo-600",
+    instructor: "from-indigo-500 to-indigo-600",
     student: "from-emerald-500 to-teal-600",
   };
   return colors[role] || "from-slate-500 to-slate-600";

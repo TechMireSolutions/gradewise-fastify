@@ -3,6 +3,7 @@
 import { cn } from "@/lib/cn.js";
 import { card } from "@/lib/ui.js";
 import { LoadingSpinner } from "@/components/ui";
+import { getExamTranslation } from "@/utils/translations.js";
 import useTakeAssessment from "./hooks/useTakeAssessment.js";
 import ExamLanguageSelector from "./components/exam/ExamLanguageSelector.jsx";
 import ExamHeader from "./components/exam/ExamHeader.jsx";
@@ -39,7 +40,9 @@ export default function TakeAssessment() {
           <div className="rounded-full border border-indigo-500/20 bg-indigo-500/10 p-4">
             <LoadingSpinner size="lg" type="spinner" color="blue" />
           </div>
-          <p className="text-xl font-bold text-foreground">Loading Assessment...</p>
+          <p className="text-xl font-bold text-foreground">
+            {getExamTranslation(selectedLanguage, "loading")}
+          </p>
         </div>
       </div>
     );
@@ -91,10 +94,10 @@ export default function TakeAssessment() {
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className={cn(card, "p-8 text-center max-w-xl w-full space-y-4 shadow-2xl")}>
             <h1 className="text-2xl font-bold text-foreground text-balance">
-              Assessment Submitted!
+              {getExamTranslation(selectedLanguage, "submittedTitle")}
             </h1>
             <p className="text-muted-foreground text-pretty">
-              Your answers have been recorded. Redirecting to your dashboard in a few seconds...
+              {getExamTranslation(selectedLanguage, "submittedMsg")}
             </p>
           </div>
         </div>

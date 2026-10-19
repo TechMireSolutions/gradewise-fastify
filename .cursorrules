@@ -4,11 +4,43 @@
 
 ---
 
+## Rules & Skills Map (Mirrored in `.cursor/rules/`, `.agent/rules/`, `.agents/rules/`, `.claude/rules/`)
+
+| Rule | Scope |
+|------|-------|
+| `standards_rules.md` | Policies 1–5: deps, structure, naming, DRY, security, testing, form UX checklist |
+| `domain_rules.md` | RBAC, assessments, multilingual RTL, XAI feedback, question types, password policy |
+| `backend_rules.md` | Fastify 5 · TypeScript 6 · Drizzle ORM · PostgreSQL · Redis · BullMQ · AI SDK · migration parity |
+| `frontend_rules.md` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · cookie auth · form primitives |
+| `ui.md` | Tailwind v4 tokens · `statSurface` · typography · accessible form inputs · modal overscroll containment |
+| `workflow_rules.md` | Verification gates · PM2 reload after build · pre-commit checklist |
+| `project_rules.md` | Repository overview, port 5005, commands, and key routes |
+| `antigravity_rules.md` | Google Antigravity SDK agent orchestration (not app code) |
+
+### Skills Catalog (Mirrored in `.cursor/skills/`, `.agent/skills/`, `.agents/skills/`, `.claude/skills/`)
+
+| Skill | Purpose |
+|-------|---------|
+| `gradewise-frontend` | Next.js 16 App Router, pure Tailwind v4, form primitives (`PasswordInput`, `Select`, `Textarea`), exam UI |
+| `gradewise-backend` | Fastify 5, Drizzle ORM, BullMQ, Redis, Vitest, migration parity |
+| `gradewise-domain` | RBAC, assessment lifecycle, XAI feedback, multilingual RTL, physical paper generation |
+| `gradewise-modularization` | Full-stack view decomposition (<200 lines), shared dashboard primitives, and backend service facade patterns |
+| `ui-styling` | Design system styling, Tailwind v4 tokens, form primitives & accessibility standards |
+| `design-system` | Three-layer token architecture, component specifications, pure Tailwind v4 tokens |
+| `ui-ux-pro-max` | UI/UX design intelligence for web and mobile across responsive layouts |
+| `brand` | Brand voice, visual identity, messaging frameworks, asset management |
+| `design` | Comprehensive design: logos, icons, presentations, banners, mockups |
+| `slides` | Strategic HTML presentations & layouts |
+| `banner-design` | Banner design for web, social, ads, print |
+| `google-antigravity-sdk` | Google Antigravity AI agent orchestration |
+
+---
+
 ## Repository
 
 | App | Path | Stack | Port |
 |-----|------|-------|------|
-| Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 (strict) · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest | 8000 |
+| Backend | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 (strict) · Drizzle · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest | 5005 |
 | Frontend | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query · Zod 4 · Playwright | 3000 |
 | CI/CD | `.github/workflows/deploy.yml` | SSH deploy → PM2 restart → health check | — |
 
@@ -21,7 +53,7 @@
 ```bash
 # Backend
 cd grade-wise-ai-backend-fastify
-npm run dev              # API on :8000
+npm run dev              # API on :5005
 npm run dev:worker       # BullMQ worker (USE_ASYNC_JOBS=true)
 npm run typecheck        # tsc --noEmit
 npm run build            # tsc + fonts copy
@@ -59,6 +91,10 @@ npm run build && npm run lint
 6. **Config cache** — `system_configs` cached 60s. Call `invalidateConfigCache()` after writes.
 7. **Google OAuth** — Backend verifies Firebase ID tokens via custom `verifyGoogleIdToken()`.
 8. **RBAC** — `authenticate` + `authorize(...roles)` preHandler hooks. Roles: super_admin > admin > instructor > student.
+9. **Assessment Immutability & Cloning** — Executed assessments (`is_executed === true`) are immutable. Duplicate assessments via `POST /api/assessments/:id/clone` to create a new editable version.
+10. **Container Scale & FOES Prevention** — Never apply `cardInteractive` to container cards or form sections (causes click jitter; strictly use `card` or `cardElevated`). Always render skeleton loaders during initial fetch (`loading && !hasLoaded`); never render `EmptyState` prematurely.
+11. **View Modularization & Monolith Prevention** — Orchestrator views in `src/views/` must stay under ~200 lines. Extract data queries/forms to custom hooks (`hooks/`) and presentation to subcomponents (`components/`). Reuse `@/components/dashboard/shared/` primitives.
+12. **Backend Service Facades & Query Consolidation** — Decompose services >300 lines into focused sub-services (`*-common.ts`, `*-*.service.ts`) while preserving `<domain>.service.ts` as a backward-compatible facade. Consolidate sequential count/average queries into single SQL conditional aggregations.
 
 ---
 
@@ -70,7 +106,8 @@ npm run build && npm run lint
 src/modules/<domain>/
 ├── index.ts            # Route definitions (prefix: /api/<domain>)
 ├── <domain>.schema.ts  # Zod request/response schemas
-└── <domain>.service.ts # Business logic (throws AppError)
+├── <domain>.service.ts # Facade re-exporting sub-services
+└── <domain>-*.service.ts # Focused sub-services (<250 lines)
 ```
 
 ### Key Files
@@ -81,6 +118,9 @@ src/modules/<domain>/
 | `src/index.ts` | Server entry point |
 | `src/worker.ts` | BullMQ worker entry point |
 | `src/db/schema.ts` | Drizzle table definitions (11 tables) |
+| `src/modules/admin/` | Admin role aggregation & server-side filtering |
+| `src/modules/assessments/assessments-common.ts` | Assessment access control & immutability guards |
+| `src/modules/student-assessments/student-evaluation.service.ts` | Pure answer evaluation & matching normalization |
 | `src/ai/providers.ts` | AI provider rotation + config from DB |
 | `src/ai/generate.ts` | `generateContent()` / `generatePdfContent()` |
 | `src/utils/crypto.ts` | AES-256-GCM encrypt/decrypt + Firebase token verify |
@@ -89,10 +129,11 @@ src/modules/<domain>/
 | `src/hooks/authenticate.ts` | JWT verification preHandler |
 | `src/hooks/authorize.ts` | Role-based RBAC preHandler |
 
-### 37 API Routes
+### 39 API Routes
 
 - **Auth** (12): signup, login, Google OAuth, logout, me, verify, forgot/change password, user management
-- **Assessments** (10): CRUD, enrollment, preview, physical paper PDF
+- **Admin** (1): role overview counts (`/api/admin/overview`) + server-side search/pagination/filtering
+- **Assessments** (11): CRUD, deep clone (`/:id/clone`), enrollment, preview, physical paper PDF
 - **Taking** (4): start, submit, status poll, submission detail
 - **Config** (9): AI key CRUD, model set, test, bulk update
 - **Resources** (4): upload (PDF/DOCX/txt), list, delete
@@ -133,8 +174,8 @@ src/features/<domain>/
 | `src/proxy.js` | Next.js 16 middleware — auth gate (cookie check) |
 | `src/lib/apiClient.js` | Axios instance (`withCredentials: true`, base URL) |
 | `src/lib/cn.js` | `clsx` + `tailwind-merge` utility |
-| `src/lib/ui.js` | UI component catalog |
-| `src/components/ui/` | Design system primitives (Button, Card, Input, Modal, etc.) |
+| `src/lib/ui.js` | UI component catalog (`statSurface`, `btn.*`, `card*`, `input`, `select`, `textarea`, `label`) |
+| `src/components/ui/` | Design system primitives (`Button`, `Card`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `Modal`, `StatusBadge`, `PageLoader`) |
 | `src/components/ProtectedRoutes.jsx` | Client-side route guard |
 | `src/components/Providers.jsx` | Context wrapper (TanStack Query, theme, etc.) |
 | `src/schemas/fields.js` | Shared Zod field validators |
@@ -148,7 +189,7 @@ src/features/<domain>/
 
 - **Server state**: TanStack Query (all data fetching/caching)
 - **Client state**: Zustand (auth user, theme, assessment-taking state, UI state)
-- **Forms**: react-hook-form + Zod resolver
+- **Forms**: react-hook-form + Zod resolver with shared UI primitives
 
 ### Tailwind v4 & Modern Web Standards
 
@@ -157,7 +198,9 @@ src/features/<domain>/
 - Dark mode via `.dark` class on `<html>` (`color-scheme: light/dark` synced)
 - `cn()` utility for class merging
 - **Typography (`improve-text-layout-and-legibility`)**: `text-wrap: balance` on headings ($\le 6$ lines); `text-wrap: pretty` on paragraphs.
-- **Forms & A11y (`validate-input-after-interaction`, `accessible-error-announcement`)**: Use `:user-invalid` / `:user-valid` and sync with `aria-invalid` and `aria-errormessage`.
+- **Forms & A11y (`validate-input-after-interaction`, `accessible-error-announcement`)**: Use `:user-invalid` / `:user-valid` and sync with `aria-invalid` and `aria-errormessage`. Form controls must link error messages to input fields via `aria-errormessage`.
+- **Password Policy**: 5-point standard ($\ge 8$ chars, uppercase, lowercase, number, special char `@$!%*?&`) with live visual requirement checklist.
+- **Timers**: Question and exam countdowns use `role="timer"` and `tabular-nums` for rock-steady numeral layout in LTR and RTL.
 - **Modals (`prevent-page-scroll-under-modal-dialog`)**: Pure CSS scroll containment via `overscroll-behavior: contain` on `<dialog>` and `::backdrop`; never lock body scroll with `overflow: hidden`.
 - **Performance (`defer-rendering-heavy-content`)**: `content-visibility: auto` + `contain-intrinsic-size` on long question lists or heavy tables.
 
@@ -165,11 +208,16 @@ src/features/<domain>/
 
 ## Common Pitfalls
 
-1. **Port 8000**: Only ONE backend PM2 process should bind this port
-2. **EADDRINUSE**: `pm2 delete <duplicate>` then `pm2 restart <name>`
-3. **Config cache**: DB changes take 60s to reflect; restart PM2 for immediate effect
-4. **SKIP_CAPTCHA**: Set `true` when no reCAPTCHA is configured
-5. **FIREBASE_PROJECT_ID**: Must be set in backend `.env` for Google Auth to work
-6. **Groq models**: Use current catalog (`openai/gpt-oss-120b`), not deprecated Llama models
-7. **Font paths**: Backend builds copy fonts from `src/assets/fonts/` to `dist/assets/fonts/`
-8. **Node version**: Server runs Node 22; use `npm install --ignore-engines` on deploy
+1. **Port 5005**: Fastify binds to port 5005 (PORT in `.env`, default `5005`). Only ONE backend PM2 process should bind this port. Never reference port 8000.
+2. **PM2 reload after build**: When running local dev/e2e with Next.js under PM2, run `npx pm2 restart all` after `npm run build` to load new Turbopack chunk manifests.
+3. **EADDRINUSE**: `pm2 delete <duplicate>` then `pm2 restart <name>`.
+4. **Config cache**: DB changes take 60s to reflect; restart PM2 for immediate effect.
+5. **SKIP_CAPTCHA**: Set `true` when no reCAPTCHA is configured.
+6. **FIREBASE_PROJECT_ID**: Must be set in backend `.env` for Google Auth to work.
+7. **Groq models**: Use current catalog (`openai/gpt-oss-120b`), not deprecated Llama models.
+8. **Font paths**: Backend builds copy fonts from `src/assets/fonts/` to `dist/assets/fonts/`.
+9. **Migration Parity**: When updating `src/db/schema.ts`, run `npm run db:generate` to keep SQL migrations in `drizzle/` perfectly in sync with Drizzle schema.
+10. **Node version**: Server runs Node 24; use `npm install --ignore-engines` on deploy if required.
+11. **Container Scale Jitter**: `cardInteractive` contains `active:scale-[0.99]`. Never wrap forms or container sections with it; reserve strictly for leaf clickable cards.
+12. **Flash of Empty State (FOES)**: Always gate `<EmptyState />` with `hasLoaded` or `!loading`, rendering skeleton loaders during initial fetch.
+13. **Dynamic Param Normalization**: In Next.js App Router dynamic routes, always normalize `const rawId = params?.id || params?.assessmentId; const id = Array.isArray(rawId) ? rawId[0] : rawId;`.

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { card, iconBadge, page } from "@/lib/ui.js";
+import { card, iconBadge, page, pageInner } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Link from "next/link";
 import Modal from "@/components/ui/Modal.jsx";
@@ -43,7 +43,7 @@ function SuperAdminDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className={pageInner}>
         <div className="mb-8 sm:mb-10">
           <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8", "lg:p-10")}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">

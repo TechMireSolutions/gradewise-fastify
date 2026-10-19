@@ -15,4 +15,5 @@ export {
   RTL_LANGUAGES,
   isRTLLanguage,
   getTranslation,
+  getExamTranslation,
 } from "./translations.js";

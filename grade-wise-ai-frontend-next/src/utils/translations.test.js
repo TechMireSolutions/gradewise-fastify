@@ -5,6 +5,7 @@ import {
   LANGUAGE_OPTIONS,
   RTL_LANGUAGES,
   getTranslation,
+  getExamTranslation,
   translations,
 } from "./translations.js";
 
@@ -74,6 +75,23 @@ test("getTranslation", async (t) => {
     const missingKey = "some_non_existent_key_xyz";
     assert.strictEqual(getTranslation("en", missingKey), missingKey);
     assert.strictEqual(getTranslation("ur", missingKey), missingKey);
+  });
+});
+
+test("getExamTranslation", async (t) => {
+  await t.test("returns language-specific exam translations", () => {
+    assert.strictEqual(getExamTranslation("en", "submitExam"), "Submit Exam");
+    assert.strictEqual(getExamTranslation("ur", "submitExam"), "ٹیسٹ جمع کرائیں");
+    assert.strictEqual(getExamTranslation("ar", "submitExam"), "تقديم الاختبار");
+    assert.strictEqual(getExamTranslation("fa", "submitExam"), "ثبت آزمون");
+  });
+
+  await t.test("falls back to English when key is missing in target language", () => {
+    assert.strictEqual(getExamTranslation("unknown", "submitExam"), "Submit Exam");
+  });
+
+  await t.test("falls back to raw key if key not in English dictionary", () => {
+    assert.strictEqual(getExamTranslation("en", "non_existent"), "non_existent");
   });
 });
 

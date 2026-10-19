@@ -114,6 +114,7 @@ pm2 stop all
 | Prefix | Module |
 |--------|--------|
 | `/api/auth` | Auth, `/me`, `/logout`, user management |
+| `/api/admin` | Admin role overview counts & user filtering |
 | `/api/assessments` | Assessment CRUD, enrollment, preview, physical paper |
 | `/api/resources` | Resource upload & management |
 | `/api/config` | AI provider keys (super_admin) |
@@ -124,7 +125,10 @@ pm2 stop all
 
 ## Quick Pointers
 
-- **Backend:** cookie auth · async AI via BullMQ · encrypted AI keys · thin routes · fat services.
-- **Frontend:** httpOnly cookie session · `proxy.js` + `ProtectedRoute` · TanStack Query provider · `schemas/` for Zod.
-- **Styling:** `ui.md` + slate/indigo/violet/emerald palette.
+- **Backend:** cookie auth · async AI via BullMQ · encrypted AI keys · thin routes · fat services · decomposed services with facade pattern · default port 5005.
+- **Frontend:** httpOnly cookie session · `proxy.js` + `ProtectedRoute` · TanStack Query provider · `schemas/` for Zod · Next.js 16.4.2 · shared dashboard primitives (`DashboardStatCard`, `DashboardStatGrid`, `DashboardSectionCard`, `DashboardQuickActions`) · modular views (<200 lines).
+- **UI Primitives:** standardized `Button`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `SearchField`, `EmptyState` · zero raw grayscale classes.
+- **Styling:** `ui.md` + semantic palette (`statSurface`, `btn.*`, `card`, `input`).
+- **PM2:** reload via `npx pm2 restart all` after `npm run build`.
 - **Before commit:** `workflow_rules.md`.
+

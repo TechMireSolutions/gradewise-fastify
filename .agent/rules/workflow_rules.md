@@ -58,13 +58,22 @@ Run the **Compliance checklist** at the bottom of `standards_rules.md` before ev
 4. Frontend `.env.local` with `NEXT_PUBLIC_API_URL=http://localhost:5005`
 5. `npm run dev` (frontend)
 
-## Production
+## Production & PM2 Operations
 
 ```bash
 npm run build              # in both apps
 pm2 start ecosystem.config.cjs
 pm2 save && pm2 startup
+npx pm2 restart all        # reload PM2 after every frontend Next.js build
 ```
+
+> **Important:** Next.js Turbopack generates new chunk manifests on `npm run build`. If PM2 processes are running, always execute `npx pm2 restart all` so that local servers or Playwright tests hit active pages instead of stale route manifests.
+
+## CI & PR Readiness
+
+All PRs must satisfy the consolidated `ci-gate` job in `.github/workflows/ci.yml`:
+- Backend: typecheck, build, Vitest unit tests (142 tests), critical security audit
+- Frontend: build, ESLint flat config, unit tests (191 tests), critical security audit, Playwright E2E smoke tests (9 tests)
 
 ## Git
 

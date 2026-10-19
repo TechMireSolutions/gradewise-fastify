@@ -20,7 +20,7 @@ export default function WelcomeBanner({
                 className={cn(pageTitle, "mb-3 flex flex-wrap items-center gap-3")}
               >
                 {Icon && (
-                  <Icon className="shrink-0 text-teal-400" aria-hidden="true" />
+                  <Icon className="shrink-0 text-teal-600 dark:text-teal-400" aria-hidden="true" />
                 )}
                 <span>{title}</span>
               </h1>

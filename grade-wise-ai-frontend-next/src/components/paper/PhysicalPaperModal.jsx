@@ -317,11 +317,11 @@ const PhysicalPaperModal = ({
         {notify.message}
       </Modal>
 
-      <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm p-4 overflow-y-auto overscroll-contain">
         <div className="min-h-full flex items-center justify-center">
           <div
             className={cn(
-              "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto transition-all duration-300",
+              "bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300",
               isRTL ? "text-right" : "text-left",
               isQuranic && "font-quran"
             )}
@@ -358,10 +358,10 @@ const PhysicalPaperModal = ({
               {step === "language" ? (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                    <h3 className="text-2xl font-bold text-foreground mb-2">
                       {t("selectLanguage")}
                     </h3>
-                    <p className="text-slate-500 dark:text-slate-400">{t("selectLanguageDesc")}</p>
+                    <p className="text-muted-foreground">{t("selectLanguageDesc")}</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -371,12 +371,12 @@ const PhysicalPaperModal = ({
                         type="button"
                         onClick={() => handleLanguageSelect(lang.value)}
                         className={cn(
-                          "p-6 rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 hover:border-indigo-500 dark:hover:border-indigo-500 hover:bg-slate-50 dark:hover:bg-slate-950 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 text-slate-700 dark:text-slate-200 cursor-pointer",
+                          "p-6 rounded-2xl border-2 border-border bg-input hover:border-accent hover:bg-surface-elevated transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 text-secondary-foreground cursor-pointer",
                           ["ar", "fa"].includes(lang.value) && "font-quran"
                         )}
                       >
                         <span className="text-4xl">{lang.label.split(" ")[0]}</span>
-                        <span className="text-xl font-bold text-slate-700 dark:text-slate-100">
+                        <span className="text-xl font-bold text-foreground">
                           {lang.label.split(" ").slice(1).join(" ")}
                         </span>
                       </button>
@@ -394,12 +394,12 @@ const PhysicalPaperModal = ({
                     <span>{t("back")}</span>
                   </button>
 
-                  <div className="bg-indigo-50 dark:bg-indigo-950/40 p-4 rounded-xl border border-indigo-200 dark:border-indigo-500/20">
+                  <div className="bg-card/70 p-4 rounded-xl border border-border">
                     <div className="flex items-center gap-3">
                       <FaGlobe className="text-2xl text-indigo-600 dark:text-indigo-400" />
                       <div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">{t("selectLanguage")}</p>
-                        <p className="text-lg font-bold text-slate-700 dark:text-slate-100">
+                        <p className="text-sm text-muted-foreground">{t("selectLanguage")}</p>
+                        <p className="text-lg font-bold text-foreground">
                           {LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage)?.label}
                         </p>
                       </div>
@@ -417,12 +417,12 @@ const PhysicalPaperModal = ({
 
                   <FormattingOptions form={form} onChange={handleChange} language={selectedLanguage} />
 
-                  <div className="border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 mt-6">
+                  <div className="border-t border-border flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 mt-6">
                     <button
                       type="button"
                       onClick={handleClose}
                       disabled={loading}
-                      className="px-6 py-3 w-full sm:w-auto border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-700 rounded-xl font-bold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 cursor-pointer"
+                      className={cn(btn.secondary, "font-bold w-full sm:w-auto")}
                     >
                       {t("cancel")}
                     </button>
@@ -430,7 +430,7 @@ const PhysicalPaperModal = ({
                       type="button"
                       onClick={handleSubmit}
                       disabled={loading}
-                      className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 w-full sm:w-auto text-white rounded-xl font-bold text-sm sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 cursor-pointer"
+                      className={cn(btn.success, "font-bold w-full sm:w-auto text-sm sm:text-base py-3 sm:py-3.5")}
                     >
                       {loading ? (
                         <>

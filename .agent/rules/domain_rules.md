@@ -70,17 +70,34 @@ Each assessment is composed of one or more typed blocks. Every block is fully co
 
 ### Assessment Creation Flow (Instructor)
 1. Select resources (already uploaded, vectorized).
-2. Name the assessment + write high-level AI directives (e.g. "Focus on conceptual understanding").
+2. Name the assessment + select assessment language (English, Urdu, Arabic, Persian) + write high-level AI directives (e.g. "Focus on conceptual understanding").
 3. Add Question Blocks — one or more, each with its own type and parameters.
 4. Submit → backend constructs the AI prompt and stores it.
 
 ### Assessment Lifecycle & Business Rules
-- **Edit / Delete**: only allowed if **no student has started an attempt** yet (`is_executed === false`).
-- **View Prompt**: show the AI prompt constructed from resources + block config.
-- **Preview as Student**: instructor runs a live demo of the assessment experience.
+- **Edit / Delete**: only allowed if **no student has started an attempt** yet (`is_executed === false`). If attempted, the backend throws a 400 Bad Request to guarantee grade and audit integrity.
+- **Assessment Cloning ("Clone & Version")**: Instructors can clone an existing assessment via `POST /api/assessments/:id/clone`. The backend creates a deep copy in a single database transaction (`db.transaction`), duplicating the title (prefixed with "Clone of "), description, instructions, language, and all associated Question Blocks, resetting `is_executed: false`.
+- **Locked Edit Guard**: When navigating to edit an executed assessment (`/instructor/assessments/[id]/edit`), the UI renders a prominent warning banner explaining the assessment is locked due to student attempts, disables form inputs, and provides direct CTAs to "Clone Assessment" or "View Analytics".
+- **View Prompt**: show the AI prompt constructed from resources + block config, respecting language directionality (`dir="rtl"` for Urdu, Arabic, Persian).
+- **Preview as Student**: instructor runs a live demo of the assessment experience with matching multilingual layout.
 - **Manage Enrollment**: add or remove students after creation.
-- **View Analytics & Results**: per-student and per-question breakdown including Q&A pairs and full stats.
-- **Generate Physical Paper**: produce a printable version with answer key.
+- **Assessment Action Suite & Multi-Mode Presentation**:
+  - `AssessmentActionButtons` provides a unified action set across all dashboard lists and management views:
+    - Edit (guarded by `is_executed === false`)
+    - Clone & Version (`POST /api/assessments/:id/clone`)
+    - Preview as Student (live interactive demo)
+    - View Analytics & Results
+    - Manage Enrollment (student roster)
+    - Generate Physical Paper (customizable typography modal)
+    - Delete (guarded by `is_executed === false`, with modal confirmation)
+  - Display modes: `chips` (compact action chips for data tables) and `grid` (full-width stacked buttons for mobile card lists).
+- **Answer Evaluation & Scoring Engine**:
+  - Multiple Choice, Short Answer, Fill in Blank: exact match after case-insensitive trimming.
+  - Matching: JSON parsed into normalized key-value pairs (supports array of tuples, array of single-key objects, or key-value map). Evaluated symmetrically regardless of order.
+  - True / False: supports multilingual synonyms:
+    - True: `true`, `yes`, `correct`, `right`, `ا` (alif).
+    - False: `false`, `no`, `incorrect`, `wrong`, `ب` (baa).
+  - Negative marking: applied only if student provided an incorrect non-empty answer; skipped answers receive 0.
 
 ### Async Question Generation (infrastructure)
 
@@ -114,7 +131,7 @@ Triggered from the assessment's action menu. A modal collects:
 | Total Marks | Number |
 | Notes / Instructions | Textarea |
 | Page Size | Dropdown: A4 / A5 / Letter |
-| Font Size | User-configurable (header size vs body size) |
+| Font Size | User-configurable (header size, question size, option size) — persisted in `localStorage` |
 | Output Format | PDF or DOCX (user selects) |
 
 **Format rules for generated paper:**
@@ -122,6 +139,7 @@ Triggered from the assessment's action menu. A modal collects:
 - Answer options: normal weight
 - Header (institute/teacher/subject/date): larger font, user-adjustable
 - Answer key printed separately or appended as a final page
+- Settings persistence: font sizes saved to `gradewise_paper_settings` to streamline recurring paper generation.
 
 ---
 
@@ -184,6 +202,7 @@ Managed at `/super-admin/api-config`:
 
 ## Platform-Level Features
 
+- **Password Policy**: Registration and password changes enforce 5-point criteria (8+ characters, uppercase, lowercase, number, special character) with real-time UI indicator (`PasswordRequirements`) and confirm-password match feedback
 - **Feedback form** (user-submitted): Rating · Suggestion · Problem faced
 - **Captcha** required at signup to prevent bot registration
 - **Resource alphabet count check** (backend validation on uploaded text resources)

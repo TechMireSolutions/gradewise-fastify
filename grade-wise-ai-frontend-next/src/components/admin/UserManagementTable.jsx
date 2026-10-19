@@ -14,6 +14,7 @@ import {
 import { getRoleBadgeColor, getRoleAvatarBg, formatRole } from "../../utils/roleDisplay.js";
 import { formatDate } from "../../utils/formatDate.js";
 import EmptyState from "../ui/EmptyState.jsx";
+import StatusBadge from "../ui/StatusBadge.jsx";
 import { DashboardStatCard, DashboardStatGrid } from "@/components/dashboard/shared/index.js";
 
 function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onDelete, canDelete }) {
@@ -29,7 +30,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onRoleChange(userData.id, "admin", userData.name, userData.email)}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
+          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
         >
           {isLoading ? <FaSync className="animate-spin" /> : <FaCrown className="text-xs" />}
           {isLoading ? "..." : "Admin"}
@@ -39,7 +40,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onRoleChange(userData.id, "instructor", userData.name, userData.email)}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
+          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
         >
           {isLoading ? <FaSync className="animate-spin" /> : <FaChalkboardTeacher className="text-xs" />}
           {isLoading ? "..." : "Instructor"}
@@ -49,7 +50,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onRoleChange(userData.id, "student", userData.name, userData.email)}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
+          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
         >
           {isLoading ? <FaSync className="animate-spin" /> : <FaUserGraduate className="text-xs" />}
           {isLoading ? "..." : "Student"}
@@ -59,7 +60,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onDelete(userData.id, userData.name)}
           aria-label={`Delete user ${userData.name}`}
-          className={cn("p-2", "rounded-lg", "text-muted-foreground", "hover:text-red-400", "hover:bg-red-500/10", "border", "border-transparent", "hover:border-red-500/20", "transition-all", "duration-150", "cursor-pointer", "min-w-[44px]", "min-h-[44px]", "flex", "items-center", "justify-center")}
+          className={cn("p-2", "rounded-lg", "text-muted-foreground", "hover:text-red-700 dark:hover:text-red-400", "hover:bg-red-500/10", "border", "border-transparent", "hover:border-red-500/20", "transition-all", "duration-150", "cursor-pointer", "min-w-[44px]", "min-h-[44px]", "flex", "items-center", "justify-center")}
         >
           <FaTrash className="w-3.5 h-3.5" />
         </button>
@@ -96,14 +97,14 @@ export default function UserManagementTable({
         <table className="min-w-full">
           <thead>
             <tr className={tableHead}>
-              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>User</th>
-              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Role</th>
-              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Status</th>
-              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Joined</th>
-              <th className={cn("px-6", "py-3.5", "text-left", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Actions</th>
+              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>User</th>
+              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Role</th>
+              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Status</th>
+              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Joined</th>
+              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/30">
+          <tbody className="divide-y divide-border">
             {users.map((userData) => (
               <tr key={userData.id} className="hover:bg-indigo-500/5 transition-colors duration-150">
                 <td className="px-6 py-4">
@@ -123,14 +124,10 @@ export default function UserManagementTable({
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    userData.verified
-                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                      : "bg-amber-500/15 text-amber-400 border border-amber-500/20"
-                  }`}>
+                  <StatusBadge variant={userData.verified ? "success" : "warning"}>
                     {userData.verified ? <FaCheckCircle /> : <FaClock />}
                     {userData.verified ? "Verified" : "Pending"}
-                  </span>
+                  </StatusBadge>
                 </td>
                 <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>
                   <div className="flex items-center gap-2">
@@ -154,7 +151,7 @@ export default function UserManagementTable({
         </table>
       </div>
 
-      <div className="lg:hidden divide-y divide-slate-700/30">
+      <div className="lg:hidden divide-y divide-border">
         {users.map((userData) => (
           <div key={userData.id} className="p-4 sm:p-5 hover:bg-indigo-500/5 transition-colors duration-150">
             <div className="flex items-start gap-3 mb-4">

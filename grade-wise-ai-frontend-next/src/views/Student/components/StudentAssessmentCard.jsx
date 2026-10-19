@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn.js";
 import { btn } from "@/lib/ui.js";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 
 export default function StudentAssessmentCard({ assessment }) {
   const isCompleted =
@@ -9,7 +10,7 @@ export default function StudentAssessmentCard({ assessment }) {
   return (
     <div
       style={{ contentVisibility: "auto", containIntrinsicSize: "auto 110px" }}
-      className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
+      className="@container bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
     >
       <div className="flex items-start gap-3 mb-3">
         <div className="flex-1 min-w-0">
@@ -19,16 +20,9 @@ export default function StudentAssessmentCard({ assessment }) {
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
-        <span
-          className={cn(
-            "text-xs font-semibold px-2.5 py-1 rounded-full",
-            isCompleted
-              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-              : "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20"
-          )}
-        >
+        <StatusBadge variant={isCompleted ? "success" : "info"}>
           {isCompleted ? "Completed" : "Available"}
-        </span>
+        </StatusBadge>
         {!isCompleted && (
           <Link
             href={`/student/assessments/${assessment.id}/take`}

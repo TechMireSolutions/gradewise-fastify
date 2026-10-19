@@ -39,8 +39,8 @@ function Footer() {
       {/* Decorative overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/5 via-violet-600/5 to-indigo-600/5 pointer-events-none" />
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="mx-auto">
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div>
 
           {/* Brand + Social */}
           <div className="text-center md:text-left mb-8 lg:mb-10">

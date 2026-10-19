@@ -10,7 +10,7 @@ Workspace guide for humans and AI agents (Cursor, Claude Code, Antigravity).
 |-----------|------|-------|
 | **Backend** | `grade-wise-ai-backend-fastify/` | Fastify 5 · TS 6 · Drizzle ORM · PostgreSQL · Redis · BullMQ · AI SDK 6 · Vitest |
 | **Frontend** | `grade-wise-ai-frontend-next/` | Next.js 16 · React 19 · Tailwind 4 · Zustand 5 · TanStack Query 5 · Zod 4 · Playwright |
-| **Process manager** | `ecosystem.config.cjs` | PM2 — api (port 8000) + worker |
+| **Process manager** | `ecosystem.config.cjs` | PM2 — api (port 5005) + worker |
 | **CI/CD** | `.github/workflows/deploy.yml` | SSH deploy to production |
 
 > **Not in use:** `grade-wise-ai-backend-v2/` (legacy Express) — do not reference or modify.
@@ -20,7 +20,7 @@ Workspace guide for humans and AI agents (Cursor, Claude Code, Antigravity).
 ## Quick Start
 
 ```bash
-# Backend — port 8000
+# Backend — port 5005
 cd grade-wise-ai-backend-fastify && cp .env.example .env && npm install && npm run dev
 
 # Frontend — port 3000
@@ -49,7 +49,7 @@ pm2 flush gradewise-api           # clear old logs
 ### Backend
 
 ```bash
-npm run dev          # API — http://localhost:8000
+npm run dev          # API — http://localhost:5005
 npm run dev:worker   # BullMQ worker (USE_ASYNC_JOBS=true)
 npm run typecheck    # tsc --noEmit (strict mode)
 npm run build        # tsc + copy fonts to dist/assets/fonts/
@@ -85,28 +85,44 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 - **ESM + `.js` import suffixes** — all imports use `.js` extension (NodeNext resolution)
 - **Strict TypeScript** — `strict: true`, `noUncheckedIndexedAccess: true`
 - **Cookie auth** — `setAuthCookie` / `clearAuthCookie`; JWT stored in httpOnly cookie (`gradewise_token`), never in JSON bodies
-- **Google OAuth** — client gets Firebase `idToken` → backend verifies via `verifyGoogleIdToken()` (custom implementation, no runtime `google-auth-library`)
+- **Google OAuth** — client gets Firebase `idToken` → backend verifies via `verifyGoogleIdToken()` in `src/utils/crypto.ts` using native Node `crypto` verification against Google x509 public certificates (`google-auth-library` installed as peer/dependency)
 - **Async AI** — BullMQ + `npm run dev:worker` when `USE_ASYNC_JOBS=true`; sync fallback when Redis unavailable
 - **AI key encryption** — AES-256-GCM via `encryptSecret`/`decryptSecret`; keys stored as `enc:iv:tag:data` in `system_configs` table
 - **Provider rotation** — `callWithRotation()` tries up to 4 providers with cooldown (60s rate limit, 15s other errors)
 - **Services throw `AppError`** — routes stay thin, business logic in services
 - **Config cache** — `system_configs` cached 60s in memory; call `invalidateConfigCache()` after writes
 - **Fonts** — PDFKit fonts in `src/assets/fonts/`, auto-copied to `dist/assets/fonts/` during build
+- **Database Parity** — Drizzle migrations in `drizzle/` maintained via `npm run db:generate` to guarantee exact match with `src/db/schema.ts` (including `question_block_type` enum `'fill_in_the_blank'` and `assessments` `language` column)
+- **Assessment Deep Cloning** — `cloneAssessmentService` transactionally copies assessment metadata and all question blocks in `db.transaction()` (`POST /api/assessments/:id/clone`), resetting `is_executed: false`
+- **Assessment Immutability** — Executed assessments (`is_executed === true`) cannot be edited or deleted; updates/deletions throw `400 Bad Request`
+- **Service Decomposition & Facades** — Monolithic services (>300 lines) are decomposed into focused sub-services (`*-common.ts`, `*-attempts.service.ts`, `*-submissions.service.ts`, `*-evaluation.service.ts`) while keeping `<domain>.service.ts` as a 100% backward-compatible facade
+- **Database Query Consolidation** — Use SQL conditional aggregation (`count(case when role = ... then 1 end)`) and combined joins (`count` + `avg`) to eliminate sequential unindexed queries in dashboard analytics
 
 ### Frontend
 
 - **httpOnly cookie session** — `withCredentials: true` on all API calls; no token in localStorage/sessionStorage
-- **Middleware** — `proxy.js` (Next.js 16 convention) checks `gradewise_token` cookie; redirects unauthenticated to `/login?next=<path>`
+- **Middleware** — `proxy.js` (Next.js 16 convention) checks `gradewise_token` cookie; redirects unauthenticated to `/login?next=<path>` (with `/_not-found` whitelisted)
+- **View Modularization (< 200 lines)** — Orchestrator views in `src/views/` must not exceed ~200 lines. Extract UI to `<View>/components/` and data/state logic to custom hooks (`<View>/hooks/` or `src/hooks/`)
+- **Shared Dashboard Primitives** — Reuse `@/components/dashboard/shared/` (`DashboardStatCard`, `DashboardStatGrid`, `DashboardSectionCard`, `DashboardQuickActions`, `DashboardSkeletons`)
+- **Shared Assessment Primitives** — Reuse `AssessmentActionButtons` (chips vs grid modes), `AssessmentMetadataCard`, and `AssessmentLockedNotice`
+- **Auth Primitives** — Use `GoogleAuthButton`, `useLoginForm`, and `useSignupForm`
 - **State management** — TanStack Query (server state) + Zustand (UI/auth/theme state)
 - **Feature modules** — `features/<domain>/api.js` (API calls) + `features/<domain>/store.js` (Zustand store)
 - **Zod schemas** — in `src/schemas/`; shared field validators in `fields.js`
-- **UI primitives** — `components/ui/` (Button, Card, Input, Modal, etc.); build with `cn()` utility
+- **Dynamic Route Params** — Safely normalize route params: `const rawId = params?.id || params?.assessmentId; const id = Array.isArray(rawId) ? rawId[0] : rawId;`
+- **Container Scale Prohibition** — Never apply `cardInteractive` (which has `active:scale-[0.99]`) to container cards or form sections; reserve exclusively for leaf clickable cards to eliminate click jitter
+- **FOES Prevention** — Avoid Flash of Empty State by maintaining `hasLoaded` and rendering animated skeleton placeholders during `loading && !hasLoaded`; never render `EmptyState` prematurely
+- **Modal Decoupling** — Separate confirmation dialogs from general action modals to eliminate modal state race conditions
+- **UI primitives** — `components/ui/` (`Button`, `Card`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `Modal`, `StatusBadge`, `PageLoader`); build with `cn()` utility
 - **Views** — `views/<Role>/` contain page-level components; `app/` pages are thin wrappers
 - **Dark mode** — class-based (`.dark` on `<html>`); theme tokens in `globals.css` `@theme inline {}`
-- **RTL support** — exam layout supports RTL via `dir="rtl"` and `font-quran` font family
+- **RTL & Multilingual Layout** — Exam layout and instructor assessment preview/prompt components (`PromptTab`, `QuestionCard`) dynamically apply `dir="rtl"` for Urdu, Arabic, and Persian; use pure semantic border tokens (`border-border`) with zero raw grayscale classes (`border-slate-600` is forbidden)
+- **Physical Paper Persistence** — User-configured font sizes (`headerFontSize`, `questionFontSize`, `optionFontSize`) saved to `localStorage` (`gradewise_paper_settings`)
 - **Google Auth** — Firebase redirect flow (`signInWithRedirect` on click + `getRedirectResult` in `Login`/`Signup` `useEffect`) → `getIdToken()` → POST to `/api/auth/google-auth` → instant role-based redirect (`router.replace`, no success modal/delay)
 - **Auto logout** — 1h inactivity idle timer in `src/components/AutoLogout.jsx`, mounted in `Providers.jsx`
-- **Modern Web Standards** — `text-wrap: balance` for headings, `text-wrap: pretty` for body paragraphs, `:user-invalid` for form feedback, pure CSS overscroll containment on dialogs (`overscroll-behavior: contain`), no body scroll locking, and `content-visibility: auto` for heavy question rendering
+- **Form Standards & Accessibility** — shared form primitives across all 4 role portals, linked errors (`aria-errormessage`), `:user-invalid` styling, 5-point password requirement checklist, and IME-safe Enter submissions
+- **Timers** — Question countdowns use `role="timer"` with `tabular-nums` for rock-steady numeral layout in LTR and RTL
+- **Modern Web Standards** — `text-wrap: balance` for headings, `text-wrap: pretty` for body paragraphs, pure CSS overscroll containment on dialogs (`overscroll-behavior: contain`), no body scroll locking, and `content-visibility: auto` for heavy question rendering
 
 ---
 
@@ -117,7 +133,8 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 | Module | Prefix | Purpose |
 |--------|--------|---------|
 | `auth` | `/api/auth` | Signup, login, Google OAuth, email verify, password reset, user management |
-| `assessments` | `/api/assessments` | CRUD, enrollment, question preview, physical paper PDF |
+| `admin` | `/api/admin` | Platform role aggregation, user pagination, and server-side filtering |
+| `assessments` | `/api/assessments` | CRUD, deep clone, preview, enrollment, physical paper PDF |
 | `student-assessments` | `/api/taking` | Start/submit attempts, question generation, status polling |
 | `config` | `/api/config` | Super admin AI key management (add/delete/test/model) |
 | `resources` | `/api/resources` | File upload (PDF/DOCX/txt), URL scraping, text chunking |
@@ -149,7 +166,7 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `PORT` | Yes | Server port (default: 8000) |
+| `PORT` | Yes | Server port (default: 5005) |
 | `NODE_ENV` | Yes | `development` or `production` |
 | `DATABASE_URL` | Yes | PostgreSQL connection string |
 | `JWT_SECRET` | Yes | Secret for JWT signing (64-char hex) |
@@ -166,7 +183,7 @@ cd grade-wise-ai-frontend-next && npm run build && npm run lint
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `NEXT_PUBLIC_API_URL` | Yes | Backend URL (e.g., `https://gradewiseai.techmiresolutions.com`) |
+| `NEXT_PUBLIC_API_URL` | Yes | Backend URL (e.g., `https://gradewiseai.techmiresolutions.com` or `http://localhost:5005`) |
 | `NEXT_PUBLIC_FIREBASE_*` | Yes | Firebase config (API key, auth domain, project ID, etc.) |
 | `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` | No | Set `dummy-key` to bypass |
 
@@ -207,15 +224,17 @@ Protected by `authenticate` (JWT verify) + `authorize(...roles)` preHandler hook
 
 ## Common Pitfalls
 
-1. **Port conflict**: Only ONE backend PM2 process should bind port 8000. Check for duplicates: `pm2 list`
-2. **Groq model names**: Current models use prefix format (e.g., `openai/gpt-oss-120b`), not old `llama-3.3-70b-versatile`
-3. **Config cache**: Changes to `system_configs` take up to 60s to reflect. Call `invalidateConfigCache()` or restart PM2
-4. **Font paths**: Fonts live in `src/assets/fonts/` and are copied to `dist/assets/fonts/` during build. If fonts missing in production, rebuild
-5. **SKIP_CAPTCHA**: Must be `true` in `.env` when no reCAPTCHA secret is configured; frontend sends `dummy-key` as token
-6. **EADDRINUSE**: Kill duplicate PM2 processes before restarting: `pm2 delete <name>` then `pm2 restart <name>`
+1. **Port 5005**: Fastify binds to port 5005 by default (`ecosystem.config.cjs` & `src/index.ts`). Only ONE backend PM2 process should bind port 5005. Check for duplicates: `pm2 list`. Never reference port 8000.
+2. **PM2 reload after build**: When running local dev/e2e with Next.js under PM2, run `npx pm2 restart all` after `npm run build` to load new Turbopack chunk manifests.
+3. **Groq model names**: Current models use prefix format (e.g., `openai/gpt-oss-120b`), not old `llama-3.3-70b-versatile`
+4. **Config cache**: Changes to `system_configs` take up to 60s to reflect. Call `invalidateConfigCache()` or restart PM2
+5. **Font paths**: Fonts live in `src/assets/fonts/` and are copied to `dist/assets/fonts/` during build. If fonts missing in production, rebuild
+6. **SKIP_CAPTCHA**: Must be `true` in `.env` when no reCAPTCHA secret is configured; frontend sends `dummy-key` as token
+7. **EADDRINUSE**: Kill duplicate PM2 processes before restarting: `pm2 delete <name>` then `pm2 restart <name>`
+8. **Migration Parity**: When updating `src/db/schema.ts`, run `npm run db:generate` to generate corresponding SQL migrations in `drizzle/`.
 
 ---
 
 ## Conflict Resolution
 
-Previous rules referenced Express v2, `scheema/` directory, JWT in localStorage, root `src/store/`, and port 5005. All superseded by this document and the actual codebase state.
+Previous legacy documentation referenced Express v2, `scheema/` directory, JWT in localStorage, root `src/store/`, and port 8000. All superseded by this document and the actual codebase state: Fastify 5 on port 5005, cookie session auth, and `src/schemas/`.

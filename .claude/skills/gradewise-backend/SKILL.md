@@ -70,6 +70,14 @@ grade-wise-ai-backend-fastify/src/
 | AI call | `generateContent()` — never direct `@ai-sdk/*` in routes |
 | Token limit | `maxOutputTokens` (SDK v6) |
 | Encrypt AI keys | `encryptSecret()` on save, `decryptSecret()` on read |
+| DB Migrations | 100% parity: `npm run db:generate` + commit `drizzle/` + `npm run db:migrate` |
+| Deep cloning | `cloneAssessmentService` transactionally clones assessment & question blocks (`POST /api/assessments/:id/clone`) |
+| Assessment immutability | `updateAssessmentService` / `deleteAssessmentService` reject edits on executed assessments (`isExecuted === true`) |
+| Service decomposition | Large services (>300 lines) decomposed into focused sub-services (`*-common.ts`, `*-*.service.ts`) with facade pattern |
+| Query consolidation | Consolidate sequential count/average queries into single SQL conditional aggregations |
+| Pure logic testing | Algorithmic evaluation (`evaluateAnswer`) isolated into unit-tested pure functions |
+| Analytics tenant isolation | Filter aggregations strictly by `instructorId` |
+| Question types | `multiple_choice`, `short_answer`, `fill_in_the_blank`, `true_false`, `matching` |
 | Imports | ESM with `.js` suffix |
 
 ## Module Map
@@ -77,18 +85,21 @@ grade-wise-ai-backend-fastify/src/
 | Prefix | Module |
 |--------|--------|
 | `/api/auth` | `modules/auth/` (+ `/me`, `/logout`) |
-| `/api/assessments` | `modules/assessments/` |
+| `/api/admin` | `modules/admin/` (user & role metrics, server filtering) |
+| `/api/assessments` | `modules/assessments/` (CRUD, deep clone, preview, enrollment) |
 | `/api/resources` | `modules/resources/` |
 | `/api/config` | `modules/config/` |
-| `/api/taking` | `modules/student-assessments/` (+ `/status`) |
+| `/api/taking` | `modules/student-assessments/` (attempts, status, submit, review) |
 | `/api/instructor-analytics` | `modules/instructor-analytics/` |
 | `/api/student-analytics` | `modules/student-analytics/` |
 | `/api/health` | `health.ts` |
 
 ## Shared Code (reuse first)
 
+- `modules/assessments/assessments-common.ts`
 - `modules/assessments/question-generation.ts`
 - `modules/student-assessments/generation.ts`
+- `modules/student-assessments/student-evaluation.service.ts`
 - `modules/analytics/shared.ts`
 - `utils/auth-cookie.ts`, `utils/crypto.ts`
 - `queue/index.ts`, `schemas/common.ts`, `constants/roles.ts`

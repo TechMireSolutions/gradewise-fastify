@@ -10,7 +10,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     blue: "border-indigo-500",
     green: "border-emerald-500",
     red: "border-red-500",
-    gray: "border-slate-400",
+    gray: "border-muted-foreground",
     white: "border-white",
     purple: "border-violet-500",
   };
@@ -19,8 +19,8 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
     blue: "from-indigo-500 to-violet-600",
     green: "from-emerald-500 to-teal-600",
     red: "from-red-500 to-rose-600",
-    gray: "from-slate-500 to-slate-700",
-    white: "from-white to-slate-200",
+    gray: "from-muted-foreground/60 to-muted-foreground/90",
+    white: "from-white to-white/70",
     purple: "from-violet-500 to-purple-600",
   };
 
@@ -72,7 +72,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
       blue: "bg-indigo-500",
       green: "bg-emerald-500",
       red: "bg-red-500",
-      gray: "bg-slate-400",
+      gray: "bg-muted-foreground",
       white: "bg-white",
       purple: "bg-violet-500",
     };
@@ -101,7 +101,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
       blue: "bg-indigo-500",
       green: "bg-emerald-500",
       red: "bg-red-500",
-      gray: "bg-slate-400",
+      gray: "bg-muted-foreground",
       white: "bg-white",
       purple: "bg-violet-500",
     };
@@ -141,7 +141,7 @@ function LoadingSpinner({ size = "md", color = "blue", type = "spinner" }) {
       blue: "bg-indigo-500",
       green: "bg-emerald-500",
       red: "bg-red-500",
-      gray: "bg-slate-400",
+      gray: "bg-muted-foreground",
       white: "bg-white",
       purple: "bg-violet-500",
     };

@@ -16,7 +16,7 @@ export default function AssessmentMetadataCard({
   titlePlaceholder = "e.g., Computer Systems Final Exam",
 }) {
   return (
-    <div className={cn(card, "shadow-2xl overflow-hidden")}>
+    <div className={cn(card, "@container", "shadow-2xl overflow-hidden")}>
       <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
         <div className={cn("p-2.5 rounded-xl", iconBadge)}>
           <FaFileAlt className="text-white text-base" />
@@ -28,7 +28,7 @@ export default function AssessmentMetadataCard({
         <div className={cn("grid gap-4", showLanguage ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1")}>
           <div className={showLanguage ? "sm:col-span-2" : "col-span-1"}>
             <Label htmlFor="title">
-              Assessment Title <span className="text-red-400">*</span>
+              Assessment Title <span className="text-red-500 dark:text-red-400">*</span>
             </Label>
             <Input
               type="text"

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card as uiCard, iconBadge, page } from "@/lib/ui.js";
+import { card as uiCard, iconBadge, page, pageInner } from "@/lib/ui.js";
 import Link from "next/link";
 import { Modal, Button } from "@/components/ui";
 import { FaKey, FaArrowLeft, FaWrench } from "react-icons/fa";
@@ -43,7 +43,7 @@ export default function SuperAdminApiConfig() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className={pageInner}>
         {/* Page Header */}
         <div className="mb-8">
           <Link

@@ -92,10 +92,36 @@ preHandler: [authenticate, authorize("admin", "super_admin")]
 ## Database (Drizzle ORM)
 
 - PostgreSQL only · pgvector extension for future embeddings.
+- Schema definitions:
+  - `question_type` enum: `multiple_choice`, `short_answer`, `fill_in_the_blank`, `true_false`, `matching`
+  - `assessments` table includes `language` column (text, default `'en'`)
 - Multi-table writes → `db.transaction()`.
 - `numeric` columns → `string` — use `Number()` for math.
-- **Production:** `npm run db:generate` + commit + `npm run db:migrate`.
-- **Local dev:** `npm run db:push` acceptable.
+- **Production migration parity:** Always run `npm run db:generate`, commit generated `drizzle/*.sql` and `drizzle/meta/_journal.json`, and run `npm run db:migrate`.
+- Never create unjournaled or manual migration files outside `drizzle-kit`.
+- **Local dev:** `npm run db:push` acceptable for experimentation only.
+- **Assessment Deep Cloning (`cloneAssessmentService`)**:
+  - Clones assessment metadata (title with `"Clone of "` prefix, description, instructions, language) and all child `question_blocks` in a single `db.transaction()`.
+  - Resets `isExecuted` to `false` on the clone.
+  - Route: `POST /api/assessments/:id/clone` guarded by `[authenticate, authorize(...INSTRUCTOR_ROLES)]`.
+- **Assessment Immutability on Execution**:
+  - `updateAssessmentService` and `deleteAssessmentService` verify `isExecuted === false`. If attempts exist, throw `BadRequestError("Cannot edit or delete an assessment with existing student attempts")`.
+- **Instructor Analytics Isolation**:
+  - Aggregations in `modules/instructor-analytics/` (`totalAssessments`, `executedAssessments`, `totalAttempts`, `totalResources`) must strictly filter by `instructorId` to prevent cross-tenant data leakage.
+- **Database Query Consolidation & Aggregation**:
+  - Never execute sequential unindexed queries for dashboard summaries.
+  - Consolidate counts and filters using SQL conditional aggregation: `count(case when role = ... then 1 end)` or `count(case when is_executed then 1 end)`.
+  - Combine related metric queries (`count` + `avg`) into a single join query against PostgreSQL.
+- **Service Decomposition with Facade Pattern**:
+  - Monolithic services (>300 lines) must be decomposed into focused single-responsibility files:
+    - Common / Access Control (e.g., `assessments-common.ts`)
+    - Domain Operations (e.g., `assessments-enrollment.service.ts`, `assessments-preview.service.ts`, `student-attempts.service.ts`, `student-submissions.service.ts`)
+    - Pure Evaluation & Algorithms (e.g., `student-evaluation.service.ts`)
+  - The root `<domain>.service.ts` file acts as a lightweight facade re-exporting all functions with 100% backward-compatible route contracts.
+- **Pure Logic Isolation & Unit Testing**:
+  - Isolate core business algorithms (e.g., `evaluateAnswer`, `normalizeMatchPairs`) from database I/O so they can be thoroughly tested with fast unit tests in `*.test.ts` (covering case insensitivity, whitespace, JSON variations, and multilingual true/false synonyms).
+- **Admin Module (`/api/admin`)**:
+  - `modules/admin/` provides single-query role overview counts and server-side search, pagination, and role filtering. Guarded by `[authenticate, authorize("admin", "super_admin")]`.
 
 ## Async Assessment Generation
 

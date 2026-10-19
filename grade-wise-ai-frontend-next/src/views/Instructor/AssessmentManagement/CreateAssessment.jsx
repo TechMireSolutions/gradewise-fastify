@@ -1,7 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/cn.js";
-import { btn, page } from "@/lib/ui.js";
+import { page, pageInnerNarrow } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -10,6 +9,7 @@ import { Button, Modal } from "@/components/ui";
 import { createAssessmentSchema } from "@/schemas/assessmentSchemas.js";
 import { FiArrowLeft, FiZap } from "react-icons/fi";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useModal from "@/hooks/useModal.js";
 import useAssessmentForm from "./hooks/useAssessmentForm.js";
 import AssessmentMetadataCard from "./components/AssessmentMetadataCard.jsx";
@@ -104,7 +104,7 @@ export default function CreateAssessment() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <MainLandmark className={pageInnerNarrow}>
         {/* Header Section */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -118,17 +118,15 @@ export default function CreateAssessment() {
               Design a comprehensive assessment with customizable question blocks and AI parameters
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={() => router.push("/instructor/assessments")}
-            className={cn(
-              btn.secondary,
-              "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm self-start sm:self-auto cursor-pointer"
-            )}
+            className="self-start sm:self-auto inline-flex items-center gap-2"
           >
             <FiArrowLeft className="text-base" />
             Back to Assessments
-          </button>
+          </Button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -173,14 +171,15 @@ export default function CreateAssessment() {
 
           {/* Action Footer */}
           <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => router.push("/instructor/assessments")}
               disabled={isProcessing}
-              className={cn(btn.secondary, "w-full sm:w-auto px-6 py-3 rounded-xl")}
+              className="w-full sm:w-auto"
             >
               Cancel
-            </button>
+            </Button>
             <Button
               type="submit"
               variant="primary"
@@ -192,7 +191,7 @@ export default function CreateAssessment() {
             </Button>
           </div>
         </form>
-      </div>
+      </MainLandmark>
 
       <Modal
         isOpen={modal.isOpen}

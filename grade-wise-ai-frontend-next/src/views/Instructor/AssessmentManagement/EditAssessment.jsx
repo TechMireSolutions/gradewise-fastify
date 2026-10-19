@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { btn, card, page } from "@/lib/ui.js";
+import { card, page, pageInnerNarrow } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
@@ -15,6 +15,7 @@ import {
   FaCopy,
 } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useModal from "@/hooks/useModal.js";
 import useAssessmentForm from "./hooks/useAssessmentForm.js";
 import AssessmentMetadataCard from "./components/AssessmentMetadataCard.jsx";
@@ -214,17 +215,18 @@ export default function EditAssessment() {
         <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className={cn(card, "shadow-2xl p-8 text-center")}>
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6 mx-auto">
-              <FaExclamationTriangle className="text-red-400 text-3xl" />
+              <FaExclamationTriangle className="text-red-700 dark:text-red-400 text-3xl" />
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-4">Error</h1>
             <p className="text-muted-foreground mb-8">{error}</p>
-            <button
+            <Button
+              variant="primary"
               onClick={() => router.push("/instructor/assessments")}
-              className={cn(btn.primary, "px-5 py-3 inline-flex items-center gap-2 cursor-pointer")}
+              className="inline-flex items-center gap-2"
             >
               <FaArrowLeft />
               Back to Assessments
-            </button>
+            </Button>
           </div>
         </div>
         <Modal
@@ -252,7 +254,7 @@ export default function EditAssessment() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <MainLandmark className={pageInnerNarrow}>
         {/* Header Section */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -267,23 +269,25 @@ export default function EditAssessment() {
             </p>
           </div>
           <div className="flex items-center gap-3 self-start sm:self-auto">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={handleClone}
               disabled={isCloning}
-              className={cn(btn.secondary, "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl")}
+              className="inline-flex items-center gap-2"
             >
               <FaCopy />
               <span>{isCloning ? "Cloning..." : "Clone Assessment"}</span>
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => router.push("/instructor/assessments")}
-              className={cn(btn.secondary, "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl")}
+              className="inline-flex items-center gap-2"
             >
               <FaArrowLeft />
               <span>Back</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -332,14 +336,15 @@ export default function EditAssessment() {
 
           {/* Action Footer */}
           <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={() => router.push("/instructor/assessments")}
               disabled={isProcessing}
-              className={cn(btn.secondary, "w-full sm:w-auto px-6 py-3 rounded-xl")}
+              className="w-full sm:w-auto"
             >
               Cancel
-            </button>
+            </Button>
             <Button
               type="submit"
               variant="primary"
@@ -351,7 +356,7 @@ export default function EditAssessment() {
             </Button>
           </div>
         </form>
-      </div>
+      </MainLandmark>
 
       <Modal
         isOpen={modal.isOpen}

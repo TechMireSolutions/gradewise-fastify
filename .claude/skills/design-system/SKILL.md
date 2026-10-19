@@ -8,6 +8,19 @@ metadata:
   version: "1.0.0"
 ---
 
+## ⚠️ Gradewise AI project override
+
+When working in **`grade-wise-ai-frontend-next/`**, design tokens and styling are governed by:
+
+1. **`.agent/rules/ui.md`** (or `.claude/rules/ui.md`) — canonical pure Tailwind v4 tokens (`globals.css` with `@theme inline` & `--app-*` CSS variables).
+2. **`src/lib/ui.js`** — reusable class compositions (`statSurface`, `btn.*`, `card*`, `input`, `select`, `textarea`, `label`).
+3. **`src/components/ui/`** — primitives (`Button`, `Card`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `StatusBadge`, `Modal`, `PageLoader`).
+4. **Accessible form UX** — `:user-invalid` styling, linked errors (`aria-errormessage`), password checklist, and `tabular-nums` for timers.
+
+Do not use custom CSS classes or generate arbitrary external CSS stylesheets for Gradewise app components.
+
+---
+
 # Design System
 
 Token architecture, component specifications, systematic design, slide generation.

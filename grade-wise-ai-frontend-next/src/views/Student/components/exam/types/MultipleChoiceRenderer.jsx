@@ -17,7 +17,7 @@ export default function MultipleChoiceRenderer({ question, onAnswer }) {
   }
 
   const optionBase =
-    "rounded-xl border p-4 text-left text-sm font-medium transition-all duration-200 active:scale-[0.98] w-full cursor-pointer";
+    "rounded-xl border p-4 text-start text-sm font-medium transition-all duration-200 active:scale-[0.98] w-full cursor-pointer";
   const optionIdle =
     "border-border bg-input text-secondary-foreground hover:border-accent/40 hover:bg-surface-elevated";
   const optionSelected =
@@ -35,7 +35,7 @@ export default function MultipleChoiceRenderer({ question, onAnswer }) {
             className={cn(optionBase, isSelected ? optionSelected : optionIdle, focusRing)}
             aria-pressed={isSelected}
           >
-            <span className="font-bold mr-2 text-indigo-500 dark:text-indigo-400">
+            <span className="font-bold inline-block me-2 text-indigo-500 dark:text-indigo-400">
               {String.fromCharCode(65 + i)}.
             </span>
             <span>{opt}</span>

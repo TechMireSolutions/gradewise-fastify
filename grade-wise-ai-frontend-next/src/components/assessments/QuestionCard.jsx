@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { card } from "@/lib/ui.js";
-import { isRTLLanguage } from "@/utils/translations.js";
+import { isRTLLanguage, getExamTranslation } from "@/utils/translations.js";
 // Question fields (text / options) may arrive as plain strings or as objects
 // (e.g. { text, is_correct }). Coerce any value into something React can render
 // so the view never crashes on unexpected AI output.
@@ -41,13 +41,22 @@ function QuestionCard({ question, index, selectedLanguage }) {
   const { text: questionText, options: questionOptions } = getLocalizedQuestion(question, selectedLanguage);
   const isRTL = isRTLLanguage(selectedLanguage);
 
+  const trueLabel =
+    selectedLanguage && selectedLanguage !== "all"
+      ? getExamTranslation(selectedLanguage, "trueVal")
+      : "True";
+  const falseLabel =
+    selectedLanguage && selectedLanguage !== "all"
+      ? getExamTranslation(selectedLanguage, "falseVal")
+      : "False";
+
   return (
     <div
-      className={cn(card, "p-4", "sm:p-6", "shadow-2xl", "hover:border-indigo-500/30", "transition-all", "duration-200", "animate-slide-in-up", "[content-visibility:auto] [contain-intrinsic-size:1px_180px]")}
+      className={cn(card, "@container", "p-4", "sm:p-6", "shadow-2xl", "hover:border-indigo-500/30", "transition-all", "duration-200", "animate-slide-in-up", "[content-visibility:auto] [contain-intrinsic-size:1px_180px]")}
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="min-w-0">
-        <p dir={isRTL ? "rtl" : "ltr"} className={cn("text-base sm:text-lg font-semibold text-foreground mb-4 break-words leading-relaxed whitespace-pre-line", isRTL && "text-right")}>
+        <p dir={isRTL ? "rtl" : "ltr"} className={cn("text-base sm:text-lg font-semibold text-foreground mb-4 break-words leading-relaxed whitespace-pre-line text-start")}>
           {displayText(questionText)}
         </p>
 
@@ -61,7 +70,7 @@ function QuestionCard({ question, index, selectedLanguage }) {
               <div className={cn("w-8", "h-8", "border-2", "border-border", "group-hover:border-accent/50", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
                 T
               </div>
-              <span className={cn("text-secondary-foreground", "font-medium")}>True</span>
+              <span className={cn("text-secondary-foreground", "font-medium")}>{trueLabel}</span>
             </div>
             <div
               dir={isRTL ? "rtl" : "ltr"}
@@ -70,7 +79,7 @@ function QuestionCard({ question, index, selectedLanguage }) {
               <div className={cn("w-8", "h-8", "border-2", "border-border", "group-hover:border-accent/50", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
                 F
               </div>
-              <span className={cn("text-secondary-foreground", "font-medium")}>False</span>
+              <span className={cn("text-secondary-foreground", "font-medium")}>{falseLabel}</span>
             </div>
           </div>
         ) : questionOptions ? (

@@ -1,4 +1,4 @@
-import { page } from "@/lib/ui.js";
+import { page, pageInner } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Modal from "@/components/ui/Modal.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
@@ -43,7 +43,7 @@ function AdminDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className={pageInner}>
         <AdminHeader user={user} totalUsers={totalUsers} />
 
         <AdminStatsSection

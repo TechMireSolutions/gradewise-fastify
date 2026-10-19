@@ -1,7 +1,9 @@
 import { cn } from "@/lib/cn.js";
 import { btn } from "@/lib/ui.js";
-import { FaGraduationCap, FaCheckCircle } from "react-icons/fa";
+import { FaGraduationCap } from "react-icons/fa";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 import EmptyState from "@/components/ui/EmptyState.jsx";
+import { formatDate } from "@/utils/formatDate.js";
 import {
   DashboardSectionCard,
   CardListSkeleton,
@@ -44,13 +46,10 @@ export default function StudentAnalyticsList({
                     {a.title || "Assessment"}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                      <FaCheckCircle className="w-3 h-3" aria-hidden="true" />
-                      Completed
-                    </span>
+                    <StatusBadge variant="success">Completed</StatusBadge>
                     {a.completedAt && (
                       <span className="text-xs text-muted-foreground">
-                        {new Date(a.completedAt).toLocaleDateString()}
+                        {formatDate(a.completedAt)}
                       </span>
                     )}
                   </div>

@@ -2,12 +2,17 @@
 
 import { cn } from "@/lib/cn.js";
 import { focusRing } from "@/lib/ui.js";
+import useStudentAssessmentStore from "@/features/student-assessment/store.js";
+import { getExamTranslation } from "@/utils/translations.js";
 
 export default function TrueFalseRenderer({ question, onAnswer }) {
+  const language = useStudentAssessmentStore((s) => s.language) || "en";
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
       {[true, false].map((val) => {
         const isSelected = question.answer === val;
+        const label = getExamTranslation(language, val ? "trueVal" : "falseVal");
         return (
           <button
             key={val.toString()}
@@ -22,7 +27,7 @@ export default function TrueFalseRenderer({ question, onAnswer }) {
             )}
             aria-pressed={isSelected}
           >
-            {val ? "True" : "False"}
+            {label}
           </button>
         );
       })}

@@ -126,7 +126,7 @@ function Home() {
               {BENEFITS.map((text) => (
                 <div
                   key={text}
-                  className={cn("flex", "items-center", "gap-3", card, "px-4", "py-3", cardInteractive, "text-left")}
+                  className={cn("flex", "items-center", "gap-3", card, "px-4", "py-3", cardInteractive, "text-start")}
                 >
                   <FaCheckCircle className="text-emerald-500 dark:text-emerald-400 text-lg shrink-0" />
                   <span className={cn("text-sm", "text-secondary-foreground", "font-medium")}>{text}</span>

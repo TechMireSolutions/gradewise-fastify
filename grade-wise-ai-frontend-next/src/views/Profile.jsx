@@ -1,4 +1,4 @@
-import { page } from "@/lib/ui.js";
+import { page, pageInner } from "@/lib/ui.js";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
@@ -23,7 +23,7 @@ function Profile() {
   return (
     <div className={page}>
       <AmbientBackground />
-      <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className={pageInner}>
         {user ? (
           <>
             <ProfileHeader RoleIcon={RoleIcon} />

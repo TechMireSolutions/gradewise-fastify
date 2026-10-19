@@ -4,6 +4,7 @@
 /* ── Theme tokens (light default, .dark overrides) ── */
 :root {
   color-scheme: light;
+  accent-color: var(--app-accent);
 
   --app-bg: #f1f5f9;
   --app-surface: rgb(255 255 255 / 0.85);
@@ -27,10 +28,12 @@
   --blob-indigo: rgb(99 102 241 / 0.1);
   --blob-sky: rgb(56 189 248 / 0.1);
   --shadow-accent: rgb(99 102 241 / 0.12);
+  --scrollbar-thumb: rgb(100 116 139 / 0.55);
 }
 
 .dark {
   color-scheme: dark;
+  accent-color: var(--app-accent);
 
   --app-bg: #0a0f1e;
   --app-surface: rgb(15 23 42 / 0.55);
@@ -54,6 +57,7 @@
   --blob-indigo: rgb(99 102 241 / 0.12);
   --blob-sky: rgb(56 189 248 / 0.08);
   --shadow-accent: rgb(99 102 241 / 0.12);
+  --scrollbar-thumb: rgb(148 163 184 / 0.45);
 }
 
 @theme inline {
@@ -107,6 +111,41 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Modern Web Guidance: Selection, Typography, Modals, Forms ── */
+::selection {
+  background-color: rgb(20 184 166 / 0.25);
+  color: var(--app-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+p,
+blockquote {
+  text-wrap: pretty;
+}
+
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
+input:user-invalid,
+select:user-invalid,
+textarea:user-invalid {
+  border-color: rgb(239 68 68 / 0.7);
+}
+
 @keyframes blob {
   0%, 100% { transform: translate(0, 0) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }
@@ -153,7 +192,7 @@ body {
 @media (pointer: fine) {
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgb(100 116 139 / 0.45) transparent;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 }
 

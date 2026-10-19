@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LoadingSpinner, Modal } from "@/components/ui/index.js";
 import { FaExclamationCircle, FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import { PhysicalPaperModal } from "@/components/paper/index.js";
 import useAssessmentDetail from "./hooks/useAssessmentDetail.js";
 import AssessmentDetailHeader from "./components/AssessmentDetailHeader.jsx";
@@ -45,11 +46,11 @@ export default function AssessmentDetail() {
     return (
       <div className={page}>
         <AmbientBackground />
-        <div className="relative max-w-2xl mx-auto px-4 py-16">
+        <MainLandmark className="relative max-w-2xl mx-auto px-4 py-16">
           <div className={cn(card, "shadow-2xl")}>
             <div className="flex flex-col items-center justify-center py-28 text-center px-4">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6">
-                <FaExclamationCircle className="text-red-400 text-3xl" />
+                <FaExclamationCircle className="text-red-700 dark:text-red-400 text-3xl" />
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2">Assessment Not Found</h3>
               <p className="text-muted-foreground max-w-sm mb-8">
@@ -63,7 +64,7 @@ export default function AssessmentDetail() {
               </Link>
             </div>
           </div>
-        </div>
+        </MainLandmark>
       </div>
     );
   }
@@ -72,7 +73,7 @@ export default function AssessmentDetail() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         {/* Header Section */}
         <div className={cn(card, "shadow-xl overflow-hidden mb-8")}>
           <AssessmentDetailHeader
@@ -94,7 +95,7 @@ export default function AssessmentDetail() {
             <AssessmentResourcesDisplay resources={currentAssessment.resources} />
           </div>
         </div>
-      </div>
+      </MainLandmark>
 
       {/* Physical Paper Modal */}
       {paperModal.isOpen && (

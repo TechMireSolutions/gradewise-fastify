@@ -1,8 +1,14 @@
 "use client";
 
 import { Select } from "@/components/ui";
+import useStudentAssessmentStore from "@/features/student-assessment/store.js";
+import { getExamTranslation } from "@/utils/translations.js";
 
 export default function MatchingRenderer({ question, onAnswer }) {
+  const language = useStudentAssessmentStore((s) => s.language) || "en";
+  const unavailableMsg = getExamTranslation(language, "matchingUnavailable");
+  const selectMatchMsg = getExamTranslation(language, "selectMatch");
+
   let matchData = { leftItems: [], rightItems: [] };
   try {
     const raw = Array.isArray(question.options) ? question.options[0] : null;
@@ -16,7 +22,7 @@ export default function MatchingRenderer({ question, onAnswer }) {
   const rightItems = Array.isArray(matchData.rightItems) ? matchData.rightItems : [];
 
   if (leftItems.length === 0 || rightItems.length === 0) {
-    return <p className="text-muted-foreground text-sm">Matching items unavailable.</p>;
+    return <p className="text-muted-foreground text-sm">{unavailableMsg}</p>;
   }
 
   let selectedPairs = [];
@@ -51,7 +57,7 @@ export default function MatchingRenderer({ question, onAnswer }) {
                 onChange={(e) => handleMatchChange(left, e.target.value)}
                 aria-label={`Match for ${left}`}
               >
-                <option value="">Select match...</option>
+                <option value="">{selectMatchMsg}</option>
                 {rightItems.map((r, ri) => (
                   <option key={ri} value={r}>
                     {r}

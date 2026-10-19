@@ -15,6 +15,7 @@ import useAssessmentPreview from "@/hooks/useAssessmentPreview.js";
 import useAssessmentStore from "@/features/assessments/store.js";
 import { generateAIPrompt } from "@/utils/promptGenerator.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import toast from "react-hot-toast";
 
 function AssessmentPreview() {
@@ -108,7 +109,7 @@ function AssessmentPreview() {
     return (
       <div className={cn(page, "flex", "items-center", "justify-center", "px-4")}>
         <AmbientBackground />
-        <div className="relative bg-card/60 backdrop-blur-sm border border-red-500/30 rounded-2xl p-8 shadow-2xl text-center max-w-md">
+        <MainLandmark className="relative bg-card/60 backdrop-blur-sm border border-red-500/30 rounded-2xl p-8 shadow-2xl text-center max-w-md">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25 flex items-center justify-center mx-auto mb-5">
             <FaExclamationTriangle className="text-white text-2xl" />
           </div>
@@ -121,7 +122,7 @@ function AssessmentPreview() {
             <FaArrowLeft />
             Back to Assessments
           </Link>
-        </div>
+        </MainLandmark>
       </div>
     );
   }
@@ -130,7 +131,7 @@ function AssessmentPreview() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
 
         <AssessmentHeader
           assessmentId={id}
@@ -196,13 +197,13 @@ function AssessmentPreview() {
         <div className="mt-6 sm:mt-8 text-center">
           <Link
             href="/instructor/assessments"
-            className={cn("inline-flex", "items-center", "gap-2", "px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer")}
+            className={cn(btn.secondary, "inline-flex items-center gap-2 px-6 py-3 rounded-xl")}
           >
             <FaArrowLeft />
             <span>Back to Assessments</span>
           </Link>
         </div>
-      </div>
+      </MainLandmark>
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { accentPanel } from "@/lib/ui.js";
 import { cn } from "@/lib/cn.js";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
+import EmptyState from "@/components/ui/EmptyState.jsx";
 import QuestionCard from "./QuestionCard.jsx";
 import { FiAlertCircle, FiList } from "react-icons/fi";
 import { LANGUAGE_OPTIONS } from "@/utils/translations.js";
@@ -44,7 +44,7 @@ function SampleQuestionsTab({ questions, questionError, loading, selectedLanguag
               <FiAlertCircle className="text-white text-lg" />
             </div>
           </div>
-          <p className="text-red-400 font-semibold mb-1">
+          <p className="text-red-700 dark:text-red-400 font-semibold mb-1">
             Failed to generate preview questions
           </p>
           <p className={cn("text-sm", "text-muted-foreground")}>{questionError}</p>
@@ -63,12 +63,12 @@ function SampleQuestionsTab({ questions, questionError, loading, selectedLanguag
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-          <div className={cn(accentPanel, "w-20 h-20 rounded-2xl", "flex items-center justify-center mb-6")}>
-            <FiList className="text-indigo-400 text-3xl" />
-          </div>
-          <h3 className="text-2xl font-bold text-foreground mb-2">No questions yet</h3>
-          <p className={cn("text-muted-foreground", "max-w-sm", "mb-8")}>Sample questions will appear here once the AI generates them for preview.</p>
+        <div className="py-12">
+          <EmptyState
+            icon={FiList}
+            title="No questions yet"
+            description="Sample questions will appear here once the AI generates them for preview."
+          />
         </div>
       )}
     </div>

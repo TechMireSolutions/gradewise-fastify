@@ -133,7 +133,7 @@ function Modal({
           {/* Close Button — 44×44px touch target */}
           <button
             onClick={handleClose}
-            className={cn("absolute", "top-2", "right-2", "w-11", "h-11", "flex", "items-center", "justify-center", "rounded-lg", "bg-surface-elevated", "hover:opacity-80", "text-muted-foreground", "hover:text-foreground", "transition-all", "duration-150", "hover:scale-110", "active:scale-95", "z-10", "focus-visible:outline-none", "focus-visible:ring-2", "focus-visible:ring-violet-500", "cursor-pointer")}
+            className={cn("absolute", "top-2", "right-2", "w-11", "h-11", "flex", "items-center", "justify-center", "rounded-lg", "bg-surface-elevated", "hover:opacity-80", "text-muted-foreground", "hover:text-foreground", "transition-all", "duration-150", "hover:scale-110", "active:scale-95", "z-10", focusRing, "cursor-pointer")}
             aria-label="Close notification"
           >
             <FaTimes className="w-3.5 h-3.5" />
@@ -172,7 +172,7 @@ function Modal({
                 <button
                   onClick={handleClose}
                   disabled={loading}
-                  className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground text-sm font-medium transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={cn("w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground text-sm font-medium transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed", focusRing)}
                 >
                   {cancelText}
                 </button>

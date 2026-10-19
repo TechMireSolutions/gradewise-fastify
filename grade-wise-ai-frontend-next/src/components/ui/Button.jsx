@@ -6,6 +6,7 @@ const VARIANTS = {
   secondary: btn.secondary,
   google: btn.google,
   success: btn.success,
+  danger: btn.danger,
 };
 
 export default function Button({

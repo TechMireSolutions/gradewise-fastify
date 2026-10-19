@@ -19,7 +19,7 @@ export default function QuestionBlockCard({
   const isSingleBlock = totalBlocks <= 1;
 
   return (
-    <div className={cn(card, "p-5 sm:p-6 shadow-md transition-all duration-200 border-border/80")}>
+    <div className={cn(card, "@container", "p-5 sm:p-6 shadow-md transition-all duration-200 border-border/80")}>
       {/* Header */}
       <div className="flex items-center justify-between pb-4 mb-5 border-b border-border/70">
         <div className="flex items-center gap-3">
@@ -45,7 +45,7 @@ export default function QuestionBlockCard({
             "p-2 rounded-lg transition-all duration-200",
             isSingleBlock
               ? "opacity-30 cursor-not-allowed text-muted-foreground"
-              : "text-red-500 hover:bg-red-500/10 active:scale-95 cursor-pointer",
+              : "text-red-700 dark:text-red-400 hover:bg-red-500/10 active:scale-95 cursor-pointer",
             focusRing
           )}
           title={isSingleBlock ? "Must keep at least one block" : "Remove Block"}

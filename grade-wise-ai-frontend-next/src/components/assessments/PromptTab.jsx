@@ -41,13 +41,13 @@ export default function PromptTab({
           <div>
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                <FaFileAlt className="text-indigo-400 text-sm" />
+                <FaFileAlt className="text-indigo-500 dark:text-indigo-400 text-sm" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                 AI Prompt Blueprint
               </h2>
               {aiPrompt?.languageLabel && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
                   <FaLanguage /> {aiPrompt.languageLabel}
                 </span>
               )}
@@ -119,7 +119,7 @@ export default function PromptTab({
               dir={isRTL ? "rtl" : "ltr"}
               className={cn(
                 "whitespace-pre-wrap text-xs text-muted-foreground p-3.5 bg-muted max-h-[500px] overflow-y-auto leading-relaxed",
-                isRTL ? "font-sans text-right" : "font-mono"
+                isRTL ? "font-sans text-start" : "font-mono text-start"
               )}
             >
               {aiPrompt.unifiedPrompt}
@@ -140,7 +140,7 @@ export default function PromptTab({
                       dir={isRTL ? "rtl" : "ltr"}
                       className={cn(
                         "whitespace-pre-wrap text-[11px] text-muted-foreground max-h-40 overflow-y-auto",
-                        isRTL ? "font-sans text-right" : "font-mono"
+                        isRTL ? "font-sans text-start" : "font-mono text-start"
                       )}
                     >
                       {block.prompt}
@@ -166,7 +166,7 @@ export default function PromptTab({
                 dir={isRTL ? "rtl" : "ltr"}
                 className={cn(
                   "whitespace-pre-wrap text-xs text-muted-foreground p-3 bg-muted max-h-96 overflow-y-auto",
-                  isRTL ? "font-sans text-right" : "font-mono"
+                  isRTL ? "font-sans text-start" : "font-mono text-start"
                 )}
               >
                 {block.prompt}
@@ -184,7 +184,7 @@ export default function PromptTab({
             dir={isRTL ? "rtl" : "ltr"}
             className={cn(
               "whitespace-pre-wrap text-xs text-muted-foreground p-3.5 bg-muted rounded border border-border max-h-96 overflow-y-auto",
-              isRTL ? "font-sans text-right" : "font-mono"
+              isRTL ? "font-sans text-start" : "font-mono text-start"
             )}
           >
             {fallbackPrompt || assessment?.prompt || "No prompt generated yet."}

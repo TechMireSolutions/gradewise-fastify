@@ -53,18 +53,18 @@ export default function DashboardStatCard({
   }
 
   return (
-    <div className={cn(selectedTone.surface, "transition-all duration-200", className)}>
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-2xl sm:text-3xl font-bold text-foreground leading-none">
+    <div className={cn("@container", selectedTone.surface, "transition-all duration-200", className)}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-2xl @xs:text-3xl font-bold text-foreground leading-none truncate">
             {value}
           </div>
-          <div className="text-xs font-medium text-muted-foreground mt-1 text-pretty">
+          <div className="text-xs font-medium text-muted-foreground mt-1 text-pretty break-words">
             {label}
           </div>
         </div>
         {Icon && (
-          <div className={cn("p-2.5 rounded-xl text-white shadow-lg", selectedTone.icon)}>
+          <div className={cn("p-2.5 rounded-xl text-white shadow-lg shrink-0", selectedTone.icon)}>
             {typeof Icon === "function" ? (
               <Icon className="w-5 h-5" aria-hidden="true" />
             ) : (

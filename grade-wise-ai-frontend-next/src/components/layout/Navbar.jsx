@@ -114,7 +114,7 @@ function Navbar() {
           <div className="flex items-center flex-shrink-0">
             <Link
               href="/"
-              className="flex items-center space-x-2.5 group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900"
+              className="flex items-center space-x-2.5 group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
               onClick={closeMobileMenu}
             >
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-600 flex items-center justify-center flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-teal-500/25">
@@ -163,7 +163,7 @@ function Navbar() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-background cursor-pointer"
                 >
                   <FaSignOutAlt />
                   <span className="hidden xl:inline">Logout</span>
@@ -229,7 +229,7 @@ function Navbar() {
                         <div className="min-w-0">
                           <div className={cn("font-semibold", "text-foreground", "text-sm", "leading-tight", "truncate")}>{user.name}</div>
                           <div className={cn("text-xs", "text-muted-foreground", "truncate", "mt-0.5")}>{user.email}</div>
-                          <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                          <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
                             {ROLE_LABELS[user.role] ?? user.role}
                           </div>
                         </div>
@@ -238,7 +238,7 @@ function Navbar() {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full px-4 py-3 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-slate-900 cursor-pointer"
+                      className="w-full px-4 py-3 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-background cursor-pointer"
                     >
                       <FaSignOutAlt className="w-4 h-4" />
                       Logout
