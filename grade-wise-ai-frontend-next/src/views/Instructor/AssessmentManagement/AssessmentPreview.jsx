@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn.js";
-import { btn, card, page } from "@/lib/ui.js";
+import { btn, card, page, pageInner } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { FaArrowLeft, FaExclamationTriangle } from "react-icons/fa";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
@@ -12,13 +12,18 @@ import {
   SampleQuestionsTab,
 } from "@/components/assessments";
 import useAssessmentPreview from "@/hooks/useAssessmentPreview.js";
+import useAssessmentStore from "@/features/assessments/store.js";
 import { generateAIPrompt } from "@/utils/promptGenerator.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import toast from "react-hot-toast";
 
 function AssessmentPreview() {
   const { id } = useParams();
+  const router = useRouter();
   const [tab, setTab] = useState("prompt");
   const [copied, setCopied] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
+  const { cloneAssessment } = useAssessmentStore();
 
   const {
     assessment,
@@ -69,6 +74,22 @@ function AssessmentPreview() {
     setTimeout(() => setCopied(false), 3000);
   };
 
+  const handleClone = async () => {
+    if (!id || isCloning) return;
+    setIsCloning(true);
+    try {
+      const cloned = await cloneAssessment(id);
+      if (cloned?.id) {
+        toast.success("Assessment cloned successfully!");
+        router.push(`/instructor/assessments/${cloned.id}/edit`);
+      }
+    } catch {
+      toast.error("Failed to clone assessment");
+    } finally {
+      setIsCloning(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={cn(page, "flex", "flex-col", "items-center", "justify-center")}>
@@ -109,9 +130,14 @@ function AssessmentPreview() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl">
+      <div className={pageInner}>
 
-        <AssessmentHeader assessmentId={id} />
+        <AssessmentHeader
+          assessmentId={id}
+          isExecuted={assessment?.is_executed}
+          onClone={handleClone}
+          isCloning={isCloning}
+        />
         <AssessmentInfoCard assessment={assessment} />
 
         {/* Tabs */}

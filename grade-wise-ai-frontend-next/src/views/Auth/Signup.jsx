@@ -1,104 +1,26 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { btn, card, headingGradient, iconBadge } from "@/lib/ui.js";
-import { useEffect, useState } from "react";
+import { card, headingGradient, iconBadge } from "@/lib/ui.js";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import useAuthStore from "@/features/auth/store.js";
 import { Button, Input, Label, LoadingSpinner, Modal, PasswordInput } from "@/components/ui/index.js";
 import AuthPageLayout from "@/components/layout/AuthPageLayout.jsx";
-import { PasswordRequirements } from "@/components/auth/index.js";
-import useModal from "@/hooks/useModal.js";
-import { getCaptchaToken } from "@/config/captcha.js";
-import { FaUser, FaEnvelope, FaUserPlus, FaGoogle, FaGraduationCap, FaExclamationTriangle } from "react-icons/fa";
-import { redirectByRole } from "@/utils/redirectByRole.js";
-import useRecaptchaInit from "@/hooks/useRecaptchaInit.js";
-import { signupSchema } from "@/schemas/authSchemas.js";
-import { parseZodFieldErrors } from "@/utils/parseZodFieldErrors.js";
+import { PasswordRequirements, GoogleAuthButton } from "@/components/auth/index.js";
+import useSignupForm from "@/hooks/useSignupForm.js";
+import { FaUser, FaEnvelope, FaUserPlus, FaGraduationCap, FaExclamationTriangle } from "react-icons/fa";
 
 function Signup() {
-  const router = useRouter();
-  const { signup, googleAuth, completeGoogleRedirect } = useAuthStore();
-
-  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const { modal, showModal, closeModal } = useModal();
-
-  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "dummy-key";
-  useRecaptchaInit(siteKey);
-
-  useEffect(() => {
-    let isMounted = true;
-    
-    (async () => {
-      try {
-        const user = await completeGoogleRedirect();
-        if (isMounted && user) {
-          redirectByRole(user.role, (to) => router.replace(to));
-        }
-      } catch (error) {
-        if (isMounted) {
-          const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
-          showModal("error", "Google Signup Failed", errorMessage);
-        }
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [completeGoogleRedirect, router, showModal]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrors({});
-
-    try {
-      signupSchema.parse(formData);
-      const captchaToken = await getCaptchaToken(siteKey, "signup");
-      const response = await signup({ ...formData, captchaToken });
-      showModal("success", "Registration Successful!", response.message);
-      setFormData({ name: "", email: "", password: "" });
-      setTimeout(() => router.push("/login"), 2000);
-    } catch (error) {
-      const fieldErrors = parseZodFieldErrors(error);
-      if (fieldErrors) {
-        setErrors(fieldErrors);
-        const firstKey = Object.keys(fieldErrors)[0];
-        if (firstKey) {
-          const el = document.getElementById(firstKey) || document.getElementById(`signup-${firstKey}`);
-          el?.focus();
-        }
-      } else {
-        const errorMessage = error.response?.data?.message || error.message || "Registration failed. Please try again.";
-        showModal("error", "Registration Failed", errorMessage);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignup = async () => {
-    setGoogleLoading(true);
-    try {
-      await getCaptchaToken(siteKey, "google_signup");
-      const user = await googleAuth();
-      redirectByRole(user.role, (to) => router.replace(to));
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || "Google signup failed. Please try again.";
-      showModal("error", "Google Signup Failed", errorMessage);
-      setGoogleLoading(false);
-    }
-  };
+  const {
+    formData,
+    errors,
+    loading,
+    googleLoading,
+    handleChange,
+    handleSubmit,
+    handleGoogleSignup,
+    modal,
+    closeModal,
+  } = useSignupForm();
 
   return (
     <AuthPageLayout backLabel="Back to Home">
@@ -108,10 +30,10 @@ function Signup() {
           <div className={cn("w-16", "h-16", "rounded-2xl", iconBadge, "flex", "items-center", "justify-center", "mx-auto", "mb-4")}>
             <FaGraduationCap className="text-white text-2xl" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">
+          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1 text-wrap-balance">
             Create Account
           </h1>
-          <p className={cn("text-muted-foreground", "text-sm")}>
+          <p className={cn("text-muted-foreground", "text-sm", "text-wrap-pretty")}>
             Join{" "}
             <span className={headingGradient}>Gradewise AI</span>{" "}
             as a student
@@ -119,21 +41,15 @@ function Signup() {
         </div>
 
         {/* Google Signup */}
-        <button
-          type="button"
-          onClick={handleGoogleSignup}
-          disabled={googleLoading || loading}
-          className={cn(btn.google, "mb-6", "shadow-lg")}
-        >
-          {googleLoading ? (
-            <LoadingSpinner size="sm" type="dots" color="purple" />
-          ) : (
-            <>
-              <FaGoogle className="text-base" />
-              <span>Continue with Google</span>
-            </>
-          )}
-        </button>
+        <div className="mb-6">
+          <GoogleAuthButton
+            onClick={handleGoogleSignup}
+            loading={googleLoading}
+            disabled={loading}
+            text="Continue with Google"
+            loadingText="Connecting to Google..."
+          />
+        </div>
 
         {/* Divider */}
         <div className="relative mb-6">
@@ -151,9 +67,7 @@ function Signup() {
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
           {/* Name */}
           <div>
-            <Label htmlFor="name">
-              Full Name
-            </Label>
+            <Label htmlFor="name">Full Name</Label>
             <div className="relative">
               <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
               <Input
@@ -179,9 +93,7 @@ function Signup() {
 
           {/* Email */}
           <div>
-            <Label htmlFor="signup-email">
-              Email Address
-            </Label>
+            <Label htmlFor="signup-email">Email Address</Label>
             <div className="relative">
               <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
               <Input
@@ -207,9 +119,7 @@ function Signup() {
 
           {/* Password */}
           <div>
-            <Label htmlFor="signup-password">
-              Password
-            </Label>
+            <Label htmlFor="signup-password">Password</Label>
             <PasswordInput
               id="signup-password"
               name="password"

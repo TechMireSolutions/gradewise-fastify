@@ -7,54 +7,31 @@ import {
   resources,
   resourceChunks,
   assessmentAttempts,
-  generatedQuestions,
-  studentAnswers,
-  users,
   type Assessment,
   type QuestionBlock,
   type NewAssessment,
 } from "../../db/schema.js";
 import { eq, and, inArray, sql } from "drizzle-orm";
-import { AppError, NotFoundError, ForbiddenError, ConflictError } from "../../utils/errors.js";
-import { generateContent, mapLanguageCode } from "../../ai/generate.js";
+import { AppError, NotFoundError, ForbiddenError } from "../../utils/errors.js";
 import type { CreateAssessmentInput, UpdateAssessmentInput, PhysicalPaperInput } from "./assessments.schema.js";
-import {
-  gatherAssessmentContext,
-  buildBlockPrompt,
-  parseQuestionsFromAI,
-  buildUnifiedAssignmentPrompt,
-  parseUnifiedAssignmentQuestionsFromAI,
-} from "./question-generation.js";
 import { generatePhysicalPaperPdf, validateAndProcessPdf } from "../../utils/pdf.js";
 import { PassThrough } from "stream";
+import { assertCanManageAssessment, loadAssessmentForManagement } from "./assessments-common.js";
+import { generatePreviewQuestions } from "./assessments-preview.service.js";
 
-// ─── Access control ───────────────────────────────────────────────────────────
-
-function assertCanManageAssessment(
-  assessment: Assessment,
-  userId: number,
-  role: string
-): void {
-  if (["admin", "super_admin"].includes(role)) return;
-  if (assessment.instructorId !== userId) {
-    throw new ForbiddenError("Access denied to this assessment");
-  }
-}
-
-async function loadAssessmentForManagement(
-  assessmentId: number,
-  userId: number,
-  role: string
-): Promise<Assessment> {
-  const [assessment] = await db
-    .select()
-    .from(assessments)
-    .where(eq(assessments.id, assessmentId))
-    .limit(1);
-  if (!assessment) throw new NotFoundError("Assessment");
-  assertCanManageAssessment(assessment, userId, role);
-  return assessment;
-}
+// Re-exports for clean modular access and 100% backward compatibility
+export { assertCanManageAssessment, loadAssessmentForManagement } from "./assessments-common.js";
+export {
+  enrollStudentService,
+  unenrollStudentService,
+  getEnrolledStudentsService,
+} from "./assessments-enrollment.service.js";
+export {
+  generatePreviewQuestions,
+  previewQuestionsService,
+  getAssessmentAIPromptService,
+} from "./assessments-preview.service.js";
+export { parseQuestionsFromAI } from "./question-generation.js";
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
@@ -107,14 +84,86 @@ export async function createAssessmentService(
       );
     }
 
-    // Link selected resources
-    if (selectedResources && selectedResources.length > 0) {
+    // Link resources
+    if (hasResources) {
       await trx.insert(assessmentResources).values(
-        selectedResources.map((rid) => ({ assessmentId: assessment.id, resourceId: rid }))
+        selectedResources.map((resourceId) => ({
+          assessmentId: assessment.id,
+          resourceId,
+        }))
       );
     }
 
     return assessment;
+  });
+}
+
+// ─── Clone ────────────────────────────────────────────────────────────────────
+
+export async function cloneAssessmentService(
+  sourceId: number,
+  userId: number,
+  role?: string
+) {
+  const [source] = await db
+    .select()
+    .from(assessments)
+    .where(eq(assessments.id, sourceId))
+    .limit(1);
+
+  if (!source) throw new NotFoundError("Source assessment not found");
+  assertCanManageAssessment(source, userId, role ?? "instructor");
+
+  const [blocks, linkedResources] = await Promise.all([
+    db.select().from(questionBlocks).where(eq(questionBlocks.assessmentId, sourceId)),
+    db.select().from(assessmentResources).where(eq(assessmentResources.assessmentId, sourceId)),
+  ]);
+
+  return db.transaction(async (trx) => {
+    const [cloned] = await trx
+      .insert(assessments)
+      .values({
+        title: `${source.title} (Copy)`,
+        prompt: source.prompt,
+        externalLinks: source.externalLinks,
+        instructorId: userId,
+        isExecuted: false,
+        language: source.language ?? "en",
+      } satisfies Omit<NewAssessment, "id" | "createdAt" | "updatedAt">)
+      .returning();
+
+    if (!cloned) throw new AppError("CLONE_FAILED", "Failed to clone assessment", 500);
+
+    if (blocks.length > 0) {
+      await trx.insert(questionBlocks).values(
+        blocks.map((b) => ({
+          assessmentId: cloned.id,
+          questionType: b.questionType,
+          questionCount: b.questionCount,
+          durationPerQuestion: b.durationPerQuestion,
+          numOptions: b.numOptions,
+          leftCount: b.leftCount,
+          rightCount: b.rightCount,
+          positiveMarks: b.positiveMarks,
+          negativeMarks: b.negativeMarks,
+          createdBy: userId,
+        }))
+      );
+    }
+
+    if (linkedResources.length > 0) {
+      await trx.insert(assessmentResources).values(
+        linkedResources.map((r) => ({
+          assessmentId: cloned.id,
+          resourceId: r.resourceId,
+        }))
+      );
+    }
+
+    return {
+      ...mapAssessment(cloned),
+      isExecuted: cloned.isExecuted,
+    };
   });
 }
 
@@ -343,183 +392,6 @@ export async function deleteAssessmentService(
   await db.delete(assessmentResources).where(eq(assessmentResources.assessmentId, assessmentId));
   await db.delete(assessments).where(eq(assessments.id, assessmentId));
 }
-
-// ─── Enrollment ───────────────────────────────────────────────────────────────
-
-export async function enrollStudentService(
-  assessmentId: number,
-  email: string,
-  userId: number,
-  role: string
-): Promise<void> {
-  await loadAssessmentForManagement(assessmentId, userId, role);
-
-  const student = await db
-    .select({ id: users.id, role: users.role })
-    .from(users)
-    .where(eq(users.email, email))
-    .limit(1);
-  if (!student[0] || student[0].role !== "student") {
-    throw new AppError("INVALID_STUDENT", "User is not a student or not found", 400);
-  }
-
-  const studentId = student[0].id;
-
-  const existing = await db
-    .select({ id: enrollments.id })
-    .from(enrollments)
-    .where(and(eq(enrollments.assessmentId, assessmentId), eq(enrollments.studentId, studentId)))
-    .limit(1);
-
-  if (existing.length > 0) {
-    throw new ConflictError("Student is already enrolled in this assessment.");
-  }
-
-  await db
-    .insert(enrollments)
-    .values({ assessmentId, studentId });
-}
-
-export async function unenrollStudentService(
-  assessmentId: number,
-  studentId: number,
-  userId: number,
-  role: string
-): Promise<void> {
-  await loadAssessmentForManagement(assessmentId, userId, role);
-  await db
-    .delete(enrollments)
-    .where(and(eq(enrollments.assessmentId, assessmentId), eq(enrollments.studentId, studentId)));
-}
-
-export async function getEnrolledStudentsService(
-  assessmentId: number,
-  userId: number,
-  role: string
-) {
-  await loadAssessmentForManagement(assessmentId, userId, role);
-  return db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      role: users.role,
-      enrolledAt: enrollments.enrolledAt,
-    })
-    .from(enrollments)
-    .innerJoin(users, eq(enrollments.studentId, users.id))
-    .where(eq(enrollments.assessmentId, assessmentId));
-}
-
-// ─── Preview questions ────────────────────────────────────────────────────────
-
-async function generatePreviewQuestions(
-  assessment: Assessment,
-  language: string
-): Promise<object[]> {
-  const blocks = await db
-    .select()
-    .from(questionBlocks)
-    .where(eq(questionBlocks.assessmentId, assessment.id));
-
-  if (blocks.length === 0) {
-    throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
-  }
-
-  const context = await gatherAssessmentContext(assessment.id);
-  const langLabel = mapLanguageCode(language);
-  const prompt = assessment.prompt ?? "";
-
-  const unifiedPrompt = buildUnifiedAssignmentPrompt(
-    blocks,
-    prompt,
-    context,
-    language,
-    langLabel,
-    assessment.title
-  );
-
-  try {
-    const raw = await generateContent(unifiedPrompt, { maxOutputTokens: 8192, temperature: 0.7 });
-    return parseUnifiedAssignmentQuestionsFromAI(raw, blocks);
-  } catch (err) {
-    console.warn("[PreviewQuestions] Unified generation encountered error, falling back to block prompt:", err);
-    const allQuestions: object[] = [];
-    for (const block of blocks) {
-      try {
-        const blockPrompt = buildBlockPrompt(block, prompt, context, language, langLabel);
-        const raw = await generateContent(blockPrompt, { maxOutputTokens: 4096, temperature: 0.7 });
-        const parsed = parseQuestionsFromAI(raw, block.questionType);
-        allQuestions.push(...parsed);
-      } catch (blockErr) {
-        console.error(`[PreviewQuestions] Block ${block.id} generation failed:`, blockErr);
-      }
-    }
-    return allQuestions;
-  }
-}
-
-export async function previewQuestionsService(
-  assessmentId: number,
-  language = "en",
-  userId?: number,
-  role?: string
-): Promise<object[]> {
-  const assessment = await loadAssessmentForManagement(assessmentId, userId ?? -1, role ?? "instructor");
-  return generatePreviewQuestions(assessment, language);
-}
-
-// ─── AI prompt blueprint ──────────────────────────────────────────────────────
-
-export async function getAssessmentAIPromptService(
-  assessmentId: number,
-  userId: number,
-  role: string,
-  targetLanguage?: string
-): Promise<{
-  language: string;
-  languageLabel: string;
-  unifiedPrompt: string;
-  blocks: Array<{ id: number | null; questionType: string; questionCount: number; prompt: string }>;
-}> {
-  const assessment = await loadAssessmentForManagement(assessmentId, userId, role);
-
-  const blocks = await db
-    .select()
-    .from(questionBlocks)
-    .where(eq(questionBlocks.assessmentId, assessmentId));
-
-  if (blocks.length === 0) {
-    throw new AppError("NO_BLOCKS", "No question blocks configured for this assessment", 400);
-  }
-
-  const effectiveLang = (targetLanguage || "all").toLowerCase();
-  const context = await gatherAssessmentContext(assessment.id);
-  const langLabel = mapLanguageCode(effectiveLang);
-  const instructorPrompt = assessment.prompt ?? "";
-
-  const unifiedPrompt = buildUnifiedAssignmentPrompt(
-    blocks,
-    instructorPrompt,
-    context,
-    effectiveLang,
-    langLabel,
-    assessment.title,
-    50_000
-  );
-
-  const mapped = blocks.map((block) => ({
-    id: block.id,
-    questionType: block.questionType,
-    questionCount: block.questionCount,
-    prompt: buildBlockPrompt(block, instructorPrompt, context, effectiveLang, langLabel, 50_000),
-  }));
-
-  return { language: effectiveLang, languageLabel: langLabel, unifiedPrompt, blocks: mapped };
-}
-
-// Re-export for backward compatibility
-export { parseQuestionsFromAI } from "./question-generation.js";
 
 // ─── Physical paper ───────────────────────────────────────────────────────────
 

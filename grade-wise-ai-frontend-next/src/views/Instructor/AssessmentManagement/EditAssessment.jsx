@@ -1,23 +1,69 @@
+"use client";
+
 import { cn } from "@/lib/cn.js";
-import { btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
+import { btn, card, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import { Input, Label, Select, Textarea, LoadingSpinner, Modal } from "@/components/ui";
+import { Button, LoadingSpinner, Modal } from "@/components/ui";
 import { validateAssessmentForm, validateFiles } from "@/schemas/editAssessmentSchemas.js";
-import { assessmentLanguages } from "@/schemas/assessmentSchemas.js";
-import { FaArrowLeft, FaExclamationTriangle, FaClipboardList, FaLink, FaPlus, FaTrash, FaBook, FaFile, FaTimes, FaQuestionCircle, FaSave } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaExclamationTriangle,
+  FaSave,
+  FaCopy,
+} from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useModal from "@/hooks/useModal.js";
+import useAssessmentForm from "./hooks/useAssessmentForm.js";
+import AssessmentMetadataCard from "./components/AssessmentMetadataCard.jsx";
+import AssessmentLockedNotice from "./components/AssessmentLockedNotice.jsx";
+import QuestionBlockList from "./components/QuestionBlockList.jsx";
+import AssessmentResourcePicker from "./components/AssessmentResourcePicker.jsx";
+import AssessmentExternalLinks from "./components/AssessmentExternalLinks.jsx";
 
-function EditAssessment() {
+export default function EditAssessment() {
   const { id } = useParams();
   const router = useRouter();
-  const { currentAssessment, loading, error, getAssessmentById, updateAssessment } = useAssessmentStore();
-  const { resources, fetchAllResources, uploadResources, loading: resourcesLoading } = useResourceStore();
-  const { modal, showModal, closeModal } = useModal();
+  const {
+    currentAssessment,
+    loading,
+    error,
+    getAssessmentById,
+    updateAssessment,
+    cloneAssessment,
+  } = useAssessmentStore();
 
+  const {
+    resources,
+    fetchAllResources,
+    uploadResources,
+    loading: resourcesLoading,
+  } = useResourceStore();
+
+  const { modal, showModal, closeModal } = useModal();
+  const [isCloning, setIsCloning] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const {
+    formData,
+    handleInputChange,
+    handleLinkChange,
+    addExternalLink,
+    removeExternalLink,
+    selectedResources,
+    handleResourceToggle,
+    newFiles,
+    setNewFiles,
+    questionBlocks,
+    handleBlockChange,
+    handleNegativeMarksBlur,
+    addQuestionBlock,
+    removeQuestionBlock,
+    hydrateFromAssessment,
+    getSanitizedBlocks,
+  } = useAssessmentForm();
 
   useEffect(() => {
     fetchAllResources();
@@ -29,229 +75,67 @@ function EditAssessment() {
     }
   }, [id, getAssessmentById]);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    prompt: "",
-    language: "en",
-    externalLinks: [""],
-  });
-
-  const [questionBlocks, setQuestionBlocks] = useState([
-    {
-      question_type: "multiple_choice",
-      question_count: 1,
-      duration_per_question: 120,
-      num_options: 4,
-      positive_marks: 1,
-      negative_marks: 0,
-    },
-  ]);
-
-  const [selectedResources, setSelectedResources] = useState([]);
-  const [newFiles, setNewFiles] = useState([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-
   useEffect(() => {
     if (currentAssessment && currentAssessment.id === Number(id)) {
-      setFormData({
-        title: currentAssessment.title || "",
-        prompt: currentAssessment.prompt || "",
-        language: currentAssessment.language || "en",
-        externalLinks: Array.isArray(currentAssessment.external_links) && currentAssessment.external_links.length > 0
-          ? currentAssessment.external_links
-          : [""],
-      });
-      setQuestionBlocks(
-        Array.isArray(currentAssessment.question_blocks) && currentAssessment.question_blocks.length > 0
-          ? currentAssessment.question_blocks.map(block => ({
-            question_type: block.question_type || "multiple_choice",
-            question_count: Number(block.question_count) || 1,
-            duration_per_question: Number(block.duration_per_question) || 120,
-            num_options: Number(block.num_options) || 4,
-            num_first_side: Number(block.num_first_side) || 3,
-            num_second_side: Number(block.num_second_side) || 4,
-            positive_marks: block.positive_marks !== undefined && block.positive_marks !== null ? Number(block.positive_marks) : 1,
-            negative_marks: block.negative_marks !== undefined && block.negative_marks !== null
-              ? (Number(block.negative_marks) === 0 ? 0 : -Math.abs(Number(block.negative_marks)))
-              : 0,
-          }))
-          : [{ question_type: "multiple_choice", question_count: 1, duration_per_question: 120, num_options: 4, positive_marks: 1, negative_marks: 0 }]
-      );
-      setSelectedResources(
-        Array.isArray(currentAssessment.resources)
-          ? currentAssessment.resources.map(r => r.id).filter(id => id && !isNaN(id))
-          : []
-      );
+      hydrateFromAssessment(currentAssessment);
     }
-  }, [currentAssessment, id]);
+  }, [currentAssessment, id, hydrateFromAssessment]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const formatNegativeMarksInput = (value) => {
-    if (value === "" || value === null || value === undefined) {
-      return "";
+  const handleClone = async () => {
+    if (!id || isCloning) return;
+    setIsCloning(true);
+    try {
+      const cloned = await cloneAssessment(id);
+      if (cloned?.id) {
+        showModal(
+          "success",
+          "Success",
+          "Assessment cloned successfully. Redirecting to new draft..."
+        );
+        setTimeout(() => {
+          router.push(`/instructor/assessments/${cloned.id}/edit`);
+        }, 1000);
+      }
+    } catch (err) {
+      showModal("error", "Cloning Failed", err.message || "Failed to clone assessment.");
+    } finally {
+      setIsCloning(false);
     }
-    let str = String(value).trim();
-    // Keep only numeric characters, dots, and minus
-    str = str.replace(/[^0-9.-]/g, "");
-    if (str === "") return "";
-    if (str === "-") return "-";
-
-    // Strip existing minus signs to work with raw digits
-    str = str.replace(/-/g, "");
-
-    // If only dot was entered, e.g. "." or "-."
-    if (str === ".") return "-0.";
-
-    // Prevent multiple dots: keep only the first decimal point
-    const parts = str.split(".");
-    if (parts.length > 2) {
-      str = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    // Always prefix with minus sign
-    return `-${str}`;
-  };
-
-  const handleNegativeMarksBlur = (index) => {
-    setQuestionBlocks((prev) =>
-      prev.map((block, i) => {
-        if (i !== index) return block;
-        const val = String(block.negative_marks ?? "").trim();
-        if (val === "" || val === "-" || val === "-." || val === "-0.") {
-          return { ...block, negative_marks: 0 };
-        }
-        const num = Number(val);
-        if (!isNaN(num)) {
-          return { ...block, negative_marks: num === 0 ? 0 : -Math.abs(num) };
-        }
-        return { ...block, negative_marks: 0 };
-      })
-    );
-  };
-
-  const handleBlockChange = (index, field, value) => {
-    setQuestionBlocks((prev) =>
-      prev.map((block, i) =>
-        i === index
-          ? {
-            ...block,
-            [field]:
-              field === "question_count" || field === "duration_per_question" || field === "num_options"
-                ? Math.max(Number.parseInt(value) || 1, 1)
-                : field === "positive_marks"
-                  ? value === "" || value === null
-                    ? null
-                    : value === "-"
-                      ? "-"
-                      : isNaN(Number(value))
-                        ? 1
-                        : Math.abs(Number(value))
-                  : field === "negative_marks"
-                    ? formatNegativeMarksInput(value)
-                    : value,
-          }
-          : block
-      )
-    );
-  };
-
-  const addQuestionBlock = () => {
-    setQuestionBlocks((prev) => [
-      ...prev,
-      {
-        question_type: "multiple_choice",
-        question_count: 1,
-        duration_per_question: 120,
-        num_options: 4,
-        positive_marks: 1,
-        negative_marks: 0,
-      },
-    ]);
-  };
-
-  const removeQuestionBlock = (index) => {
-    if (questionBlocks.length > 1) {
-      setQuestionBlocks((prev) => prev.filter((_, i) => i !== index));
-    }
-  };
-
-  const addExternalLink = () => {
-    setFormData((prev) => ({
-      ...prev,
-      externalLinks: [...prev.externalLinks, ""],
-    }));
-  };
-
-  const removeExternalLink = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      externalLinks: prev.externalLinks.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleLinkChange = (index, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      externalLinks: prev.externalLinks.map((link, i) => (i === index ? value : link)),
-    }));
   };
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-
-    // Validate files using Zod
     const validation = validateFiles(files);
     if (!validation.success) {
       showModal("error", "File Validation Error", validation.error);
-      e.target.value = ''; // Clear the input
+      e.target.value = "";
       return;
     }
-
     setNewFiles(files);
-  };
-
-  const handleResourceToggle = (resourceId) => {
-    setSelectedResources((prev) =>
-      prev.includes(resourceId) ? prev.filter((id) => id !== resourceId) : [...prev, resourceId]
-    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Sanitize question blocks before validation so negative values and intermediate strings are handled properly
-    const sanitizedBlocks = questionBlocks.map((b) => {
-      const pos = b.positive_marks === "" || b.positive_marks === "-" || b.positive_marks == null
-        ? 1
-        : Math.abs(Number(b.positive_marks) || 1);
-      const neg = b.negative_marks === "" || b.negative_marks === "-" || b.negative_marks == null
-        ? 0
-        : (isNaN(Number(b.negative_marks)) ? 0 : (Number(b.negative_marks) === 0 ? 0 : -Math.abs(Number(b.negative_marks))));
-      return {
-        ...b,
-        question_count: Math.max(1, Number(b.question_count) || 1),
-        duration_per_question: Math.max(30, Number(b.duration_per_question) || 60),
-        num_options: b.question_type === "multiple_choice" ? Math.max(2, Number(b.num_options) || 4) : 4,
-        positive_marks: pos,
-        negative_marks: neg,
-      };
-    });
+    const sanitizedBlocks = getSanitizedBlocks();
 
-    // Validate form using Zod
+    // Map to validation schema expectations
+    const validationBlocks = sanitizedBlocks.map((b) => ({
+      question_type: b.questionType,
+      question_count: b.questionCount,
+      duration_per_question: b.durationPerQuestion,
+      num_options: b.questionType === "multiple_choice" ? b.numOptions : null,
+      positive_marks: b.positiveMarks,
+      negative_marks: b.negativeMarks,
+    }));
+
     const validation = validateAssessmentForm({
       title: formData.title,
       prompt: formData.prompt,
       externalLinks: formData.externalLinks,
-      questionBlocks: sanitizedBlocks,
+      questionBlocks: validationBlocks,
       selectedResources,
-      newFiles
+      newFiles,
     });
 
     if (!validation.success) {
@@ -270,7 +154,11 @@ function EditAssessment() {
           .filter(Boolean);
         finalResources = [...new Set([...finalResources, ...newIds])];
       } catch (uploadErr) {
-        showModal("error", "Resource Upload Failed", uploadErr.message || "Failed to upload new files.");
+        showModal(
+          "error",
+          "Resource Upload Failed",
+          uploadErr.message || "Failed to upload new files."
+        );
         setIsProcessing(false);
         return;
       }
@@ -283,23 +171,22 @@ function EditAssessment() {
       externalLinks: (formData.externalLinks || []).filter((l) => l && l.trim()),
       selectedResources: finalResources,
       questionBlocks: sanitizedBlocks.map((b) => ({
-        questionType: b.question_type,
-        questionCount: b.question_count,
-        durationPerQuestion: b.duration_per_question,
-        numOptions: b.question_type === "multiple_choice" ? b.num_options : 4,
-        leftCount: b.question_type === "matching" ? (Number(b.num_first_side) || 3) : 3,
-        rightCount: b.question_type === "matching" ? (Number(b.num_second_side) || 4) : 4,
-        positiveMarks: b.positive_marks,
-        negativeMarks: b.negative_marks,
+        questionType: b.questionType,
+        questionCount: b.questionCount,
+        durationPerQuestion: b.durationPerQuestion,
+        numOptions: b.questionType === "multiple_choice" ? b.numOptions : 4,
+        leftCount: b.questionType === "matching" ? (Number(b.leftCount) || 3) : 3,
+        rightCount: b.questionType === "matching" ? (Number(b.rightCount) || 4) : 4,
+        positiveMarks: b.positiveMarks,
+        negativeMarks: b.negativeMarks,
       })),
     };
 
     try {
-      await updateAssessment(parseInt(id), assessmentData);
-      showModal("success", "Success!", "Assessment updated!");
+      await updateAssessment(parseInt(id, 10), assessmentData);
+      showModal("success", "Success!", "Assessment updated successfully!");
       setTimeout(() => router.push("/instructor/assessments"), 1500);
     } catch (err) {
-      console.error("DEBUG: Frontend EditAssessment - Update error:", err);
       showModal("error", "Error", err.message || "Update failed");
     } finally {
       setIsProcessing(false);
@@ -308,13 +195,13 @@ function EditAssessment() {
 
   if (loading || !currentAssessment || currentAssessment.id !== Number(id)) {
     return (
-      <div className={cn(page, "flex", "flex-col", "justify-center", "items-center")}>
+      <div className={cn(page, "flex flex-col justify-center items-center")}>
         <AmbientBackground />
         <div className="relative flex flex-col items-center justify-center py-32 gap-4">
           <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
             <LoadingSpinner size="lg" type="spinner" color="blue" />
           </div>
-          <p className={cn("text-muted-foreground", "text-sm")}>Loading assessment details...</p>
+          <p className="text-muted-foreground text-sm">Loading assessment details...</p>
         </div>
       </div>
     );
@@ -325,21 +212,19 @@ function EditAssessment() {
       <div className={page}>
         <AmbientBackground />
         <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className={cn(card, "shadow-2xl", "p-8")}>
-            <div className="text-center">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6 mx-auto">
-                <FaExclamationTriangle className="text-red-400 text-3xl" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground mb-4">Error</h1>
-              <p className={cn("text-muted-foreground", "mb-8")}>{error}</p>
-              <button
-                onClick={() => router.push("/instructor/assessments")}
-                className={cn(btn.primary, "px-5 py-3", "inline-flex items-center gap-2 cursor-pointer")}
-              >
-                <FaArrowLeft />
-                Back to Assessments
-              </button>
+          <div className={cn(card, "shadow-2xl p-8 text-center")}>
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6 mx-auto">
+              <FaExclamationTriangle className="text-red-400 text-3xl" />
             </div>
+            <h1 className="text-3xl font-bold text-foreground mb-4">Error</h1>
+            <p className="text-muted-foreground mb-8">{error}</p>
+            <button
+              onClick={() => router.push("/instructor/assessments")}
+              className={cn(btn.primary, "px-5 py-3 inline-flex items-center gap-2 cursor-pointer")}
+            >
+              <FaArrowLeft />
+              Back to Assessments
+            </button>
           </div>
         </div>
         <Modal
@@ -347,454 +232,123 @@ function EditAssessment() {
           onClose={closeModal}
           type={modal.type}
           title={modal.title}
-        >
-          {modal.message}
-        </Modal>
+          message={modal.message}
+        />
       </div>
+    );
+  }
+
+  if (currentAssessment.is_executed) {
+    return (
+      <AssessmentLockedNotice
+        assessment={currentAssessment}
+        isCloning={isCloning}
+        onClone={handleClone}
+      />
     );
   }
 
   return (
     <div className={page}>
-      {/* Ambient blobs */}
       <AmbientBackground />
 
       <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-5">
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+              Instructor Portal
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2 text-balance">
+              Edit Assessment
+            </h1>
+            <p className="text-muted-foreground leading-relaxed text-pretty">
+              Update assessment parameters, modify question blocks, or assign additional resources
+            </p>
+          </div>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
             <button
-              onClick={() => router.push("/instructor/assessments")}
-              className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
+              type="button"
+              onClick={handleClone}
+              disabled={isCloning}
+              className={cn(btn.secondary, "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl")}
             >
-              <FaArrowLeft className="text-xs" />
-              Back to Assessments
+              <FaCopy />
+              <span>{isCloning ? "Cloning..." : "Clone Assessment"}</span>
             </button>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
-            <div className={cn("p-2.5", "rounded-xl", iconBadge, "w-fit")}>
-              <FaClipboardList className="text-white text-lg" />
-            </div>
-            <div>
-              <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-1")}>Assessment Management</p>
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">Edit Assessment</h1>
-            </div>
-          </div>
-          <p className={cn("text-muted-foreground", "leading-relaxed", "ml-0", "sm:ml-14")}>Update your assessment details and configuration</p>
-
-          {currentAssessment.is_executed && (
-            <div className="mt-5 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-              <div className="p-1.5 rounded-lg bg-amber-500/20 mt-0.5 flex-shrink-0">
-                <FaExclamationTriangle className="text-amber-400 text-sm" />
-              </div>
-              <div>
-                <p className="font-semibold text-amber-300 text-sm">Assessment Already Executed</p>
-                <p className="text-xs text-amber-400/80 mt-0.5">This assessment has been executed and cannot be modified.</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Assessment Details Card */}
-          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
-            {/* Card Header */}
-            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20">
-                <FaClipboardList className="text-indigo-400 text-sm" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">Assessment Details</h2>
-            </div>
-
-            <div className="p-6 sm:p-8 space-y-6">
-              {/* Title Input */}
-              <div>
-                <Label htmlFor="title">
-                  Assessment Title <span className="text-red-400">*</span>
-                </Label>
-                <Input
-                  type="text"
-                  name="title"
-                  id="title"
-                  hasIcon={false}
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  placeholder="e.g., Data Structures Final Exam"
-                  disabled={currentAssessment.is_executed || isProcessing}
-                  required
-                />
-              </div>
-
-              {/* Language Selector */}
-              <div>
-                <Label htmlFor="language">
-                  Questions Language <span className={cn("text-muted-foreground", "font-normal")}>(AI will generate questions in this language)</span>
-                </Label>
-                <Select
-                  name="language"
-                  id="language"
-                  value={formData.language}
-                  onChange={handleInputChange}
-                  disabled={currentAssessment.is_executed || isProcessing}
-                >
-                  {assessmentLanguages.map((lang) => (
-                    <option key={lang.value} value={lang.value}>{lang.label}</option>
-                  ))}
-                </Select>
-              </div>
-
-              {/* Prompt Textarea */}
-              <div>
-                <Label htmlFor="prompt">
-                  AI Prompt <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using resources or links)</span>
-                </Label>
-                <Textarea
-                  name="prompt"
-                  id="prompt"
-                  value={formData.prompt}
-                  onChange={handleInputChange}
-                  rows={5}
-                  placeholder="Provide a detailed prompt for question generation..."
-                  disabled={currentAssessment.is_executed || isProcessing}
-                />
-              </div>
-
-              {/* External Links */}
-              <div className="bg-input rounded-xl border border-border p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <FaLink className="text-indigo-400 text-sm" />
-                  <label className={cn("text-secondary-foreground", "text-sm", "font-semibold")}>External Links</label>
-                </div>
-                <div className="space-y-3">
-                  {formData.externalLinks.map((link, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <FaLink className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
-                        <Input
-                          type="url"
-                          value={link}
-                          hasIcon={true}
-                          onChange={(e) => handleLinkChange(index, e.target.value)}
-                          placeholder="https://example.com/resource"
-                          disabled={currentAssessment.is_executed || isProcessing}
-                          aria-label={`External link ${index + 1}`}
-                        />
-                      </div>
-                      {formData.externalLinks.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeExternalLink(index)}
-                          className="p-2 rounded-xl text-red-400 hover:text-red-300 bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-w-11 min-h-11 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
-                          disabled={currentAssessment.is_executed || isProcessing}
-                          aria-label={`Remove link ${index + 1}`}
-                        >
-                          <FaTimes />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={addExternalLink}
-                  className={cn("mt-4", btn.secondary, "inline-flex items-center gap-2")}
-                  disabled={currentAssessment.is_executed || isProcessing}
-                >
-                  <FaPlus className="text-xs" />
-                  Add Link
-                </button>
-              </div>
-
-              {/* Resources Section */}
-              <div className="bg-input rounded-xl border border-border p-5">
-                <div className="flex items-center gap-2 mb-5">
-                  <FaBook className="text-indigo-400 text-sm" />
-                  <label className={cn("text-secondary-foreground", "text-sm", "font-semibold")}>Resources</label>
-                </div>
-                <div className="space-y-6">
-                  {/* Upload Files */}
-                  <div>
-                    <label htmlFor="new_files" className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-2")}>
-                      Upload New Files
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="file"
-                        id="new_files"
-                        multiple
-                        accept=".pdf,.doc,.docx,.txt,.ppt,.pptx,.jpg,.jpeg,.png,.webp"
-                        onChange={handleFileChange}
-                        className={cn("w-full", "bg-input", "border", "border-dashed", "border-border", "hover:border-indigo-500/50", "rounded-xl", "px-4", "py-4", "text-muted-foreground", "text-sm", "transition-all", "duration-200", "focus:outline-none", "focus:ring-2", "focus:ring-indigo-500/30", "cursor-pointer", "file:mr-4", "file:py-1.5", "file:px-3", "file:rounded-lg", "file:border-0", "file:text-xs", "file:font-semibold", "file:bg-indigo-500/15", "file:text-indigo-400", "hover:file:bg-indigo-500/25", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                        disabled={currentAssessment.is_executed}
-                      />
-                    </div>
-                    {newFiles.length > 0 && (
-                      <div className="mt-3 bg-card rounded-xl p-3 border border-border">
-                        <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-2")}>Selected Files</p>
-                        <ul className="space-y-1.5">
-                          {newFiles.map((file, index) => (
-                            <li key={index} className={cn("text-sm", "text-secondary-foreground", "flex", "items-center", "gap-2")}>
-                              <FaFile className="text-indigo-400 text-xs flex-shrink-0" />
-                              {file.name}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Existing Resources */}
-                  <div>
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-2")}>Select Existing Resources</label>
-                    {resourcesLoading ? (
-                      <div className="flex justify-center py-8">
-                        <LoadingSpinner size="sm" type="dots" color="blue" />
-                      </div>
-                    ) : resources.length > 0 ? (
-                      <div className="space-y-1.5 max-h-64 overflow-y-auto bg-slate-900/40 border border-border rounded-xl p-3">
-                        {resources.map((resource) => (
-                          <div
-                            key={resource.id}
-                            className="flex items-center p-2.5 hover:bg-indigo-500/5 rounded-lg transition-colors duration-150 cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              id={`resource-${resource.id}`}
-                              checked={selectedResources.includes(resource.id)}
-                              onChange={() => handleResourceToggle(resource.id)}
-                              className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                              disabled={currentAssessment.is_executed}
-                            />
-                            <label
-                              htmlFor={`resource-${resource.id}`}
-                              className={cn("ml-3", "text-sm", "text-secondary-foreground", "cursor-pointer", "flex-1", "flex", "items-center", "gap-2")}
-                            >
-                              <span className="font-medium">{resource.name}</span>
-                              <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>
-                                {resource.contentType}
-                              </span>
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-border rounded-xl bg-slate-900/30">
-                        <FaBook className="text-slate-600 text-2xl mb-2" />
-                        <p className={cn("text-muted-foreground", "text-sm")}>No resources available</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Question Blocks Card */}
-          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
-            {/* Card Header */}
-            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
-                <FaQuestionCircle className="text-violet-400 text-sm" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">Question Configuration</h2>
-            </div>
-
-            <div className="p-6 sm:p-8">
-              <div className="space-y-5">
-                {questionBlocks.map((block, index) => (
-                  <div
-                    key={index}
-                    className="bg-input rounded-xl border border-border hover:border-indigo-500/30 p-5 transition-all duration-200"
-                  >
-                    <div className="flex justify-between items-center mb-5">
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-                          Block {index + 1}
-                        </span>
-                        <h3 className={cn("text-base", "font-semibold", "text-secondary-foreground")}>
-                          {block.question_type === "multiple_choice" && "Multiple Choice"}
-                          {block.question_type === "short_answer" && "Short Answer"}
-                          {block.question_type === "true_false" && "True / False"}
-                          {block.question_type === "fill_in_the_blank" && "Fill in the Blank"}
-                        </h3>
-                      </div>
-                      {questionBlocks.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeQuestionBlock(index)}
-                          className="px-3 py-1.5 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={currentAssessment.is_executed}
-                        >
-                          <FaTrash className="text-xs" />
-                          Remove
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Question Type */}
-                      <div>
-                        <Label htmlFor={`edit-block-${index}-type`}>Question Type</Label>
-                        <Select
-                          id={`edit-block-${index}-type`}
-                          value={block.question_type}
-                          onChange={(e) => handleBlockChange(index, "question_type", e.target.value)}
-                          disabled={currentAssessment.is_executed || isProcessing}
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="true_false">True/False</option>
-                          <option value="fill_in_the_blank">Fill in the Blank</option>
-                        </Select>
-                      </div>
-
-                      {/* Question Count */}
-                      <div>
-                        <Label htmlFor={`edit-block-${index}-count`}>Question Count</Label>
-                        <Input
-                          id={`edit-block-${index}-count`}
-                          type="number"
-                          hasIcon={false}
-                          value={block.question_count}
-                          onChange={(e) => handleBlockChange(index, "question_count", e.target.value)}
-                          min="1"
-                          placeholder="e.g. 5"
-                          disabled={currentAssessment.is_executed || isProcessing}
-                          required
-                        />
-                      </div>
-
-                      {/* Duration */}
-                      <div>
-                        <Label htmlFor={`edit-block-${index}-duration`}>Duration (seconds)</Label>
-                        <Input
-                          id={`edit-block-${index}-duration`}
-                          type="number"
-                          hasIcon={false}
-                          value={block.duration_per_question}
-                          onChange={(e) => handleBlockChange(index, "duration_per_question", e.target.value)}
-                          min="30"
-                          max="600"
-                          placeholder="e.g. 120"
-                          disabled={currentAssessment.is_executed || isProcessing}
-                          required
-                        />
-                      </div>
-
-                      {/* Positive Marks */}
-                      <div>
-                        <Label htmlFor={`edit-block-${index}-pos-marks`}>Positive Marks</Label>
-                        <Input
-                          id={`edit-block-${index}-pos-marks`}
-                          type="number"
-                          hasIcon={false}
-                          value={block.positive_marks ?? ""}
-                          onChange={(e) => handleBlockChange(index, "positive_marks", e.target.value)}
-                          step="0.1"
-                          placeholder="e.g. 1"
-                          disabled={currentAssessment.is_executed || isProcessing}
-                        />
-                      </div>
-
-                      {/* Negative Marks */}
-                      <div>
-                        <Label htmlFor={`edit-block-${index}-neg-marks`}>Negative Marks</Label>
-                        <Input
-                          id={`edit-block-${index}-neg-marks`}
-                          type="text"
-                          inputMode="decimal"
-                          hasIcon={false}
-                          value={block.negative_marks ?? ""}
-                          onChange={(e) => handleBlockChange(index, "negative_marks", e.target.value)}
-                          onBlur={() => handleNegativeMarksBlur(index)}
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                              e.preventDefault();
-                              const current = Number(block.negative_marks) || 0;
-                              const step = 0.05;
-                              const nextVal = e.key === "ArrowUp"
-                                ? Math.min(0, Number((current + step).toFixed(2)))
-                                : Math.max(-100, Number((current - step).toFixed(2)));
-                              handleBlockChange(index, "negative_marks", nextVal === 0 ? 0 : nextVal);
-                            }
-                          }}
-                          placeholder="e.g. -0.25"
-                          disabled={currentAssessment.is_executed || isProcessing}
-                        />
-                        <span className="text-[11px] text-muted-foreground mt-1 block">
-                          Deduction must be less than total marks ({block.positive_marks || 1})
-                        </span>
-                      </div>
-
-                      {/* Number of Options (MCQ only) */}
-                      {block.question_type === "multiple_choice" && (
-                        <div>
-                          <Label htmlFor={`edit-block-${index}-options`}>Number of Options</Label>
-                          <Input
-                            id={`edit-block-${index}-options`}
-                            type="number"
-                            hasIcon={false}
-                            value={block.num_options}
-                            onChange={(e) => handleBlockChange(index, "num_options", e.target.value)}
-                            min="2"
-                            max="6"
-                            placeholder="2 to 6"
-                            disabled={currentAssessment.is_executed || isProcessing}
-                            required
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {/* Add Block Button */}
-                <button
-                  type="button"
-                  onClick={addQuestionBlock}
-                  className={cn("w-full", "py-3", "bg-card/60", "border", "border-dashed", "border-border", "hover:border-indigo-500/40", "hover:bg-indigo-500/5", "text-muted-foreground", "hover:text-indigo-300", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "inline-flex", "items-center", "justify-center", "gap-2", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-                  disabled={currentAssessment.is_executed}
-                >
-                  <FaPlus className="text-xs" />
-                  Add Question Block
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={() => router.push("/instructor/assessments")}
-              className={cn(btn.secondary, "order-2 sm:order-1")}
+              className={cn(btn.secondary, "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl")}
+            >
+              <FaArrowLeft />
+              <span>Back</span>
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Assessment Metadata Card */}
+          <AssessmentMetadataCard
+            title={formData.title}
+            language={formData.language}
+            prompt={formData.prompt}
+            onChange={handleInputChange}
+            disabled={isProcessing}
+            showLanguage={true}
+            titlePlaceholder="e.g., Computer Systems Final Exam"
+          />
+
+          {/* Resources Picker */}
+          <AssessmentResourcePicker
+            resources={resources}
+            selectedResources={selectedResources}
+            onToggleResource={handleResourceToggle}
+            loading={resourcesLoading}
+            allowUpload={true}
+            newFiles={newFiles}
+            onFileChange={handleFileChange}
+            disabled={isProcessing}
+          />
+
+          {/* External Links */}
+          <AssessmentExternalLinks
+            externalLinks={formData.externalLinks}
+            onLinkChange={handleLinkChange}
+            onAddLink={addExternalLink}
+            onRemoveLink={removeExternalLink}
+            disabled={isProcessing}
+          />
+
+          {/* Question Blocks */}
+          <QuestionBlockList
+            questionBlocks={questionBlocks}
+            onChange={handleBlockChange}
+            onNegativeMarksBlur={handleNegativeMarksBlur}
+            onAddBlock={addQuestionBlock}
+            onRemoveBlock={removeQuestionBlock}
+            disabled={isProcessing}
+          />
+
+          {/* Action Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => router.push("/instructor/assessments")}
               disabled={isProcessing}
+              className={cn(btn.secondary, "w-full sm:w-auto px-6 py-3 rounded-xl")}
             >
               Cancel
             </button>
-            <button
+            <Button
               type="submit"
-              className={cn(btn.primary, "px-5 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed")}
-              disabled={loading || isProcessing || currentAssessment.is_executed}
+              variant="primary"
+              disabled={isProcessing}
+              className="w-full sm:w-auto px-8 py-3 rounded-xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-indigo-500/20"
             >
-              {isProcessing ? (
-                <>
-                  <LoadingSpinner size="sm" color="white" type="gradient" />
-                  <span>Processing...</span>
-                </>
-              ) : loading ? (
-                <>
-                  <LoadingSpinner size="sm" color="white" type="gradient" />
-                  <span>Updating...</span>
-                </>
-              ) : (
-                <>
-                  <FaSave />
-                  <span>Update Assessment</span>
-                </>
-              )}
-            </button>
+              <FaSave />
+              {isProcessing ? "Updating Assessment..." : "Save Changes"}
+            </Button>
           </div>
         </form>
       </div>
@@ -804,10 +358,8 @@ function EditAssessment() {
         onClose={closeModal}
         type={modal.type}
         title={modal.title}
-      >
-        {modal.message}
-      </Modal>
+        message={modal.message}
+      />
     </div>
   );
 }
-export default EditAssessment;

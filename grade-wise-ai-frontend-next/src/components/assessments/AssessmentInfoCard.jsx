@@ -1,10 +1,10 @@
 import { cn } from "@/lib/cn.js";
-import { card, cardInteractive, iconBadge } from "@/lib/ui.js";
+import { card, iconBadge } from "@/lib/ui.js";
 import { FaFileAlt } from "react-icons/fa";
 
 function AssessmentInfoCard({ assessment }) {
   return (
-    <div className={cn("mb-6", card, cardInteractive, "shadow-2xl", "p-4", "sm:p-6")}>
+    <div className={cn("mb-6", card, "shadow-2xl", "p-4", "sm:p-6")}>
       <div className="flex items-start gap-4">
         <div className={cn("p-2.5", "rounded-xl", iconBadge, "flex-shrink-0")}>
           <FaFileAlt className="text-foreground text-xl" />

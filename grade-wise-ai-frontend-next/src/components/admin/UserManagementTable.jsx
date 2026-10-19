@@ -14,6 +14,7 @@ import {
 import { getRoleBadgeColor, getRoleAvatarBg, formatRole } from "../../utils/roleDisplay.js";
 import { formatDate } from "../../utils/formatDate.js";
 import EmptyState from "../ui/EmptyState.jsx";
+import { DashboardStatCard, DashboardStatGrid } from "@/components/dashboard/shared/index.js";
 
 function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onDelete, canDelete }) {
   const isSelf = userData.id === currentUserId;
@@ -189,28 +190,25 @@ export default function UserManagementTable({
 
 export function UserStatsGrid({ stats, totalUsers }) {
   const cards = [
-    { value: totalUsers, label: "Total Users", icon: FaUsers, gradient: "from-indigo-500 to-violet-600", border: "border-indigo-500/30", bg: "from-indigo-500/20 to-violet-500/20" },
-    { value: stats.admin, label: "Admins", icon: FaCrown, gradient: "from-red-500 to-rose-600", border: "border-red-500/30", bg: "from-red-500/20 to-rose-500/20" },
-    { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, gradient: "from-violet-500 to-purple-600", border: "border-violet-500/30", bg: "from-violet-500/20 to-purple-500/20" },
-    { value: stats.student, label: "Students", icon: FaUserGraduate, gradient: "from-emerald-500 to-teal-600", border: "border-emerald-500/30", bg: "from-emerald-500/20 to-teal-500/20" },
-    { value: stats.verified, label: "Verified", icon: FaCheckCircle, gradient: "from-sky-500 to-blue-600", border: "border-sky-500/30", bg: "from-sky-50 dark:to-sky-950/300/20" },
+    { value: totalUsers, label: "Total Users", icon: FaUsers, tone: "indigo" },
+    { value: stats.admin, label: "Admins", icon: FaCrown, tone: "rose" },
+    { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, tone: "purple" },
+    { value: stats.student, label: "Students", icon: FaUserGraduate, tone: "emerald" },
+    { value: stats.verified, label: "Verified", icon: FaCheckCircle, tone: "sky" },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
-      {cards.map(({ value, label, icon: Icon, gradient, border, bg }) => (
-        <div key={label} className={`bg-gradient-to-br ${bg} backdrop-blur-sm border ${border} rounded-xl p-3 sm:p-4`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={cn("text-muted-foreground", "text-xs", "sm:text-sm", "font-medium", "mb-1")}>{label}</p>
-              <p className="text-xl sm:text-2xl font-bold text-foreground">{value}</p>
-            </div>
-            <div className={`p-2.5 rounded-xl bg-gradient-to-br ${gradient} shadow-lg text-white`}>
-              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-          </div>
-        </div>
+    <DashboardStatGrid columns={5}>
+      {cards.map(({ value, label, icon, tone }) => (
+        <DashboardStatCard
+          key={label}
+          label={label}
+          value={value}
+          icon={icon}
+          tone={tone}
+        />
       ))}
-    </div>
+    </DashboardStatGrid>
   );
 }
+

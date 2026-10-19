@@ -12,6 +12,9 @@ const useInstructorAnalyticsStore = create((set) => ({
     assessments: 0,
     executedAssessments: 0,
     resources: 0,
+    totalStudents: 0,
+    completedAttempts: 0,
+    averageScore: 0,
   },
   loading: false,
   hasLoaded: false,
@@ -31,9 +34,12 @@ const useInstructorAnalyticsStore = create((set) => ({
       // Mapping Backend Keys to Frontend UI Keys
       set({
         overview: {
-          assessments: data.totalAssessments || 0,
-          executedAssessments: data.completedAttempts || 0,
-          resources: data.totalResources || 0,
+          assessments: data.totalAssessments ?? 0,
+          executedAssessments: data.executedAssessments ?? data.completedAttempts ?? 0,
+          resources: data.totalResources ?? 0,
+          totalStudents: data.totalStudents ?? 0,
+          completedAttempts: data.completedAttempts ?? 0,
+          averageScore: data.averageScore ?? 0,
         },
         loading: false,
         hasLoaded: true,

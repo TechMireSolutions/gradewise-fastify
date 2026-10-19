@@ -19,6 +19,7 @@ import configModule from "./modules/config/index.js";
 import studentAssessmentsModule from "./modules/student-assessments/index.js";
 import instructorAnalyticsModule from "./modules/instructor-analytics/index.js";
 import studentAnalyticsModule from "./modules/student-analytics/index.js";
+import adminModule from "./modules/admin/index.js";
 
 export function buildApp() {
   const app = Fastify({
@@ -79,6 +80,7 @@ export function buildApp() {
   app.register(studentAssessmentsModule, { prefix: "/api/taking" });
   app.register(instructorAnalyticsModule, { prefix: "/api/instructor-analytics" });
   app.register(studentAnalyticsModule, { prefix: "/api/student-analytics" });
+  app.register(adminModule, { prefix: "/api/admin" });
 
   return app;
 }

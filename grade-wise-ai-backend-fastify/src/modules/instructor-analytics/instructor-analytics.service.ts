@@ -4,10 +4,11 @@ import {
   assessmentAttempts,
   users,
   enrollments,
+  resources,
 } from "../../db/schema.js";
 import { eq, and, sql } from "drizzle-orm";
 import { ForbiddenError, NotFoundError } from "../../utils/errors.js";
-import { getCompletedAttempt, getAttemptQuestionsWithAnswers } from "../analytics/shared.js";
+import { getCompletedAttempt, getAttemptQuestionsWithAnswers, roundScore } from "../analytics/shared.js";
 
 async function assertCanViewAssessment(
   assessmentId: number,
@@ -26,10 +27,18 @@ async function assertCanViewAssessment(
 }
 
 export async function getInstructorOverview(instructorId: number) {
-  const [totalAssessments] = await db
-    .select({ count: sql<number>`count(*)` })
+  const [assessmentCounts] = await db
+    .select({
+      total: sql<number>`count(*)`,
+      executed: sql<number>`count(case when ${assessments.isExecuted} = true then 1 end)`,
+    })
     .from(assessments)
     .where(eq(assessments.instructorId, instructorId));
+
+  const [totalRes] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(resources)
+    .where(eq(resources.uploadedBy, instructorId));
 
   const [totalEnrolled] = await db
     .select({ count: sql<number>`count(distinct ${enrollments.studentId})` })
@@ -37,19 +46,11 @@ export async function getInstructorOverview(instructorId: number) {
     .innerJoin(assessments, eq(enrollments.assessmentId, assessments.id))
     .where(eq(assessments.instructorId, instructorId));
 
-  const [completed] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(assessmentAttempts)
-    .innerJoin(assessments, eq(assessmentAttempts.assessmentId, assessments.id))
-    .where(
-      and(
-        eq(assessments.instructorId, instructorId),
-        eq(assessmentAttempts.status, "completed")
-      )
-    );
-
-  const [avgScore] = await db
-    .select({ avg: sql<number>`avg(cast(${assessmentAttempts.score} as float))` })
+  const [attemptMetrics] = await db
+    .select({
+      completed: sql<number>`count(*)`,
+      avgScore: sql<number>`avg(cast(${assessmentAttempts.score} as float))`,
+    })
     .from(assessmentAttempts)
     .innerJoin(assessments, eq(assessmentAttempts.assessmentId, assessments.id))
     .where(
@@ -60,10 +61,12 @@ export async function getInstructorOverview(instructorId: number) {
     );
 
   return {
-    totalAssessments: totalAssessments?.count ?? 0,
-    totalStudents: totalEnrolled?.count ?? 0,
-    completedAttempts: completed?.count ?? 0,
-    averageScore: Math.round((avgScore?.avg ?? 0) * 100) / 100,
+    totalAssessments: Number(assessmentCounts?.total ?? 0),
+    executedAssessments: Number(assessmentCounts?.executed ?? 0),
+    totalResources: Number(totalRes?.count ?? 0),
+    totalStudents: Number(totalEnrolled?.count ?? 0),
+    completedAttempts: Number(attemptMetrics?.completed ?? 0),
+    averageScore: roundScore(attemptMetrics?.avgScore),
   };
 }
 

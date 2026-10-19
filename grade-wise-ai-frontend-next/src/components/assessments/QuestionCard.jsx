@@ -1,5 +1,6 @@
 import { cn } from "@/lib/cn.js";
 import { card } from "@/lib/ui.js";
+import { isRTLLanguage } from "@/utils/translations.js";
 // Question fields (text / options) may arrive as plain strings or as objects
 // (e.g. { text, is_correct }). Coerce any value into something React can render
 // so the view never crashes on unexpected AI output.
@@ -38,6 +39,7 @@ function getLocalizedQuestion(question, selectedLanguage) {
 
 function QuestionCard({ question, index, selectedLanguage }) {
   const { text: questionText, options: questionOptions } = getLocalizedQuestion(question, selectedLanguage);
+  const isRTL = isRTLLanguage(selectedLanguage);
 
   return (
     <div
@@ -45,21 +47,27 @@ function QuestionCard({ question, index, selectedLanguage }) {
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="min-w-0">
-        <p dir="auto" className="text-base sm:text-lg font-semibold text-foreground mb-4 break-words leading-relaxed whitespace-pre-line">
+        <p dir={isRTL ? "rtl" : "ltr"} className={cn("text-base sm:text-lg font-semibold text-foreground mb-4 break-words leading-relaxed whitespace-pre-line", isRTL && "text-right")}>
           {displayText(questionText)}
         </p>
 
         {/* Options Display */}
         {question.question_type === "true_false" ? (
           <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-input rounded-xl border border-border hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all duration-150 cursor-pointer">
-              <div className={cn("w-8", "h-8", "border-2", "border-slate-600", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
+            <div
+              dir={isRTL ? "rtl" : "ltr"}
+              className="group flex items-center gap-3 p-3 bg-input rounded-xl border border-border hover:bg-surface-elevated hover:border-accent/30 transition-all duration-150 cursor-pointer"
+            >
+              <div className={cn("w-8", "h-8", "border-2", "border-border", "group-hover:border-accent/50", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
                 T
               </div>
               <span className={cn("text-secondary-foreground", "font-medium")}>True</span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-input rounded-xl border border-border hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all duration-150 cursor-pointer">
-              <div className={cn("w-8", "h-8", "border-2", "border-slate-600", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
+            <div
+              dir={isRTL ? "rtl" : "ltr"}
+              className="group flex items-center gap-3 p-3 bg-input rounded-xl border border-border hover:bg-surface-elevated hover:border-accent/30 transition-all duration-150 cursor-pointer"
+            >
+              <div className={cn("w-8", "h-8", "border-2", "border-border", "group-hover:border-accent/50", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
                 F
               </div>
               <span className={cn("text-secondary-foreground", "font-medium")}>False</span>
@@ -70,12 +78,13 @@ function QuestionCard({ question, index, selectedLanguage }) {
             {Object.entries(questionOptions).map(([key, text]) => (
               <div
                 key={key}
-                className="flex items-center gap-3 p-3 bg-input rounded-xl border border-border hover:bg-indigo-500/10 hover:border-indigo-500/30 transition-all duration-150 cursor-pointer"
+                dir={isRTL ? "rtl" : "ltr"}
+                className="group flex items-center gap-3 p-3 bg-input rounded-xl border border-border hover:bg-surface-elevated hover:border-accent/30 transition-all duration-150 cursor-pointer"
               >
-                <div className={cn("w-8", "h-8", "border-2", "border-slate-600", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
+                <div className={cn("w-8", "h-8", "border-2", "border-border", "group-hover:border-accent/50", "rounded-full", "flex", "items-center", "justify-center", "font-semibold", "text-secondary-foreground", "flex-shrink-0")}>
                   {key}
                 </div>
-                <span dir="auto" className={cn("text-secondary-foreground", "break-words", "whitespace-pre-line")}>{displayText(text)}</span>
+                <span dir={isRTL ? "rtl" : "ltr"} className={cn("text-secondary-foreground", "break-words", "whitespace-pre-line")}>{displayText(text)}</span>
               </div>
             ))}
           </div>

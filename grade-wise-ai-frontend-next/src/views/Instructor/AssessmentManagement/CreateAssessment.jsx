@@ -1,201 +1,69 @@
+"use client";
+
 import { cn } from "@/lib/cn.js";
-import { accentPanel, btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
+import { btn, page } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import useAssessmentStore from "@/features/assessments/store.js";
 import useResourceStore from "@/features/resources/store.js";
-import { Input, Label, Select, Textarea, LoadingSpinner, Modal } from "@/components/ui";
+import { Button, Modal } from "@/components/ui";
 import { createAssessmentSchema } from "@/schemas/assessmentSchemas.js";
-import { FiFileText, FiList, FiLink, FiPlus, FiTrash2, FiBook, FiZap, FiX, FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiZap } from "react-icons/fi";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import useModal from "@/hooks/useModal.js";
+import useAssessmentForm from "./hooks/useAssessmentForm.js";
+import AssessmentMetadataCard from "./components/AssessmentMetadataCard.jsx";
+import QuestionBlockList from "./components/QuestionBlockList.jsx";
+import AssessmentResourcePicker from "./components/AssessmentResourcePicker.jsx";
+import AssessmentExternalLinks from "./components/AssessmentExternalLinks.jsx";
 
-function CreateAssessment() {
+export default function CreateAssessment() {
   const router = useRouter();
-  const { createAssessment, loading } = useAssessmentStore();
+  const { createAssessment } = useAssessmentStore();
   const { resources, fetchAllResources, loading: resourcesLoading } = useResourceStore();
-    const { modal, showModal, closeModal } = useModal();
+  const { modal, showModal, closeModal } = useModal();
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const {
+    formData,
+    handleInputChange,
+    handleLinkChange,
+    addExternalLink,
+    removeExternalLink,
+    selectedResources,
+    handleResourceToggle,
+    questionBlocks,
+    handleBlockChange,
+    handleNegativeMarksBlur,
+    addQuestionBlock,
+    removeQuestionBlock,
+    getSanitizedBlocks,
+  } = useAssessmentForm();
 
   useEffect(() => {
     fetchAllResources();
   }, [fetchAllResources]);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    prompt: "",
-    externalLinks: [""],
-  });
-
-  const [questionBlocks, setQuestionBlocks] = useState([
-    {
-      questionType: "multiple_choice",
-      questionCount: 1,
-      durationPerQuestion: 120,
-      numOptions: 4,
-      positiveMarks: 1,
-      negativeMarks: 0,
-    },
-  ]);
-
-  const [selectedResources, setSelectedResources] = useState([]);
-  const [sourceMode, setSourceMode] = useState("links");
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const formatNegativeMarksInput = (value) => {
-    if (value === "" || value === null || value === undefined) {
-      return "";
-    }
-    let str = String(value).trim();
-    // Keep only numeric characters, dots, and minus
-    str = str.replace(/[^0-9.-]/g, "");
-    if (str === "") return "";
-    if (str === "-") return "-";
-
-    // Strip existing minus signs to work with raw digits
-    str = str.replace(/-/g, "");
-
-    // If only dot was entered, e.g. "." or "-."
-    if (str === ".") return "-0.";
-
-    // Prevent multiple dots: keep only the first decimal point
-    const parts = str.split(".");
-    if (parts.length > 2) {
-      str = parts[0] + "." + parts.slice(1).join("");
-    }
-
-    // Always prefix with minus sign
-    return `-${str}`;
-  };
-
-  const handleNegativeMarksBlur = (index) => {
-    setQuestionBlocks((prev) =>
-      prev.map((block, i) => {
-        if (i !== index) return block;
-        const val = String(block.negativeMarks ?? "").trim();
-        if (val === "" || val === "-" || val === "-." || val === "-0.") {
-          return { ...block, negativeMarks: 0 };
-        }
-        const num = Number(val);
-        if (!isNaN(num)) {
-          return { ...block, negativeMarks: num === 0 ? 0 : -Math.abs(num) };
-        }
-        return { ...block, negativeMarks: 0 };
-      })
-    );
-  };
-
-  const handleBlockChange = (index, field, value) => {
-    setQuestionBlocks((prev) =>
-      prev.map((block, i) =>
-        i === index
-          ? {
-            ...block,
-            [field]:
-              field === "questionCount" || field === "durationPerQuestion" || field === "numOptions"
-                ? Math.max(Number.parseInt(value) || 1, 1)
-                : field === "positiveMarks"
-                  ? value === "" || value === null
-                    ? null
-                    : value === "-"
-                      ? "-"
-                      : isNaN(Number(value))
-                        ? 1
-                        : Math.abs(Number(value))
-                  : field === "negativeMarks"
-                    ? formatNegativeMarksInput(value)
-                    : value,
-          }
-          : block
-      )
-    );
-  };
-
-  const addQuestionBlock = () => {
-    setQuestionBlocks((prev) => [
-      ...prev,
-      {
-        questionType: "multiple_choice",
-        questionCount: 1,
-        durationPerQuestion: 120,
-        numOptions: 4,
-        positiveMarks: 1,
-        negativeMarks: 0,
-      },
-    ]);
-  };
-
-  const removeQuestionBlock = (index) => {
-    if (questionBlocks.length > 1) {
-      setQuestionBlocks((prev) => prev.filter((_, i) => i !== index));
-    }
-  };
-
-  const addExternalLink = () => {
-    setFormData((prev) => ({
-      ...prev,
-      externalLinks: [...prev.externalLinks, ""],
-    }));
-  };
-
-  const removeExternalLink = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      externalLinks: prev.externalLinks.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleLinkChange = (index, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      externalLinks: prev.externalLinks.map((link, i) => (i === index ? value : link)),
-    }));
-  };
-
-  const handleResourceToggle = (resourceId) => {
-    setSelectedResources((prev) =>
-      prev.includes(resourceId) ? prev.filter((id) => id !== resourceId) : [...prev, resourceId]
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Sanitize question blocks before validation so negative values and intermediate strings are handled properly
-    const sanitizedBlocks = questionBlocks.map((b) => {
-      const pos = b.positiveMarks === "" || b.positiveMarks === "-" || b.positiveMarks == null
-        ? 1
-        : Math.abs(Number(b.positiveMarks) || 1);
-      const neg = b.negativeMarks === "" || b.negativeMarks === "-" || b.negativeMarks == null
-        ? 0
-        : (isNaN(Number(b.negativeMarks)) ? 0 : (Number(b.negativeMarks) === 0 ? 0 : -Math.abs(Number(b.negativeMarks))));
-      return {
-        ...b,
-        questionCount: Math.max(1, Number(b.questionCount) || 1),
-        durationPerQuestion: Math.max(30, Number(b.durationPerQuestion) || 60),
-        numOptions: b.questionType === "multiple_choice" ? Math.max(2, Number(b.numOptions) || 4) : 4,
-        positiveMarks: pos,
-        negativeMarks: neg,
-      };
-    });
+    const sanitizedBlocks = getSanitizedBlocks();
 
     const validationResult = createAssessmentSchema.safeParse({
       title: formData.title,
       prompt: formData.prompt,
+      language: "en",
       selectedResources,
       externalLinks: formData.externalLinks.filter((l) => l.trim() !== ""),
       questionBlocks: sanitizedBlocks,
     });
 
     if (!validationResult.success) {
-      showModal("error", "Validation Error", validationResult.error.issues?.[0]?.message || "Invalid data");
+      showModal(
+        "error",
+        "Validation Error",
+        validationResult.error.issues?.[0]?.message || "Invalid assessment form data."
+      );
       return;
     }
 
@@ -212,6 +80,8 @@ function CreateAssessment() {
         questionCount: block.questionCount,
         durationPerQuestion: block.durationPerQuestion,
         ...(block.questionType === "multiple_choice" ? { numOptions: block.numOptions } : {}),
+        leftCount: block.questionType === "matching" ? block.leftCount : undefined,
+        rightCount: block.questionType === "matching" ? block.rightCount : undefined,
         positiveMarks: block.positiveMarks,
         negativeMarks: block.negativeMarks,
       })),
@@ -219,9 +89,7 @@ function CreateAssessment() {
 
     try {
       await createAssessment(payload);
-
       showModal("success", "Success", "Assessment created successfully!");
-
       setTimeout(() => {
         router.push("/instructor/assessments");
       }, 1500);
@@ -234,21 +102,29 @@ function CreateAssessment() {
 
   return (
     <div className={page}>
-      {/* Ambient blobs */}
       <AmbientBackground />
 
       <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header Section */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-2")}>Instructor Portal</p>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2">Create New Assessment</h1>
-            <p className={cn("text-muted-foreground", "leading-relaxed")}>Design a comprehensive assessment with customizable question blocks</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
+              Instructor Portal
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-2 text-balance">
+              Create New Assessment
+            </h1>
+            <p className="text-muted-foreground leading-relaxed text-pretty">
+              Design a comprehensive assessment with customizable question blocks and AI parameters
+            </p>
           </div>
           <button
             type="button"
             onClick={() => router.push("/instructor/assessments")}
-            className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "self-start", "sm:self-auto")}
+            className={cn(
+              btn.secondary,
+              "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm self-start sm:self-auto cursor-pointer"
+            )}
           >
             <FiArrowLeft className="text-base" />
             Back to Assessments
@@ -256,377 +132,64 @@ function CreateAssessment() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Assessment Details Card */}
-          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
-            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-              <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
-                <FiFileText className="text-white text-base" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">Assessment Details</h2>
-            </div>
-            <div className="p-6 sm:p-8">
-              <div className="space-y-6">
-                {/* Title Input */}
-                <div>
-                  <Label htmlFor="title">
-                    Assessment Title <span className="text-red-400">*</span>
-                  </Label>
-                  <Input
-                    type="text"
-                    name="title"
-                    id="title"
-                    hasIcon={false}
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Data Structures Final Exam"
-                    required
-                    disabled={isProcessing}
-                  />
-                </div>
+          {/* Assessment Metadata Card */}
+          <AssessmentMetadataCard
+            title={formData.title}
+            language={formData.language}
+            prompt={formData.prompt}
+            onChange={handleInputChange}
+            disabled={isProcessing}
+            showLanguage={true}
+            titlePlaceholder="e.g., Data Structures Midterm Examination"
+          />
 
-                {/* Prompt Textarea */}
-                <div>
-                  <Label htmlFor="prompt">
-                    Prompt <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using resources or links)</span>
-                  </Label>
-                  <Textarea
-                    name="prompt"
-                    id="prompt"
-                    value={formData.prompt}
-                    onChange={handleInputChange}
-                    rows={5}
-                    placeholder="Provide a detailed prompt for question generation. Describe the topics, difficulty level, and any specific requirements..."
-                    disabled={isProcessing}
-                  />
-                </div>
+          {/* Resources Picker */}
+          <AssessmentResourcePicker
+            resources={resources}
+            selectedResources={selectedResources}
+            onToggleResource={handleResourceToggle}
+            loading={resourcesLoading}
+            disabled={isProcessing}
+          />
 
-                {/* Content Source (External Links or Existing Resources) */}
-                <div className="bg-input rounded-xl border border-border p-4 sm:p-5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FiBook className="text-indigo-400 text-sm" />
-                    <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium")}>Content Source <span className={cn("text-muted-foreground", "font-normal")}>(Optional if using Prompt)</span></label>
-                  </div>
+          {/* External Links */}
+          <AssessmentExternalLinks
+            externalLinks={formData.externalLinks}
+            onLinkChange={handleLinkChange}
+            onAddLink={addExternalLink}
+            onRemoveLink={removeExternalLink}
+            disabled={isProcessing}
+          />
 
-                  {/* Ask the user which source type to add */}
-                  <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Content source type">
-                    <button
-                      type="button"
-                      onClick={() => setSourceMode("links")}
-                      className={cn(
-                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer",
-                        sourceMode === "links"
-                          ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
-                          : "bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground"
-                      )}
-                      disabled={isProcessing}
-                    >
-                      <FiLink className="text-base" />
-                      Add External Link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSourceMode("resources")}
-                      className={cn(
-                        "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer",
-                        sourceMode === "resources"
-                          ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
-                          : "bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground"
-                      )}
-                      disabled={isProcessing}
-                    >
-                      <FiBook className="text-base" />
-                      Select Existing Resource
-                    </button>
-                  </div>
+          {/* Question Blocks */}
+          <QuestionBlockList
+            questionBlocks={questionBlocks}
+            onChange={handleBlockChange}
+            onNegativeMarksBlur={handleNegativeMarksBlur}
+            onAddBlock={addQuestionBlock}
+            onRemoveBlock={removeQuestionBlock}
+            disabled={isProcessing}
+          />
 
-                  {sourceMode === "links" ? (
-                    <div>
-                      <div className="space-y-3">
-                        {formData.externalLinks.map((link, index) => (
-                          <div key={index} className="flex items-center gap-2">
-                            <div className="relative flex-1">
-                              <FiLink className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none z-10" />
-                              <Input
-                                type="url"
-                                value={link}
-                                hasIcon={true}
-                                onChange={(e) => handleLinkChange(index, e.target.value)}
-                                placeholder="https://example.com/resource"
-                                disabled={isProcessing}
-                                aria-label={`External link ${index + 1}`}
-                              />
-                            </div>
-                            {formData.externalLinks.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() => removeExternalLink(index)}
-                                className="p-2 rounded-xl bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 transition-all duration-200 active:scale-95 cursor-pointer min-w-11 min-h-11 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/25"
-                                disabled={isProcessing}
-                                aria-label={`Remove link ${index + 1}`}
-                              >
-                                <FiX className="text-base" />
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={addExternalLink}
-                        className={cn("mt-4", btn.secondary, "inline-flex items-center gap-2")}
-                        disabled={isProcessing}
-                      >
-                        <FiPlus className="text-base" />
-                        Add Link
-                      </button>
-                    </div>
-                  ) : resourcesLoading ? (
-                    <div className="flex justify-center py-8">
-                      <LoadingSpinner size="sm" type="dots" color="blue" />
-                    </div>
-                  ) : resources.length > 0 ? (
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={cn("text-muted-foreground", "text-xs")}>Select one or more uploaded documents:</span>
-                        {selectedResources.length > 0 && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20 ml-auto">
-                            {selectedResources.length} selected
-                          </span>
-                        )}
-                      </div>
-                      <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                        {resources.map((resource) => (
-                          <div
-                            key={resource.id}
-                            className={`flex items-center p-3 rounded-xl border transition-all duration-150 cursor-pointer ${
-                              selectedResources.includes(resource.id)
-                                ? "bg-indigo-500/10 border-indigo-500/30"
-                                : "bg-slate-900/30 border-border hover:bg-indigo-500/5 hover:border-indigo-500/20"
-                            }`}
-                            onClick={() => !isProcessing && handleResourceToggle(resource.id)}
-                          >
-                            <input
-                              type="checkbox"
-                              id={`resource-${resource.id}`}
-                              checked={selectedResources.includes(resource.id)}
-                              onChange={() => handleResourceToggle(resource.id)}
-                              className="h-4 w-4 accent-indigo-500 border-slate-600 rounded focus:ring-indigo-500 cursor-pointer"
-                              disabled={isProcessing}
-                            />
-                            <label htmlFor={`resource-${resource.id}`} className="ml-3 text-sm cursor-pointer flex-1 flex items-center gap-2">
-                              <span className={cn("font-medium", "text-secondary-foreground")}>{resource.name}</span>
-                              <span className={cn("inline-flex", "items-center", "gap-1", "px-2", "py-0.5", "rounded-full", "text-xs", "bg-btn-secondary", "text-muted-foreground", "border", "border-border")}>{resource.contentType}</span>
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center py-10 text-center">
-                      <div className={cn(accentPanel, "w-12 h-12 rounded-xl", "flex items-center justify-center mb-3")}>
-                        <FiBook className="text-indigo-400 text-lg" />
-                      </div>
-                      <p className={cn("text-muted-foreground", "text-sm")}>No resources available.</p>
-                      <p className={cn("text-muted-foreground", "text-xs", "mt-1")}>Upload them from the Resources page.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Question Blocks Card */}
-          <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
-            <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg shadow-violet-500/25">
-                <FiList className="text-white text-base" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground">Question Configuration</h2>
-            </div>
-            <div className="p-6 sm:p-8">
-              <div className="space-y-5">
-                {questionBlocks.map((block, index) => (
-                  <div key={index} className="bg-input rounded-xl border border-border p-5 hover:border-indigo-500/25 transition-all duration-200">
-                    <div className="flex justify-between items-center mb-5">
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
-                          Block {index + 1}
-                        </span>
-                        <h3 className={cn("text-base", "font-semibold", "text-secondary-foreground")}>
-                          {block.questionType === "multiple_choice" && "Multiple Choice"}
-                          {block.questionType === "short_answer" && "Short Answer"}
-                          {block.questionType === "true_false" && "True / False"}
-                          {block.questionType === "fill_in_the_blank" && "Fill in the Blank"}
-                        </h3>
-                      </div>
-                      {questionBlocks.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeQuestionBlock(index)}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer"
-                          disabled={isProcessing}
-                        >
-                          <FiTrash2 className="text-sm" />
-                          Remove
-                        </button>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor={`block-${index}-type`}>Question Type</Label>
-                        <Select
-                          id={`block-${index}-type`}
-                          value={block.questionType}
-                          onChange={(e) => handleBlockChange(index, "questionType", e.target.value)}
-                          disabled={isProcessing}
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="short_answer">Short Answer</option>
-                          <option value="true_false">True/False</option>
-                          <option value="fill_in_the_blank">Fill in the Blank</option>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`block-${index}-count`}>Question Count</Label>
-                        <Input
-                          id={`block-${index}-count`}
-                          type="number"
-                          hasIcon={false}
-                          value={block.questionCount}
-                          onChange={(e) => handleBlockChange(index, "questionCount", e.target.value)}
-                          min="1"
-                          placeholder="e.g. 5"
-                          required
-                          disabled={isProcessing}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`block-${index}-duration`}>Duration (seconds)</Label>
-                        <Input
-                          id={`block-${index}-duration`}
-                          type="number"
-                          hasIcon={false}
-                          value={block.durationPerQuestion}
-                          onChange={(e) => handleBlockChange(index, "durationPerQuestion", e.target.value)}
-                          min="30"
-                          max="600"
-                          placeholder="e.g. 120"
-                          required
-                          disabled={isProcessing}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`block-${index}-pos-marks`}>Positive Marks</Label>
-                        <Input
-                          id={`block-${index}-pos-marks`}
-                          type="number"
-                          hasIcon={false}
-                          value={block.positiveMarks ?? ""}
-                          onChange={(e) => handleBlockChange(index, "positiveMarks", e.target.value)}
-                          step="0.1"
-                          placeholder="e.g. 1"
-                          disabled={isProcessing}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`block-${index}-neg-marks`}>Negative Marks</Label>
-                        <Input
-                          id={`block-${index}-neg-marks`}
-                          type="text"
-                          inputMode="decimal"
-                          hasIcon={false}
-                          value={block.negativeMarks ?? ""}
-                          onChange={(e) => handleBlockChange(index, "negativeMarks", e.target.value)}
-                          onBlur={() => handleNegativeMarksBlur(index)}
-                          onKeyDown={(e) => {
-                            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                              e.preventDefault();
-                              const current = Number(block.negativeMarks) || 0;
-                              const step = 0.05;
-                              const nextVal = e.key === "ArrowUp"
-                                ? Math.min(0, Number((current + step).toFixed(2)))
-                                : Math.max(-100, Number((current - step).toFixed(2)));
-                              handleBlockChange(index, "negativeMarks", nextVal === 0 ? 0 : nextVal);
-                            }
-                          }}
-                          placeholder="e.g. -0.25"
-                          disabled={isProcessing}
-                        />
-                        <span className="text-[11px] text-muted-foreground mt-1 block">
-                          Deduction must be less than total marks ({block.positiveMarks || 1})
-                        </span>
-                      </div>
-
-                      {block.questionType === "multiple_choice" && (
-                        <div>
-                          <Label htmlFor={`block-${index}-options`}>Number of Options</Label>
-                          <Input
-                            id={`block-${index}-options`}
-                            type="number"
-                            hasIcon={false}
-                            value={block.numOptions}
-                            onChange={(e) => handleBlockChange(index, "numOptions", e.target.value)}
-                            min="2"
-                            max="6"
-                            placeholder="2 to 6"
-                            required
-                            disabled={isProcessing}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                <button
-                  type="button"
-                  onClick={addQuestionBlock}
-                  className={cn("w-full", "py-3.5", "flex", "items-center", "justify-center", "gap-2", "bg-card/60", "hover:bg-indigo-500/10", "border-2", "border-dashed", "border-border", "hover:border-indigo-500/40", "text-muted-foreground", "hover:text-indigo-400", "rounded-xl", "font-semibold", "text-sm", "transition-all", "duration-200", "cursor-pointer")}
-                  disabled={isProcessing}
-                >
-                  <FiPlus className="text-base" />
-                  Add Question Block
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2 pb-4">
+          {/* Action Footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-4 pt-4">
             <button
               type="button"
               onClick={() => router.push("/instructor/assessments")}
-              className={cn("px-6", "py-3", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "order-2", "sm:order-1")}
               disabled={isProcessing}
+              className={cn(btn.secondary, "w-full sm:w-auto px-6 py-3 rounded-xl")}
             >
               Cancel
             </button>
-            <button
+            <Button
               type="submit"
-              className={cn(btn.primary, "px-6 py-3", "inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2")}
-              disabled={loading || isProcessing}
+              variant="primary"
+              disabled={isProcessing}
+              className="w-full sm:w-auto px-8 py-3 rounded-xl flex items-center justify-center gap-2 font-bold shadow-lg shadow-indigo-500/20"
             >
-              {isProcessing ? (
-                <>
-                  <LoadingSpinner size="sm" color="white" type="gradient" />
-                  <span>Processing...</span>
-                </>
-              ) : loading ? (
-                <>
-                  <LoadingSpinner size="sm" color="white" type="gradient" />
-                  <span>Creating...</span>
-                </>
-              ) : (
-                <>
-                  <FiZap className="text-base" />
-                  <span>Create Assessment</span>
-                </>
-              )}
-            </button>
+              <FiZap className="text-lg" />
+              {isProcessing ? "Generating Assessment..." : "Create Assessment"}
+            </Button>
           </div>
         </form>
       </div>
@@ -636,11 +199,8 @@ function CreateAssessment() {
         onClose={closeModal}
         type={modal.type}
         title={modal.title}
-      >
-        {modal.message}
-      </Modal>
+        message={modal.message}
+      />
     </div>
   );
 }
-
-export default CreateAssessment;

@@ -1,124 +1,36 @@
 "use client";
+
 import { cn } from "@/lib/cn.js";
-import { card, chip, examBar, focusRing, panel } from "@/lib/ui.js";
-import { useState, useEffect, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
-import useStudentAssessmentStore from "@/features/student-assessment/store.js";
-import { Input, Label, Select, Textarea, Button, LoadingSpinner } from "@/components/ui";
-import toast from "react-hot-toast";
-import useModal from "@/hooks/useModal.js";
+import { card } from "@/lib/ui.js";
+import { LoadingSpinner } from "@/components/ui";
+import useTakeAssessment from "./hooks/useTakeAssessment.js";
+import ExamLanguageSelector from "./components/exam/ExamLanguageSelector.jsx";
+import ExamHeader from "./components/exam/ExamHeader.jsx";
+import ExamQuestionCard from "./components/exam/ExamQuestionCard.jsx";
+import ExamNavigation from "./components/exam/ExamNavigation.jsx";
 
-function TakeAssessment() {
-  const { assessmentId } = useParams();
-  const router = useRouter();
-
+export default function TakeAssessment() {
   const {
     assessmentQuestions,
+    currentQuestion,
+    currentQuestionIndex,
     timeRemaining,
+    questionTimeLeft,
     loading,
-    error,
-    startAssessment,
-    updateAnswer,
-    submitAssessment,
+    isSubmitting,
     isSubmitted,
     hasStarted,
-    clearError,
-  } = useStudentAssessmentStore();
-
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const { showModal } = useModal();
-  const [selectedLanguage, setSelectedLanguage] = useState("en");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRTL, setIsRTL] = useState(false);
-
-  const isQuranic = ["ar", "fa"].includes(selectedLanguage);
-
-  useEffect(() => {
-    if (hasStarted) setIsRTL(["ur", "ar", "fa"].includes(selectedLanguage));
-  }, [hasStarted, selectedLanguage]);
-
-  const handleStart = async () => {
-    try {
-      await startAssessment(assessmentId, selectedLanguage);
-      toast.success("Assessment started!");
-    } catch (err) {
-      toast.error(err.message || "Failed to start");
-    }
-  };
-
-  const handleSubmit = useCallback(async () => {
-    if (isSubmitting || isSubmitted) return;
-    setIsSubmitting(true);
-    try {
-      await submitAssessment(assessmentId);
-      showModal("success", "Submitted!", "Your assessment has been submitted successfully.");
-      toast.success("Submitted successfully!");
-    } catch (err) {
-      toast.error(err.message || "Submission failed");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [isSubmitting, isSubmitted, submitAssessment, assessmentId, showModal]);
-
-  useEffect(() => {
-    if (timeRemaining > 0 && hasStarted && !isSubmitted) {
-      const timer = setInterval(() => {
-        useStudentAssessmentStore.setState((prev) => {
-          if (prev.timeRemaining <= 1) {
-            handleSubmit();
-            return { timeRemaining: 0 };
-          }
-          return { timeRemaining: prev.timeRemaining - 1 };
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    } else if (timeRemaining <= 0 && hasStarted && !isSubmitted) {
-      handleSubmit();
-    }
-  }, [timeRemaining, hasStarted, isSubmitted, handleSubmit]);
-
-  const currentQuestion = assessmentQuestions[currentQuestionIndex];
-  const perQuestionTime = currentQuestion?.duration_per_question || currentQuestion?.durationPerQuestion || 30;
-  const [questionTimeLeft, setQuestionTimeLeft] = useState(perQuestionTime);
-
-  useEffect(() => setQuestionTimeLeft(perQuestionTime), [currentQuestionIndex, perQuestionTime]);
-
-  useEffect(() => {
-    if (!hasStarted || isSubmitted || questionTimeLeft <= 0) return;
-    const timer = setInterval(() => {
-      setQuestionTimeLeft((prev) => {
-        if (prev <= 1 && currentQuestionIndex < assessmentQuestions.length - 1) {
-          setCurrentQuestionIndex((i) => i + 1);
-          return perQuestionTime;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [questionTimeLeft, hasStarted, isSubmitted, currentQuestionIndex, assessmentQuestions.length, perQuestionTime]);
-
-  const goPrevious = () => currentQuestionIndex > 0 && setCurrentQuestionIndex((i) => i - 1);
-  const goNext = () => currentQuestionIndex < assessmentQuestions.length - 1 && setCurrentQuestionIndex((i) => i + 1);
-
-  const handleAnswer = (qid, answer) => updateAnswer(qid, answer);
-
-  useEffect(() => {
-    if (error) {
-      showModal("error", "Error", error);
-      clearError();
-    }
-  }, [error, clearError, showModal]);
-
-  useEffect(() => {
-    if (isSubmitted) {
-      const timer = setTimeout(() => {
-        router.push("/student/dashboard");
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [isSubmitted, router]);
-
-  const formatTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+    selectedLanguage,
+    setSelectedLanguage,
+    isRTL,
+    isQuranic,
+    formatTime,
+    handleStart,
+    handleSubmit,
+    handleAnswer,
+    goPrevious,
+    goNext,
+  } = useTakeAssessment();
 
   if (loading && !hasStarted) {
     return (
@@ -133,258 +45,60 @@ function TakeAssessment() {
     );
   }
 
-  // Pure data mappings fallbacks safely
-  const rawText = currentQuestion?.question_text || currentQuestion?.questionText || "";
-  const rawType = currentQuestion?.question_type || currentQuestion?.questionType || "multiple_choice";
-
-  // Safe options parsing logic
-  let rawOptions = currentQuestion?.options;
-  if (typeof rawOptions === "string") {
-    try {
-      rawOptions = JSON.parse(rawOptions);
-    } catch {
-      rawOptions = [];
-    }
-  }
-  if (!Array.isArray(rawOptions)) {
-    rawOptions = [];
-  }
-
-  const optionBase = "rounded-xl border p-4 text-left text-sm font-medium transition-all duration-200 active:scale-[0.98] w-full";
-  const optionIdle = "border-border bg-input text-secondary-foreground hover:border-accent/40 hover:bg-surface-elevated";
-  const optionSelected = "border-indigo-500/50 bg-indigo-500/15 text-indigo-800 shadow-lg shadow-indigo-500/10 dark:text-indigo-300";
-
   return (
     <div className={cn("min-h-screen", isQuranic && "font-quran")} dir={isRTL ? "rtl" : "ltr"}>
+      {/* Pre-Exam Language Selection */}
       {!hasStarted && (
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className={cn("w-full", "max-w-2xl", card, "shadow-2xl", "p-6 sm:p-8 space-y-6")}>
-            <div className="text-center">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Welcome to Your Assessment</h1>
-              <p className="text-muted-foreground text-sm mt-1">Select your preferred exam language to begin.</p>
-            </div>
-            <div>
-              <Label htmlFor="exam-language">Select Language</Label>
-              <Select
-                id="exam-language"
-                value={selectedLanguage}
-                onChange={(e) => setSelectedLanguage(e.target.value)}
-              >
-                <option value="en">English (LTR)</option>
-                <option value="ur">Urdu - اردو (RTL)</option>
-                <option value="ar">Arabic - العربية (RTL)</option>
-                <option value="fa">Persian - فارسی (RTL)</option>
-              </Select>
-            </div>
-            <Button
-              type="button"
-              variant="primary"
-              onClick={handleStart}
-              className="w-full"
-            >
-              Start Assessment
-            </Button>
-          </div>
-        </div>
+        <ExamLanguageSelector
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={setSelectedLanguage}
+          onStart={handleStart}
+          loading={loading}
+        />
       )}
 
+      {/* Active Exam Running */}
       {hasStarted && !isSubmitted && currentQuestion && (
         <div className="min-h-screen flex flex-col">
-          <div className={examBar}>
-            <div className="mx-auto max-w-7xl px-4 py-4 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-xs text-foreground uppercase tracking-wider">Assessment Session</span>
-              </div>
-              <div className="flex gap-2 text-xs font-semibold">
-                <span role="timer" aria-live="polite" className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-full inline-flex items-center">
-                  Q Time: {formatTime(questionTimeLeft)}
-                </span>
-                <span role="timer" aria-live="polite" className={cn(chip, "rounded-full px-3 py-1.5")}>
-                  Total: {formatTime(timeRemaining)}
-                </span>
-              </div>
-            </div>
-          </div>
+          <ExamHeader
+            questionTimeLeft={questionTimeLeft}
+            timeRemaining={timeRemaining}
+            formatTime={formatTime}
+          />
 
           <div className="flex-1 flex items-center justify-center p-4">
             <div className="w-full max-w-4xl space-y-6">
-              <div className={cn(card, "p-6 sm:p-8 space-y-6 shadow-2xl")}>
-                <div className={cn(panel, "text-center py-6")}>
-                  <p className="text-xl font-semibold text-foreground leading-relaxed">{rawText || "No Question Text Found"}</p>
-                </div>
+              <ExamQuestionCard
+                question={currentQuestion}
+                onAnswer={handleAnswer}
+              />
 
-                {/* Multiple Choice Render */}
-                {(rawType === "multiple_choice" || rawType === "multiple-choice") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {rawOptions.map((opt, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleAnswer(currentQuestion.id, opt)}
-                        className={cn(optionBase, currentQuestion.answer === opt ? optionSelected : optionIdle, focusRing)}
-                        aria-pressed={currentQuestion.answer === opt}
-                      >
-                        <span className="font-bold mr-2 text-indigo-500 dark:text-indigo-400">{String.fromCharCode(65 + i)}.</span>
-                        <span>{opt}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* True/False Render */}
-                {(rawType === "true_false" || rawType === "true-false") && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
-                    {[true, false].map((val) => (
-                      <button
-                        key={val.toString()}
-                        type="button"
-                        onClick={() => handleAnswer(currentQuestion.id, val)}
-                        className={cn(
-                          "py-6 text-xl font-bold rounded-xl border transition-all text-center",
-                          currentQuestion.answer === val
-                            ? "bg-indigo-500/20 border-indigo-500 text-indigo-700 dark:text-indigo-300 shadow-md shadow-indigo-500/15"
-                            : "bg-input border-border text-foreground hover:bg-surface-elevated",
-                          focusRing
-                        )}
-                        aria-pressed={currentQuestion.answer === val}
-                      >
-                        {val ? "True" : "False"}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Short Answer Render */}
-                {(rawType === "short_answer" || rawType === "short-answer") && (
-                  <div>
-                    <Label htmlFor="short-answer-input">Your Answer</Label>
-                    <Textarea
-                      id="short-answer-input"
-                      value={currentQuestion.answer || ""}
-                      onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
-                      placeholder="Type your answer here..."
-                      rows={6}
-                    />
-                  </div>
-                )}
-
-                {/* Fill in the Blank Render */}
-                {(rawType === "fill_in_the_blank" || rawType === "fill-in-the-blank" || rawType === "fill_in_blank") && (
-                  <div>
-                    <Label htmlFor="fill-blank-input">Missing Word / Phrase</Label>
-                    <Input
-                      id="fill-blank-input"
-                      type="text"
-                      hasIcon={false}
-                      value={currentQuestion.answer || ""}
-                      onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
-                      placeholder="Type the missing word or phrase here..."
-                    />
-                  </div>
-                )}
-
-                {/* Matching Render */}
-                {rawType === "matching" && (() => {
-                  let matchData = { leftItems: [], rightItems: [] };
-                  try {
-                    const raw = Array.isArray(currentQuestion.options) ? currentQuestion.options[0] : null;
-                    if (typeof raw === "string") matchData = { ...matchData, ...JSON.parse(raw) };
-                    else if (raw && typeof raw === "object") matchData = { ...matchData, ...raw };
-                  } catch {
-                    matchData = { leftItems: [], rightItems: [] };
-                  }
-
-                  const leftItems = Array.isArray(matchData.leftItems) ? matchData.leftItems : [];
-                  const rightItems = Array.isArray(matchData.rightItems) ? matchData.rightItems : [];
-
-                  if (leftItems.length === 0 || rightItems.length === 0) {
-                    return <p className="text-muted-foreground text-sm">Matching items unavailable.</p>;
-                  }
-
-                  let selectedPairs = [];
-                  try {
-                    const parsed = JSON.parse(currentQuestion.answer || "[]");
-                    if (Array.isArray(parsed)) selectedPairs = parsed;
-                  } catch {
-                    selectedPairs = [];
-                  }
-
-                  const handleMatchChange = (left, right) => {
-                    const others = selectedPairs.filter(([, r]) => r !== right || r === "");
-                    const next = [...others.filter(([l]) => l !== left), [left, right]];
-                    handleAnswer(currentQuestion.id, JSON.stringify(next));
-                  };
-
-                  return (
-                    <div className="space-y-4">
-                      {leftItems.map((left, i) => {
-                        const pair = selectedPairs.find(([l]) => l === left);
-                        return (
-                          <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-input rounded-xl border border-border">
-                            <span className="font-semibold text-secondary-foreground flex-1 break-words">{left}</span>
-                            <div className="sm:w-72">
-                              <Select
-                                value={pair ? pair[1] : ""}
-                                onChange={(e) => handleMatchChange(left, e.target.value)}
-                                aria-label={`Match for ${left}`}
-                              >
-                                <option value="">Select match...</option>
-                                {rightItems.map((r, ri) => (
-                                  <option key={ri} value={r}>{r}</option>
-                                ))}
-                              </Select>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
-              </div>
-
-              <div className="flex justify-between items-center gap-3">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={goPrevious}
-                  disabled={currentQuestionIndex === 0}
-                >
-                  Previous
-                </Button>
-                {currentQuestionIndex === assessmentQuestions.length - 1 ? (
-                  <Button
-                    type="button"
-                    variant="success"
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Exam"}
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="primary"
-                    onClick={goNext}
-                  >
-                    Next Question
-                  </Button>
-                )}
-              </div>
+              <ExamNavigation
+                currentIndex={currentQuestionIndex}
+                totalQuestions={assessmentQuestions.length}
+                onPrevious={goPrevious}
+                onNext={goNext}
+                onSubmit={handleSubmit}
+                isSubmitting={isSubmitting}
+              />
             </div>
           </div>
         </div>
       )}
 
+      {/* Submitted Screen */}
       {isSubmitted && (
         <div className="min-h-screen flex items-center justify-center p-4">
-          <div className={cn(card, "p-8 text-center max-w-xl w-full space-y-4")}>
-            <h1 className="text-2xl font-bold text-foreground">Assessment Submitted!</h1>
-            <p className="text-muted-foreground">Redirecting to dashboard...</p>
+          <div className={cn(card, "p-8 text-center max-w-xl w-full space-y-4 shadow-2xl")}>
+            <h1 className="text-2xl font-bold text-foreground text-balance">
+              Assessment Submitted!
+            </h1>
+            <p className="text-muted-foreground text-pretty">
+              Your answers have been recorded. Redirecting to your dashboard in a few seconds...
+            </p>
           </div>
         </div>
       )}
     </div>
   );
 }
-
-export default TakeAssessment;

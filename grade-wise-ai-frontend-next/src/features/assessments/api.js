@@ -19,6 +19,9 @@ export const updateAssessmentApi = (assessmentId, formData) =>
 export const deleteAssessmentApi = (assessmentId) =>
   apiClient.delete(`/assessments/${assessmentId}`);
 
+export const cloneAssessmentApi = (assessmentId) =>
+  apiClient.post(`/assessments/${assessmentId}/clone`);
+
 /* =========================
    Physical Paper
 ========================= */

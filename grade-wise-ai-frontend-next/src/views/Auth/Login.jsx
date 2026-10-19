@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { btn, card } from "@/lib/ui.js";
+import { card } from "@/lib/ui.js";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import Modal from "@/components/ui/Modal.jsx";
 import AuthPageLayout from "@/components/layout/AuthPageLayout.jsx";
 import useLoginForm from "@/hooks/useLoginForm.js";
 import LoginFormFields, { LoginSubmitButton, AuthCardHeader } from "@/components/auth/LoginFormFields.jsx";
-import { FaSignInAlt, FaGoogle, FaUserCircle } from "react-icons/fa";
+import { FaSignInAlt, FaUserCircle } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { executeGoogleAuthBootstrap, clearPartialSession, bootstrapAppData } from "@/features/auth/bootstrap.js";
 import { googleAuthApi, rememberedLoginApi } from "@/features/auth/api.js";
@@ -16,6 +16,7 @@ import { auth, googleProvider } from "@/config/firebase.js";
 import { getRedirectResult } from "firebase/auth";
 import { getDestinationRoute } from "@/utils/redirectByRole.js";
 import RememberedAccountCard from "@/components/auth/RememberedAccountCard.jsx";
+import { GoogleAuthButton } from "@/components/auth/index.js";
 import {
   getRememberedAccounts,
   saveRememberedAccount,
@@ -213,14 +214,12 @@ function Login() {
             </button>
           </div>
         ) : (
-          <button
+          <GoogleAuthButton
             onClick={handleGoogleLogin}
-            disabled={googleLoading || loading}
-            className={cn(btn.google, "mb-6", "disabled:opacity-50", "disabled:cursor-not-allowed")}
-          >
-            <FaGoogle className="text-base" />
-            <span>Continue with Google</span>
-          </button>
+            loading={googleLoading}
+            disabled={loading}
+            className="mb-6"
+          />
         )}
 
         <div className="relative mb-6">

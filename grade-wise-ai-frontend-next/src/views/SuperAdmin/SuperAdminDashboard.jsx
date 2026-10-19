@@ -6,6 +6,7 @@ import Modal from "@/components/ui/Modal.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import UserManagementTable, { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
+import { DashboardSectionCard } from "@/components/dashboard/shared/index.js";
 import useUserManagement from "@/hooks/useUserManagement.js";
 import {
   FaUsers,
@@ -91,30 +92,22 @@ function SuperAdminDashboard() {
 
         <UserStatsGrid stats={stats} totalUsers={users.length} />
 
-        <div className={cn(card, "shadow-2xl", "overflow-hidden")}>
-          <div className="px-6 py-4 border-b border-border bg-input">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-              <div className="flex items-center gap-3">
-                <div className={cn("p-2.5", "rounded-xl", iconBadge)}>
-                  <FaUsers className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Platform Users Management</h2>
-                  <p className={cn("text-muted-foreground", "text-xs", "mt-0.5")}>
-                    {users.length} user{users.length !== 1 ? "s" : ""} (excluding super admins)
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={fetchUsers}
-                className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "min-h-[44px]")}
-              >
-                <FaSync />
-                Refresh
-              </button>
-            </div>
-          </div>
-
+        <DashboardSectionCard
+          icon={FaUsers}
+          title="Platform Users Management"
+          subtitle={`${users.length} user${users.length !== 1 ? "s" : ""} (excluding super admins)`}
+          headerClassName="bg-input"
+          bodyClassName="p-0"
+          actions={
+            <button
+              onClick={fetchUsers}
+              className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "min-h-[44px]")}
+            >
+              <FaSync />
+              Refresh
+            </button>
+          }
+        >
           <UserManagementTable
             users={users}
             currentUserId={user?.id}
@@ -123,7 +116,8 @@ function SuperAdminDashboard() {
             onDelete={handleDeleteUser}
             canDelete
           />
-        </div>
+        </DashboardSectionCard>
+
       </div>
 
       <Modal

@@ -1,76 +1,20 @@
-import { cn } from "@/lib/cn.js";
-import { accentPanel, btn, card, cardHeader, cardInteractive, iconBadge, page } from "@/lib/ui.js";
-import Link from "next/link";
+import { page } from "@/lib/ui.js";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
-import {
-  FaUser,
-  FaEnvelope,
-  FaShieldAlt,
-  FaCheckCircle,
-  FaTachometerAlt,
-  FaKey,
-  FaCrown,
-  FaChalkboardTeacher,
-  FaGraduationCap,
-  FaUserShield,
-} from "react-icons/fa";
-
-const ROLE_THEME = {
-  super_admin: {
-    gradient:     "from-violet-600 via-violet-600 to-indigo-700",
-    darkGradient: "dark:from-violet-700 dark:via-violet-700 dark:to-indigo-800",
-    badge:        "bg-violet-500/15 text-violet-400 border border-violet-500/20",
-    label:        "Super Admin",
-    Icon:         FaCrown,
-  },
-  admin: {
-    gradient:     "from-rose-500 via-rose-500 to-violet-600",
-    darkGradient: "dark:from-rose-600 dark:via-rose-700 dark:to-violet-800",
-    badge:        "bg-red-500/15 text-red-400 border border-red-500/20",
-    label:        "Admin",
-    Icon:         FaUserShield,
-  },
-  instructor: {
-    gradient:     "from-indigo-500 via-indigo-600 to-violet-600",
-    darkGradient: "dark:from-indigo-600 dark:via-indigo-700 dark:to-violet-800",
-    badge:        "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20",
-    label:        "Instructor",
-    Icon:         FaChalkboardTeacher,
-  },
-  student: {
-    gradient:     "from-emerald-500 via-emerald-500 to-indigo-600",
-    darkGradient: "dark:from-emerald-600 dark:via-emerald-700 dark:to-indigo-800",
-    badge:        "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
-    label:        "Student",
-    Icon:         FaGraduationCap,
-  },
-};
-
-const DEFAULT_THEME = {
-  gradient:     "from-slate-500 to-slate-600",
-  darkGradient: "dark:from-slate-600 dark:to-slate-700",
-  badge:        "bg-btn-secondary text-muted-foreground border border-border",
-  label:        "User",
-  Icon:         FaUser,
-};
-
-const DASHBOARD_MAP = {
-  super_admin: "/super-admin/dashboard",
-  admin:       "/admin/dashboard",
-  instructor:  "/instructor/dashboard",
-  student:     "/student/dashboard",
-};
+import { ROLE_THEME, DEFAULT_THEME, DASHBOARD_MAP } from "./Profile/constants.js";
+import ProfileHeader from "./Profile/components/ProfileHeader.jsx";
+import ProfileCard from "./Profile/components/ProfileCard.jsx";
+import AccountDetailsCard from "./Profile/components/AccountDetailsCard.jsx";
+import AccessDenied from "./Profile/components/AccessDenied.jsx";
 
 function Profile() {
   const { user } = useAuthStore();
   const router = useRouter();
 
-  const theme    = user ? (ROLE_THEME[user.role] ?? DEFAULT_THEME) : DEFAULT_THEME;
+  const theme = user ? (ROLE_THEME[user.role] ?? DEFAULT_THEME) : DEFAULT_THEME;
   const RoleIcon = theme.Icon;
-
-  const getDashboardLink = () => (user ? (DASHBOARD_MAP[user.role] ?? "/") : "/");
+  const dashboardLink = user ? (DASHBOARD_MAP[user.role] ?? "/") : "/";
 
   const handleChangePassword = () => {
     if (user) router.push("/forgot-password");
@@ -78,209 +22,29 @@ function Profile() {
 
   return (
     <div className={page}>
-
-      {/* Ambient blobs */}
       <AmbientBackground />
-
       <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-
         {user ? (
           <>
-            {/* ── Hero ────────────────────────────────────────── */}
-            <div className="mb-8 sm:mb-10">
-              <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8")}>
-                <div className="flex items-center gap-4">
-                  <div className={cn("p-2.5", "rounded-xl", iconBadge, "flex-shrink-0")}>
-                    <RoleIcon className="text-foreground text-xl" />
-                  </div>
-                  <div>
-                    <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                      My Profile
-                    </h1>
-                    <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>
-                      Manage your account information and settings.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            <ProfileHeader RoleIcon={RoleIcon} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-
-              {/* ── Profile card ─────────────────────────────── */}
               <div className="lg:col-span-1">
-                <div className={cn(card, cardInteractive, "shadow-2xl", "overflow-hidden")}>
-
-                  {/* Avatar area */}
-                  <div className="px-6 py-8 text-center border-b border-border bg-input">
-                    <div className={cn(accentPanel, "w-20 h-20 sm:w-24 sm:h-24 rounded-full", "flex items-center justify-center mx-auto mb-4 shadow-lg")}>
-                      <RoleIcon className="text-4xl text-indigo-400" />
-                    </div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 leading-tight">
-                      {user.name}
-                    </h2>
-                    <p className={cn("text-muted-foreground", "text-sm", "break-all", "leading-relaxed")}>
-                      {user.email}
-                    </p>
-                  </div>
-
-                  <div className="p-6 sm:p-8">
-                    <div className="flex flex-col items-center gap-4">
-
-                      {/* Role badge */}
-                      <span className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-full ${theme.badge}`}>
-                        <RoleIcon className="text-xs" />
-                        {theme.label}
-                      </span>
-
-                      {/* Verified indicator */}
-                      <div className="w-full pt-4 border-t border-border">
-                        <div className="flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-                          <FaCheckCircle className="text-emerald-400 text-base flex-shrink-0" />
-                          <span className="text-sm font-semibold text-emerald-400">
-                            Email Verified
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ProfileCard user={user} theme={theme} RoleIcon={RoleIcon} />
               </div>
-
-              {/* ── Details card ─────────────────────────────── */}
               <div className="lg:col-span-2">
-                <div className={cn(card, cardInteractive, "shadow-2xl")}>
-
-                  {/* Card header */}
-                  <div className={cardHeader}>
-                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-                      <FaUser className="text-indigo-400" />
-                      Account Information
-                    </h3>
-                  </div>
-
-                  <div className="p-6 sm:p-8">
-                    <div className="space-y-6">
-
-                      {/* Info fields grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-
-                        {/* Full Name */}
-                        <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
-                            <span className="flex items-center gap-2">
-                              <FaUser className={cn("text-muted-foreground", "text-xs")} />
-                              Full Name
-                            </span>
-                          </label>
-                          <div className="bg-input border border-border px-4 py-3 rounded-xl">
-                            <p className={cn("text-secondary-foreground", "font-semibold", "text-sm")}>
-                              {user.name}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Email */}
-                        <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
-                            <span className="flex items-center gap-2">
-                              <FaEnvelope className={cn("text-muted-foreground", "text-xs")} />
-                              Email Address
-                            </span>
-                          </label>
-                          <div className="bg-input border border-border px-4 py-3 rounded-xl break-all">
-                            <p className={cn("text-secondary-foreground", "font-semibold", "text-sm")}>
-                              {user.email}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Role */}
-                        <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
-                            <span className="flex items-center gap-2">
-                              <FaShieldAlt className={cn("text-muted-foreground", "text-xs")} />
-                              Role
-                            </span>
-                          </label>
-                          <div className="bg-input border border-border px-4 py-3 rounded-xl">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${theme.badge}`}>
-                              <RoleIcon className="text-xs" />
-                              {theme.label}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Account Status */}
-                        <div>
-                          <label className={cn("block", "text-muted-foreground", "text-sm", "font-medium", "mb-1.5")}>
-                            <span className="flex items-center gap-2">
-                              <FaCheckCircle className={cn("text-muted-foreground", "text-xs")} />
-                              Account Status
-                            </span>
-                          </label>
-                          <div className="bg-input border border-border px-4 py-3 rounded-xl">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-                              Active
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ── Quick Actions ─────────────────────── */}
-                      <div className="pt-6 border-t border-border">
-                        <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                          <FaTachometerAlt className="text-indigo-400" />
-                          Quick Actions
-                        </h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          <Link
-                            href={getDashboardLink()}
-                            className={cn(btn.primary, "flex items-center justify-center gap-2 px-5 py-3", "min-h-[44px]")}
-                          >
-                            <FaTachometerAlt />
-                            <span>Go to Dashboard</span>
-                          </Link>
-                          <button
-                            onClick={handleChangePassword}
-                            className={cn("flex", "items-center", "justify-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "min-h-[44px]")}
-                          >
-                            <FaKey />
-                            <span>Change Password</span>
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
+                <AccountDetailsCard
+                  user={user}
+                  theme={theme}
+                  RoleIcon={RoleIcon}
+                  dashboardLink={dashboardLink}
+                  onChangePassword={handleChangePassword}
+                />
               </div>
-
             </div>
           </>
         ) : (
-          /* ── Access Denied ──────────────────────────────────── */
-          <div className="flex flex-col items-center justify-center py-28 text-center px-4">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6">
-              <FaShieldAlt className="text-4xl text-red-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">
-              Access Denied
-            </h3>
-            <p className={cn("text-muted-foreground", "max-w-sm", "mb-8", "text-sm", "sm:text-base")}>
-              Please log in to view your profile.
-            </p>
-            <Link
-              href="/login"
-              className={cn(btn.primary, "inline-flex items-center gap-2 px-5 py-3", "min-h-[44px]")}
-            >
-              <FaUser />
-              <span>Go to Login</span>
-            </Link>
-          </div>
+          <AccessDenied />
         )}
-
       </div>
     </div>
   );

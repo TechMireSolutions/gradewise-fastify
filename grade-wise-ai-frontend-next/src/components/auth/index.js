@@ -7,3 +7,4 @@ export {
 } from "./LoginFormFields";
 export { default as RememberedAccountCard } from "./RememberedAccountCard";
 export { default as PasswordRequirements } from "./PasswordRequirements";
+export { default as GoogleAuthButton } from "./GoogleAuthButton";

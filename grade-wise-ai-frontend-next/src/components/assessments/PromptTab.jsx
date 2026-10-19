@@ -1,8 +1,9 @@
 import { cn } from "@/lib/cn.js";
+import { focusRing } from "@/lib/ui.js";
 import { FaFileAlt, FaLanguage, FaCopy } from "react-icons/fa";
 import React from "react";
 import { generateAIPrompt } from "@/utils/promptGenerator.js";
-import { LANGUAGE_OPTIONS } from "@/utils/translations.js";
+import { LANGUAGE_OPTIONS, isRTLLanguage } from "@/utils/translations.js";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
 
 const QUESTION_TYPE_LABELS = {
@@ -31,6 +32,7 @@ export default function PromptTab({
   }, [assessment, selectedLanguage]);
 
   const activeLangOption = LANGUAGE_OPTIONS.find((l) => l.value === selectedLanguage);
+  const isRTL = isRTLLanguage(selectedLanguage);
 
   return (
     <div className="animate-fade-in">
@@ -64,7 +66,8 @@ export default function PromptTab({
                   type="button"
                   onClick={() => onLanguageChange?.(lang.value)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer min-h-9",
+                    focusRing,
                     selectedLanguage === lang.value
                       ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
                       : "bg-btn-secondary border border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
@@ -80,7 +83,10 @@ export default function PromptTab({
               type="button"
               onClick={onCopy}
               disabled={!assessment || aiPromptLoading}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-9",
+                focusRing
+              )}
             >
               <FaCopy /> {copied ? "Copied!" : "Copy Full Prompt"}
             </button>
@@ -109,7 +115,13 @@ export default function PromptTab({
               <span>Unified Assignment Generation Prompt ({aiPrompt.languageLabel || selectedLanguage})</span>
               <span className="text-muted-foreground font-mono text-[11px]">Single Pipeline Execution</span>
             </div>
-            <pre className="whitespace-pre-wrap text-xs text-muted-foreground p-3.5 bg-muted max-h-[500px] overflow-y-auto font-mono leading-relaxed">
+            <pre
+              dir={isRTL ? "rtl" : "ltr"}
+              className={cn(
+                "whitespace-pre-wrap text-xs text-muted-foreground p-3.5 bg-muted max-h-[500px] overflow-y-auto leading-relaxed",
+                isRTL ? "font-sans text-right" : "font-mono"
+              )}
+            >
               {aiPrompt.unifiedPrompt}
             </pre>
           </div>
@@ -124,7 +136,13 @@ export default function PromptTab({
                     <p className="font-semibold text-secondary-foreground mb-1">
                       Section {i + 1} — {getSectionTypeLabel(block.questionType, selectedLanguage)} × {block.questionCount} questions
                     </p>
-                    <pre className="whitespace-pre-wrap text-[11px] text-muted-foreground max-h-40 overflow-y-auto">
+                    <pre
+                      dir={isRTL ? "rtl" : "ltr"}
+                      className={cn(
+                        "whitespace-pre-wrap text-[11px] text-muted-foreground max-h-40 overflow-y-auto",
+                        isRTL ? "font-sans text-right" : "font-mono"
+                      )}
+                    >
                       {block.prompt}
                     </pre>
                   </div>
@@ -144,7 +162,13 @@ export default function PromptTab({
               <summary className="px-3 py-2.5 bg-input cursor-pointer text-sm font-semibold text-secondary-foreground">
                 Block {i + 1} — {getSectionTypeLabel(block.questionType, selectedLanguage)} × {block.questionCount} questions
               </summary>
-              <pre className="whitespace-pre-wrap text-xs text-muted-foreground p-3 bg-muted max-h-96 overflow-y-auto">
+              <pre
+                dir={isRTL ? "rtl" : "ltr"}
+                className={cn(
+                  "whitespace-pre-wrap text-xs text-muted-foreground p-3 bg-muted max-h-96 overflow-y-auto",
+                  isRTL ? "font-sans text-right" : "font-mono"
+                )}
+              >
                 {block.prompt}
               </pre>
             </details>
@@ -156,7 +180,13 @@ export default function PromptTab({
             Showing preview based on assessment configuration in{" "}
             <span className="font-semibold text-foreground">{activeLangOption?.label?.replace(/^\S+\s/, "") || selectedLanguage}</span>:
           </p>
-          <pre className="whitespace-pre-wrap text-xs font-mono text-muted-foreground p-3.5 bg-muted rounded border border-border max-h-96 overflow-y-auto">
+          <pre
+            dir={isRTL ? "rtl" : "ltr"}
+            className={cn(
+              "whitespace-pre-wrap text-xs text-muted-foreground p-3.5 bg-muted rounded border border-border max-h-96 overflow-y-auto",
+              isRTL ? "font-sans text-right" : "font-mono"
+            )}
+          >
             {fallbackPrompt || assessment?.prompt || "No prompt generated yet."}
           </pre>
         </>

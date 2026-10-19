@@ -161,9 +161,9 @@ const PhysicalPaperModal = ({
       totalMarks: initialMarks,
       notes: "",
       pageSize: saved.pageSize || "A4",
-      headerFontSize: 18,
-      questionFontSize: 10,
-      optionFontSize: 9,
+      headerFontSize: saved.headerFontSize ? Number(saved.headerFontSize) : 18,
+      questionFontSize: saved.questionFontSize ? Number(saved.questionFontSize) : 10,
+      optionFontSize: saved.optionFontSize ? Number(saved.optionFontSize) : 9,
     });
   }, [isOpen, assessmentTitle, assessment, derivedMarks, calculatedDurationStr]);
 
@@ -202,7 +202,7 @@ const PhysicalPaperModal = ({
     if (name === "totalMarks") {
       userModifiedMarksRef.current = true;
     }
-    if (["instituteName", "teacherName", "paperTime", "paperDuration", "pageSize"].includes(name)) {
+    if (["instituteName", "teacherName", "paperTime", "paperDuration", "pageSize", "headerFontSize", "questionFontSize", "optionFontSize"].includes(name)) {
       updateSavedSettings({ [name]: value });
     }
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -212,7 +212,7 @@ const PhysicalPaperModal = ({
     if (name === "totalMarks") {
       userModifiedMarksRef.current = true;
     }
-    if (["instituteName", "teacherName", "paperTime", "paperDuration", "pageSize"].includes(name)) {
+    if (["instituteName", "teacherName", "paperTime", "paperDuration", "pageSize", "headerFontSize", "questionFontSize", "optionFontSize"].includes(name)) {
       updateSavedSettings({ [name]: value });
     }
     setForm((prev) => ({ ...prev, [name]: value }));

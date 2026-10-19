@@ -5,6 +5,7 @@ import {
   createAssessmentApi,
   updateAssessmentApi,
   deleteAssessmentApi,
+  cloneAssessmentApi,
   fetchEnrolledStudentsApi,
   enrollStudentApi,
   unenrollStudentApi,
@@ -107,6 +108,31 @@ const useAssessmentStore = create((set) => ({
       }));
     } catch (error) {
       const message = error.response?.data?.message || "Failed to delete assessment";
+      set({ error: message, loading: false });
+      throw error;
+    }
+  },
+
+  cloneAssessment: async (assessmentId) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await cloneAssessmentApi(assessmentId);
+      const cloned = response.data?.data;
+      if (cloned) {
+        set((state) => ({
+          assessments: [
+            {
+              ...cloned,
+              is_executed: cloned.is_executed ?? cloned.isExecuted ?? false,
+            },
+            ...state.assessments,
+          ],
+          loading: false,
+        }));
+      }
+      return cloned;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to clone assessment";
       set({ error: message, loading: false });
       throw error;
     }

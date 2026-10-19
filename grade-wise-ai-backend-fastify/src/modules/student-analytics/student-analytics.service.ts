@@ -7,20 +7,8 @@ import {
   studentAnswers,
 } from "../../db/schema.js";
 import { eq, and, sql, desc, gte, type SQL } from "drizzle-orm";
-import { getCompletedAttempt, getAttemptQuestionsWithAnswers } from "../analytics/shared.js";
+import { getCompletedAttempt, getAttemptQuestionsWithAnswers, timeRangeCutoff, roundScore } from "../analytics/shared.js";
 
-function timeRangeCutoff(timeRange: string): Date | null {
-  switch (timeRange) {
-    case "7d":
-      return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    case "30d":
-      return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    case "90d":
-      return new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-    default:
-      return null;
-  }
-}
 
 export async function getStudentOverview(studentId: number) {
   const [enrolled] = await db
@@ -28,18 +16,11 @@ export async function getStudentOverview(studentId: number) {
     .from(enrollments)
     .where(eq(enrollments.studentId, studentId));
 
-  const [completed] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(assessmentAttempts)
-    .where(
-      and(
-        eq(assessmentAttempts.studentId, studentId),
-        eq(assessmentAttempts.status, "completed")
-      )
-    );
-
-  const [avg] = await db
-    .select({ avg: sql<number>`avg(cast(${assessmentAttempts.score} as float))` })
+  const [attemptStats] = await db
+    .select({
+      completed: sql<number>`count(*)`,
+      avgScore: sql<number>`avg(cast(${assessmentAttempts.score} as float))`,
+    })
     .from(assessmentAttempts)
     .where(
       and(
@@ -68,9 +49,9 @@ export async function getStudentOverview(studentId: number) {
     .limit(5);
 
   return {
-    totalEnrolled: enrolled?.count ?? 0,
-    completedAssessments: completed?.count ?? 0,
-    averageScore: Math.round((avg?.avg ?? 0) * 100) / 100,
+    totalEnrolled: Number(enrolled?.count ?? 0),
+    completedAssessments: Number(attemptStats?.completed ?? 0),
+    averageScore: roundScore(attemptStats?.avgScore),
     recentAttempts,
   };
 }

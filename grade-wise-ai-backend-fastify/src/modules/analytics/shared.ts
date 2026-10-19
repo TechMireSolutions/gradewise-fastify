@@ -47,3 +47,26 @@ export async function getAttemptQuestionsWithAnswers(attemptId: number) {
     .where(eq(generatedQuestions.attemptId, attemptId))
     .orderBy(generatedQuestions.questionOrder);
 }
+
+export function roundScore(score: number | string | null | undefined, decimals = 2): number {
+  if (score === null || score === undefined || score === "") return 0;
+  const num = typeof score === "string" ? parseFloat(score) : score;
+  if (isNaN(num)) return 0;
+  const factor = Math.pow(10, decimals);
+  return Math.round(num * factor) / factor;
+}
+
+export function timeRangeCutoff(timeRange?: string): Date | null {
+  if (!timeRange) return null;
+  switch (timeRange) {
+    case "7d":
+      return new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    case "30d":
+      return new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    case "90d":
+      return new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return null;
+  }
+}
+
