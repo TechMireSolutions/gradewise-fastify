@@ -15,6 +15,7 @@ description: "Project overview — stack, repo layout, commands, routes, infrast
 | `backend_rules.md` | Fastify · TypeScript · Drizzle · Redis · BullMQ · AI SDK |
 | `frontend_rules.md` | Next.js · React · Zustand · TanStack Query · cookie auth |
 | `ui.md` | Tailwind v4 · typography · accessibility · interactions |
+| `ui-ux-consistency.md` | Semantic tokens · WCAG AA contrast · RTL/LTR logical layout · landmarks · container queries |
 | `workflow_rules.md` | Verification gates · commit checklist |
 | `antigravity_rules.md` | Google Antigravity SDK agent design (not app code) |
 

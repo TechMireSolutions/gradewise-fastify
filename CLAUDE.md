@@ -4,6 +4,40 @@ Workspace guide for humans and AI agents (Cursor, Claude Code, Antigravity).
 
 ---
 
+## Rules & Skills Map (Mirrored in `.cursor/rules/`, `.agent/rules/`, `.agents/rules/`, `.claude/rules/`)
+
+| Rule | Scope |
+|------|-------|
+| `standards_rules.md` | Policies 1–5: deps, structure, naming, DRY, security, testing, form UX checklist |
+| `domain_rules.md` | RBAC, assessments, multilingual RTL, XAI feedback, question types, password policy |
+| `backend_rules.md` | Fastify 5 · TypeScript 6 · Drizzle ORM · PostgreSQL · Redis · BullMQ · AI SDK · migration parity |
+| `frontend_rules.md` | Next.js 16 · React 19 · Tailwind 4 · Zustand · TanStack Query · cookie auth · form primitives |
+| `ui.md` | Tailwind v4 tokens · `statSurface` · typography · accessible form inputs · modal overscroll containment |
+| `ui-ux-consistency.md` | Semantic tokens · WCAG AA contrast · RTL/LTR logical layout · landmarks · container queries |
+| `workflow_rules.md` | Verification gates · PM2 reload after build · pre-commit checklist |
+| `project_rules.md` | Repository overview, port 5005, commands, and key routes |
+| `antigravity_rules.md` | Google Antigravity SDK agent orchestration (not app code) |
+
+### Skills Catalog (Mirrored in `.cursor/skills/`, `.agent/skills/`, `.agents/skills/`, `.claude/skills/`)
+
+| Skill | Purpose |
+|-------|---------|
+| `gradewise-frontend` | Next.js 16 App Router, pure Tailwind v4, form primitives (`PasswordInput`, `Select`, `Textarea`), exam UI |
+| `gradewise-backend` | Fastify 5, Drizzle ORM, BullMQ, Redis, Vitest, migration parity |
+| `gradewise-domain` | RBAC, assessment lifecycle, XAI feedback, multilingual RTL, physical paper generation |
+| `gradewise-modularization` | Full-stack view decomposition (<200 lines), shared dashboard primitives, and backend service facade patterns |
+| `ui-ux-design-consistency` | Review and enforce project-wide UI/UX consistency, semantic tokens, WCAG AA contrast, container queries, RTL/LTR |
+| `ui-styling` | Design system styling, Tailwind v4 tokens, form primitives & accessibility standards |
+| `design-system` | Three-layer token architecture, component specifications, pure Tailwind v4 tokens |
+| `ui-ux-pro-max` | UI/UX design intelligence for web and mobile across responsive layouts |
+| `brand` | Brand voice, visual identity, messaging frameworks, asset management |
+| `design` | Comprehensive design: logos, icons, presentations, banners, mockups |
+| `slides` | Strategic HTML presentations & layouts |
+| `banner-design` | Banner design for web, social, ads, print |
+| `google-antigravity-sdk` | Google Antigravity AI agent orchestration |
+
+---
+
 ## Repository Structure
 
 | Component | Path | Stack |
