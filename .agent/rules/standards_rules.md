@@ -408,6 +408,7 @@ Before marking work complete:
 - [ ] Names follow Policy 3 tables
 - [ ] No duplicate logic when shared module exists (Policy 4)
 - [ ] Shared UI primitives used: `Button`, `Input`, `PasswordInput`, `Select`, `Textarea`, `Label`, `SearchField`, `EmptyState`
+- [ ] UI/UX consistency verified (`ui-ux-consistency.md`: zero raw neutrals, WCAG AA dual-theme contrast $\ge 4.5:1$, `text-start`/`text-end` logical alignment, `<MainLandmark>` wrapper)
 - [ ] Auth uses cookies, not localStorage tokens (Policy 5)
 - [ ] Modern web standards verified (`ui.md` & `frontend_rules.md`: text-wrap balance/pretty, :user-invalid, CSS dialog overscroll containment, accessible errors)
 - [ ] UI stability verified: `cardInteractive` strictly on leaf cards (no container scale jitter), FOES avoided via skeleton placeholders (`loading && !hasLoaded`), decoupled modal states
