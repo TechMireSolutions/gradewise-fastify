@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/cn.js";
-import { iconBadge } from "@/lib/ui.js";
+import { focusRing, iconBadge } from "@/lib/ui.js";
 import { useEffect, useState, useCallback } from "react";
 import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 
