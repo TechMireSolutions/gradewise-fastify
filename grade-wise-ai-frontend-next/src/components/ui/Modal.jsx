@@ -9,6 +9,8 @@ function Modal({
   onClose,
   title,
   children,
+  message,
+  actions,
   type = "info",
   onConfirm,
   confirmText = "Confirm",
@@ -20,7 +22,8 @@ function Modal({
   const [progress, setProgress] = useState(100);
   const [isClosing, setIsClosing] = useState(false);
 
-  const isConfirmModal = typeof onConfirm === "function";
+  const isConfirmModal = typeof onConfirm === "function" || Boolean(actions);
+  const content = children || message;
 
   const handleClose = useCallback(() => {
     if (loading) return;
@@ -160,37 +163,45 @@ function Modal({
                 >
                   {title}
                 </h3>
-                <div className={cn("text-sm", "sm:text-base", "text-secondary-foreground", "leading-relaxed")}>
-                  {children}
-                </div>
+                {content && (
+                  <div className={cn("text-sm", "sm:text-base", "text-secondary-foreground", "leading-relaxed")}>
+                    {content}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* ACTION BUTTONS (ONLY FOR CONFIRM MODALS) */}
             {isConfirmModal && (
-              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-5 pt-4 border-t border-border">
-                <button
-                  onClick={handleClose}
-                  disabled={loading}
-                  className={cn("w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground text-sm font-medium transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed", focusRing)}
-                >
-                  {cancelText}
-                </button>
+              actions ? (
+                <div className="mt-5 pt-4 border-t border-border">
+                  {actions}
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 mt-5 pt-4 border-t border-border">
+                  <button
+                    onClick={handleClose}
+                    disabled={loading}
+                    className={cn("w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground text-sm font-medium transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed", focusRing)}
+                  >
+                    {cancelText}
+                  </button>
 
-                <button
-                  onClick={handleConfirm}
-                  disabled={loading}
-                  className={`
-                    w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl text-white text-sm font-semibold
-                    transition-all duration-200 active:scale-95
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1
-                    cursor-pointer disabled:opacity-60 disabled:cursor-wait disabled:active:scale-100
-                    ${styles.confirmBtn}
-                  `}
-                >
-                  {loading ? "Working..." : confirmText}
-                </button>
-              </div>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={loading}
+                    className={`
+                      w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl text-white text-sm font-semibold
+                      transition-all duration-200 active:scale-95
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1
+                      cursor-pointer disabled:opacity-60 disabled:cursor-wait disabled:active:scale-100
+                      ${styles.confirmBtn}
+                    `}
+                  >
+                    {loading ? "Working..." : confirmText}
+                  </button>
+                </div>
+              )
             )}
 
             {/* PROGRESS BAR (ONLY FOR AUTO-CLOSE MODALS) */}

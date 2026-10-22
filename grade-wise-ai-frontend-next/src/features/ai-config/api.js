@@ -50,8 +50,20 @@ export const setProviderModel = async (purpose, provider, model) => {
 };
 
 export const deleteAiKey = async (purpose, provider, index) => {
-  const response = await apiClient.delete("/config/ai-keys", { data: { purpose, provider, keyIndex: index } });
-  return response.data;
+  try {
+    const response = await apiClient.delete("/config/ai-keys", {
+      data: { purpose, provider, keyIndex: index },
+      params: { purpose, provider, keyIndex: index },
+    });
+    return response.data;
+  } catch {
+    const response = await apiClient.post("/config/ai-keys/delete", {
+      purpose,
+      provider,
+      keyIndex: index,
+    });
+    return response.data;
+  }
 };
 
 export const testStoredAiKey = async (purpose, provider, index) => {

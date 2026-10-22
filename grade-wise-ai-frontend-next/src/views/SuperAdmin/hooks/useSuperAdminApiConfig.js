@@ -354,13 +354,19 @@ export default function useSuperAdminApiConfig() {
       setActionLoading(`delete-key-${purpose}-${provider}-${index}`);
       await apiDeleteAiKey(purpose, provider, index);
       await refreshKeyList(purpose, provider);
+      setPendingKeyDelete(null);
       showModal("success", "Key Deleted", "API key removed from the pool.");
-    } catch {
-      showModal("error", "Error", "Failed to delete key. Please try again.");
+    } catch (err) {
+      setPendingKeyDelete(null);
+      showModal("error", "Error", err?.response?.data?.message || "Failed to delete key. Please try again.");
     } finally {
       setActionLoading(null);
-      setPendingKeyDelete(null);
     }
+  };
+
+  const handleCloseModal = () => {
+    setPendingKeyDelete(null);
+    closeModal();
   };
 
   const handleTestInlineKey = async () => {
@@ -417,7 +423,7 @@ export default function useSuperAdminApiConfig() {
     inlineTestStatus,
     pendingKeyDelete,
     modal,
-    closeModal,
+    closeModal: handleCloseModal,
     updateActiveCard,
     handleSaveCard,
     handleTestStoredKey,

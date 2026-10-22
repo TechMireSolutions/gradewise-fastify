@@ -179,18 +179,20 @@ export default function SuperAdminApiConfig() {
         type={modal.type}
         title={modal.title}
         message={modal.message}
+        loading={Boolean(actionLoading)}
         actions={
           pendingKeyDelete ? (
             <div className="flex gap-2 justify-end">
-              <Button variant="secondary" onClick={closeModal}>
+              <Button variant="secondary" onClick={closeModal} disabled={Boolean(actionLoading)}>
                 Cancel
               </Button>
               <Button
                 variant="danger"
                 onClick={confirmDeleteKey}
+                disabled={Boolean(actionLoading)}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Delete Key
+                {actionLoading ? "Deleting..." : "Delete Key"}
               </Button>
             </div>
           ) : undefined

@@ -115,6 +115,25 @@ export default async function configModule(app: FastifyInstance) {
   // DELETE /api/config/ai-keys
   f.delete("/ai-keys", {
     preHandler: superAdminOnly,
+  }, async (request, reply) => {
+    try {
+      const payload = ((request.body as Record<string, unknown>) || (request.query as Record<string, unknown>)) ?? {};
+      const parsed = DeleteAiKeySchema.parse({
+        provider: payload.provider,
+        purpose: payload.purpose,
+        keyIndex: payload.keyIndex !== undefined ? Number(payload.keyIndex) : undefined,
+      });
+      await deleteAiKey(parsed.provider, parsed.purpose, parsed.keyIndex);
+      return reply.send({ success: true, message: "Key removed." });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
+  // POST /api/config/ai-keys/delete (proxy-safe alternative)
+  f.post("/ai-keys/delete", {
+    preHandler: superAdminOnly,
     schema: {
       body: DeleteAiKeySchema,
     },
