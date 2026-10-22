@@ -1,16 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card as uiCard, iconBadge, page, pageInner } from "@/lib/ui.js";
+import { iconBadge, page, pageInner } from "@/lib/ui.js";
 import Link from "next/link";
 import { Modal, Button } from "@/components/ui";
-import { FaKey, FaArrowLeft, FaWrench } from "react-icons/fa";
+import { FaKey, FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
-import useSuperAdminApiConfig, { providerLabels } from "./hooks/useSuperAdminApiConfig.js";
+import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import ApiConfigSidebar from "./components/ApiConfigSidebar.jsx";
-import ModelSelector from "./components/ModelSelector.jsx";
-import AddKeysSection from "./components/AddKeysSection.jsx";
 import StoredKeysTable from "./components/StoredKeysTable.jsx";
+import ProviderSettingsModal from "./components/ProviderSettingsModal.jsx";
 
 export default function SuperAdminApiConfig() {
   const {
@@ -29,6 +28,9 @@ export default function SuperAdminApiConfig() {
     actionLoading,
     inlineTestStatus,
     pendingKeyDelete,
+    isSettingsModalOpen,
+    openSettingsModal,
+    closeSettingsModal,
     modal,
     closeModal,
     updateActiveCard,
@@ -93,78 +95,25 @@ export default function SuperAdminApiConfig() {
 
         {/* Two-column Layout */}
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Sidebar */}
+          {/* Sidebar (Purpose selection & quick settings trigger) */}
           <ApiConfigSidebar
             purpose={purpose}
             activeProvider={provider}
-            aiState={aiState}
             totalPdfKeys={totalPdfKeys}
             totalTextKeys={totalTextKeys}
             onSelectPurpose={setConfigSubTab}
-            onSelectProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
+            onOpenSettings={openSettingsModal}
           />
 
-          {/* Main Configuration Panels */}
-          <main className="flex-1 min-w-0 space-y-6">
-            {/* Active Provider Card */}
-            <div className={cn(uiCard, "shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200")}>
-              {/* Card Header */}
-              <div className="px-6 py-4 border-b border-border bg-input flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className={cn("p-2 rounded-lg text-white", pStyle.accentBg)}>
-                    <FaWrench className="w-3.5 h-3.5" />
-                  </span>
-                  <div>
-                    <h2 className="text-lg font-bold text-foreground">
-                      {providerLabels[provider]} Settings
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      {purpose === "pdf" ? "PDF Extraction" : "Question Generation & Evaluation"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className={cn("px-2.5 py-1 rounded-full text-xs font-semibold", pStyle.badge)}>
-                    {card.list.length} key{card.list.length !== 1 ? "s" : ""} in pool
-                  </span>
-                </div>
-              </div>
-
-              {/* Card Content */}
-              <div className="p-6 sm:p-8 space-y-6">
-                {/* Model Selector */}
-                <ModelSelector
-                  provider={provider}
-                  model={card.model}
-                  onChangeModel={(val) => updateActiveCard("model", val)}
-                  disabled={configLoading}
-                />
-
-                {/* Add Keys Section */}
-                <div className="pt-4 border-t border-border">
-                  <AddKeysSection
-                    provider={provider}
-                    purpose={purpose}
-                    card={card}
-                    pStyle={pStyle}
-                    configLoading={configLoading}
-                    inlineTestStatus={inlineTestStatus}
-                    onUpdateCard={updateActiveCard}
-                    onTestInlineKey={handleTestInlineKey}
-                    onSaveCard={handleSaveCard}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Stored Keys Table */}
+          {/* Main Area: Stored Keys Table */}
+          <main className="flex-1 min-w-0">
             <StoredKeysTable
-              provider={provider}
               purpose={purpose}
-              card={card}
-              pStyle={pStyle}
+              aiState={aiState}
+              activeProvider={provider}
               actionLoading={actionLoading}
+              onSelectProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
+              onOpenSettings={openSettingsModal}
               onTestStoredKey={handleTestStoredKey}
               onDeleteStoredKey={handleDeleteStoredKey}
             />
@@ -172,7 +121,24 @@ export default function SuperAdminApiConfig() {
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Provider & Model Settings Modal */}
+      <ProviderSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={closeSettingsModal}
+        purpose={purpose}
+        provider={provider}
+        card={card}
+        pStyle={pStyle}
+        aiState={aiState}
+        configLoading={configLoading}
+        inlineTestStatus={inlineTestStatus}
+        onChangeProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
+        onUpdateCard={updateActiveCard}
+        onTestInlineKey={handleTestInlineKey}
+        onSaveCard={handleSaveCard}
+      />
+
+      {/* Confirmation & Alert Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={closeModal}

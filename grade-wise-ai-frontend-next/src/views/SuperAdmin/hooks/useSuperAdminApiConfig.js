@@ -15,7 +15,7 @@ import useModal from "@/hooks/useModal.js";
 export const ALL_PROVIDERS = ["gemini", "groq", "openai", "claude", "mistral", "deepseek"];
 
 export const defaultModelMap = {
-  gemini: "gemini-2.0-flash",
+  gemini: "gemini-2.5-flash",
   groq: "openai/gpt-oss-120b",
   openai: "gpt-4o-mini",
   claude: "claude-sonnet-4-6",
@@ -178,10 +178,22 @@ export default function useSuperAdminApiConfig() {
   const [configSubTab, setConfigSubTab] = useState("pdf");
   const [activeProvider, setActiveProvider] = useState({ pdf: "gemini", text: "gemini" });
   const [pendingKeyDelete, setPendingKeyDelete] = useState(null);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [inlineTestStatus, setInlineTestStatus] = useState({});
   const [configLoading, setConfigLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const { modal, showModal, closeModal } = useModal();
+
+  const openSettingsModal = useCallback((prov) => {
+    if (prov) {
+      setActiveProvider((prev) => ({ ...prev, [configSubTab]: prov }));
+    }
+    setIsSettingsModalOpen(true);
+  }, [configSubTab]);
+
+  const closeSettingsModal = useCallback(() => {
+    setIsSettingsModalOpen(false);
+  }, []);
 
   const patchPP = useCallback((purpose, provider, patch) => {
     setAiState((prev) => ({
@@ -241,11 +253,26 @@ export default function useSuperAdminApiConfig() {
     if (field === "newKeys") {
       patch.keysDirty = true;
       const detected = detectProvider(value);
-      if (detected && detected !== prov) {
-        setActiveProvider((prev) => ({ ...prev, [pur]: detected }));
-        patchPP(pur, detected, { newKeys: value, keysDirty: true });
-        patchPP(pur, prov, { newKeys: "", keysDirty: false });
-        return;
+      if (detected) {
+        const autoModel = defaultModelMap[detected];
+        if (detected !== prov) {
+          setActiveProvider((prev) => ({ ...prev, [pur]: detected }));
+          patchPP(pur, detected, {
+            newKeys: value,
+            keysDirty: true,
+            model: autoModel,
+            detectedInfo: { provider: detected, model: autoModel },
+          });
+          patchPP(pur, prov, { newKeys: "", keysDirty: false });
+          return;
+        } else {
+          if (!aiState[pur][prov].modelManuallyChanged) {
+            patch.model = autoModel;
+          }
+          patch.detectedInfo = { provider: detected, model: autoModel };
+        }
+      } else {
+        patch.detectedInfo = null;
       }
     }
     patchPP(pur, prov, patch);
@@ -261,7 +288,7 @@ export default function useSuperAdminApiConfig() {
       let autoPickedModel = null;
       let autoPickedSource = null;
       if (card.keysDirty && card.newKeys.trim()) {
-        const explicitModel = card.modelManuallyChanged ? card.model : undefined;
+        const explicitModel = card.modelManuallyChanged ? card.model : card.model || defaultModelMap[prov];
         const r = await apiAddAiKeys(pur, prov, card.newKeys, explicitModel);
         added = r.added || 0;
         autoPickedModel = r.autoPickedModel;
@@ -269,7 +296,7 @@ export default function useSuperAdminApiConfig() {
       } else {
         await apiSetProviderModel(pur, prov, card.model);
       }
-      patchPP(pur, prov, { newKeys: "", keysDirty: false, modelManuallyChanged: false });
+      patchPP(pur, prov, { newKeys: "", keysDirty: false, modelManuallyChanged: false, detectedInfo: null });
       await refreshKeyList(pur, prov);
       const purposeLabel = pur === "pdf" ? "PDF Reading" : "Text Generation";
       const providerLabel = providerLabels[prov];
@@ -285,6 +312,7 @@ export default function useSuperAdminApiConfig() {
       } else {
         msg = `${providerLabel} model saved for ${purposeLabel}.`;
       }
+      setIsSettingsModalOpen(false);
       showModal("success", "Saved", msg);
     } catch (error) {
       const msg = error?.response?.data?.message || "Failed to save settings. Please try again.";
@@ -422,6 +450,9 @@ export default function useSuperAdminApiConfig() {
     actionLoading,
     inlineTestStatus,
     pendingKeyDelete,
+    isSettingsModalOpen,
+    openSettingsModal,
+    closeSettingsModal,
     modal,
     closeModal: handleCloseModal,
     updateActiveCard,

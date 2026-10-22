@@ -1,57 +1,149 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/cn.js";
 import { accentPanel, card as uiCard, tableHead, tableRowHover } from "@/lib/ui.js";
-import { FaKey, FaFlask, FaTrash } from "react-icons/fa";
+import { FaKey, FaFlask, FaTrash, FaWrench } from "react-icons/fa";
 import TestResultBadge from "./TestResultBadge.jsx";
-import { providerLabels } from "../hooks/useSuperAdminApiConfig.js";
+import {
+  ALL_PROVIDERS,
+  providerLabels,
+  providerTheme,
+  defaultModelMap,
+} from "../hooks/useSuperAdminApiConfig.js";
 
 export default function StoredKeysTable({
-  provider,
   purpose,
-  card,
-  pStyle,
+  aiState,
+  activeProvider,
   actionLoading,
+  onSelectProvider,
+  onOpenSettings,
   onTestStoredKey,
   onDeleteStoredKey,
 }) {
+  const [filterProvider, setFilterProvider] = useState("all");
+
+  // Collect all keys stored under the current purpose across all providers
+  const allPurposeKeys = ALL_PROVIDERS.flatMap((prov) =>
+    (aiState?.[purpose]?.[prov]?.list || []).map((k) => ({
+      ...k,
+      provider: prov,
+      providerLabel: providerLabels[prov],
+      model: aiState?.[purpose]?.[prov]?.model || defaultModelMap[prov],
+      theme: providerTheme[prov],
+      testStatus: aiState?.[purpose]?.[prov]?.testStatus?.[k.index],
+    }))
+  );
+
+  const displayedKeys =
+    filterProvider === "all"
+      ? allPurposeKeys
+      : allPurposeKeys.filter((k) => k.provider === filterProvider);
+
+  const providersWithKeys = ALL_PROVIDERS.filter(
+    (p) => (aiState?.[purpose]?.[p]?.list || []).length > 0
+  );
+
   return (
     <div className={cn(uiCard, "shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200")}>
       {/* Card Header */}
-      <div className="px-6 py-4 border-b border-border bg-input flex items-center justify-between">
+      <div className="px-6 py-5 border-b border-border bg-input flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <span className="p-2 rounded-lg bg-btn-secondary">
-            <FaKey className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="p-2.5 rounded-xl bg-btn-secondary text-foreground">
+            <FaKey className="w-4 h-4 text-muted-foreground" />
           </span>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">
-              Stored Keys
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
-                — {providerLabels[provider]}
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-bold text-foreground">
+                Stored Keys
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border">
+                {allPurposeKeys.length} key{allPurposeKeys.length !== 1 ? "s" : ""}
               </span>
-            </h3>
+            </div>
             <p className="text-muted-foreground text-xs mt-0.5">
               {purpose === "pdf" ? "PDF Reading" : "Text Generation"} pool · load-balanced automatically
             </p>
           </div>
         </div>
-        {card.list.length > 0 && (
-          <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold", pStyle.badge)}>
-            {card.list.length} key{card.list.length !== 1 ? "s" : ""}
-          </span>
-        )}
+
+        {/* Settings Modal Button */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onOpenSettings?.(activeProvider)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all duration-150 active:scale-95 cursor-pointer"
+          >
+            <FaWrench className="w-3.5 h-3.5" />
+            <span>{providerLabels[activeProvider]} Settings</span>
+          </button>
+        </div>
       </div>
 
-      {card.list.length === 0 ? (
+      {/* Provider Filter Tabs (shown when multiple providers have keys) */}
+      {providersWithKeys.length > 1 && (
+        <div className="px-6 py-3 border-b border-border bg-surface-elevated/30 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground font-semibold mr-1">Filter:</span>
+          <button
+            type="button"
+            onClick={() => setFilterProvider("all")}
+            className={cn(
+              "px-3 py-1 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
+              filterProvider === "all"
+                ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                : "bg-btn-secondary text-muted-foreground hover:text-foreground"
+            )}
+          >
+            All ({allPurposeKeys.length})
+          </button>
+          {providersWithKeys.map((p) => {
+            const count = (aiState?.[purpose]?.[p]?.list || []).length;
+            const t = providerTheme[p];
+            const isSelected = filterProvider === p;
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => {
+                  setFilterProvider(p);
+                  onSelectProvider?.(p);
+                }}
+                className={cn(
+                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
+                  isSelected
+                    ? `${t.badge} shadow-sm font-semibold`
+                    : "bg-btn-secondary text-muted-foreground hover:text-foreground border border-transparent"
+                )}
+              >
+                <span className={cn("w-1.5 h-1.5 rounded-full", t.dot)} />
+                <span>{providerLabels[p]}</span>
+                <span className="text-[10px] opacity-80">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {displayedKeys.length === 0 ? (
         /* Empty State */
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
           <div className={cn(accentPanel, "w-16 h-16 rounded-2xl flex items-center justify-center mb-5")}>
             <FaKey className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">No keys stored yet</h3>
-          <p className="text-muted-foreground text-sm max-w-xs">
-            Add a {providerLabels[provider]} API key in the form above to populate this pool.
+          <p className="text-muted-foreground text-sm max-w-sm mb-5">
+            Add a {providerLabels[activeProvider]} API key in settings to populate the{" "}
+            {purpose === "pdf" ? "PDF Reading" : "Text Generation"} pool.
           </p>
+          <button
+            type="button"
+            onClick={() => onOpenSettings?.(activeProvider)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all duration-150 active:scale-95 cursor-pointer"
+          >
+            <FaWrench className="w-3.5 h-3.5" />
+            <span>Open {providerLabels[activeProvider]} Settings</span>
+          </button>
         </div>
       ) : (
         /* Table of Stored Keys */
@@ -61,6 +153,9 @@ export default function StoredKeysTable({
               <tr>
                 <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border w-12">
                   #
+                </th>
+                <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  Provider
                 </th>
                 <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                   Masked Key
@@ -77,23 +172,35 @@ export default function StoredKeysTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {card.list.map((k) => {
-                const status = card.testStatus[k.index];
-                const delLoading = actionLoading === `delete-key-${purpose}-${provider}-${k.index}`;
+              {displayedKeys.map((k, idx) => {
+                const status = k.testStatus;
+                const delLoading =
+                  actionLoading === `delete-key-${purpose}-${k.provider}-${k.index}`;
                 return (
                   <tr
-                    key={k.index}
+                    key={`${k.provider}-${k.index}`}
                     className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors duration-150")}
                   >
                     <td className="px-6 py-4 font-mono text-xs text-muted-foreground">
-                      {k.index + 1}
+                      {idx + 1}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+                          k.theme.badge
+                        )}
+                      >
+                        <span className={cn("w-1.5 h-1.5 rounded-full", k.theme.dot)} />
+                        {k.providerLabel}
+                      </span>
                     </td>
                     <td className="px-6 py-4 font-mono text-sm text-secondary-foreground max-w-[200px] truncate">
                       {k.snippet}
                     </td>
                     <td className="px-6 py-4 hidden sm:table-cell">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border font-mono">
-                        {card.model}
+                        {k.model}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -107,10 +214,10 @@ export default function StoredKeysTable({
                       <div className="flex gap-2 justify-end">
                         <button
                           type="button"
-                          onClick={() => onTestStoredKey(purpose, provider, k.index)}
+                          onClick={() => onTestStoredKey(purpose, k.provider, k.index)}
                           disabled={status?.state === "testing"}
-                          aria-label={`Test key ${k.index + 1}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
+                          aria-label={`Test ${k.providerLabel} key ${k.index + 1}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px] cursor-pointer"
                         >
                           {status?.state === "testing" ? (
                             <>
@@ -124,10 +231,12 @@ export default function StoredKeysTable({
                         </button>
                         <button
                           type="button"
-                          onClick={() => onDeleteStoredKey(purpose, provider, k.index, k.snippet)}
+                          onClick={() =>
+                            onDeleteStoredKey(purpose, k.provider, k.index, k.snippet)
+                          }
                           disabled={delLoading}
-                          aria-label={`Delete key ${k.index + 1}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer"
+                          aria-label={`Delete ${k.providerLabel} key ${k.index + 1}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px] cursor-pointer"
                         >
                           {delLoading ? (
                             <>
