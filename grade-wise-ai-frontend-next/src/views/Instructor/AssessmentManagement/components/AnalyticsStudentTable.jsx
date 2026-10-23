@@ -17,7 +17,7 @@ export default function AnalyticsStudentTable({
         <div className={cn(card, cardInteractive, "shadow-2xl overflow-hidden")}>
           <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
             <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
-              <FaUsers className="text-violet-400 text-sm" />
+              <FaUsers className="text-violet-500 dark:text-violet-400 text-sm" />
             </div>
             <h3 className="text-xl font-bold text-foreground">
               {assessmentTitle || "Enrolled Students Results"}
@@ -119,13 +119,13 @@ export default function AnalyticsStudentTable({
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest block mb-1">
                     Correct
                   </span>
-                  <span className="text-xl font-bold text-emerald-400">{s.correct_answers}</span>
+                  <span className="text-xl font-bold text-emerald-700 dark:text-emerald-400">{s.correct_answers}</span>
                 </div>
                 <div className={cn(statSurface.indigo, "p-3")}>
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest block mb-1">
                     Score
                   </span>
-                  <span className="text-xl font-bold text-indigo-400">{s.percentage}%</span>
+                  <span className="text-xl font-bold text-indigo-700 dark:text-indigo-400">{s.percentage}%</span>
                 </div>
                 <div className="bg-input rounded-xl border border-border p-3">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest block mb-1">

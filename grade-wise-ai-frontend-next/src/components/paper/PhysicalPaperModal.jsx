@@ -322,8 +322,7 @@ const PhysicalPaperModal = ({
         <div className="min-h-full flex items-center justify-center">
           <div
             className={cn(
-              "bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300",
-              isRTL ? "text-right" : "text-left",
+              "bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300 text-start",
               isQuranic && "font-quran"
             )}
             dir={isRTL ? "rtl" : "ltr"}

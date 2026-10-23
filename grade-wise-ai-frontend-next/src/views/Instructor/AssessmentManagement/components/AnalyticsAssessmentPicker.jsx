@@ -14,7 +14,7 @@ export default function AnalyticsAssessmentPicker({
     <div className={cn(card, cardInteractive, "shadow-2xl overflow-hidden")}>
       <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
         <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20">
-          <FaList className="text-indigo-400 text-sm" />
+          <FaList className="text-indigo-500 dark:text-indigo-400 text-sm" />
         </div>
         <h3 className="text-xl font-bold text-foreground">My Executed Assessments</h3>
       </div>
@@ -40,13 +40,13 @@ export default function AnalyticsAssessmentPicker({
                         {assessment.title}
                       </h4>
                       <div className="flex items-center text-sm text-muted-foreground">
-                        <FaCalendarAlt className="mr-2 text-indigo-400" />
+                        <FaCalendarAlt className="me-2 text-indigo-500 dark:text-indigo-400" />
                         Created: {new Date(assessment.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="text-center sm:text-right bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl px-6 py-3">
+                    <div className="text-center sm:text-end bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl px-6 py-3">
                       <div className="text-3xl font-bold text-foreground flex items-center justify-center sm:justify-end gap-2 leading-none">
-                        <FaCheckCircle className="text-emerald-400 text-xl" />
+                        <FaCheckCircle className="text-emerald-500 dark:text-emerald-400 text-xl" />
                         {assessment.completed_attempts}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">Completed</p>

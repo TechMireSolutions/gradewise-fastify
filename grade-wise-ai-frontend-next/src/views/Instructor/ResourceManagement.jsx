@@ -4,6 +4,7 @@ import { page, pageInner, btn, focusRing } from "@/lib/ui.js";
 import { useRouter } from "next/navigation";
 import { FaBook, FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import WelcomeBanner from "@/components/layout/WelcomeBanner.jsx";
 import Modal from "@/components/ui/Modal.jsx";
 import useResourceManagement from "./hooks/useResourceManagement.js";
@@ -35,7 +36,7 @@ function ResourceManagement() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         <div className="mb-8">
           <WelcomeBanner
             eyebrow="Instructor Workspace"
@@ -75,7 +76,7 @@ function ResourceManagement() {
           loading={isInitialLoading}
           onOpenDelete={openDeleteConfirm}
         />
-      </div>
+      </MainLandmark>
 
       {/* Delete Confirmation Modal */}
       <Modal

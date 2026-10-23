@@ -2,6 +2,7 @@ import { page, pageInner } from "@/lib/ui.js";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/features/auth/store.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import { ROLE_THEME, DEFAULT_THEME, DASHBOARD_MAP } from "./Profile/constants.js";
 import ProfileHeader from "./Profile/components/ProfileHeader.jsx";
 import ProfileCard from "./Profile/components/ProfileCard.jsx";
@@ -23,7 +24,7 @@ function Profile() {
   return (
     <div className={page}>
       <AmbientBackground />
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         {user ? (
           <>
             <ProfileHeader RoleIcon={RoleIcon} />
@@ -45,7 +46,7 @@ function Profile() {
         ) : (
           <AccessDenied />
         )}
-      </div>
+      </MainLandmark>
     </div>
   );
 }

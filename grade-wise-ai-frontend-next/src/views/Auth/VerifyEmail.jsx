@@ -155,17 +155,17 @@ function VerifyEmail() {
               <p className={cn("text-secondary-foreground", "leading-relaxed", "text-sm")}>{result?.message || "An unknown error occurred."}</p>
             </div>
 
-            <div className="bg-input rounded-xl border border-border p-4 text-left">
+            <div className="bg-input rounded-xl border border-border p-4 text-start">
               <p className={cn("text-muted-foreground", "text-xs", "font-semibold", "uppercase", "tracking-widest", "mb-3")}>
                 What to try
               </p>
               <ul className={cn("text-muted-foreground", "text-sm", "space-y-2")}>
                 <li className="flex items-start gap-2">
-                  <span className="text-indigo-400 mt-0.5">&#8226;</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 mt-0.5">&#8226;</span>
                   <span>Check if you have a newer verification email</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-indigo-400 mt-0.5">&#8226;</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 mt-0.5">&#8226;</span>
                   <span>Try signing up again if needed</span>
                 </li>
                 <li className="flex items-start gap-2">

@@ -60,7 +60,7 @@ export default function AssessmentResourcePicker({
                   onClick={() => onToggleResource(resource.id)}
                   disabled={disabled}
                   className={cn(
-                    "flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all duration-150 active:scale-[0.99]",
+                    "flex items-start gap-3 p-3.5 rounded-xl border text-start transition-all duration-150 active:scale-[0.99]",
                     isSelected
                       ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-900 dark:text-indigo-200 shadow-sm"
                       : "border-border bg-input/40 hover:bg-surface-elevated text-secondary-foreground",

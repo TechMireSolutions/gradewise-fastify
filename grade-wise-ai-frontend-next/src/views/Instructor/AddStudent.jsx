@@ -5,6 +5,7 @@ import { card, cardHeader, focusRing, page } from "@/lib/ui.js";
 import { useRouter } from "next/navigation";
 import { Modal, StatusBadge } from "@/components/ui/index.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import WelcomeBanner from "@/components/layout/WelcomeBanner.jsx";
 import {
   FaUser,
@@ -67,7 +68,7 @@ function AddStudent({ assessmentId, onStudentAdded, compact = false }) {
       <div className={page}>
         <AmbientBackground />
 
-        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <MainLandmark className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           {/* Page header */}
           <div className="mb-6">
             <WelcomeBanner
@@ -139,7 +140,7 @@ function AddStudent({ assessmentId, onStudentAdded, compact = false }) {
 
             <div className="p-6 sm:p-8">{formContent}</div>
           </div>
-        </div>
+        </MainLandmark>
 
         <Modal
           isOpen={modal.isOpen}

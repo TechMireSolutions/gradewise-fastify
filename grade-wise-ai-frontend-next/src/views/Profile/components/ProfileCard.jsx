@@ -8,7 +8,7 @@ export default function ProfileCard({ user, theme, RoleIcon }) {
       {/* Avatar area */}
       <div className="px-6 py-8 text-center border-b border-border bg-input">
         <div className={cn(accentPanel, "w-20 h-20 sm:w-24 sm:h-24 rounded-full", "flex items-center justify-center mx-auto mb-4 shadow-lg")}>
-          <RoleIcon className="text-4xl text-indigo-400" />
+          <RoleIcon className="text-4xl text-indigo-500 dark:text-indigo-400" />
         </div>
         <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 leading-tight text-wrap-balance">
           {user.name}
@@ -29,8 +29,8 @@ export default function ProfileCard({ user, theme, RoleIcon }) {
           {/* Verified indicator */}
           <div className="w-full pt-4 border-t border-border">
             <div className="flex items-center justify-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3">
-              <FaCheckCircle className="text-emerald-400 text-base flex-shrink-0" />
-              <span className="text-sm font-semibold text-emerald-400">
+              <FaCheckCircle className="text-emerald-500 dark:text-emerald-400 text-base flex-shrink-0" />
+              <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
                 Email Verified
               </span>
             </div>

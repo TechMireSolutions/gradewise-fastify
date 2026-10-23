@@ -2,6 +2,7 @@ import { page, pageInner } from "@/lib/ui.js";
 import { useEffect } from "react";
 import Modal from "@/components/ui/Modal.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useUserManagement from "@/hooks/useUserManagement.js";
 import AdminHeader from "./components/AdminHeader.jsx";
 import AdminStatsSection from "./components/AdminStatsSection.jsx";
@@ -43,7 +44,7 @@ function AdminDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         <AdminHeader user={user} totalUsers={totalUsers} />
 
         <AdminStatsSection
@@ -63,7 +64,7 @@ function AdminDashboard() {
           roleFilter={roleFilter}
           onRoleFilterChange={handleRoleFilterChange}
         />
-      </div>
+      </MainLandmark>
 
       <Modal
         isOpen={modal.isOpen}

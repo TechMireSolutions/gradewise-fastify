@@ -43,7 +43,7 @@ function Footer() {
         <div>
 
           {/* Brand + Social */}
-          <div className="text-center md:text-left mb-8 lg:mb-10">
+          <div className="text-center md:text-start mb-8 lg:mb-10">
             <div className="flex items-center justify-center md:justify-start space-x-3 mb-5">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-teal-500 to-indigo-600 shadow-lg shadow-teal-500/25 flex items-center justify-center flex-shrink-0">
                 <FaGraduationCap className="text-white text-base" />
@@ -95,9 +95,9 @@ function Footer() {
           {user && (
             <div className="border-t border-border mt-7 pt-6">
               <div className={cn(card, cardInteractive, "shadow-2xl", "p-5", "sm:p-6", "max-w-4xl", "mx-auto")}>
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start">
                   <div className="flex items-center space-x-4">
-                    <div className={cn(accentPanel, "p-3 rounded-xl", "text-indigo-400 text-xl flex-shrink-0")}>
+                    <div className={cn(accentPanel, "p-3 rounded-xl", "text-indigo-500 dark:text-indigo-400 text-xl flex-shrink-0")}>
                       <UserRoleIcon />
                     </div>
                     <div>
@@ -106,7 +106,7 @@ function Footer() {
                       </div>
                       <div className={cn("text-xs", "text-muted-foreground", "mt-0.5")}>
                         Logged in as{" "}
-                        <span className="text-indigo-400 font-semibold">
+                        <span className="text-indigo-600 dark:text-indigo-400 font-semibold">
                           {ROLE_LABELS[user.role] ?? user.role}
                         </span>
                       </div>
@@ -119,7 +119,7 @@ function Footer() {
 
           {/* Bottom bar */}
           <div className="border-t border-border mt-8 sm:mt-10 pt-7 sm:pt-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between text-center md:text-left gap-3 mb-5">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between text-center md:text-start gap-3 mb-5">
               <div className={cn("text-sm", "text-muted-foreground", "font-medium")}>
                 © {currentYear} Gradewise AI. All rights reserved.
               </div>

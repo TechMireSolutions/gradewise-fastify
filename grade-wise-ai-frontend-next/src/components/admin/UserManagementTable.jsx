@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { tableHead } from "@/lib/ui.js";
+import { tableHead, focusRing } from "@/lib/ui.js";
 import {
   FaUsers,
   FaCheckCircle,
@@ -30,7 +30,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onRoleChange(userData.id, "admin", userData.name, userData.email)}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
+          className={cn("inline-flex items-center gap-1.5 px-3 py-2.5 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]", focusRing)}
         >
           {isLoading ? <FaSync className="animate-spin" /> : <FaCrown className="text-xs" />}
           {isLoading ? "..." : "Admin"}
@@ -40,7 +40,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onRoleChange(userData.id, "instructor", userData.name, userData.email)}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
+          className={cn("inline-flex items-center gap-1.5 px-3 py-2.5 bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]", focusRing)}
         >
           {isLoading ? <FaSync className="animate-spin" /> : <FaChalkboardTeacher className="text-xs" />}
           {isLoading ? "..." : "Instructor"}
@@ -50,7 +50,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onRoleChange(userData.id, "student", userData.name, userData.email)}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]"
+          className={cn("inline-flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/25 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]", focusRing)}
         >
           {isLoading ? <FaSync className="animate-spin" /> : <FaUserGraduate className="text-xs" />}
           {isLoading ? "..." : "Student"}
@@ -60,7 +60,7 @@ function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onD
         <button
           onClick={() => onDelete(userData.id, userData.name)}
           aria-label={`Delete user ${userData.name}`}
-          className={cn("p-2", "rounded-lg", "text-muted-foreground", "hover:text-red-700 dark:hover:text-red-400", "hover:bg-red-500/10", "border", "border-transparent", "hover:border-red-500/20", "transition-all", "duration-150", "cursor-pointer", "min-w-[44px]", "min-h-[44px]", "flex", "items-center", "justify-center")}
+          className={cn("p-2", "rounded-lg", "text-muted-foreground", "hover:text-red-700 dark:hover:text-red-400", "hover:bg-red-500/10", "border", "border-transparent", "hover:border-red-500/20", "transition-all", "duration-150", "cursor-pointer", "min-w-[44px]", "min-h-[44px]", "flex", "items-center", "justify-center", focusRing)}
         >
           <FaTrash className="w-3.5 h-3.5" />
         </button>

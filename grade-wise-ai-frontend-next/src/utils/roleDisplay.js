@@ -22,7 +22,7 @@ export function getRoleAvatarBg(role) {
     instructor: "from-indigo-500 to-indigo-600",
     student: "from-emerald-500 to-teal-600",
   };
-  return colors[role] || "from-slate-500 to-slate-600";
+  return colors[role] || "from-indigo-600 to-violet-700";
 }
 
 export function formatRole(role) {

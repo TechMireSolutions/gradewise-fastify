@@ -49,7 +49,7 @@ export default function EnrolledRosterTable({
         ) : totalCount === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center px-4">
             <div className={cn(accentPanel, "w-16 h-16 rounded-2xl flex items-center justify-center mb-4")}>
-              <FaUserGraduate className="text-indigo-400 text-2xl" aria-hidden="true" />
+              <FaUserGraduate className="text-indigo-500 dark:text-indigo-400 text-2xl" aria-hidden="true" />
             </div>
             <h3 className="text-xl font-bold text-foreground mb-1 text-balance">No Students Enrolled</h3>
             <p className="text-muted-foreground text-sm max-w-xs text-pretty">
@@ -67,13 +67,13 @@ export default function EnrolledRosterTable({
               <table className="min-w-full">
                 <thead className={tableHead}>
                   <tr>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Student Name
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-5 py-3 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Email
                     </th>
-                    <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                    <th className="px-5 py-3 text-end text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                       Action
                     </th>
                   </tr>
@@ -87,7 +87,7 @@ export default function EnrolledRosterTable({
                       <td className="px-5 py-3.5 text-sm text-muted-foreground">
                         {s?.email}
                       </td>
-                      <td className="px-5 py-3.5 text-right">
+                      <td className="px-5 py-3.5 text-end">
                         <button
                           type="button"
                           onClick={() => onRequestUnenroll(s)}

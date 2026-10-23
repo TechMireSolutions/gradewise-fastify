@@ -79,7 +79,7 @@ function Modal({
           borderAccent: "border-l-emerald-500",
           icon: <FaCheck className="w-4 h-4" />,
           iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25",
-          titleText: "text-emerald-300",
+          titleText: "text-emerald-700 dark:text-emerald-300",
           progressBg: "bg-emerald-500",
           confirmBtn: "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 focus-visible:ring-emerald-400",
         };
@@ -88,7 +88,7 @@ function Modal({
           borderAccent: "border-l-red-500",
           icon: <FaTimes className="w-4 h-4" />,
           iconBg: "bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25",
-          titleText: "text-red-300",
+          titleText: "text-red-700 dark:text-red-300",
           progressBg: "bg-red-500",
           confirmBtn: "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 focus-visible:ring-red-400",
         };
@@ -97,7 +97,7 @@ function Modal({
           borderAccent: "border-l-amber-500",
           icon: <FaExclamationTriangle className="w-4 h-4" />,
           iconBg: "bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/25",
-          titleText: "text-amber-300",
+          titleText: "text-amber-700 dark:text-amber-300",
           progressBg: "bg-amber-500",
           confirmBtn: "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-400 hover:to-rose-500 shadow-lg shadow-red-500/30 hover:shadow-red-500/50 focus-visible:ring-red-400",
         };
@@ -106,7 +106,7 @@ function Modal({
           borderAccent: "border-l-indigo-500",
           icon: <FaInfoCircle className="w-4 h-4" />,
           iconBg: iconBadge,
-          titleText: "text-indigo-300",
+          titleText: "text-indigo-700 dark:text-indigo-300",
           progressBg: "bg-gradient-to-r from-indigo-500 to-violet-600",
           confirmBtn: "bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 focus-visible:ring-indigo-400",
         };

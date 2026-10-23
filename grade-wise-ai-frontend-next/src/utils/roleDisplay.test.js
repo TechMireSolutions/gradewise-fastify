@@ -33,9 +33,9 @@ test("getRoleAvatarBg", async (t) => {
     assert.match(getRoleAvatarBg("student"), /emerald/);
   });
 
-  await t.test("returns slate fallback for unknown role", () => {
-    assert.match(getRoleAvatarBg("guest"), /slate/);
-    assert.match(getRoleAvatarBg(null), /slate/);
+  await t.test("returns brand fallback for unknown role", () => {
+    assert.match(getRoleAvatarBg("guest"), /indigo|violet/);
+    assert.match(getRoleAvatarBg(null), /indigo|violet/);
   });
 });
 

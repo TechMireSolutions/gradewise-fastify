@@ -7,7 +7,7 @@ export default function SecurityActionsCard({ dashboardLink, onChangePassword })
   return (
     <div className="pt-6 border-t border-border">
       <h4 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-        <FaTachometerAlt className="text-indigo-400" />
+        <FaTachometerAlt className="text-indigo-500 dark:text-indigo-400" />
         Quick Actions
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">

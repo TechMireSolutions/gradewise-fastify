@@ -74,8 +74,8 @@ export default function RememberedAccountCard({
           </div>
         )}
 
-        <div className="min-w-0 flex-1 text-left">
-          <p className="text-sm font-semibold text-foreground group-hover:text-indigo-400 transition-colors truncate">
+        <div className="min-w-0 flex-1 text-start">
+          <p className="text-sm font-semibold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
             Sign in as {firstName}
           </p>
           <p className="text-xs text-muted-foreground truncate">{account.email}</p>

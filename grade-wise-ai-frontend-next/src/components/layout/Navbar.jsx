@@ -210,7 +210,7 @@ function Navbar() {
                       : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated"
                   }`}
                 >
-                  <span className={isActiveLink(link.href) ? "text-white" : "text-indigo-400"}>
+                  <span className={isActiveLink(link.href) ? "text-white" : "text-indigo-600 dark:text-indigo-400"}>
                     {link.icon}
                   </span>
                   <span>{link.name}</span>

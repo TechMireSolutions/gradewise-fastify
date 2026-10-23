@@ -46,7 +46,7 @@ export default function AnalyticsQuestionReview({
       <div className={cn(card, cardInteractive, "shadow-2xl mt-10 overflow-hidden")}>
         <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
           <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
-            <FaTable className="text-violet-400 text-sm" />
+            <FaTable className="text-violet-500 dark:text-violet-400 text-sm" />
           </div>
           <h3 className="text-xl font-bold text-foreground">Student Answer Details</h3>
         </div>
@@ -72,7 +72,7 @@ export default function AnalyticsQuestionReview({
               <div
                 key={i}
                 style={{ contentVisibility: "auto", containIntrinsicSize: "auto 180px" }}
-                className="bg-input border border-border rounded-xl p-5 sm:p-6 hover:border-indigo-500/30 transition-all duration-200"
+                className="@container bg-input border border-border rounded-xl p-5 sm:p-6 hover:border-indigo-500/30 transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-4">
                   <h4 className="font-bold text-lg text-foreground flex items-center gap-2 flex-wrap">
@@ -99,7 +99,7 @@ export default function AnalyticsQuestionReview({
                     <ul className="space-y-1.5">
                       {parsedOptions.map((opt, idx) => (
                         <li key={idx} className="text-sm text-secondary-foreground flex items-start gap-2">
-                          <span className="text-indigo-400 font-bold mt-0.5">•</span>
+                          <span className="text-indigo-500 dark:text-indigo-400 font-bold mt-0.5">•</span>
                           <span>{opt}</span>
                         </li>
                       ))}
@@ -112,7 +112,7 @@ export default function AnalyticsQuestionReview({
                     <strong className="text-xs font-semibold text-muted-foreground uppercase tracking-widest block mb-2">
                       Correct Answer
                     </strong>
-                    <p className="font-bold text-base text-emerald-400">
+                    <p className="font-bold text-base text-emerald-700 dark:text-emerald-400">
                       {q.question_type === "true_false"
                         ? q.correct_answer === true || q.correct_answer === "true"
                           ? "True"

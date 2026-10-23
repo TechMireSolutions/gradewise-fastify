@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Modal, Button } from "@/components/ui";
 import { FaKey, FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import ApiConfigSidebar from "./components/ApiConfigSidebar.jsx";
 import StoredKeysTable from "./components/StoredKeysTable.jsx";
@@ -106,7 +107,7 @@ export default function SuperAdminApiConfig() {
           />
 
           {/* Main Area: Stored Keys Table */}
-          <main className="flex-1 min-w-0">
+          <MainLandmark className="flex-1 min-w-0">
             <StoredKeysTable
               purpose={purpose}
               aiState={aiState}
@@ -117,7 +118,7 @@ export default function SuperAdminApiConfig() {
               onTestStoredKey={handleTestStoredKey}
               onDeleteStoredKey={handleDeleteStoredKey}
             />
-          </main>
+          </MainLandmark>
         </div>
       </div>
 

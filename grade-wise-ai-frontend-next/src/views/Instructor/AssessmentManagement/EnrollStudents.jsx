@@ -8,6 +8,7 @@ import { Button, Modal } from "@/components/ui";
 import AddStudent from "@/views/Instructor/AddStudent.jsx";
 import { FaUserGraduate, FaUsers, FaArrowLeft } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useEnrollStudents from "./hooks/useEnrollStudents.js";
 import EnrolledRosterTable from "./components/EnrolledRosterTable.jsx";
 
@@ -35,7 +36,7 @@ export default function EnrollStudents() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         {/* Page Header */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -91,7 +92,7 @@ export default function EnrollStudents() {
             onRequestUnenroll={requestUnenroll}
           />
         </div>
-      </div>
+      </MainLandmark>
 
       {/* Unenroll Confirmation Modal */}
       <Modal

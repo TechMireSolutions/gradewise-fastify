@@ -15,6 +15,7 @@ import { EmptyState, LoadingSpinner, Button, Modal } from "@/components/ui/index
 import { FaPlus, FaClipboardList } from "react-icons/fa";
 import { PhysicalPaperModal } from "@/components/paper/index.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useAssessmentList from "./hooks/useAssessmentList.js";
 import AssessmentSearchControls from "./components/AssessmentSearchControls.jsx";
 import AssessmentTable from "./components/AssessmentTable.jsx";
@@ -62,7 +63,7 @@ export default function AssessmentList() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -135,7 +136,7 @@ export default function AssessmentList() {
             onRequestDelete={requestDelete}
           />
         )}
-      </div>
+      </MainLandmark>
 
       {/* Delete Confirmation Modal */}
       <AssessmentDeleteModal

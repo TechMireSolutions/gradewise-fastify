@@ -82,7 +82,7 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
             <div className={cn(accentPanel, "w-16 h-16 rounded-2xl flex items-center justify-center mb-4")}>
-              <FaQuestionCircle className="text-indigo-400 text-2xl" />
+              <FaQuestionCircle className="text-indigo-500 dark:text-indigo-400 text-2xl" />
             </div>
             <p className="text-muted-foreground text-sm italic">No question blocks configured</p>
           </div>
@@ -106,7 +106,7 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
               className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-400 border border-indigo-500/20">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
                   Block {i + 1}
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border capitalize">

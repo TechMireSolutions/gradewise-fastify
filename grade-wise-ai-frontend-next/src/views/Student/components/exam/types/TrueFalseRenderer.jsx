@@ -9,7 +9,7 @@ export default function TrueFalseRenderer({ question, onAnswer }) {
   const language = useStudentAssessmentStore((s) => s.language) || "en";
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
+    <div className="grid grid-cols-1 @sm:grid-cols-2 gap-4 max-w-xl mx-auto">
       {[true, false].map((val) => {
         const isSelected = question.answer === val;
         const label = getExamTranslation(language, val ? "trueVal" : "falseVal");

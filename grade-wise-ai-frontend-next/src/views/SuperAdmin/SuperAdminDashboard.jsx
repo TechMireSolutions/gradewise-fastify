@@ -5,6 +5,7 @@ import Link from "next/link";
 import Modal from "@/components/ui/Modal.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import UserManagementTable, { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
 import { DashboardSectionCard } from "@/components/dashboard/shared/index.js";
 import useUserManagement from "@/hooks/useUserManagement.js";
@@ -43,7 +44,7 @@ function SuperAdminDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         <div className="mb-8 sm:mb-10">
           <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8", "lg:p-10")}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
@@ -58,12 +59,12 @@ function SuperAdminDashboard() {
                   Super Admin Dashboard
                 </h1>
                 <p className={cn("text-secondary-foreground", "leading-relaxed", "mb-5")}>
-                  Welcome back, <span className="text-white font-semibold">{user?.name}</span>
+                  Welcome back, <span className="text-foreground font-semibold">{user?.name}</span>
                 </p>
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 sm:p-4 inline-flex items-start gap-3">
-                  <FaShieldAlt className="text-amber-400 text-lg flex-shrink-0 mt-0.5" />
+                  <FaShieldAlt className="text-amber-500 dark:text-amber-400 text-lg flex-shrink-0 mt-0.5" />
                   <div className="text-xs sm:text-sm">
-                    <strong className="block text-amber-300 mb-0.5">Role Permissions</strong>
+                    <strong className="block text-amber-700 dark:text-amber-300 mb-0.5">Role Permissions</strong>
                     <span className={"text-muted-foreground"}>
                       Manage users, promote/demote roles, and configure system API keys.
                     </span>
@@ -73,7 +74,7 @@ function SuperAdminDashboard() {
 
               <div className="flex flex-row sm:flex-col gap-3 flex-shrink-0">
                 <div className="bg-input border border-border rounded-2xl p-4 text-center min-w-[90px]">
-                  <FaUsers className="w-7 h-7 mx-auto mb-1.5 text-indigo-400" />
+                  <FaUsers className="w-7 h-7 mx-auto mb-1.5 text-indigo-500 dark:text-indigo-400" />
                   <p className="text-2xl font-bold text-foreground leading-none mb-1">{users.length}</p>
                   <p className={cn("text-xs", "text-muted-foreground", "font-medium")}>Total Users</p>
                 </div>
@@ -81,9 +82,9 @@ function SuperAdminDashboard() {
                   href="/super-admin/api-config"
                   className="inline-flex flex-col items-center gap-1.5 bg-input hover:bg-btn-secondary border border-border hover:border-indigo-500/30 backdrop-blur-sm rounded-2xl p-4 text-center transition-all duration-200 group min-w-[90px]"
                 >
-                  <FaKey className="w-7 h-7 text-indigo-400 group-hover:scale-110 transition-transform duration-150" />
+                  <FaKey className="w-7 h-7 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-150" />
                   <span className={cn("text-xs", "font-semibold", "text-secondary-foreground", "group-hover:text-foreground", "transition-colors", "whitespace-nowrap")}>API Keys</span>
-                  <FaArrowRight className={cn("w-3", "h-3", "text-muted-foreground", "group-hover:text-indigo-400", "transition-colors")} />
+                  <FaArrowRight className={cn("w-3", "h-3", "text-muted-foreground", "group-hover:text-indigo-600 dark:group-hover:text-indigo-400", "transition-colors")} />
                 </Link>
               </div>
             </div>
@@ -118,7 +119,7 @@ function SuperAdminDashboard() {
           />
         </DashboardSectionCard>
 
-      </div>
+      </MainLandmark>
 
       <Modal
         isOpen={modal.isOpen}

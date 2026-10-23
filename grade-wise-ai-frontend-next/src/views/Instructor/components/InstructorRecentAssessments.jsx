@@ -63,16 +63,16 @@ export default function InstructorRecentAssessments({
             <table className="min-w-full">
               <thead className={tableHead}>
                 <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Assessment Title
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Created On
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Status
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
+                  <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                     Actions
                   </th>
                 </tr>

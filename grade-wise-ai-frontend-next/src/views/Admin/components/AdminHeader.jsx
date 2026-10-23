@@ -18,7 +18,7 @@ export default function AdminHeader({ user, totalUsers = 0 }) {
               Admin Dashboard
             </h1>
             <p className={cn("text-secondary-foreground", "leading-relaxed", "text-sm", "sm:text-base", "text-pretty")}>
-              Welcome back, <span className="text-indigo-400 font-semibold">{user?.name}</span>! Manage your platform and oversee all operations.
+              Welcome back, <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{user?.name}</span>! Manage your platform and oversee all operations.
             </p>
           </div>
           <div className="hidden sm:block">
