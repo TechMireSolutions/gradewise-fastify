@@ -16,7 +16,7 @@ import {
   FaCogs,
   FaCheckCircle,
   FaExclamationTriangle,
-  FaSlidersH,
+  FaPlus,
 } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
@@ -142,11 +142,11 @@ export default function SuperAdminDashboard() {
 
                 <Button
                   variant="secondary"
-                  onClick={apiConfig.openSettingsModal}
+                  onClick={() => apiConfig.openSettingsModal(null, 1)}
                   className="w-full justify-center gap-2"
                 >
-                  <FaSlidersH className="w-3.5 h-3.5" />
-                  Configure AI Keys
+                  <FaPlus className="w-3.5 h-3.5" />
+                  Add New LLM
                 </Button>
 
                 <Link
@@ -510,12 +510,13 @@ export default function SuperAdminDashboard() {
         loading={Boolean(actionLoading?.startsWith("delete-"))}
       />
 
-      {/* 4. Quick AI Key Configuration Popup Modal */}
+      {/* 4. Quick AI Key Configuration / Add New LLM Modal */}
       <ProviderSettingsModal
         isOpen={apiConfig.isSettingsModalOpen}
         onClose={apiConfig.closeSettingsModal}
         purpose={apiConfig.purpose}
         provider={apiConfig.provider}
+        initialStep={apiConfig.modalInitialStep}
         card={apiConfig.card}
         pStyle={apiConfig.pStyle}
         aiState={apiConfig.aiState}
@@ -527,6 +528,9 @@ export default function SuperAdminDashboard() {
         onUpdateCard={apiConfig.updateActiveCard}
         onTestInlineKey={apiConfig.handleTestInlineKey}
         onSaveCard={apiConfig.handleSaveCard}
+        onSaveLlm={apiConfig.handleSaveLlm}
+        totalPdfKeys={apiConfig.totalPdfKeys}
+        totalTextKeys={apiConfig.totalTextKeys}
       />
 
       {/* 5. General Notification Alert Modal */}

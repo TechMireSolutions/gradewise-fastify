@@ -75,3 +75,13 @@ export const testInlineAiKey = async (provider, model, key) => {
   const response = await apiClient.post("/config/ai-keys/test-inline", { provider, model, apiKey: key });
   return response.data;
 };
+
+export const fetchProviderModels = async ({ provider, apiKey, purpose, keyIndex }) => {
+  const response = await apiClient.post("/config/ai-keys/fetch-models", {
+    provider,
+    apiKey,
+    purpose,
+    keyIndex,
+  });
+  return response.data;
+};

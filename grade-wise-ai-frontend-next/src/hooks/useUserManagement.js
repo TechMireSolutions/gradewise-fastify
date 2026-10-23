@@ -63,8 +63,10 @@ export default function useUserManagement(options = {}) {
     try {
       setLoading(true);
       const queryParams = {
-        search: params.search !== undefined ? params.search : searchQuery,
-        role: params.role !== undefined ? params.role : (roleFilter || undefined),
+        search: (params.search !== undefined ? params.search : searchQuery) || undefined,
+        role: (params.role !== undefined ? params.role : roleFilter) || undefined,
+        limit: params.limit !== undefined ? params.limit : undefined,
+        page: params.page !== undefined ? params.page : undefined,
       };
 
       const [usersRes] = await Promise.all([
@@ -162,7 +164,7 @@ export default function useUserManagement(options = {}) {
   // Prefer database-aggregated KPI stats from /api/admin/overview
   const stats = overview?.users
     ? {
-        super_admin: superAdminCount,
+        super_admin: overview.users.superAdmins ?? superAdminCount,
         admin: overview.users.admins || 0,
         instructor: overview.users.instructors || 0,
         student: overview.users.students || 0,

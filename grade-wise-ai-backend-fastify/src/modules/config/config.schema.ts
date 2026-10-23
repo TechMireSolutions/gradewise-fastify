@@ -51,3 +51,11 @@ export const TestInlineAiKeySchema = z.object({
   model: z.string().optional(),
 });
 export type TestInlineAiKeyInput = z.infer<typeof TestInlineAiKeySchema>;
+
+export const FetchProviderModelsSchema = z.object({
+  provider: ProviderEnum,
+  apiKey: z.string().optional(),
+  purpose: PurposeEnum.optional(),
+  keyIndex: z.number().int().min(0).optional(),
+});
+export type FetchProviderModelsInput = z.infer<typeof FetchProviderModelsSchema>;

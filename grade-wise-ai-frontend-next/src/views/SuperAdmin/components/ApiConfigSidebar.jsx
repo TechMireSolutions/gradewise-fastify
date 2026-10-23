@@ -2,9 +2,9 @@
 
 import { cn } from "@/lib/cn.js";
 import { card as uiCard, focusRing } from "@/lib/ui.js";
-import { FaFileAlt, FaPencilAlt, FaWrench } from "react-icons/fa";
+import { FaFileAlt, FaPencilAlt, FaPlus } from "react-icons/fa";
 import { Button } from "@/components/ui/index.js";
-import { providerLabels } from "../hooks/useSuperAdminApiConfig.js";
+import { ALL_PROVIDERS, PROVIDER_META } from "../hooks/useSuperAdminApiConfig.js";
 
 export default function ApiConfigSidebar({
   purpose,
@@ -13,6 +13,7 @@ export default function ApiConfigSidebar({
   totalTextKeys,
   onSelectPurpose,
   onOpenSettings,
+  aiState,
 }) {
   return (
     <aside className="lg:w-64 xl:w-72 flex-shrink-0">
@@ -62,7 +63,70 @@ export default function ApiConfigSidebar({
           </div>
         </div>
 
-        {/* Quick Settings Action */}
+        {/* Provider Readiness for Active Purpose */}
+        {aiState && (
+          <div className="p-4 border-t border-border bg-surface-elevated/20">
+            <div className="flex items-center justify-between px-1 mb-2.5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+                {purpose === "pdf" ? "PDF" : "Text"} Providers
+              </p>
+              <span className="text-[11px] font-mono text-muted-foreground">
+                {ALL_PROVIDERS.filter((p) => (aiState?.[purpose]?.[p]?.list || []).length > 0).length}/6
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              {ALL_PROVIDERS.map((p) => {
+                const count = (aiState?.[purpose]?.[p]?.list || []).length;
+                const meta = PROVIDER_META[p];
+                const isConfigured = count > 0;
+                const isActive = activeProvider === p;
+
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => onOpenSettings?.(p, isConfigured ? 4 : 1, purpose)}
+                    className={cn(
+                      "w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all duration-150 group text-start cursor-pointer",
+                      isActive
+                        ? "bg-btn-secondary border border-border/80 text-foreground font-semibold"
+                        : "hover:bg-btn-secondary/60 text-muted-foreground hover:text-foreground border border-transparent",
+                      focusRing
+                    )}
+                    title={`Configure ${meta?.name || p}`}
+                  >
+                    <span className="flex items-center gap-2 truncate min-w-0">
+                      <span
+                        className={cn(
+                          "w-2 h-2 rounded-full flex-shrink-0 transition-all",
+                          isConfigured
+                            ? "bg-emerald-500 shadow-sm shadow-emerald-500/50"
+                            : "bg-muted-foreground/30"
+                        )}
+                      />
+                      <span className="truncate font-medium group-hover:text-foreground">
+                        {meta?.name || p}
+                      </span>
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[10px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0 ms-1",
+                        isConfigured
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/20"
+                          : "text-muted-foreground/60"
+                      )}
+                    >
+                      {isConfigured ? `${count} key${count !== 1 ? "s" : ""}` : "—"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Add New LLM Action */}
         <div className="p-4 border-t border-border bg-input/40">
           <Button
             type="button"
@@ -70,8 +134,8 @@ export default function ApiConfigSidebar({
             onClick={() => onOpenSettings?.(activeProvider)}
             className="w-full justify-center gap-2 text-xs font-semibold shadow-md shadow-indigo-500/20"
           >
-            <FaWrench className="w-3.5 h-3.5" />
-            <span>{providerLabels[activeProvider]} Settings</span>
+            <FaPlus className="w-3.5 h-3.5" />
+            <span>Add New LLM</span>
           </Button>
         </div>
       </div>

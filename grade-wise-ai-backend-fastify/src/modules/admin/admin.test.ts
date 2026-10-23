@@ -57,6 +57,15 @@ describe("Admin Module Schema Validation", () => {
       expect(parsed.data.role).toBe("student");
       expect(parsed.data.search).toBe("Alice");
     }
+
+    // handles empty string query params gracefully
+    const emptyQuery = { search: "", role: "" };
+    const emptyParsed = AdminUsersQuerySchema.safeParse(emptyQuery);
+    expect(emptyParsed.success).toBe(true);
+    if (emptyParsed.success) {
+      expect(emptyParsed.data.role).toBeUndefined();
+      expect(emptyParsed.data.search).toBeUndefined();
+    }
   });
 
   it("rejects invalid role in ChangeRoleBodySchema", () => {
@@ -110,7 +119,7 @@ describe("Admin Service Logic", () => {
   });
 
   it("getAdminOverviewService aggregates metrics", async () => {
-    const mockUserCounts = { total: 10, admins: 2, instructors: 3, students: 5, verified: 8, unverified: 2 };
+    const mockUserCounts = { total: 10, admins: 2, instructors: 3, students: 5, superAdmins: 1, verified: 8, unverified: 2 };
     const mockAssessmentCounts = { total: 4, executed: 2 };
     const mockAttemptCounts = { total: 20, completed: 18, avgScore: "78.4" };
 

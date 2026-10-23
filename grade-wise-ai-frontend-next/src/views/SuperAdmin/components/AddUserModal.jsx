@@ -13,7 +13,7 @@ import {
   FaCrown,
   FaCheck,
 } from "react-icons/fa";
-import { Input, PasswordInput, Button } from "@/components/ui/index.js";
+import { Input, PasswordInput, Button, Label } from "@/components/ui/index.js";
 import PasswordRequirements from "@/components/auth/PasswordRequirements.jsx";
 import { createUserSchema } from "@/schemas/authSchemas.js";
 import { parseZodFieldErrors } from "@/utils/parseZodFieldErrors.js";
@@ -160,7 +160,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit, loading = fals
             disabled={loading}
             aria-label="Close dialog"
             className={cn(
-              "p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-btn-secondary transition-all active:scale-95 disabled:opacity-50 cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center",
+              "p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-btn-secondary transition-all active:scale-95 disabled:opacity-50 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center",
               focusRing
             )}
           >
@@ -198,10 +198,10 @@ export default function AddUserModal({ isOpen, onClose, onSubmit, loading = fals
 
           {/* Role Selection */}
           <div>
-            <label className="block text-sm font-semibold text-foreground mb-2">
-              Platform Role <span className="text-red-500">*</span>
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <Label required className="mb-2">
+              Platform Role
+            </Label>
+            <div role="radiogroup" aria-label="Platform Role Selection" className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {ROLE_OPTIONS.map((opt) => {
                 const isSelected = formData.role === opt.id;
                 const IconComponent = opt.icon;
@@ -209,6 +209,8 @@ export default function AddUserModal({ isOpen, onClose, onSubmit, loading = fals
                   <button
                     key={opt.id}
                     type="button"
+                    role="radio"
+                    aria-checked={isSelected}
                     onClick={() => handleRoleSelect(opt.id)}
                     className={cn(
                       "p-3 rounded-xl border text-start transition-all duration-200 cursor-pointer relative",

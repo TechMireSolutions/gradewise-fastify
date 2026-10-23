@@ -32,6 +32,75 @@ export const providerLabels = {
   deepseek: "DeepSeek",
 };
 
+export const PROVIDER_META = {
+  gemini: {
+    id: "gemini",
+    name: "Google Gemini",
+    badge: "Multimodal & Fast",
+    tagline: "Ultra-fast inference with native document OCR & huge context",
+    description: "Google's flagship multimodal models. Excels at extracting syllabi, diagrams, and complex lecture notes from PDFs.",
+    defaultModel: "gemini-2.5-flash",
+    keyPrefix: "AIza... or AQ....",
+    keyPlaceholder: "AIzaSy...",
+    docsUrl: "https://aistudio.google.com/app/apikey",
+  },
+  groq: {
+    id: "groq",
+    name: "Groq AI",
+    badge: "Instant LPU",
+    tagline: "Ultra-low latency inference on specialized LPU hardware",
+    description: "Open-weight powerhouse running GPT-OSS 120B, Llama 4, and Qwen 3.6 with near-instantaneous token generation.",
+    defaultModel: "openai/gpt-oss-120b",
+    keyPrefix: "gsk_...",
+    keyPlaceholder: "gsk_...",
+    docsUrl: "https://console.groq.com/keys",
+  },
+  openai: {
+    id: "openai",
+    name: "OpenAI",
+    badge: "Frontier Reasoning",
+    tagline: "Industry standard GPT-4o, GPT-5 series, and o3 reasoning",
+    description: "Highly capable STEM reasoning, multilingual exam question synthesis, and detailed rubric compliance.",
+    defaultModel: "gpt-4o-mini",
+    keyPrefix: "sk-proj-... or sk-...",
+    keyPlaceholder: "sk-proj-...",
+    docsUrl: "https://platform.openai.com/api-keys",
+  },
+  claude: {
+    id: "claude",
+    name: "Anthropic Claude",
+    badge: "Pedagogical Depth",
+    tagline: "Nuanced rubric scoring & long-form educational analysis",
+    description: "Claude 3.7 / 3.5 Sonnet & Haiku models with industry-leading understanding of nuanced educational directives.",
+    defaultModel: "claude-sonnet-4-6",
+    keyPrefix: "sk-ant-...",
+    keyPlaceholder: "sk-ant-api03-...",
+    docsUrl: "https://console.anthropic.com/settings/keys",
+  },
+  mistral: {
+    id: "mistral",
+    name: "Mistral AI",
+    badge: "European Frontier",
+    tagline: "High-efficiency multilingual open and commercial models",
+    description: "Mistral Large and Nemo offer balanced multilingual processing across English, Urdu, Arabic, and French.",
+    defaultModel: "mistral-large-latest",
+    keyPrefix: "32 hex characters",
+    keyPlaceholder: "a1b2c3d4e5f6...",
+    docsUrl: "https://console.mistral.ai/api-keys",
+  },
+  deepseek: {
+    id: "deepseek",
+    name: "DeepSeek",
+    badge: "Cost-Effective Reasoning",
+    tagline: "DeepSeek V3 Chat and R1 Reasoner with stellar economics",
+    description: "High-reasoning performance and code analysis at unprecedented cost efficiency for large-scale assessment evaluation.",
+    defaultModel: "deepseek-chat",
+    keyPrefix: "sk-...",
+    keyPlaceholder: "sk-...",
+    docsUrl: "https://platform.deepseek.com/api_keys",
+  },
+};
+
 export const modelOptions = {
   gemini: [
     { value: "gemini-2.5-flash", label: "Gemini 2.5 Flash (recommended)" },
@@ -84,6 +153,39 @@ export const modelOptions = {
     { value: "deepseek-chat", label: "DeepSeek Chat (V3)" },
     { value: "deepseek-reasoner", label: "DeepSeek Reasoner (R1)" },
     { value: "deepseek-coder", label: "DeepSeek Coder" },
+  ],
+};
+
+export const FEATURED_MODELS = {
+  gemini: [
+    { value: "gemini-2.5-flash", tag: "Recommended", desc: "Multimodal document vision with low latency" },
+    { value: "gemini-2.5-pro", tag: "Deep Reasoning", desc: "Complex STEM synthesis & high-depth analysis" },
+    { value: "gemini-2.5-flash-lite", tag: "Fast & Light", desc: "Ultra-low latency throughput" },
+  ],
+  groq: [
+    { value: "openai/gpt-oss-120b", tag: "Recommended", desc: "120B parameter open weights on instant LPU" },
+    { value: "qwen/qwen3.6-27b", tag: "STEM Specialist", desc: "Advanced mathematics and multilingual comprehension" },
+    { value: "meta-llama/llama-4-scout-17b-16e-instruct", tag: "Llama 4", desc: "Next-gen Llama scout architecture" },
+  ],
+  openai: [
+    { value: "gpt-4o-mini", tag: "Recommended", desc: "Fast, intelligent, and cost-effective daily driver" },
+    { value: "gpt-4o", tag: "Frontier", desc: "Multimodal frontier model for complex questions" },
+    { value: "o3-mini", tag: "STEM Reasoning", desc: "Chain-of-thought STEM evaluation" },
+  ],
+  claude: [
+    { value: "claude-sonnet-4-6", tag: "Recommended", desc: "Premier model for nuanced rubric scoring & XAI" },
+    { value: "claude-haiku-4-5", tag: "Ultra-Fast", desc: "Near-instant turnaround for concise extraction" },
+    { value: "claude-opus-4-8", tag: "Maximum Depth", desc: "Deepest pedagogical understanding" },
+  ],
+  mistral: [
+    { value: "mistral-large-latest", tag: "Recommended", desc: "Flagship model with robust multilingual support" },
+    { value: "open-mistral-nemo", tag: "Lightweight", desc: "12B parameter efficient multilingual model" },
+    { value: "codestral-latest", tag: "Code Specialist", desc: "Algorithmic and programming evaluation" },
+  ],
+  deepseek: [
+    { value: "deepseek-chat", tag: "Recommended", desc: "DeepSeek V3 high-throughput general reasoning" },
+    { value: "deepseek-reasoner", tag: "Reasoning R1", desc: "DeepSeek R1 reasoning benchmark champion" },
+    { value: "deepseek-coder", tag: "Code Logic", desc: "Code and syntax evaluation" },
   ],
 };
 
@@ -179,17 +281,24 @@ export default function useSuperAdminApiConfig() {
   const [activeProvider, setActiveProvider] = useState({ pdf: "gemini", text: "gemini" });
   const [pendingKeyDelete, setPendingKeyDelete] = useState(null);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [modalInitialStep, setModalInitialStep] = useState(1);
   const [inlineTestStatus, setInlineTestStatus] = useState({});
   const [configLoading, setConfigLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
   const { modal, showModal, closeModal } = useModal();
 
-  const openSettingsModal = useCallback((prov) => {
-    if (prov) {
-      setActiveProvider((prev) => ({ ...prev, [configSubTab]: prov }));
+  const openAddLlmModal = useCallback((prov = null, initialStep = 1, initialPurpose = null) => {
+    if (initialPurpose) {
+      setConfigSubTab(initialPurpose);
     }
+    if (prov) {
+      setActiveProvider((prev) => ({ ...prev, [initialPurpose || configSubTab]: prov }));
+    }
+    setModalInitialStep(initialStep);
     setIsSettingsModalOpen(true);
   }, [configSubTab]);
+
+  const openSettingsModal = openAddLlmModal;
 
   const closeSettingsModal = useCallback(() => {
     setIsSettingsModalOpen(false);
@@ -278,48 +387,76 @@ export default function useSuperAdminApiConfig() {
     patchPP(pur, prov, patch);
   };
 
-  const handleSaveCard = async () => {
-    const pur = configSubTab;
-    const prov = activeProvider[pur];
-    const card = aiState[pur][prov];
+  const handleSaveLlm = async ({ purpose: targetPurpose, provider: targetProvider, key: targetKey, model: targetModel }) => {
+    const pur = targetPurpose || configSubTab;
+    const prov = targetProvider || activeProvider[pur];
+    const keyToSave = typeof targetKey === "string" ? targetKey.trim() : "";
+    const modelToSave = targetModel || aiState[pur]?.[prov]?.model || defaultModelMap[prov];
+
     try {
       setConfigLoading(true);
       let added = 0;
       let autoPickedModel = null;
       let autoPickedSource = null;
-      if (card.keysDirty && card.newKeys.trim()) {
-        const explicitModel = card.modelManuallyChanged ? card.model : card.model || defaultModelMap[prov];
-        const r = await apiAddAiKeys(pur, prov, card.newKeys, explicitModel);
+
+      if (keyToSave) {
+        const r = await apiAddAiKeys(pur, prov, keyToSave, modelToSave);
         added = r.added || 0;
         autoPickedModel = r.autoPickedModel;
         autoPickedSource = r.autoPickedSource;
-      } else {
-        await apiSetProviderModel(pur, prov, card.model);
+      } else if (modelToSave) {
+        await apiSetProviderModel(pur, prov, modelToSave);
       }
-      patchPP(pur, prov, { newKeys: "", keysDirty: false, modelManuallyChanged: false, detectedInfo: null });
+
+      patchPP(pur, prov, {
+        newKeys: "",
+        keysDirty: false,
+        model: modelToSave,
+        modelManuallyChanged: false,
+        detectedInfo: null,
+      });
+
+      // Switch active tab and provider so user sees the newly configured LLM immediately
+      setConfigSubTab(pur);
+      setActiveProvider((prev) => ({ ...prev, [pur]: prov }));
+
       await refreshKeyList(pur, prov);
+
       const purposeLabel = pur === "pdf" ? "PDF Reading" : "Text Generation";
-      const providerLabel = providerLabels[prov];
-      let msg;
-      if (card.keysDirty) {
-        msg = `${added} key${added === 1 ? "" : "s"} added to ${providerLabel} (${purposeLabel}).`;
+      const providerLabel = providerLabels[prov] || prov;
+
+      let msg = "";
+      if (keyToSave) {
+        msg = `${added} key${added === 1 ? "" : "s"} added to ${providerLabel} (${purposeLabel}) with active model "${modelToSave}".`;
         if (autoPickedModel && autoPickedSource && autoPickedSource !== "default") {
-          msg += ` Model auto-selected: ${autoPickedModel} (${
-            autoPickedSource === "listed" ? "discovered from key's available models" : "verified via probe"
-          }).`;
+          msg += ` Verified model: ${autoPickedModel}.`;
         }
-        msg += " Form cleared — ready for the next key.";
       } else {
-        msg = `${providerLabel} model saved for ${purposeLabel}.`;
+        msg = `${providerLabel} model updated to "${modelToSave}" for ${purposeLabel}.`;
       }
+
       setIsSettingsModalOpen(false);
-      showModal("success", "Saved", msg);
+      showModal("success", "LLM Configured Successfully", msg);
+      return { success: true };
     } catch (error) {
-      const msg = error?.response?.data?.message || "Failed to save settings. Please try again.";
-      showModal("error", "Save Rejected", msg);
+      const msg = error?.response?.data?.message || "Failed to configure LLM. Please try again.";
+      showModal("error", "Configuration Rejected", msg);
+      return { success: false, error: msg };
     } finally {
       setConfigLoading(false);
     }
+  };
+
+  const handleSaveCard = async () => {
+    const pur = configSubTab;
+    const prov = activeProvider[pur];
+    const card = aiState[pur][prov];
+    return handleSaveLlm({
+      purpose: pur,
+      provider: prov,
+      key: card.newKeys,
+      model: card.model,
+    });
   };
 
   const handleTestStoredKey = async (purpose, provider, index) => {
@@ -397,28 +534,34 @@ export default function useSuperAdminApiConfig() {
     closeModal();
   };
 
-  const handleTestInlineKey = async () => {
+  const handleTestInlineKey = async (overrideProv, overrideModel, overrideKey) => {
     const pur = configSubTab;
-    const prov = activeProvider[pur];
-    const card = aiState[pur][prov];
-    const firstKey = (card.newKeys || "").split(",")[0]?.trim();
-    if (!firstKey) {
-      showModal("warning", "No key entered", "Paste a key in the textarea first.");
-      return;
+    const prov = overrideProv || activeProvider[pur];
+    const card = aiState[pur]?.[prov] || {};
+    const key = overrideKey !== undefined ? overrideKey : (card.newKeys || "").split(",")[0]?.trim();
+    const model = overrideModel || card.model || defaultModelMap[prov];
+
+    if (!key) {
+      showModal("warning", "No key entered", "Enter an API key first to test the connection.");
+      return null;
     }
+
     const id = `${pur}-${prov}`;
     setInlineTestStatus((s) => ({ ...s, [id]: { state: "testing" } }));
     try {
-      const r = await testInlineAiKey(prov, card.model, firstKey);
-      setInlineTestStatus((s) => ({
-        ...s,
-        [id]: { state: r.success ? "ok" : "fail", message: r.message, latencyMs: r.latencyMs },
-      }));
+      const r = await testInlineAiKey(prov, model, key);
+      const res = {
+        state: r.success ? "ok" : "fail",
+        message: r.message,
+        latencyMs: r.latencyMs,
+        modelUsed: r.modelUsed || model,
+      };
+      setInlineTestStatus((s) => ({ ...s, [id]: res }));
+      return res;
     } catch (e) {
-      setInlineTestStatus((s) => ({
-        ...s,
-        [id]: { state: "fail", message: e?.response?.data?.message || e.message },
-      }));
+      const res = { state: "fail", message: e?.response?.data?.message || e.message };
+      setInlineTestStatus((s) => ({ ...s, [id]: res }));
+      return res;
     }
   };
 
@@ -451,12 +594,15 @@ export default function useSuperAdminApiConfig() {
     inlineTestStatus,
     pendingKeyDelete,
     isSettingsModalOpen,
+    modalInitialStep,
+    openAddLlmModal,
     openSettingsModal,
     closeSettingsModal,
     modal,
     closeModal: handleCloseModal,
     updateActiveCard,
     handleSaveCard,
+    handleSaveLlm,
     handleTestStoredKey,
     handleDeleteStoredKey,
     confirmDeleteKey,

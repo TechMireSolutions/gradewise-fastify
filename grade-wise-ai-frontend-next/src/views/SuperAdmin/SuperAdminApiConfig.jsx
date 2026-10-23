@@ -30,12 +30,14 @@ export default function SuperAdminApiConfig() {
     inlineTestStatus,
     pendingKeyDelete,
     isSettingsModalOpen,
+    modalInitialStep,
     openSettingsModal,
     closeSettingsModal,
     modal,
     closeModal,
     updateActiveCard,
     handleSaveCard,
+    handleSaveLlm,
     handleTestStoredKey,
     handleDeleteStoredKey,
     confirmDeleteKey,
@@ -98,6 +100,7 @@ export default function SuperAdminApiConfig() {
             totalTextKeys={totalTextKeys}
             onSelectPurpose={setConfigSubTab}
             onOpenSettings={openSettingsModal}
+            aiState={aiState}
           />
 
           {/* Main Area: Stored Keys Table */}
@@ -116,12 +119,13 @@ export default function SuperAdminApiConfig() {
         </div>
       </MainLandmark>
 
-      {/* Provider & Model Settings Modal */}
+      {/* Add New LLM Modal */}
       <ProviderSettingsModal
         isOpen={isSettingsModalOpen}
         onClose={closeSettingsModal}
         purpose={purpose}
         provider={provider}
+        initialStep={modalInitialStep}
         card={card}
         pStyle={pStyle}
         aiState={aiState}
@@ -131,6 +135,9 @@ export default function SuperAdminApiConfig() {
         onUpdateCard={updateActiveCard}
         onTestInlineKey={handleTestInlineKey}
         onSaveCard={handleSaveCard}
+        onSaveLlm={handleSaveLlm}
+        totalPdfKeys={totalPdfKeys}
+        totalTextKeys={totalTextKeys}
       />
 
       {/* Confirmation & Alert Modal */}
@@ -151,7 +158,6 @@ export default function SuperAdminApiConfig() {
                 variant="danger"
                 onClick={confirmDeleteKey}
                 disabled={Boolean(actionLoading)}
-                className="bg-red-600 hover:bg-red-700 text-white"
               >
                 {actionLoading ? "Deleting..." : "Delete Key"}
               </Button>

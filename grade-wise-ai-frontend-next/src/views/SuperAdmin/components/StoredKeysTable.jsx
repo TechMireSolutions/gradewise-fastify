@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/cn.js";
-import { accentPanel, card as uiCard, tableHead, tableRowHover, focusRing } from "@/lib/ui.js";
-import { FaKey, FaFlask, FaTrash, FaWrench } from "react-icons/fa";
-import { Button } from "@/components/ui/index.js";
+import { card as uiCard, tableHead, tableRowHover, focusRing } from "@/lib/ui.js";
+import { FaKey, FaFlask, FaTrash, FaPlus, FaWrench, FaCopy, FaCheck } from "react-icons/fa";
+import { Button, EmptyState } from "@/components/ui/index.js";
 import TestResultBadge from "./TestResultBadge.jsx";
 import {
   ALL_PROVIDERS,
@@ -24,6 +24,8 @@ export default function StoredKeysTable({
   onDeleteStoredKey,
 }) {
   const [filterProvider, setFilterProvider] = useState("all");
+  const [isTestingAll, setIsTestingAll] = useState(false);
+  const [copiedSnippet, setCopiedSnippet] = useState(null);
 
   // Collect all keys stored under the current purpose across all providers
   const allPurposeKeys = ALL_PROVIDERS.flatMap((prov) =>
@@ -45,6 +47,23 @@ export default function StoredKeysTable({
   const providersWithKeys = ALL_PROVIDERS.filter(
     (p) => (aiState?.[purpose]?.[p]?.list || []).length > 0
   );
+
+  const handleTestAllKeys = async () => {
+    if (displayedKeys.length === 0 || isTestingAll) return;
+    setIsTestingAll(true);
+    for (const k of displayedKeys) {
+      await onTestStoredKey(purpose, k.provider, k.index);
+    }
+    setIsTestingAll(false);
+  };
+
+  const handleCopySnippet = (snippet) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(snippet);
+      setCopiedSnippet(snippet);
+      setTimeout(() => setCopiedSnippet(null), 1800);
+    }
+  };
 
   return (
     <div className={cn(uiCard, "shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200")}>
@@ -69,16 +88,29 @@ export default function StoredKeysTable({
           </div>
         </div>
 
-        {/* Settings Modal Button */}
+        {/* Header Action Buttons */}
         <div className="flex items-center gap-2">
+          {displayedKeys.length > 1 && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleTestAllKeys}
+              disabled={isTestingAll}
+              className="gap-2 text-xs sm:text-sm font-semibold"
+            >
+              <FaFlask className="w-3.5 h-3.5 text-indigo-500" />
+              <span>{isTestingAll ? "Testing All…" : `Test All (${displayedKeys.length})`}</span>
+            </Button>
+          )}
+
           <Button
             type="button"
             variant="primary"
             onClick={() => onOpenSettings?.(activeProvider)}
             className="gap-2 text-xs sm:text-sm font-semibold shadow-md shadow-indigo-500/20"
           >
-            <FaWrench className="w-3.5 h-3.5" />
-            <span>{providerLabels[activeProvider]} Settings</span>
+            <FaPlus className="w-3.5 h-3.5" />
+            <span>Add New LLM</span>
           </Button>
         </div>
       </div>
@@ -130,26 +162,23 @@ export default function StoredKeysTable({
       )}
 
       {displayedKeys.length === 0 ? (
-        /* Empty State */
-        <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-          <div className={cn(accentPanel, "w-16 h-16 rounded-2xl flex items-center justify-center mb-5")}>
-            <FaKey className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
-          </div>
-          <h3 className="text-lg font-bold text-foreground mb-2">No keys stored yet</h3>
-          <p className="text-muted-foreground text-sm max-w-sm mb-5 text-pretty">
-            Add a {providerLabels[activeProvider]} API key in settings to populate the{" "}
-            {purpose === "pdf" ? "PDF Reading" : "Text Generation"} pool.
-          </p>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={() => onOpenSettings?.(activeProvider)}
-            className="gap-2 shadow-md shadow-indigo-500/20"
-          >
-            <FaWrench className="w-3.5 h-3.5" />
-            <span>Open {providerLabels[activeProvider]} Settings</span>
-          </Button>
-        </div>
+        <EmptyState
+          icon={FaKey}
+          title="No keys stored yet"
+          description={`Add a new LLM to populate the ${purpose === "pdf" ? "PDF Reading" : "Text Generation"} pool.`}
+          action={
+            <Button
+              type="button"
+              variant="primary"
+              onClick={() => onOpenSettings?.(activeProvider)}
+              className="gap-2 shadow-md shadow-indigo-500/20"
+            >
+              <FaPlus className="w-3.5 h-3.5" />
+              <span>Add New LLM</span>
+            </Button>
+          }
+          className="border-0 bg-transparent py-16"
+        />
       ) : (
         /* Table of Stored Keys */
         <div className="overflow-x-auto">
@@ -166,7 +195,7 @@ export default function StoredKeysTable({
                   Masked Key
                 </th>
                 <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border hidden sm:table-cell">
-                  Model
+                  Active Model
                 </th>
                 <th className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">
                   Status
@@ -201,13 +230,40 @@ export default function StoredKeysTable({
                         {k.providerLabel}
                       </span>
                     </td>
-                    <td className="px-6 py-4 font-mono text-sm text-secondary-foreground max-w-[200px] truncate">
-                      {k.snippet}
+                    <td className="px-6 py-4 font-mono text-sm text-secondary-foreground max-w-[220px]">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate">{k.snippet}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopySnippet(k.snippet)}
+                          className={cn(
+                            "p-1 rounded text-muted-foreground hover:text-foreground transition-colors cursor-pointer",
+                            focusRing
+                          )}
+                          title="Copy snippet"
+                          aria-label="Copy snippet"
+                        >
+                          {copiedSnippet === k.snippet ? (
+                            <FaCheck className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <FaCopy className="w-2.5 h-2.5 opacity-60 hover:opacity-100" />
+                          )}
+                        </button>
+                      </div>
                     </td>
                     <td className="px-6 py-4 hidden sm:table-cell">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border font-mono">
-                        {k.model}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => onOpenSettings?.(k.provider, 4, purpose)}
+                        title="Click to change model for this provider"
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-btn-secondary hover:bg-indigo-500/15 text-muted-foreground hover:text-indigo-700 dark:hover:text-indigo-400 border border-border hover:border-indigo-500/30 font-mono transition-all duration-150 cursor-pointer group",
+                          focusRing
+                        )}
+                      >
+                        <span>{k.model}</span>
+                        <FaWrench className="w-2.5 h-2.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       {status ? (

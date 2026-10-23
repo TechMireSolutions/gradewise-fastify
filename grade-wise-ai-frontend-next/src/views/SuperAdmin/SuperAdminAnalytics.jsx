@@ -52,10 +52,12 @@ export default function SuperAdminAnalytics() {
   }
 
   const { users, assessments, attempts } = overview || {
-    users: { total: 0, admins: 0, instructors: 0, students: 0, verified: 0, unverified: 0 },
+    users: { total: 0, admins: 0, instructors: 0, students: 0, superAdmins: 0, verified: 0, unverified: 0 },
     assessments: { total: 0, executed: 0 },
     attempts: { total: 0, completed: 0, averageScore: 0 },
   };
+
+  const superAdminCount = users.superAdmins ?? Math.max(0, users.total - (users.students + users.instructors + users.admins));
 
   const executionRate = assessments.total > 0
     ? Math.round((assessments.executed / assessments.total) * 100)
@@ -287,20 +289,16 @@ export default function SuperAdminAnalytics() {
               </div>
 
               {/* Super Admins (if any) */}
-              {Math.max(0, users.total - (users.students + users.instructors + users.admins)) > 0 && (
+              {superAdminCount > 0 && (
                 <div>
                   <div className="flex justify-between text-xs font-medium mb-1">
                     <span className="flex items-center gap-1.5 text-foreground">
                       <FaCrown className="text-purple-500" /> Super Administrators
                     </span>
                     <span className="text-muted-foreground">
-                      {Math.max(0, users.total - (users.students + users.instructors + users.admins))} (
+                      {superAdminCount} (
                       {users.total > 0
-                        ? Math.round(
-                            (Math.max(0, users.total - (users.students + users.instructors + users.admins)) /
-                              users.total) *
-                              100
-                          )
+                        ? Math.round((superAdminCount / users.total) * 100)
                         : 0}
                       %)
                     </span>
@@ -309,13 +307,7 @@ export default function SuperAdminAnalytics() {
                     <div
                       className="h-full bg-purple-500 rounded-full"
                       style={{
-                        width: `${
-                          users.total > 0
-                            ? (Math.max(0, users.total - (users.students + users.instructors + users.admins)) /
-                                users.total) *
-                              100
-                            : 0
-                        }%`,
+                        width: `${users.total > 0 ? (superAdminCount / users.total) * 100 : 0}%`,
                       }}
                     />
                   </div>

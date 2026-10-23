@@ -13,6 +13,7 @@ export async function getAdminOverviewService(): Promise<AdminOverviewResponse> 
       admins: sql<number>`count(case when ${users.role} = 'admin' then 1 end)`,
       instructors: sql<number>`count(case when ${users.role} = 'instructor' then 1 end)`,
       students: sql<number>`count(case when ${users.role} = 'student' then 1 end)`,
+      superAdmins: sql<number>`count(case when ${users.role} = 'super_admin' then 1 end)`,
       verified: sql<number>`count(case when ${users.verified} = true then 1 end)`,
       unverified: sql<number>`count(case when ${users.verified} = false then 1 end)`,
     })
@@ -39,6 +40,7 @@ export async function getAdminOverviewService(): Promise<AdminOverviewResponse> 
       admins: Number(userCounts?.admins ?? 0),
       instructors: Number(userCounts?.instructors ?? 0),
       students: Number(userCounts?.students ?? 0),
+      superAdmins: Number(userCounts?.superAdmins ?? 0),
       verified: Number(userCounts?.verified ?? 0),
       unverified: Number(userCounts?.unverified ?? 0),
     },
@@ -99,14 +101,17 @@ export async function getAdminUsersService(query?: AdminUsersQuery): Promise<{
     .where(whereClause)
     .orderBy(desc(users.createdAt));
 
-  if (query?.page && query?.limit) {
-    const offset = (query.page - 1) * query.limit;
-    const paginatedUsers = await q.limit(query.limit).offset(offset);
+  const page = query?.page ?? 1;
+  const limit = query?.limit;
+
+  if (limit) {
+    const offset = (page - 1) * limit;
+    const paginatedUsers = await q.limit(limit).offset(offset);
     return {
       users: paginatedUsers,
       total,
-      page: query.page,
-      limit: query.limit,
+      page,
+      limit,
     };
   }
 

@@ -121,7 +121,7 @@ export default function ChangeRoleModal({
             disabled={loading}
             aria-label="Close dialog"
             className={cn(
-              "p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-btn-secondary transition-all active:scale-95 disabled:opacity-50 cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center",
+              "p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-btn-secondary transition-all active:scale-95 disabled:opacity-50 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center",
               focusRing
             )}
           >
@@ -160,7 +160,7 @@ export default function ChangeRoleModal({
             <label className="block text-sm font-semibold text-foreground mb-3">
               Assign New Role
             </label>
-            <div className="space-y-3">
+            <div role="radiogroup" aria-label="Assign New Role" className="space-y-3">
               {ROLES.map((roleOpt) => {
                 const isSelected = selectedRole === roleOpt.id;
                 const isCurrent = user.role === roleOpt.id;
@@ -169,6 +169,8 @@ export default function ChangeRoleModal({
                   <button
                     key={roleOpt.id}
                     type="button"
+                    role="radio"
+                    aria-checked={isSelected}
                     onClick={() => setSelectedRole(roleOpt.id)}
                     className={cn(
                       "w-full p-4 rounded-xl border text-start transition-all duration-200 cursor-pointer flex items-start gap-3.5 relative",

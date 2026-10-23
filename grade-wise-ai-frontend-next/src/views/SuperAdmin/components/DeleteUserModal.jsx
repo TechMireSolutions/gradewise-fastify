@@ -73,7 +73,7 @@ export default function DeleteUserModal({
             disabled={loading}
             aria-label="Close dialog"
             className={cn(
-              "p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-btn-secondary transition-all active:scale-95 disabled:opacity-50 cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center",
+              "p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-btn-secondary transition-all active:scale-95 disabled:opacity-50 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center",
               focusRing
             )}
           >

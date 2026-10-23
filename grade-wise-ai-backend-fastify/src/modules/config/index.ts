@@ -12,6 +12,7 @@ import {
   deleteAiKey,
   testAiKey,
   bulkUpdateConfigs,
+  getProviderModels,
 } from "./config.service.js";
 import { buildConfigKey } from "../../ai/constants.js";
 import { decryptSecret } from "../../utils/crypto.js";
@@ -22,6 +23,7 @@ import {
   DeleteAiKeySchema,
   TestAiKeySchema,
   TestInlineAiKeySchema,
+  FetchProviderModelsSchema,
 } from "./config.schema.js";
 
 export default async function configModule(app: FastifyInstance) {
@@ -192,6 +194,31 @@ export default async function configModule(app: FastifyInstance) {
         message: result.error,
         latencyMs: result.latencyMs,
         modelUsed: result.model,
+      });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
+  // POST /api/config/ai-keys/fetch-models (fetches live models from provider API with key)
+  f.post("/ai-keys/fetch-models", {
+    preHandler: superAdminOnly,
+    schema: {
+      body: FetchProviderModelsSchema,
+    },
+  }, async (request, reply) => {
+    try {
+      const result = await getProviderModels(request.body.provider, {
+        apiKey: request.body.apiKey,
+        purpose: request.body.purpose,
+        keyIndex: request.body.keyIndex,
+      });
+      return reply.send({
+        success: result.success,
+        provider: request.body.provider,
+        models: result.models,
+        message: result.error,
       });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);
