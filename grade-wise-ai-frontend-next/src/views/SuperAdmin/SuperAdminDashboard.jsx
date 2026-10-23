@@ -1,16 +1,35 @@
 "use client";
 
-import { useEffect } from "react";
-import { page, pageInner } from "@/lib/ui.js";
-import Modal from "@/components/ui/Modal.jsx";
-import PageLoader from "@/components/ui/PageLoader.jsx";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/cn.js";
+import { card, page, pageInner, focusRing } from "@/lib/ui.js";
+import {
+  FaCrown,
+  FaShieldAlt,
+  FaUsers,
+  FaKey,
+  FaChartBar,
+  FaServer,
+  FaUserPlus,
+  FaArrowRight,
+  FaCogs,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaSlidersH,
+} from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
-import { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
+import PageLoader from "@/components/ui/PageLoader.jsx";
+import Modal from "@/components/ui/Modal.jsx";
+import { Button, StatusBadge } from "@/components/ui/index.js";
 import useUserManagement from "@/hooks/useUserManagement.js";
+import useAdminStore from "@/features/admin/store.js";
+import apiClient from "@/lib/apiClient.js";
+import { formatRole, getRoleBadgeColor, getRoleAvatarBg } from "@/utils/roleDisplay.js";
+import { formatDate } from "@/utils/formatDate.js";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
-import SuperAdminHeader from "./components/SuperAdminHeader.jsx";
-import SuperAdminUsersSection from "./components/SuperAdminUsersSection.jsx";
+import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 import AddUserModal from "./components/AddUserModal.jsx";
 import ChangeRoleModal from "./components/ChangeRoleModal.jsx";
 import DeleteUserModal from "./components/DeleteUserModal.jsx";
@@ -21,7 +40,7 @@ export default function SuperAdminDashboard() {
     user,
     users,
     totalUsers,
-    loading,
+    loading: usersLoading,
     actionLoading,
     modal,
     closeModal,
@@ -30,11 +49,6 @@ export default function SuperAdminDashboard() {
     handleCreateUser,
     handleDeleteUser,
     confirmDeleteUser,
-    stats,
-    searchQuery,
-    setSearchQuery,
-    roleFilter,
-    setRoleFilter,
     activeModal,
     selectedUser,
     openCreateModal,
@@ -43,52 +57,509 @@ export default function SuperAdminDashboard() {
   } = useUserManagement();
 
   const apiConfig = useSuperAdminApiConfig();
+  const { overview, getAdminOverview } = useAdminStore();
+  const [healthStatus, setHealthStatus] = useState("checking");
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    fetchUsers({ limit: 5 });
+    getAdminOverview().catch(() => {});
+    apiClient
+      .get("/health")
+      .then((res) => setHealthStatus(res.data?.status === "ok" ? "ok" : "degraded"))
+      .catch(() => setHealthStatus("degraded"));
+  }, [fetchUsers, getAdminOverview]);
 
-  const handleSearchChange = (term) => {
-    setSearchQuery(term);
-    fetchUsers({ search: term });
-  };
-
-  const handleRoleFilterChange = (role) => {
-    setRoleFilter(role);
-    fetchUsers({ role: role || undefined });
-  };
-
-  if (loading && users.length === 0) {
-    return <PageLoader message="Loading users..." />;
+  if (usersLoading && users.length === 0) {
+    return <PageLoader message="Loading Super Admin Command Center..." />;
   }
+
+  const { assessments, attempts } = overview || {
+    assessments: { total: 0, executed: 0 },
+    attempts: { total: 0, completed: 0, averageScore: 0 },
+  };
+
+  const configuredKeyCount = apiConfig.configuredCount || 0;
+  const recentUsers = users.slice(0, 5);
 
   return (
     <div className={page}>
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <SuperAdminHeader
-          user={user}
-          totalUsers={totalUsers}
-          onOpenCreateModal={openCreateModal}
-          onOpenApiConfigModal={apiConfig.openSettingsModal}
-        />
+        <SuperAdminNavTabs />
 
-        <UserStatsGrid stats={stats} totalUsers={totalUsers} />
+        {/* Executive Header Banner */}
+        <div className="mb-8">
+          <div className={cn(card, "p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-2xl")}>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="p-1.5 rounded-lg bg-yellow-500/20 text-yellow-400">
+                    <FaCrown className="w-3.5 h-3.5" />
+                  </span>
+                  <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 uppercase tracking-wider">
+                    Super Administrator Authority
+                  </span>
+                </div>
 
-        <SuperAdminUsersSection
-          users={users}
-          currentUserId={user?.id}
-          actionLoading={actionLoading}
-          onRefresh={() => fetchUsers()}
-          onOpenCreateModal={openCreateModal}
-          onOpenRoleModal={openRoleModal}
-          onDelete={handleDeleteUser}
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          roleFilter={roleFilter}
-          onRoleFilterChange={handleRoleFilterChange}
-        />
+                <h1 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight text-balance">
+                  Executive Command Center
+                </h1>
+
+                <p className="text-sm sm:text-base text-secondary-foreground leading-relaxed mt-1 text-pretty">
+                  Welcome back, <span className="text-foreground font-semibold">{user?.name}</span>. Full platform authority over user governance, AI engine configuration, system diagnostics, and assessment analytics.
+                </p>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <StatusBadge
+                    variant={healthStatus === "ok" ? "success" : healthStatus === "checking" ? "info" : "danger"}
+                    size="md"
+                    label={
+                      healthStatus === "ok"
+                        ? "Infrastructure Operational"
+                        : healthStatus === "checking"
+                        ? "Probing Health..."
+                        : "Subsystems Degraded"
+                    }
+                  />
+
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5 bg-input px-3 py-1.5 rounded-xl border border-border">
+                    <FaShieldAlt className="text-indigo-500 w-3 h-3" />
+                    AES-256 Vault Active
+                  </span>
+                </div>
+              </div>
+
+              {/* Header Quick Action Popups */}
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+                <Button
+                  variant="primary"
+                  onClick={openCreateModal}
+                  className="w-full justify-center gap-2"
+                >
+                  <FaUserPlus className="w-3.5 h-3.5" />
+                  Add New User
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  onClick={apiConfig.openSettingsModal}
+                  className="w-full justify-center gap-2"
+                >
+                  <FaSlidersH className="w-3.5 h-3.5" />
+                  Configure AI Keys
+                </Button>
+
+                <Link
+                  href="/super-admin/system"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-input hover:bg-btn-secondary text-secondary-foreground hover:text-foreground border border-border transition-all active:scale-95",
+                    focusRing
+                  )}
+                >
+                  <FaServer className="w-3 h-3 text-indigo-500" />
+                  System Health
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Executive KPI Summary Highlights (Links to Sub-pages) */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Platform Health & Metric Highlights
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Metric 1: Users */}
+            <Link
+              href="/super-admin/users"
+              className={cn(
+                card,
+                "p-5 hover:border-indigo-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Total Registered Users</span>
+                  <FaUsers className="w-4 h-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-3xl font-extrabold text-foreground">
+                  {totalUsers}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Global accounts across all 4 roles
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                <span>Manage Users & RBAC</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Metric 2: AI Config */}
+            <Link
+              href="/super-admin/api-config"
+              className={cn(
+                card,
+                "p-5 hover:border-violet-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Configured AI Providers</span>
+                  <FaKey className="w-4 h-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-3xl font-extrabold text-foreground">
+                  {configuredKeyCount}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Active keys for PDF & Text AI engines
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-violet-600 dark:text-violet-400">
+                <span>Open Key Vault</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Metric 3: Assessment Analytics */}
+            <Link
+              href="/super-admin/analytics"
+              className={cn(
+                card,
+                "p-5 hover:border-emerald-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Total Assessments</span>
+                  <FaChartBar className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-3xl font-extrabold text-foreground">
+                  {assessments.total}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {attempts.total} attempts submitted ({attempts.completed} completed)
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <span>View Full Telemetry</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Metric 4: System Health */}
+            <Link
+              href="/super-admin/system"
+              className={cn(
+                card,
+                "p-5 hover:border-amber-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Infrastructure State</span>
+                  <FaServer className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+                  {healthStatus === "ok" ? (
+                    <>
+                      <FaCheckCircle className="w-5 h-5 text-emerald-500" />
+                      Healthy
+                    </>
+                  ) : (
+                    <>
+                      <FaExclamationTriangle className="w-5 h-5 text-amber-500" />
+                      Degraded
+                    </>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PostgreSQL, Redis & BullMQ Workers
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-amber-600 dark:text-amber-400">
+                <span>Diagnostics & Probes</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Dedicated Workspace Launchers */}
+        <div className="mb-8">
+          <h2 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+            <FaCogs className="w-4 h-4 text-indigo-500" />
+            Dedicated Administrative Portals
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Workspace 1 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shrink-0">
+                  <FaUsers className="w-6 h-6" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    User Directory & Role Governance
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Search and filter users across Super Admin, Admin, Instructor, and Student tiers. Invite new accounts and change user roles via modal dialogs.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  {totalUsers} registered users
+                </span>
+                <Link
+                  href="/super-admin/users"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-all",
+                    focusRing
+                  )}
+                >
+                  Open Users Page
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Workspace 2 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shrink-0">
+                  <FaKey className="w-6 h-6" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    AI Engine & Key Management Vault
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Manage multi-provider API keys for Gemini, OpenAI, Claude, Groq, Mistral, and DeepSeek. Configure model tiers for PDF parsing and text generation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  {configuredKeyCount} active providers
+                </span>
+                <Link
+                  href="/super-admin/api-config"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border transition-all",
+                    focusRing
+                  )}
+                >
+                  Open AI Vault
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Workspace 3 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shrink-0">
+                  <FaChartBar className="w-6 h-6" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Platform & Assessment Analytics
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    System-wide assessment completion metrics, student attempt score averages, role distributions, and verification audits.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  {assessments.total} assessments tracked
+                </span>
+                <Link
+                  href="/super-admin/analytics"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border transition-all",
+                    focusRing
+                  )}
+                >
+                  View Analytics
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Workspace 4 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shrink-0">
+                  <FaServer className="w-6 h-6" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Infrastructure & System Diagnostics
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Inspect PostgreSQL database ping, Redis caching state, BullMQ background worker queue, and export raw diagnostic JSON dumps.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  Status: {healthStatus === "ok" ? "All Operational" : "Degraded"}
+                </span>
+                <Link
+                  href="/super-admin/system"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border transition-all",
+                    focusRing
+                  )}
+                >
+                  Run Diagnostics
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Users Preview Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                <FaUsers className="w-4 h-4 text-indigo-500" />
+                Recent User Accounts
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Quick preview of latest registered accounts. Navigate to Users page for complete directory and search.
+              </p>
+            </div>
+
+            <Link
+              href="/super-admin/users"
+              className={cn(
+                "inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline self-start sm:self-auto",
+                focusRing
+              )}
+            >
+              View Full User Directory ({totalUsers})
+              <FaArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className={cn(card, "p-0 overflow-hidden")}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-start text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-border bg-input/40 text-muted-foreground uppercase tracking-wider text-[11px]">
+                    <th scope="col" className="py-3 px-4 text-start font-semibold">User</th>
+                    <th scope="col" className="py-3 px-4 text-start font-semibold">Role</th>
+                    <th scope="col" className="py-3 px-4 text-start font-semibold hidden sm:table-cell">Joined</th>
+                    <th scope="col" className="py-3 px-4 text-end font-semibold">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {recentUsers.map((u) => {
+                    const isSelf = u.id === user?.id;
+                    const initials = u.name
+                      ? u.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()
+                      : "?";
+
+                    return (
+                      <tr key={u.id} className="hover:bg-surface-elevated/50 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <span
+                              className={cn(
+                                "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 bg-gradient-to-br",
+                                getRoleAvatarBg(u.role)
+                              )}
+                            >
+                              {initials}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-foreground truncate">{u.name}</p>
+                              <p className="text-muted-foreground text-[11px] truncate">{u.email}</p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-3 px-4">
+                          <span
+                            className={cn(
+                              "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border",
+                              getRoleBadgeColor(u.role)
+                            )}
+                          >
+                            {formatRole(u.role)}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
+                          {formatDate(u.createdAt)}
+                        </td>
+
+                        <td className="py-3 px-4 text-end">
+                          {!isSelf ? (
+                            <div className="inline-flex items-center gap-2">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => openRoleModal(u)}
+                                className="text-xs py-1 px-2.5 h-auto"
+                              >
+                                Change Role
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleDeleteUser(u.id, u.name)}
+                                className="text-xs py-1 px-2.5 h-auto"
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground italic px-2">
+                              Current User
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="p-3 bg-input/20 border-t border-border flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                Showing {recentUsers.length} of {totalUsers} total users
+              </span>
+              <Link
+                href="/super-admin/users"
+                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                Go to Users &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
       </MainLandmark>
 
       {/* ─── Popup Modal Forms (Pure Dialogs) ────────────────────────────────── */}

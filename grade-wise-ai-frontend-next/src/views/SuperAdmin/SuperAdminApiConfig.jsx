@@ -11,6 +11,7 @@ import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import ApiConfigSidebar from "./components/ApiConfigSidebar.jsx";
 import StoredKeysTable from "./components/StoredKeysTable.jsx";
 import ProviderSettingsModal from "./components/ProviderSettingsModal.jsx";
+import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 
 export default function SuperAdminApiConfig() {
   const {
@@ -46,7 +47,9 @@ export default function SuperAdminApiConfig() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
+        <SuperAdminNavTabs />
+
         {/* Page Header */}
         <div className="mb-8">
           <Link
@@ -107,7 +110,7 @@ export default function SuperAdminApiConfig() {
           />
 
           {/* Main Area: Stored Keys Table */}
-          <MainLandmark className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
             <StoredKeysTable
               purpose={purpose}
               aiState={aiState}
@@ -118,9 +121,9 @@ export default function SuperAdminApiConfig() {
               onTestStoredKey={handleTestStoredKey}
               onDeleteStoredKey={handleDeleteStoredKey}
             />
-          </MainLandmark>
+          </div>
         </div>
-      </div>
+      </MainLandmark>
 
       {/* Provider & Model Settings Modal */}
       <ProviderSettingsModal

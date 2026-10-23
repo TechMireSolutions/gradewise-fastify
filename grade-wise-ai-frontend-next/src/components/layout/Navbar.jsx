@@ -21,6 +21,9 @@ import {
   FaCrown,
   FaGraduationCap,
   FaSignOutAlt,
+  FaUsers,
+  FaKey,
+  FaHeartbeat,
 } from "react-icons/fa";
 
 const ROLE_LABELS = {
@@ -59,7 +62,11 @@ function Navbar() {
     switch (user.role) {
       case "super_admin":
         return [
-          { name: "Dashboard", href: "/super-admin/dashboard", icon: <FaTachometerAlt className="w-4 h-4" /> },
+          { name: "Overview", href: "/super-admin/dashboard", icon: <FaTachometerAlt className="w-4 h-4" /> },
+          { name: "Users", href: "/super-admin/users", icon: <FaUsers className="w-4 h-4" /> },
+          { name: "AI Config", href: "/super-admin/api-config", icon: <FaKey className="w-4 h-4" /> },
+          { name: "Analytics", href: "/super-admin/analytics", icon: <FaChartBar className="w-4 h-4" /> },
+          { name: "System", href: "/super-admin/system", icon: <FaHeartbeat className="w-4 h-4" /> },
           profileLink,
         ];
       case "admin":
