@@ -242,7 +242,7 @@ export default function AddNewLlmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-llm-title"
-        className="bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto flex flex-col"
+        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto flex flex-col"
       >
         {/* Sticky Header */}
         <div className="sticky top-0 bg-input/95 backdrop-blur-md px-6 py-5 border-b border-border flex items-center justify-between gap-4 z-20">
@@ -380,7 +380,7 @@ export default function AddNewLlmModal({
                   aria-checked={selectedPurpose === "pdf"}
                   onClick={() => setSelectedPurpose("pdf")}
                   className={cn(
-                    "p-5 rounded-2xl border text-start transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[170px] relative group",
+                    "p-5 rounded-xl border text-start transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[170px] relative group",
                     selectedPurpose === "pdf"
                       ? "bg-gradient-to-br from-indigo-500/15 to-violet-500/15 border-indigo-500 shadow-md ring-2 ring-indigo-500/30"
                       : "bg-surface-elevated hover:bg-btn-secondary border-border hover:border-border/80",
@@ -423,7 +423,7 @@ export default function AddNewLlmModal({
                   aria-checked={selectedPurpose === "text"}
                   onClick={() => setSelectedPurpose("text")}
                   className={cn(
-                    "p-5 rounded-2xl border text-start transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[170px] relative group",
+                    "p-5 rounded-xl border text-start transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[170px] relative group",
                     selectedPurpose === "text"
                       ? "bg-gradient-to-br from-indigo-500/15 to-violet-500/15 border-indigo-500 shadow-md ring-2 ring-indigo-500/30"
                       : "bg-surface-elevated hover:bg-btn-secondary border-border hover:border-border/80",
@@ -501,7 +501,7 @@ export default function AddNewLlmModal({
                       aria-checked={isSelected}
                       onClick={() => handleSelectProvider(prov)}
                       className={cn(
-                        "p-4 rounded-2xl border text-start transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[148px] relative group",
+                        "p-4 rounded-xl border text-start transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[148px] relative group",
                         isSelected
                           ? "bg-gradient-to-br from-indigo-500/15 to-violet-500/15 border-indigo-500 shadow-md ring-2 ring-indigo-500/30"
                           : "bg-surface-elevated hover:bg-btn-secondary border-border hover:border-border/80",
@@ -525,7 +525,7 @@ export default function AddNewLlmModal({
                       </div>
 
                       <div className="my-2">
-                        <span className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-md inline-block mb-1", theme.badge)}>
+                        <span className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1", theme.badge)}>
                           {meta.badge}
                         </span>
                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed text-pretty">
@@ -678,7 +678,7 @@ export default function AddNewLlmModal({
               )}
 
               {/* Inline Test Action & Status */}
-              <div className="p-4 rounded-2xl bg-surface-elevated/50 border border-border space-y-3">
+              <div className="p-4 rounded-xl bg-surface-elevated/50 border border-border space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -758,7 +758,7 @@ export default function AddNewLlmModal({
 
               {/* Dynamic Loading State */}
               {isFetchingModels && (
-                <div className="p-8 rounded-2xl bg-surface-elevated/50 border border-border flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
+                <div className="p-8 rounded-xl bg-surface-elevated/50 border border-border flex flex-col items-center justify-center text-center space-y-3 animate-fade-in">
                   <LoadingSpinner size="lg" />
                   <div className="space-y-1">
                     <h4 className="text-sm font-bold text-foreground">
@@ -844,7 +844,7 @@ export default function AddNewLlmModal({
                             <div className="flex items-center justify-between gap-1">
                               <span
                                 className={cn(
-                                  "text-[10px] font-semibold px-2 py-0.5 rounded-md",
+                                  "text-[10px] font-semibold px-2 py-0.5 rounded-full",
                                   isCur
                                     ? "bg-indigo-600 text-white"
                                     : "bg-btn-secondary text-muted-foreground border border-border"
@@ -867,12 +867,12 @@ export default function AddNewLlmModal({
                   </div>
 
                   {/* Full Select Menu with All Discovered Models */}
-                  <div className="bg-surface-elevated/60 border border-border rounded-2xl p-4 sm:p-5 space-y-3">
+                  <div className="bg-surface-elevated/60 border border-border rounded-xl p-4 sm:p-5 space-y-3">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="add-llm-model-select" className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
                         All Live Models ({fetchedModels.length} available)
                       </Label>
-                      <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-btn-secondary border border-border text-foreground font-semibold">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded-lg bg-btn-secondary border border-border text-foreground font-semibold">
                         {selectedModel}
                       </span>
                     </div>
@@ -905,7 +905,7 @@ export default function AddNewLlmModal({
 
               {/* Custom Model Input Mode (or fallback when models couldn't be fetched) */}
               {(!isFetchingModels && (isCustomModelMode || fetchedModels.length === 0)) && (
-                <div className="bg-surface-elevated/60 border border-border rounded-2xl p-4 sm:p-5 space-y-3 animate-fade-in">
+                <div className="bg-surface-elevated/60 border border-border rounded-xl p-4 sm:p-5 space-y-3 animate-fade-in">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="custom-model-input" className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
                       Model Identifier (Live API / Custom)
@@ -938,7 +938,7 @@ export default function AddNewLlmModal({
               )}
 
               {/* Review Summary Box */}
-              <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 via-transparent to-violet-500/10 p-5 space-y-3">
+              <div className="rounded-xl border border-indigo-500/30 bg-gradient-to-br from-indigo-500/10 via-transparent to-violet-500/10 p-5 space-y-3">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-2">
                   <FaCheck className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
                   Configuration Review

@@ -49,7 +49,7 @@ export default function DeleteUserModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-user-modal-title"
-        className="bg-card border border-red-500/30 rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto"
+        className="bg-card border border-red-500/30 rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto"
       >
         {/* Header */}
         <div className="sticky top-0 bg-input/95 backdrop-blur-md px-6 py-5 border-b border-border flex items-center justify-between gap-4 z-10">

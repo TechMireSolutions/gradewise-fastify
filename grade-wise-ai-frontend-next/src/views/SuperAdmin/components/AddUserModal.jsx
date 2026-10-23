@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/cn.js";
-import { focusRing, iconBadge } from "@/lib/ui.js";
+import { focusRing, iconBadge, statusTone } from "@/lib/ui.js";
 import {
   FaUser,
   FaEnvelope,
@@ -25,7 +25,7 @@ const ROLE_OPTIONS = [
     icon: FaUserGraduate,
     color: "emerald",
     desc: "Takes timed assessments, receives AI feedback and study guides.",
-    badgeClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+    badgeClass: statusTone.success,
     activeCardClass: "border-emerald-500 bg-emerald-500/10 shadow-emerald-500/10",
   },
   {
@@ -34,7 +34,7 @@ const ROLE_OPTIONS = [
     icon: FaChalkboardTeacher,
     color: "indigo",
     desc: "Uploads resources, designs assessments, enrolls students.",
-    badgeClass: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+    badgeClass: statusTone.info,
     activeCardClass: "border-indigo-500 bg-indigo-500/10 shadow-indigo-500/10",
   },
   {
@@ -43,7 +43,7 @@ const ROLE_OPTIONS = [
     icon: FaCrown,
     color: "rose",
     desc: "Platform administration, KPI monitoring, user management.",
-    badgeClass: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20",
+    badgeClass: statusTone.danger,
     activeCardClass: "border-red-500 bg-red-500/10 shadow-red-500/10",
   },
 ];
@@ -136,7 +136,7 @@ export default function AddUserModal({ isOpen, onClose, onSubmit, loading = fals
         role="dialog"
         aria-modal="true"
         aria-labelledby="add-user-modal-title"
-        className="bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto"
+        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto"
       >
         {/* Header */}
         <div className="sticky top-0 bg-input/95 backdrop-blur-md px-6 py-5 border-b border-border flex items-center justify-between gap-4 z-10">

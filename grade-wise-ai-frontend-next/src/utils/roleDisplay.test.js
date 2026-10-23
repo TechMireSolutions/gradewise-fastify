@@ -11,8 +11,8 @@ test("getRoleBadgeColor", async (t) => {
     assert.match(getRoleBadgeColor("admin"), /red/);
   });
 
-  await t.test("returns blue styling for instructor", () => {
-    assert.match(getRoleBadgeColor("instructor"), /blue/);
+  await t.test("returns indigo styling for instructor", () => {
+    assert.match(getRoleBadgeColor("instructor"), /indigo/);
   });
 
   await t.test("returns emerald styling for student", () => {

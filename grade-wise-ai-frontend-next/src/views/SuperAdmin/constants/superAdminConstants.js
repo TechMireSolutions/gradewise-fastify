@@ -1,3 +1,5 @@
+import { statusTone, gradient } from "../../../lib/ui.js";
+
 export const ALL_PROVIDERS = ["gemini", "groq", "openai", "claude", "mistral", "deepseek"];
 
 export const defaultModelMap = {
@@ -90,37 +92,37 @@ export const PROVIDER_META = {
 export const providerTheme = {
   gemini: {
     dot: "bg-indigo-500",
-    badge: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20",
+    badge: statusTone.info,
     activeSidebar: "bg-indigo-500/15 border-indigo-500/30 text-indigo-700 dark:text-indigo-300",
     activeText: "text-indigo-700 dark:text-indigo-300",
     panelGradient: "from-indigo-600 to-violet-600",
     saveGradient: "from-indigo-500 to-violet-600",
     focusBorder: "focus:border-indigo-500",
-    accentBg: "bg-gradient-to-br from-indigo-500 to-violet-600",
+    accentBg: gradient.brand,
   },
   groq: {
     dot: "bg-amber-500",
-    badge: "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20",
+    badge: statusTone.warning,
     activeSidebar: "bg-amber-500/15 border-amber-500/30 text-amber-700 dark:text-amber-300",
     activeText: "text-amber-700 dark:text-amber-300",
     panelGradient: "from-amber-500 to-orange-600",
     saveGradient: "from-amber-500 to-orange-600",
     focusBorder: "focus:border-amber-500",
-    accentBg: "bg-gradient-to-br from-amber-500 to-orange-600",
+    accentBg: gradient.amber,
   },
   openai: {
     dot: "bg-emerald-500",
-    badge: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20",
+    badge: statusTone.success,
     activeSidebar: "bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300",
     activeText: "text-emerald-700 dark:text-emerald-300",
     panelGradient: "from-emerald-600 to-teal-600",
     saveGradient: "from-emerald-500 to-teal-600",
     focusBorder: "focus:border-emerald-500",
-    accentBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
+    accentBg: gradient.emerald,
   },
   claude: {
     dot: "bg-violet-500",
-    badge: "bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20",
+    badge: statusTone.purple,
     activeSidebar: "bg-violet-500/15 border-violet-500/30 text-violet-700 dark:text-violet-300",
     activeText: "text-violet-700 dark:text-violet-300",
     panelGradient: "from-violet-600 to-purple-700",
@@ -130,17 +132,17 @@ export const providerTheme = {
   },
   mistral: {
     dot: "bg-rose-500",
-    badge: "bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/20",
+    badge: statusTone.danger,
     activeSidebar: "bg-rose-500/15 border-rose-500/30 text-rose-700 dark:text-rose-300",
     activeText: "text-rose-700 dark:text-rose-300",
     panelGradient: "from-rose-600 to-pink-700",
     saveGradient: "from-rose-500 to-pink-700",
     focusBorder: "focus:border-rose-500",
-    accentBg: "bg-gradient-to-br from-rose-500 to-pink-700",
+    accentBg: gradient.danger,
   },
   deepseek: {
     dot: "bg-sky-500",
-    badge: "bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/20",
+    badge: statusTone.sky,
     activeSidebar: "bg-sky-500/15 border-sky-500/30 text-sky-700 dark:text-sky-300",
     activeText: "text-sky-700 dark:text-sky-300",
     panelGradient: "from-sky-600 to-blue-700",

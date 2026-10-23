@@ -3,6 +3,7 @@
 import { cn } from "@/lib/cn.js";
 import { accentPanel, btn, card, cardInteractive, statSurface, tableHead, tableRowHover } from "@/lib/ui.js";
 import EmptyState from "@/components/ui/EmptyState";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 import { FaUsers, FaEye } from "react-icons/fa";
 
 export default function AnalyticsStudentTable({
@@ -58,14 +59,14 @@ export default function AnalyticsStudentTable({
                         {s.total_questions || 0}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                        <StatusBadge variant="success">
                           {s.correct_answers || 0}
-                        </span>
+                        </StatusBadge>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                        <StatusBadge variant="info">
                           {s.percentage}%
-                        </span>
+                        </StatusBadge>
                       </td>
                       <td className="px-6 py-4 text-secondary-foreground text-sm">
                         {s.time_used}

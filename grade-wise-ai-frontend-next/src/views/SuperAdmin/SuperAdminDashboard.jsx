@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn.js";
-import { card, page, pageInner, focusRing } from "@/lib/ui.js";
+import { card, page, pageInner, focusRing, statusTone, shape } from "@/lib/ui.js";
 import {
   FaCrown,
   FaShieldAlt,
@@ -90,7 +90,7 @@ export default function SuperAdminDashboard() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="p-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                  <span className={cn("p-1.5", statusTone.warning, shape.control)}>
                     <FaCrown className="w-3.5 h-3.5" />
                   </span>
                   <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
@@ -301,7 +301,7 @@ export default function SuperAdminDashboard() {
             {/* Workspace 1 */}
             <div className={cn(card, "p-6 flex flex-col justify-between")}>
               <div className="flex items-start gap-4">
-                <span className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shrink-0">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shrink-0">
                   <FaUsers className="w-6 h-6" />
                 </span>
                 <div className="flex-1 min-w-0">
@@ -309,7 +309,7 @@ export default function SuperAdminDashboard() {
                     <h3 className="text-base font-bold text-foreground">
                       User Directory & Role Governance
                     </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className={cn("px-2 py-0.5 text-[10px] font-semibold", statusTone.success, shape.pill)}>
                       RBAC Active
                     </span>
                   </div>
@@ -339,7 +339,7 @@ export default function SuperAdminDashboard() {
             {/* Workspace 2 */}
             <div className={cn(card, "p-6 flex flex-col justify-between")}>
               <div className="flex items-start gap-4">
-                <span className="p-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shrink-0">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shrink-0">
                   <FaKey className="w-6 h-6" />
                 </span>
                 <div className="flex-1 min-w-0">
@@ -377,7 +377,7 @@ export default function SuperAdminDashboard() {
             {/* Workspace 3 */}
             <div className={cn(card, "p-6 flex flex-col justify-between")}>
               <div className="flex items-start gap-4">
-                <span className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shrink-0">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shrink-0">
                   <FaChartBar className="w-6 h-6" />
                 </span>
                 <div className="flex-1 min-w-0">
@@ -385,7 +385,7 @@ export default function SuperAdminDashboard() {
                     <h3 className="text-base font-bold text-foreground">
                       Platform & Assessment Analytics
                     </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
+                    <span className={cn("px-2 py-0.5 text-[10px] font-semibold", statusTone.info, shape.pill)}>
                       Telemetry Live
                     </span>
                   </div>
@@ -415,7 +415,7 @@ export default function SuperAdminDashboard() {
             {/* Workspace 4 */}
             <div className={cn(card, "p-6 flex flex-col justify-between")}>
               <div className="flex items-start gap-4">
-                <span className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shrink-0">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shrink-0">
                   <FaServer className="w-6 h-6" />
                 </span>
                 <div className="flex-1 min-w-0">
@@ -425,10 +425,9 @@ export default function SuperAdminDashboard() {
                     </h3>
                     <span
                       className={cn(
-                        "px-2 py-0.5 rounded-full text-[10px] font-semibold border",
-                        healthStatus === "ok"
-                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
-                          : "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                        "px-2 py-0.5 text-[10px] font-semibold",
+                        shape.pill,
+                        healthStatus === "ok" ? statusTone.success : statusTone.warning
                       )}
                     >
                       {healthStatus === "ok" ? "All Probes Passing" : "Subsystems Degraded"}

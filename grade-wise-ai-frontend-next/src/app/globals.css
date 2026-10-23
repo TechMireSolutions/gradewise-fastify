@@ -19,6 +19,8 @@
   --app-nav: rgb(255 255 255 / 0.88);
   --app-input: rgb(255 255 255 / 0.9);
   --app-btn-secondary: rgb(241 245 249 / 0.9);
+  --app-primary: #6366f1;
+  --app-primary-foreground: #ffffff;
   --app-accent: #14b8a6;
   --app-eyebrow: #0d9488;
   --app-toast-bg: rgb(255 255 255 / 0.96);
@@ -48,6 +50,8 @@
   --app-nav: rgb(10 15 30 / 0.82);
   --app-input: rgb(15 23 42 / 0.65);
   --app-btn-secondary: rgb(51 65 85 / 0.45);
+  --app-primary: #818cf8;
+  --app-primary-foreground: #ffffff;
   --app-accent: #2dd4bf;
   --app-eyebrow: #2dd4bf;
   --app-toast-bg: rgb(15 23 42 / 0.95);
@@ -77,10 +81,16 @@
   --color-surface: var(--app-surface);
   --color-surface-elevated: var(--app-surface-elevated);
   --color-btn-secondary: var(--app-btn-secondary);
+  --color-primary: var(--app-primary);
+  --color-primary-foreground: var(--app-primary-foreground);
   --color-accent: var(--app-accent);
   --color-eyebrow: var(--app-eyebrow);
   --color-toast: var(--app-toast-bg);
   --color-toast-border: var(--app-toast-border);
+
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+  --radius-badge: 9999px;
 
   --color-brand-navy: #0a0f1e;
   --color-brand-teal: #14b8a6;

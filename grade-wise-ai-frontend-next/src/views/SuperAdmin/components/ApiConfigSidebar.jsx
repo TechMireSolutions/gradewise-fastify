@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card as uiCard, focusRing } from "@/lib/ui.js";
+import { card as uiCard, focusRing, statusTone } from "@/lib/ui.js";
 import { FaFileAlt, FaPencilAlt, FaPlus } from "react-icons/fa";
 import { Button } from "@/components/ui/index.js";
 import { ALL_PROVIDERS, PROVIDER_META } from "../hooks/useSuperAdminApiConfig.js";
@@ -126,7 +126,7 @@ export default function ApiConfigSidebar({
                         className={cn(
                           "text-[10px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0 hover:scale-105 transition-all cursor-pointer",
                           isConfigured
-                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/20"
+                            ? cn("font-semibold", statusTone.success)
                             : "text-muted-foreground/60 hover:text-foreground hover:bg-input",
                           focusRing
                         )}

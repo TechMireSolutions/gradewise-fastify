@@ -3,6 +3,60 @@
  * Use these constants or matching UI primitives — no custom CSS classes.
  */
 
+/**
+ * Concentric 3-tier border radius hierarchy:
+ * Tier 1: Containers, Cards, Modals (rounded-2xl / 16px)
+ * Tier 2: Controls, Buttons, Inputs, Panels, Insets (rounded-xl / 12px)
+ * Tier 3: Badges, Pills, Statuses, Avatars (rounded-full / 9999px)
+ */
+export const shape = {
+  container: "rounded-2xl",
+  card: "rounded-2xl",
+  modal: "rounded-2xl",
+  control: "rounded-xl",
+  button: "rounded-xl",
+  input: "rounded-xl",
+  panel: "rounded-xl",
+  chip: "rounded-xl",
+  badge: "rounded-full",
+  pill: "rounded-full",
+  avatar: "rounded-full",
+};
+
+/**
+ * Centralized status tone pairs complying with WCAG AA (>= 4.5:1 contrast)
+ * in both light and dark themes.
+ */
+export const statusTone = {
+  success:
+    "border-emerald-500/20 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  warning:
+    "border-amber-500/20 bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  danger:
+    "border-red-500/20 bg-red-500/15 text-red-700 dark:text-red-400",
+  info:
+    "border-indigo-500/20 bg-indigo-500/15 text-indigo-700 dark:text-indigo-400",
+  purple:
+    "border-purple-500/20 bg-purple-500/15 text-purple-700 dark:text-purple-300",
+  sky:
+    "border-sky-500/20 bg-sky-500/15 text-sky-700 dark:text-sky-400",
+  neutral:
+    "border-border bg-btn-secondary text-muted-foreground",
+};
+
+/**
+ * Platform brand gradients.
+ */
+export const gradient = {
+  brand: "bg-gradient-to-br from-indigo-500 to-violet-600",
+  primary: "bg-gradient-to-br from-indigo-500 to-violet-500",
+  teal: "bg-gradient-to-br from-teal-500 to-sky-400",
+  emerald: "bg-gradient-to-br from-emerald-500 to-teal-600",
+  amber: "bg-gradient-to-br from-amber-500 to-orange-600",
+  danger: "bg-gradient-to-br from-red-500 to-rose-600",
+  surface: "bg-gradient-to-br from-indigo-500/10 via-transparent to-violet-500/10",
+};
+
 const fieldBase =
   "w-full rounded-xl border border-border bg-input text-sm text-foreground transition-[border-color,box-shadow] duration-200 placeholder:text-subtle-foreground hover:border-accent/30 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15";
 
@@ -129,7 +183,7 @@ export const examBar =
   "sticky top-0 z-50 border-b border-border bg-nav/95 shadow-lg backdrop-blur-md";
 
 export const chip =
-  "inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border bg-btn-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-all duration-200 hover:border-teal-500/30 hover:text-foreground active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/25 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex min-h-9 cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-border bg-btn-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-all duration-200 hover:border-teal-500/30 hover:text-foreground active:scale-[0.98] motion-reduce:active:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/25 disabled:cursor-not-allowed disabled:opacity-50";
 
 export const chipTone = {
   indigo:

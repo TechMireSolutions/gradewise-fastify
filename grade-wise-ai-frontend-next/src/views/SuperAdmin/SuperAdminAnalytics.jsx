@@ -19,7 +19,7 @@ import {
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
-import { Button } from "@/components/ui/index.js";
+import { Button, StatusBadge } from "@/components/ui/index.js";
 import { DashboardStatCard, DashboardStatGrid } from "@/components/dashboard/shared/index.js";
 import useAdminStore from "@/features/admin/store.js";
 
@@ -186,9 +186,9 @@ export default function SuperAdminAnalytics() {
                 <FaAward className="text-emerald-500 dark:text-emerald-400" />
                 Exam Attempt Completion
               </h2>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+              <StatusBadge variant="success">
                 {completionRate}% Completed
-              </span>
+              </StatusBadge>
             </div>
 
             <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
@@ -332,12 +332,12 @@ export default function SuperAdminAnalytics() {
             </p>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-input border border-border text-center">
+              <div className="p-4 rounded-xl bg-input border border-border text-center">
                 <FaCheckCircle className="w-6 h-6 mx-auto mb-2 text-emerald-500 dark:text-emerald-400" />
                 <span className="text-2xl font-bold text-foreground block">{users.verified}</span>
                 <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Verified Accounts</span>
               </div>
-              <div className="p-4 rounded-2xl bg-input border border-border text-center">
+              <div className="p-4 rounded-xl bg-input border border-border text-center">
                 <FaUsers className="w-6 h-6 mx-auto mb-2 text-amber-500 dark:text-amber-400" />
                 <span className="text-2xl font-bold text-foreground block">{users.unverified}</span>
                 <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">Pending Verification</span>

@@ -22,6 +22,9 @@ import {
   headingGradient,
   iconBadge,
   statSurface,
+  shape,
+  statusTone,
+  gradient,
 } from "./ui.js";
 
 test("Design System Layout & Surface Tokens", async (t) => {
@@ -103,5 +106,65 @@ test("Design System Badges and Surfaces", async (t) => {
     assert.ok(statSurface.indigo.includes("border-indigo-500"));
     assert.ok(statSurface.emerald.includes("border-emerald-500"));
     assert.ok(statSurface.amber.includes("border-amber-500"));
+  });
+});
+
+test("Concentric Shape Hierarchy (3-Tier Radius Standard)", async (t) => {
+  await t.test("enforces Tier 1 container/card/modal 16px radius (rounded-2xl)", () => {
+    assert.strictEqual(shape.container, "rounded-2xl");
+    assert.strictEqual(shape.card, "rounded-2xl");
+    assert.strictEqual(shape.modal, "rounded-2xl");
+  });
+
+  await t.test("enforces Tier 2 control/button/input/panel/chip 12px radius (rounded-xl)", () => {
+    assert.strictEqual(shape.control, "rounded-xl");
+    assert.strictEqual(shape.button, "rounded-xl");
+    assert.strictEqual(shape.input, "rounded-xl");
+    assert.strictEqual(shape.panel, "rounded-xl");
+    assert.strictEqual(shape.chip, "rounded-xl");
+  });
+
+  await t.test("enforces Tier 3 badge/pill/avatar full radius (rounded-full)", () => {
+    assert.strictEqual(shape.badge, "rounded-full");
+    assert.strictEqual(shape.pill, "rounded-full");
+    assert.strictEqual(shape.avatar, "rounded-full");
+  });
+});
+
+test("Centralized Status Tone Tokens & WCAG Contrast", async (t) => {
+  const tones = ["success", "warning", "danger", "info", "purple", "sky", "neutral"];
+
+  await t.test("defines all standard status tones", () => {
+    for (const tone of tones) {
+      assert.ok(typeof statusTone[tone] === "string" && statusTone[tone].length > 0, `Missing statusTone.${tone}`);
+    }
+  });
+
+  await t.test("enforces dual-theme dark: contrast classes on colored tones", () => {
+    const coloredTones = ["success", "warning", "danger", "info", "purple", "sky"];
+    for (const tone of coloredTones) {
+      assert.ok(
+        statusTone[tone].includes("dark:"),
+        `statusTone.${tone} is missing dark theme contrast class`
+      );
+      assert.ok(
+        statusTone[tone].includes("border-"),
+        `statusTone.${tone} is missing semantic border class`
+      );
+    }
+  });
+});
+
+test("Centralized Brand Gradient Tokens", async (t) => {
+  const gradients = ["brand", "primary", "teal", "emerald", "amber", "danger", "surface"];
+
+  await t.test("defines all standard brand gradients", () => {
+    for (const key of gradients) {
+      assert.ok(typeof gradient[key] === "string" && gradient[key].length > 0, `Missing gradient.${key}`);
+      assert.ok(
+        gradient[key].includes("bg-gradient-to-br"),
+        `gradient.${key} should declare bg-gradient-to-br`
+      );
+    }
   });
 });

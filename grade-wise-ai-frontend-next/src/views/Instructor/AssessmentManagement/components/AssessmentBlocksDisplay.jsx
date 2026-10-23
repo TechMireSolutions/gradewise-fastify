@@ -3,6 +3,7 @@
 import { cn } from "@/lib/cn.js";
 import { accentPanel, card, iconBadge, tableRowHover } from "@/lib/ui.js";
 import { FaQuestionCircle } from "react-icons/fa";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 
 export default function AssessmentBlocksDisplay({ blocks = [] }) {
   return (
@@ -46,9 +47,9 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
                   {blocks.map((b, i) => (
                     <tr key={i} className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors duration-150")}>
                       <td className="px-6 py-4 text-sm text-secondary-foreground">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 capitalize">
+                        <StatusBadge variant="info" className="capitalize">
                           {b.question_type?.replace(/_/g, " ") || b.questionType?.replace(/_/g, " ")}
-                        </span>
+                        </StatusBadge>
                       </td>
                       <td className="px-6 py-4 text-sm text-secondary-foreground font-medium">
                         {b.question_count || b.questionCount}
@@ -64,14 +65,14 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
                             : "N/A"}
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                        <StatusBadge variant="success">
                           +{b.positive_marks ?? b.positiveMarks ?? "1"}
-                        </span>
+                        </StatusBadge>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20">
+                        <StatusBadge variant="danger">
                           -{Math.abs(Number(b.negative_marks ?? b.negativeMarks ?? 0))}
-                        </span>
+                        </StatusBadge>
                       </td>
                     </tr>
                   ))}
@@ -81,7 +82,7 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center px-4">
-            <div className={cn(accentPanel, "w-16 h-16 rounded-2xl flex items-center justify-center mb-4")}>
+            <div className={cn(accentPanel, "w-16 h-16 rounded-xl flex items-center justify-center mb-4")}>
               <FaQuestionCircle className="text-indigo-500 dark:text-indigo-400 text-2xl" />
             </div>
             <p className="text-muted-foreground text-sm italic">No question blocks configured</p>
@@ -106,12 +107,12 @@ export default function AssessmentBlocksDisplay({ blocks = [] }) {
               className="bg-input rounded-xl border border-border p-4 sm:p-5 hover:border-indigo-500/30 transition-all duration-200"
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                <StatusBadge variant="info">
                   Block {i + 1}
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border capitalize">
+                </StatusBadge>
+                <StatusBadge variant="neutral" className="capitalize">
                   {b.question_type?.replace(/_/g, " ") || b.questionType?.replace(/_/g, " ")}
-                </span>
+                </StatusBadge>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>

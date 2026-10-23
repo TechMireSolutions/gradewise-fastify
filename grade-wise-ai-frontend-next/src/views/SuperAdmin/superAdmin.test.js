@@ -6,6 +6,7 @@ import {
   providerLabels,
   PROVIDER_META,
   detectProvider,
+  providerTheme,
 } from "./constants/superAdminConstants.js";
 import { formatRole, getRoleBadgeColor, getRoleAvatarBg } from "../../utils/roleDisplay.js";
 
@@ -107,5 +108,27 @@ describe("Super Admin Analytics Calculation Edge Cases", () => {
     assert.equal(calcCompletion(0, 0), 0);
     assert.equal(calcCompletion(3, 4), 75);
     assert.equal(calcCompletion(12, 12), 100);
+  });
+});
+
+describe("Super Admin Provider Theme Integration", () => {
+  it("defines providerTheme for all 6 providers", () => {
+    for (const provider of ALL_PROVIDERS) {
+      assert.ok(providerTheme[provider], `Missing providerTheme for ${provider}`);
+      assert.ok(providerTheme[provider].dot);
+      assert.ok(providerTheme[provider].badge);
+      assert.ok(providerTheme[provider].activeSidebar);
+      assert.ok(providerTheme[provider].panelGradient);
+      assert.ok(providerTheme[provider].accentBg);
+    }
+  });
+
+  it("binds provider badges to centralized statusTone palette", () => {
+    assert.match(providerTheme.gemini.badge, /indigo/);
+    assert.match(providerTheme.groq.badge, /amber/);
+    assert.match(providerTheme.openai.badge, /emerald/);
+    assert.match(providerTheme.claude.badge, /purple/);
+    assert.match(providerTheme.mistral.badge, /red/);
+    assert.match(providerTheme.deepseek.badge, /sky/);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { chip, examBar } from "@/lib/ui.js";
+import { chip, examBar, statusTone, shape } from "@/lib/ui.js";
 import useStudentAssessmentStore from "@/features/student-assessment/store.js";
 import { getExamTranslation } from "@/utils/translations.js";
 
@@ -27,14 +27,14 @@ export default function ExamHeader({
           <span
             role="timer"
             aria-live="polite"
-            className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-3 py-1.5 rounded-full inline-flex items-center"
+            className={cn("px-3 py-1.5 inline-flex items-center font-mono tabular-nums text-xs font-semibold", statusTone.warning, shape.pill)}
           >
             {qTimeLabel}: {formatTime(questionTimeLeft)}
           </span>
           <span
             role="timer"
             aria-live="polite"
-            className={cn(chip, "rounded-full px-3 py-1.5")}
+            className={cn(chip, "rounded-full px-3 py-1.5 font-mono tabular-nums")}
           >
             {totalLabel}: {formatTime(timeRemaining)}
           </span>

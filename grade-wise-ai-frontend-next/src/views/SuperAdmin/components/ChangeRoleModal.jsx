@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/cn.js";
-import { focusRing } from "@/lib/ui.js";
+import { focusRing, statusTone } from "@/lib/ui.js";
 import {
   FaTimes,
   FaShieldAlt,
@@ -21,7 +21,7 @@ const ROLES = [
     name: "Student",
     icon: FaUserGraduate,
     desc: "Can take assigned timed exams, review XAI justifications, and access personalized study guides.",
-    badgeClass: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
+    badgeClass: statusTone.success,
     activeClass: "border-emerald-500 bg-emerald-500/10 shadow-emerald-500/10",
   },
   {
@@ -29,7 +29,7 @@ const ROLES = [
     name: "Instructor",
     icon: FaChalkboardTeacher,
     desc: "Can author assessments, upload and vectorize course resources, enroll students, and view performance analytics.",
-    badgeClass: "bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/20",
+    badgeClass: statusTone.info,
     activeClass: "border-indigo-500 bg-indigo-500/10 shadow-indigo-500/10",
   },
   {
@@ -37,7 +37,7 @@ const ROLES = [
     name: "Admin",
     icon: FaCrown,
     desc: "Can manage platform users, promote/demote roles, inspect system KPIs, and audit assessments.",
-    badgeClass: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/20",
+    badgeClass: statusTone.danger,
     activeClass: "border-red-500 bg-red-500/10 shadow-red-500/10",
   },
 ];
@@ -97,7 +97,7 @@ export default function ChangeRoleModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="change-role-modal-title"
-        className="bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto"
+        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto overscroll-contain transition-all duration-300 relative my-auto"
       >
         {/* Header */}
         <div className="sticky top-0 bg-input/95 backdrop-blur-md px-6 py-5 border-b border-border flex items-center justify-between gap-4 z-10">
@@ -132,7 +132,7 @@ export default function ChangeRoleModal({
         {/* Modal Form Content */}
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           {/* User Preview Card */}
-          <div className="flex items-center gap-4 p-4 rounded-2xl bg-input border border-border">
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-input border border-border">
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0 bg-gradient-to-br ${getRoleAvatarBg(
                 user.role

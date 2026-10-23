@@ -1,18 +1,13 @@
+import { statusTone } from "../lib/ui.js";
+
 export function getRoleBadgeColor(role) {
   const colors = {
-    super_admin:
-      "bg-purple-500/15 text-purple-700 border-purple-500/25 dark:text-purple-300 dark:border-purple-500/30",
-    admin:
-      "bg-red-500/15 text-red-700 border-red-500/25 dark:text-red-300 dark:border-red-500/30",
-    instructor:
-      "bg-blue-500/15 text-blue-700 border-blue-500/25 dark:text-blue-300 dark:border-blue-500/30",
-    student:
-      "bg-emerald-500/15 text-emerald-700 border-emerald-500/25 dark:text-emerald-300 dark:border-emerald-500/30",
+    super_admin: statusTone.purple,
+    admin: statusTone.danger,
+    instructor: statusTone.info,
+    student: statusTone.success,
   };
-  return (
-    colors[role] ||
-    "bg-muted/30 text-muted-foreground border-border"
-  );
+  return colors[role] || statusTone.neutral;
 }
 
 export function getRoleAvatarBg(role) {

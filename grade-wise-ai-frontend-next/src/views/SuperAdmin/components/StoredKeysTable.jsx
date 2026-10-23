@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/cn.js";
-import { card as uiCard, tableHead, tableRowHover, focusRing } from "@/lib/ui.js";
+import { card as uiCard, tableHead, tableRowHover, focusRing, btn } from "@/lib/ui.js";
 import { FaKey, FaFlask, FaTrash, FaPlus, FaWrench, FaCopy, FaCheck } from "react-icons/fa";
 import { Button, EmptyState } from "@/components/ui/index.js";
 import TestResultBadge from "./TestResultBadge.jsx";
@@ -123,7 +123,7 @@ export default function StoredKeysTable({
             type="button"
             onClick={() => setFilterProvider("all")}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 min-h-[36px] cursor-pointer",
+              "px-3.5 py-2 rounded-xl text-xs font-medium transition-all duration-150 min-h-[44px] cursor-pointer",
               filterProvider === "all"
                 ? "bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 font-semibold"
                 : "bg-btn-secondary text-muted-foreground hover:text-foreground",
@@ -145,7 +145,7 @@ export default function StoredKeysTable({
                   onSelectProvider?.(p);
                 }}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 min-h-[36px] cursor-pointer",
+                  "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium transition-all duration-150 min-h-[44px] cursor-pointer",
                   isSelected
                     ? `${t.badge} shadow-sm font-semibold`
                     : "bg-btn-secondary text-muted-foreground hover:text-foreground border border-transparent",
@@ -302,8 +302,8 @@ export default function StoredKeysTable({
                           disabled={delLoading}
                           aria-label={`Delete ${k.providerLabel} key ${k.index + 1}`}
                           className={cn(
-                            "inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer",
-                            focusRing
+                            btn.danger,
+                            "text-xs px-3 py-2 min-h-[44px]"
                           )}
                         >
                           {delLoading ? (
