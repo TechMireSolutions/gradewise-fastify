@@ -30,6 +30,7 @@ export default function SuperAdminSystem() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showDiagnosticsModal, setShowDiagnosticsModal] = useState(false);
+  const [autoProbe, setAutoProbe] = useState(false);
 
   const fetchHealth = useCallback(async () => {
     try {
@@ -57,6 +58,15 @@ export default function SuperAdminSystem() {
   useEffect(() => {
     fetchHealth();
   }, [fetchHealth]);
+
+  // Periodic Auto-Probe (30s)
+  useEffect(() => {
+    if (!autoProbe) return;
+    const interval = setInterval(() => {
+      fetchHealth();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [autoProbe, fetchHealth]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -156,22 +166,41 @@ export default function SuperAdminSystem() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <Button
+                variant={autoProbe ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => setAutoProbe((v) => !v)}
+                aria-pressed={autoProbe}
+                className="gap-2 min-h-[44px]"
+                title="Automatically refresh health status every 30 seconds"
+              >
+                <span
+                  className={cn(
+                    "w-2 h-2 rounded-full",
+                    autoProbe ? "bg-white animate-ping" : "bg-muted-foreground/40"
+                  )}
+                  aria-hidden="true"
+                />
+                {autoProbe ? "Auto-Probe ON (30s)" : "Auto-Probe"}
+              </Button>
+
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="gap-2"
+                className="gap-2 min-h-[44px]"
               >
                 <FaSyncAlt className={cn("w-3.5 h-3.5", refreshing && "animate-spin")} />
                 {refreshing ? "Probing..." : "Refresh Status"}
               </Button>
+
               <Button
                 variant="primary"
                 size="sm"
                 onClick={() => setShowDiagnosticsModal(true)}
-                className="gap-2"
+                className="gap-2 min-h-[44px]"
               >
                 <FaTerminal className="w-3.5 h-3.5" />
                 Raw Diagnostics
@@ -245,7 +274,7 @@ export default function SuperAdminSystem() {
                   key={svc.id}
                   className={cn(card, "@container p-5 flex flex-col justify-between relative overflow-hidden")}
                 >
-                  <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex flex-col @xs:flex-row @xs:items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">
                       <span className="p-2.5 rounded-xl bg-input border border-border text-foreground shrink-0">
                         <Icon className="w-5 h-5" />

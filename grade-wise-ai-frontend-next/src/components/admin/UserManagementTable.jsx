@@ -211,24 +211,28 @@ export default function UserManagementTable({
         <table className="min-w-full">
           <thead>
             <tr className={tableHead}>
-              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>User</th>
-              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Role</th>
-              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Status</th>
-              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Joined</th>
-              <th className={cn("px-6", "py-3.5", "text-start", "text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-wider", "border-b", "border-border")}>Actions</th>
+              <th scope="col" className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">User</th>
+              <th scope="col" className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Role</th>
+              <th scope="col" className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Status</th>
+              <th scope="col" className="px-6 py-3.5 text-start text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Joined</th>
+              <th scope="col" className="px-6 py-3.5 text-end text-xs font-semibold text-muted-foreground uppercase tracking-wider border-b border-border">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {users.map((userData) => (
-              <tr key={userData.id} className="hover:bg-indigo-500/5 transition-colors duration-150">
+              <tr
+                key={userData.id}
+                className="hover:bg-indigo-500/5 transition-colors duration-150"
+                style={{ contentVisibility: "auto", containIntrinsicSize: "auto 64px" }}
+              >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg bg-gradient-to-br ${getRoleAvatarBg(userData.role)}`}>
                       {userData.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <div className={cn("text-sm", "font-semibold", "text-secondary-foreground")}>{userData.name}</div>
-                      <div className={cn("text-xs", "text-muted-foreground")}>{userData.email}</div>
+                      <div className="text-sm font-semibold text-secondary-foreground">{userData.name}</div>
+                      <div className="text-xs text-muted-foreground">{userData.email}</div>
                     </div>
                   </div>
                 </td>
@@ -243,13 +247,13 @@ export default function UserManagementTable({
                     {userData.verified ? "Verified" : "Pending"}
                   </StatusBadge>
                 </td>
-                <td className={cn("px-6", "py-4", "text-sm", "text-muted-foreground")}>
+                <td className="px-6 py-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <FaCalendarAlt className={"text-muted-foreground"} />
+                    <FaCalendarAlt className="text-muted-foreground" />
                     {formatDate(userData.createdAt || userData.created_at)}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 text-end">
                   <RoleActions
                     userData={userData}
                     currentUserId={currentUserId}
@@ -268,20 +272,28 @@ export default function UserManagementTable({
 
       <div className="lg:hidden divide-y divide-border">
         {users.map((userData) => (
-          <div key={userData.id} className="p-4 sm:p-5 hover:bg-indigo-500/5 transition-colors duration-150">
+          <div key={userData.id} className="p-4 sm:p-5 hover:bg-surface-elevated/40 transition-colors duration-150">
             <div className="flex items-start gap-3 mb-4">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0 bg-gradient-to-br ${getRoleAvatarBg(userData.role)}`}>
                 {userData.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className={cn("font-semibold", "text-secondary-foreground")}>{userData.name}</h3>
-                <p className={cn("text-xs", "text-muted-foreground", "truncate", "mb-2")}>{userData.email}</p>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${getRoleBadgeColor(userData.role)}`}>
-                  {formatRole(userData.role)}
-                </span>
-                <div className={cn("flex", "items-center", "gap-2", "text-xs", "text-muted-foreground", "mt-2")}>
-                  <FaCalendarAlt />
-                  Joined: {formatDate(userData.createdAt || userData.created_at)}
+                <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                  <h3 className="font-semibold text-foreground text-sm truncate">{userData.name}</h3>
+                  <StatusBadge variant={userData.verified ? "success" : "warning"} size="sm">
+                    {userData.verified ? <FaCheckCircle /> : <FaClock />}
+                    {userData.verified ? "Verified" : "Pending"}
+                  </StatusBadge>
+                </div>
+                <p className="text-xs text-muted-foreground truncate mb-2">{userData.email}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getRoleBadgeColor(userData.role)}`}>
+                    {formatRole(userData.role)}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <FaCalendarAlt className="text-muted-foreground w-3 h-3" />
+                    <span>Joined {formatDate(userData.createdAt || userData.created_at)}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -301,29 +313,54 @@ export default function UserManagementTable({
   );
 }
 
-export function UserStatsGrid({ stats, totalUsers }) {
+export function UserStatsGrid({ stats, totalUsers, activeRole = "", onSelectRole }) {
   const cards = [
-    { value: totalUsers, label: "Total Users", icon: FaUsers, tone: "indigo" },
+    { value: totalUsers, label: "Total Users", icon: FaUsers, tone: "indigo", role: "" },
     ...(stats.super_admin !== undefined && stats.super_admin > 0
-      ? [{ value: stats.super_admin, label: "Super Admins", icon: FaCrown, tone: "purple" }]
+      ? [{ value: stats.super_admin, label: "Super Admins", icon: FaCrown, tone: "purple", role: "super_admin" }]
       : []),
-    { value: stats.admin, label: "Admins", icon: FaCrown, tone: "rose" },
-    { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, tone: "purple" },
-    { value: stats.student, label: "Students", icon: FaUserGraduate, tone: "emerald" },
+    { value: stats.admin, label: "Admins", icon: FaCrown, tone: "rose", role: "admin" },
+    { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, tone: "purple", role: "instructor" },
+    { value: stats.student, label: "Students", icon: FaUserGraduate, tone: "emerald", role: "student" },
     { value: stats.verified, label: "Verified", icon: FaCheckCircle, tone: "sky" },
   ];
 
   return (
     <DashboardStatGrid columns={cards.length > 5 ? 6 : 5}>
-      {cards.map(({ value, label, icon, tone }) => (
-        <DashboardStatCard
-          key={label}
-          label={label}
-          value={value}
-          icon={icon}
-          tone={tone}
-        />
-      ))}
+      {cards.map(({ value, label, icon, tone, role }) => {
+        const isClickable = Boolean(onSelectRole && role !== undefined);
+        const isActive = isClickable && activeRole === role;
+
+        const cardContent = (
+          <DashboardStatCard
+            label={label}
+            value={value}
+            icon={icon}
+            tone={tone}
+            className={cn(
+              isClickable && "cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all",
+              isActive && "ring-2 ring-indigo-500 ring-offset-2 ring-offset-card shadow-lg"
+            )}
+          />
+        );
+
+        if (!isClickable) {
+          return <div key={label}>{cardContent}</div>;
+        }
+
+        return (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onSelectRole(role)}
+            className={cn("text-start w-full rounded-xl cursor-pointer", focusRing)}
+            aria-pressed={isActive}
+            title={role === "" ? "Show all users" : `Filter by ${label}`}
+          >
+            {cardContent}
+          </button>
+        );
+      })}
     </DashboardStatGrid>
   );
 }

@@ -141,9 +141,8 @@ export default function AddNewLlmModal({
 
       if (res.success && Array.isArray(res.models) && res.models.length > 0) {
         setFetchedModels(res.models);
-        // Automatically select recommended / default model if current selection isn't present
-        const match = res.models.find((m) => m.id === selectedModel);
-        if (!match) {
+        // If no model is selected yet, choose recommended or first model
+        if (!selectedModel) {
           const defaultMod = res.models.find((m) => m.isDefault);
           setSelectedModel(defaultMod ? defaultMod.id : res.models[0].id);
         }
@@ -890,6 +889,11 @@ export default function AddNewLlmModal({
                           {m.name && m.name !== m.id ? `${m.name} (${m.id})` : m.id}
                         </option>
                       ))}
+                      {selectedModel && !fetchedModels.some((m) => m.id === selectedModel) && (
+                        <option value={selectedModel}>
+                          {selectedModel} (Active Configured Model)
+                        </option>
+                      )}
                     </Select>
 
                     <p className="text-xs text-muted-foreground">

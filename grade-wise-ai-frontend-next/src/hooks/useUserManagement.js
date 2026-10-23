@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import useAuthStore from "@/features/auth/store.js";
 import useAdminStore from "@/features/admin/store.js";
 import useModal from "./useModal.js";
@@ -25,6 +25,9 @@ export default function useUserManagement(options = {}) {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
+
+  const queryRef = useRef({ searchQuery: "", roleFilter: "" });
+  queryRef.current = { searchQuery, roleFilter };
 
   // Popup modal state
   const [activeModal, setActiveModal] = useState(null); // 'create' | 'change-role' | 'delete' | 'api-config' | null
@@ -63,8 +66,8 @@ export default function useUserManagement(options = {}) {
     try {
       setLoading(true);
       const queryParams = {
-        search: (params.search !== undefined ? params.search : searchQuery) || undefined,
-        role: (params.role !== undefined ? params.role : roleFilter) || undefined,
+        search: (params.search !== undefined ? params.search : queryRef.current.searchQuery) || undefined,
+        role: (params.role !== undefined ? params.role : queryRef.current.roleFilter) || undefined,
         limit: params.limit !== undefined ? params.limit : undefined,
         page: params.page !== undefined ? params.page : undefined,
       };
@@ -82,7 +85,7 @@ export default function useUserManagement(options = {}) {
     } finally {
       setLoading(false);
     }
-  }, [getAdminUsers, getAdminOverview, searchQuery, roleFilter, showModal]);
+  }, [getAdminUsers, getAdminOverview, showModal]);
 
   const handleRoleChange = async (userId, newRole, userName, userEmail) => {
     try {

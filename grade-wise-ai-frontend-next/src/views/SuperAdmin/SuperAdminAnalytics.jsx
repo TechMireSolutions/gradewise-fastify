@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/cn.js";
-import { card, page, pageInner } from "@/lib/ui.js";
+import { card, page, pageInner, focusRing } from "@/lib/ui.js";
 import {
   FaChartBar,
   FaClipboardList,
@@ -13,6 +14,7 @@ import {
   FaSync,
   FaAward,
   FaUsers,
+  FaArrowRight,
 } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
@@ -160,7 +162,7 @@ export default function SuperAdminAnalytics() {
                 <div className="w-full h-3 rounded-full bg-input border border-border overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(4, executionRate))}%` }}
+                    style={{ width: `${assessments.total > 0 && executionRate > 0 ? Math.min(100, Math.max(4, executionRate)) : 0}%` }}
                   />
                 </div>
               </div>
@@ -205,7 +207,7 @@ export default function SuperAdminAnalytics() {
                 <div className="w-full h-3 rounded-full bg-input border border-border overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
-                    style={{ width: `${Math.min(100, Math.max(4, completionRate))}%` }}
+                    style={{ width: `${attempts.total > 0 && completionRate > 0 ? Math.min(100, Math.max(4, completionRate)) : 0}%` }}
                   />
                 </div>
               </div>
@@ -244,7 +246,7 @@ export default function SuperAdminAnalytics() {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="flex items-center gap-1.5 text-foreground">
-                    <FaGraduationCap className="text-emerald-500" /> Students
+                    <FaGraduationCap className="text-emerald-600 dark:text-emerald-400" /> Students
                   </span>
                   <span className="text-muted-foreground">{users.students} ({users.total > 0 ? Math.round((users.students / users.total) * 100) : 0}%)</span>
                 </div>
@@ -260,7 +262,7 @@ export default function SuperAdminAnalytics() {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="flex items-center gap-1.5 text-foreground">
-                    <FaChalkboardTeacher className="text-indigo-500" /> Instructors
+                    <FaChalkboardTeacher className="text-indigo-600 dark:text-indigo-400" /> Instructors
                   </span>
                   <span className="text-muted-foreground">{users.instructors} ({users.total > 0 ? Math.round((users.instructors / users.total) * 100) : 0}%)</span>
                 </div>
@@ -276,7 +278,7 @@ export default function SuperAdminAnalytics() {
               <div>
                 <div className="flex justify-between text-xs font-medium mb-1">
                   <span className="flex items-center gap-1.5 text-foreground">
-                    <FaCrown className="text-rose-500" /> Administrators
+                    <FaCrown className="text-rose-600 dark:text-rose-400" /> Administrators
                   </span>
                   <span className="text-muted-foreground">{users.admins} ({users.total > 0 ? Math.round((users.admins / users.total) * 100) : 0}%)</span>
                 </div>
@@ -293,7 +295,7 @@ export default function SuperAdminAnalytics() {
                 <div>
                   <div className="flex justify-between text-xs font-medium mb-1">
                     <span className="flex items-center gap-1.5 text-foreground">
-                      <FaCrown className="text-purple-500" /> Super Administrators
+                      <FaCrown className="text-purple-600 dark:text-purple-400" /> Super Administrators
                     </span>
                     <span className="text-muted-foreground">
                       {superAdminCount} (
@@ -345,6 +347,49 @@ export default function SuperAdminAnalytics() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Quick Portal Jump Banners */}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            href="/super-admin/users"
+            className={cn(
+              card,
+              "p-5 flex items-center justify-between hover:border-indigo-500/40 hover:bg-surface-elevated transition-all group",
+              focusRing
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 rounded-xl bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
+                <FaUsers className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">User Directory</h3>
+                <p className="text-xs text-muted-foreground">Manage accounts, invites & role privileges</p>
+              </div>
+            </div>
+            <FaArrowRight className="w-4 h-4 text-indigo-500 group-hover:translate-x-1 transition-transform" />
+          </Link>
+
+          <Link
+            href="/super-admin/api-config"
+            className={cn(
+              card,
+              "p-5 flex items-center justify-between hover:border-violet-500/40 hover:bg-surface-elevated transition-all group",
+              focusRing
+            )}
+          >
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 rounded-xl bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20">
+                <FaCrown className="w-4 h-4" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">AI Key Vault</h3>
+                <p className="text-xs text-muted-foreground">Inspect multi-provider LLM rotation pools</p>
+              </div>
+            </div>
+            <FaArrowRight className="w-4 h-4 text-violet-500 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </MainLandmark>
     </div>

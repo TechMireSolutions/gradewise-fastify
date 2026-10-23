@@ -32,7 +32,7 @@ import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 import AddUserModal from "./components/AddUserModal.jsx";
 import ChangeRoleModal from "./components/ChangeRoleModal.jsx";
 import DeleteUserModal from "./components/DeleteUserModal.jsx";
-import ProviderSettingsModal from "./components/ProviderSettingsModal.jsx";
+import AddNewLlmModal from "./components/AddNewLlmModal.jsx";
 
 export default function SuperAdminDashboard() {
   const {
@@ -93,10 +93,10 @@ export default function SuperAdminDashboard() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="p-1.5 rounded-lg bg-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+                  <span className="p-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/20">
                     <FaCrown className="w-3.5 h-3.5" />
                   </span>
-                  <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 uppercase tracking-wider">
+                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
                     Super Administrator Authority
                   </span>
                 </div>
@@ -152,11 +152,11 @@ export default function SuperAdminDashboard() {
                 <Link
                   href="/super-admin/system"
                   className={cn(
-                    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-input hover:bg-btn-secondary text-secondary-foreground hover:text-foreground border border-border transition-all active:scale-95",
+                    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-input hover:bg-btn-secondary text-secondary-foreground hover:text-foreground border border-border transition-all active:scale-95 min-h-[44px]",
                     focusRing
                   )}
                 >
-                  <FaServer className="w-3 h-3 text-indigo-500" />
+                  <FaServer className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                   System Health
                 </Link>
               </div>
@@ -178,7 +178,8 @@ export default function SuperAdminDashboard() {
               href="/super-admin/users"
               className={cn(
                 card,
-                "p-5 hover:border-indigo-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+                "@container p-5 hover:border-indigo-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
               )}
             >
               <div>
@@ -204,7 +205,8 @@ export default function SuperAdminDashboard() {
               href="/super-admin/api-config"
               className={cn(
                 card,
-                "p-5 hover:border-violet-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+                "@container p-5 hover:border-violet-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
               )}
             >
               <div>
@@ -230,7 +232,8 @@ export default function SuperAdminDashboard() {
               href="/super-admin/analytics"
               className={cn(
                 card,
-                "p-5 hover:border-emerald-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+                "@container p-5 hover:border-emerald-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
               )}
             >
               <div>
@@ -256,7 +259,8 @@ export default function SuperAdminDashboard() {
               href="/super-admin/system"
               className={cn(
                 card,
-                "p-5 hover:border-amber-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between"
+                "@container p-5 hover:border-amber-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
               )}
             >
               <div>
@@ -303,10 +307,15 @@ export default function SuperAdminDashboard() {
                 <span className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shrink-0">
                   <FaUsers className="w-6 h-6" />
                 </span>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">
-                    User Directory & Role Governance
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      User Directory & Role Governance
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                      RBAC Active
+                    </span>
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     Search and filter users across Super Admin, Admin, Instructor, and Student tiers. Invite new accounts and change user roles via modal dialogs.
                   </p>
@@ -336,10 +345,15 @@ export default function SuperAdminDashboard() {
                 <span className="p-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shrink-0">
                   <FaKey className="w-6 h-6" />
                 </span>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">
-                    AI Engine & Key Management Vault
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      AI Engine & Key Management Vault
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20">
+                      AES-256 Vault
+                    </span>
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     Manage multi-provider API keys for Gemini, OpenAI, Claude, Groq, Mistral, and DeepSeek. Configure model tiers for PDF parsing and text generation.
                   </p>
@@ -369,10 +383,15 @@ export default function SuperAdminDashboard() {
                 <span className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shrink-0">
                   <FaChartBar className="w-6 h-6" />
                 </span>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">
-                    Platform & Assessment Analytics
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      Platform & Assessment Analytics
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
+                      Telemetry Live
+                    </span>
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     System-wide assessment completion metrics, student attempt score averages, role distributions, and verification audits.
                   </p>
@@ -402,10 +421,22 @@ export default function SuperAdminDashboard() {
                 <span className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shrink-0">
                   <FaServer className="w-6 h-6" />
                 </span>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">
-                    Infrastructure & System Diagnostics
-                  </h3>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      Infrastructure & System Diagnostics
+                    </h3>
+                    <span
+                      className={cn(
+                        "px-2 py-0.5 rounded-full text-[10px] font-semibold border",
+                        healthStatus === "ok"
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/20"
+                          : "bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                      )}
+                    >
+                      {healthStatus === "ok" ? "All Probes Passing" : "Subsystems Degraded"}
+                    </span>
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                     Inspect PostgreSQL database ping, Redis caching state, BullMQ background worker queue, and export raw diagnostic JSON dumps.
                   </p>
@@ -511,36 +542,31 @@ export default function SuperAdminDashboard() {
       />
 
       {/* 4. Quick AI Key Configuration / Add New LLM Modal */}
-      <ProviderSettingsModal
+      <AddNewLlmModal
         isOpen={apiConfig.isSettingsModalOpen}
         onClose={apiConfig.closeSettingsModal}
-        purpose={apiConfig.purpose}
-        provider={apiConfig.provider}
+        initialPurpose={apiConfig.purpose}
+        initialProvider={apiConfig.provider}
         initialStep={apiConfig.modalInitialStep}
-        card={apiConfig.card}
-        pStyle={apiConfig.pStyle}
         aiState={apiConfig.aiState}
         configLoading={apiConfig.configLoading}
-        inlineTestStatus={apiConfig.inlineTestStatus}
-        onChangeProvider={(p) =>
-          apiConfig.setActiveProvider((prev) => ({ ...prev, [apiConfig.purpose]: p }))
-        }
-        onUpdateCard={apiConfig.updateActiveCard}
-        onTestInlineKey={apiConfig.handleTestInlineKey}
-        onSaveCard={apiConfig.handleSaveCard}
         onSaveLlm={apiConfig.handleSaveLlm}
+        onTestInlineKey={apiConfig.handleTestInlineKey}
         totalPdfKeys={apiConfig.totalPdfKeys}
         totalTextKeys={apiConfig.totalTextKeys}
       />
 
-      {/* 5. General Notification Alert Modal */}
+      {/* 5. General Notification Alert Modal (Unifies User Management and AI Config alerts) */}
       <Modal
-        isOpen={modal.isOpen}
-        onClose={closeModal}
-        type={modal.type}
-        title={modal.title}
+        isOpen={modal.isOpen || apiConfig.modal.isOpen}
+        onClose={() => {
+          if (modal.isOpen) closeModal();
+          if (apiConfig.modal.isOpen) apiConfig.closeModal();
+        }}
+        type={modal.isOpen ? modal.type : apiConfig.modal.type}
+        title={modal.isOpen ? modal.title : apiConfig.modal.title}
       >
-        {modal.message}
+        {modal.isOpen ? modal.message : apiConfig.modal.message}
       </Modal>
     </div>
   );

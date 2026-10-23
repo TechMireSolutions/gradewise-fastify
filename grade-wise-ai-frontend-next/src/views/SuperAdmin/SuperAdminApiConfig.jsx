@@ -9,7 +9,7 @@ import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import ApiConfigSidebar from "./components/ApiConfigSidebar.jsx";
 import StoredKeysTable from "./components/StoredKeysTable.jsx";
-import ProviderSettingsModal from "./components/ProviderSettingsModal.jsx";
+import AddNewLlmModal from "./components/AddNewLlmModal.jsx";
 import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 
 export default function SuperAdminApiConfig() {
@@ -19,15 +19,12 @@ export default function SuperAdminApiConfig() {
     setActiveProvider,
     purpose,
     provider,
-    card,
-    pStyle,
     totalPdfKeys,
     totalTextKeys,
     totalKeys,
     configuredCount,
     configLoading,
     actionLoading,
-    inlineTestStatus,
     pendingKeyDelete,
     isSettingsModalOpen,
     modalInitialStep,
@@ -35,8 +32,6 @@ export default function SuperAdminApiConfig() {
     closeSettingsModal,
     modal,
     closeModal,
-    updateActiveCard,
-    handleSaveCard,
     handleSaveLlm,
     handleTestStoredKey,
     handleDeleteStoredKey,
@@ -99,6 +94,7 @@ export default function SuperAdminApiConfig() {
             totalPdfKeys={totalPdfKeys}
             totalTextKeys={totalTextKeys}
             onSelectPurpose={setConfigSubTab}
+            onSelectProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
             onOpenSettings={openSettingsModal}
             aiState={aiState}
           />
@@ -120,22 +116,16 @@ export default function SuperAdminApiConfig() {
       </MainLandmark>
 
       {/* Add New LLM Modal */}
-      <ProviderSettingsModal
+      <AddNewLlmModal
         isOpen={isSettingsModalOpen}
         onClose={closeSettingsModal}
-        purpose={purpose}
-        provider={provider}
+        initialPurpose={purpose}
+        initialProvider={provider}
         initialStep={modalInitialStep}
-        card={card}
-        pStyle={pStyle}
         aiState={aiState}
         configLoading={configLoading}
-        inlineTestStatus={inlineTestStatus}
-        onChangeProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
-        onUpdateCard={updateActiveCard}
-        onTestInlineKey={handleTestInlineKey}
-        onSaveCard={handleSaveCard}
         onSaveLlm={handleSaveLlm}
+        onTestInlineKey={handleTestInlineKey}
         totalPdfKeys={totalPdfKeys}
         totalTextKeys={totalTextKeys}
       />

@@ -12,6 +12,7 @@ export default function ApiConfigSidebar({
   totalPdfKeys,
   totalTextKeys,
   onSelectPurpose,
+  onSelectProvider,
   onOpenSettings,
   aiState,
 }) {
@@ -81,22 +82,24 @@ export default function ApiConfigSidebar({
                 const meta = PROVIDER_META[p];
                 const isConfigured = count > 0;
                 const isActive = activeProvider === p;
+                const activeModel = aiState?.[purpose]?.[p]?.model || meta?.defaultModel;
 
                 return (
-                  <button
+                  <div
                     key={p}
-                    type="button"
-                    onClick={() => onOpenSettings?.(p, isConfigured ? 4 : 1, purpose)}
                     className={cn(
-                      "w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition-all duration-150 group text-start cursor-pointer",
+                      "w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs transition-all duration-150 group text-start",
                       isActive
                         ? "bg-btn-secondary border border-border/80 text-foreground font-semibold"
-                        : "hover:bg-btn-secondary/60 text-muted-foreground hover:text-foreground border border-transparent",
-                      focusRing
+                        : "hover:bg-btn-secondary/60 text-muted-foreground hover:text-foreground border border-transparent"
                     )}
-                    title={`Configure ${meta?.name || p}`}
                   >
-                    <span className="flex items-center gap-2 truncate min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => onSelectProvider?.(p)}
+                      className={cn("flex items-center gap-2 truncate min-w-0 flex-1 cursor-pointer text-start", focusRing)}
+                      title={`Select ${meta?.name || p} (Active model: ${activeModel})`}
+                    >
                       <span
                         className={cn(
                           "w-2 h-2 rounded-full flex-shrink-0 transition-all",
@@ -108,18 +111,31 @@ export default function ApiConfigSidebar({
                       <span className="truncate font-medium group-hover:text-foreground">
                         {meta?.name || p}
                       </span>
-                    </span>
-                    <span
-                      className={cn(
-                        "text-[10px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0 ms-1",
-                        isConfigured
-                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/20"
-                          : "text-muted-foreground/60"
+                    </button>
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0 ms-1">
+                      {isConfigured && activeModel && (
+                        <span className="hidden xl:inline text-[10px] text-muted-foreground font-mono truncate max-w-[70px]">
+                          {activeModel}
+                        </span>
                       )}
-                    >
-                      {isConfigured ? `${count} key${count !== 1 ? "s" : ""}` : "—"}
-                    </span>
-                  </button>
+                      <button
+                        type="button"
+                        onClick={() => onOpenSettings?.(p, isConfigured ? 4 : 1, purpose)}
+                        aria-label={`Configure ${meta?.name || p}`}
+                        className={cn(
+                          "text-[10px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0 hover:scale-105 transition-all cursor-pointer",
+                          isConfigured
+                            ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-semibold border border-emerald-500/20"
+                            : "text-muted-foreground/60 hover:text-foreground hover:bg-input",
+                          focusRing
+                        )}
+                        title={isConfigured ? `${count} active key(s) - Click to configure` : "Click to add key"}
+                      >
+                        {isConfigured ? `${count} key${count !== 1 ? "s" : ""}` : "+ Add"}
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>

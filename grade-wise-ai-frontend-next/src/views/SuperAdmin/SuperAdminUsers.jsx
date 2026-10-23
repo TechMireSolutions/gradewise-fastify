@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { page, pageInner } from "@/lib/ui.js";
-import { FaUserPlus } from "react-icons/fa";
+import { FaUserPlus, FaFileCsv } from "react-icons/fa";
 import Modal from "@/components/ui/Modal.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
 import { Button } from "@/components/ui/index.js";
@@ -42,18 +42,54 @@ export default function SuperAdminUsers() {
     closeActiveModal,
   } = useUserManagement();
 
+  const isFirstMount = useRef(true);
+
+  // Initial fetch on mount
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
+  // Debounced search effect (300ms)
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      fetchUsers({ search: searchQuery, role: roleFilter || undefined });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, fetchUsers]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSearchChange = (term) => {
     setSearchQuery(term);
-    fetchUsers({ search: term });
   };
 
   const handleRoleFilterChange = (role) => {
     setRoleFilter(role);
-    fetchUsers({ role: role || undefined });
+    fetchUsers({ role: role || undefined, search: searchQuery || undefined });
+  };
+
+  const handleExportCsv = () => {
+    if (!users || users.length === 0) return;
+    const headers = ["ID", "Name", "Email", "Role", "Verified", "Created At"];
+    const rows = users.map((u) => [
+      u.id,
+      `"${(u.name || "").replace(/"/g, '""')}"`,
+      `"${(u.email || "").replace(/"/g, '""')}"`,
+      u.role,
+      u.verified ? "Yes" : "No",
+      u.createdAt || u.created_at || "",
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `gradewise_users_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading && users.length === 0) {
@@ -81,18 +117,35 @@ export default function SuperAdminUsers() {
               </p>
             </div>
 
-            <Button
-              variant="primary"
-              onClick={openCreateModal}
-              className="gap-2 self-start sm:self-auto"
-            >
-              <FaUserPlus className="w-3.5 h-3.5" />
-              Add New User
-            </Button>
+            <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
+              <Button
+                variant="secondary"
+                onClick={handleExportCsv}
+                className="gap-2"
+                title="Download user directory as CSV"
+              >
+                <FaFileCsv className="w-3.5 h-3.5 text-emerald-500" />
+                Export CSV
+              </Button>
+
+              <Button
+                variant="primary"
+                onClick={openCreateModal}
+                className="gap-2"
+              >
+                <FaUserPlus className="w-3.5 h-3.5" />
+                Add New User
+              </Button>
+            </div>
           </div>
         </div>
 
-        <UserStatsGrid stats={stats} totalUsers={totalUsers} />
+        <UserStatsGrid
+          stats={stats}
+          totalUsers={totalUsers}
+          activeRole={roleFilter}
+          onSelectRole={handleRoleFilterChange}
+        />
 
         <SuperAdminUsersSection
           users={users}

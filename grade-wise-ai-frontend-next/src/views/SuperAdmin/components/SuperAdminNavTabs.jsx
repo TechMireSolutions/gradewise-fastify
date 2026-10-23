@@ -47,7 +47,7 @@ export default function SuperAdminNavTabs({ className = "" }) {
     <nav
       aria-label="Super Admin Portal Navigation"
       className={cn(
-        "bg-input border border-border rounded-2xl p-1.5 shadow-sm mb-6 sm:mb-8 flex items-center gap-1.5 overflow-x-auto scrollbar-none",
+        "bg-input border border-border rounded-2xl p-1.5 shadow-sm mb-6 sm:mb-8 flex items-center gap-1.5 overflow-x-auto overscroll-contain [scrollbar-width:none] [-webkit-overflow-scrolling:touch]",
         className
       )}
     >
