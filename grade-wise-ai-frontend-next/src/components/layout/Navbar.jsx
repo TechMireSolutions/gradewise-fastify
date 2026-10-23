@@ -164,7 +164,9 @@ function Navbar() {
                   <div className="hidden xl:block">
                     <div className={cn("text-xs", "font-semibold", "text-foreground", "leading-tight")}>{user.name}</div>
                     <div className={cn("text-xs", "text-muted-foreground", "leading-tight")}>
-                      {ROLE_LABELS[user.role] ?? user.role}
+                      {user.name?.trim().toLowerCase() === (ROLE_LABELS[user.role] ?? user.role).toLowerCase()
+                        ? (user.email || (ROLE_LABELS[user.role] ?? user.role))
+                        : (ROLE_LABELS[user.role] ?? user.role)}
                     </div>
                   </div>
                 </div>

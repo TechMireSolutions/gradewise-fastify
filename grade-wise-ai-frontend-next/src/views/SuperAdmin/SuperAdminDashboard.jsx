@@ -28,7 +28,6 @@ import useAdminStore from "@/features/admin/store.js";
 import apiClient from "@/lib/apiClient.js";
 import UserManagementTable from "@/components/admin/UserManagementTable.jsx";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
-import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 import AddUserModal from "./components/AddUserModal.jsx";
 import ChangeRoleModal from "./components/ChangeRoleModal.jsx";
 import DeleteUserModal from "./components/DeleteUserModal.jsx";
@@ -85,8 +84,6 @@ export default function SuperAdminDashboard() {
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <SuperAdminNavTabs />
-
         {/* Executive Header Banner */}
         <div className="mb-8">
           <div className={cn(card, "@container p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-2xl")}>

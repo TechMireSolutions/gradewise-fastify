@@ -10,7 +10,6 @@ import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import ApiConfigSidebar from "./components/ApiConfigSidebar.jsx";
 import StoredKeysTable from "./components/StoredKeysTable.jsx";
 import AddNewLlmModal from "./components/AddNewLlmModal.jsx";
-import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 
 export default function SuperAdminApiConfig() {
   const {
@@ -44,8 +43,6 @@ export default function SuperAdminApiConfig() {
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <SuperAdminNavTabs />
-
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">

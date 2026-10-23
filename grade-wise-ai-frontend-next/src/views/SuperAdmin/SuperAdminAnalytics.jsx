@@ -22,7 +22,6 @@ import PageLoader from "@/components/ui/PageLoader.jsx";
 import { Button } from "@/components/ui/index.js";
 import { DashboardStatCard, DashboardStatGrid } from "@/components/dashboard/shared/index.js";
 import useAdminStore from "@/features/admin/store.js";
-import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 
 export default function SuperAdminAnalytics() {
   const { overview, getAdminOverview } = useAdminStore();
@@ -78,8 +77,6 @@ export default function SuperAdminAnalytics() {
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <SuperAdminNavTabs />
-
         {/* Header */}
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>

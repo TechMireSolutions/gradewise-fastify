@@ -10,7 +10,6 @@ import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
 import useUserManagement from "@/hooks/useUserManagement.js";
-import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 import SuperAdminUsersSection from "./components/SuperAdminUsersSection.jsx";
 import AddUserModal from "./components/AddUserModal.jsx";
 import ChangeRoleModal from "./components/ChangeRoleModal.jsx";
@@ -101,8 +100,6 @@ export default function SuperAdminUsers() {
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <SuperAdminNavTabs />
-
         <div className="mb-6 sm:mb-8">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
             Access Control & RBAC

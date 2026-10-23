@@ -22,7 +22,6 @@ import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
 import { Button, StatusBadge } from "@/components/ui/index.js";
 import apiClient from "@/lib/apiClient.js";
-import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 import SystemDiagnosticsModal from "./components/SystemDiagnosticsModal.jsx";
 
 export default function SuperAdminSystem() {
@@ -142,8 +141,6 @@ export default function SuperAdminSystem() {
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <SuperAdminNavTabs />
-
         {/* Page Header */}
         <div className="mb-6 sm:mb-8">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-1">
