@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/cn.js";
-import { accentPanel, card as uiCard, tableHead, tableRowHover } from "@/lib/ui.js";
+import { accentPanel, card as uiCard, tableHead, tableRowHover, focusRing } from "@/lib/ui.js";
 import { FaKey, FaFlask, FaTrash, FaWrench } from "react-icons/fa";
+import { Button } from "@/components/ui/index.js";
 import TestResultBadge from "./TestResultBadge.jsx";
 import {
   ALL_PROVIDERS,
@@ -70,29 +71,31 @@ export default function StoredKeysTable({
 
         {/* Settings Modal Button */}
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={() => onOpenSettings?.(activeProvider)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all duration-150 active:scale-95 cursor-pointer"
+            className="gap-2 text-xs sm:text-sm font-semibold shadow-md shadow-indigo-500/20"
           >
             <FaWrench className="w-3.5 h-3.5" />
             <span>{providerLabels[activeProvider]} Settings</span>
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Provider Filter Tabs (shown when multiple providers have keys) */}
       {providersWithKeys.length > 1 && (
         <div className="px-6 py-3 border-b border-border bg-surface-elevated/30 flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground font-semibold mr-1">Filter:</span>
+          <span className="text-xs text-muted-foreground font-semibold me-1">Filter:</span>
           <button
             type="button"
             onClick={() => setFilterProvider("all")}
             className={cn(
-              "px-3 py-1 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
+              "px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 min-h-[36px] cursor-pointer",
               filterProvider === "all"
-                ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                : "bg-btn-secondary text-muted-foreground hover:text-foreground"
+                ? "bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 font-semibold"
+                : "bg-btn-secondary text-muted-foreground hover:text-foreground",
+              focusRing
             )}
           >
             All ({allPurposeKeys.length})
@@ -110,10 +113,11 @@ export default function StoredKeysTable({
                   onSelectProvider?.(p);
                 }}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 min-h-[36px] cursor-pointer",
                   isSelected
                     ? `${t.badge} shadow-sm font-semibold`
-                    : "bg-btn-secondary text-muted-foreground hover:text-foreground border border-transparent"
+                    : "bg-btn-secondary text-muted-foreground hover:text-foreground border border-transparent",
+                  focusRing
                 )}
               >
                 <span className={cn("w-1.5 h-1.5 rounded-full", t.dot)} />
@@ -132,18 +136,19 @@ export default function StoredKeysTable({
             <FaKey className="w-6 h-6 text-indigo-500 dark:text-indigo-400" />
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">No keys stored yet</h3>
-          <p className="text-muted-foreground text-sm max-w-sm mb-5">
+          <p className="text-muted-foreground text-sm max-w-sm mb-5 text-pretty">
             Add a {providerLabels[activeProvider]} API key in settings to populate the{" "}
             {purpose === "pdf" ? "PDF Reading" : "Text Generation"} pool.
           </p>
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={() => onOpenSettings?.(activeProvider)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white rounded-xl text-sm font-semibold shadow-md shadow-indigo-500/20 transition-all duration-150 active:scale-95 cursor-pointer"
+            className="gap-2 shadow-md shadow-indigo-500/20"
           >
             <FaWrench className="w-3.5 h-3.5" />
             <span>Open {providerLabels[activeProvider]} Settings</span>
-          </button>
+          </Button>
         </div>
       ) : (
         /* Table of Stored Keys */
@@ -180,6 +185,7 @@ export default function StoredKeysTable({
                   <tr
                     key={`${k.provider}-${k.index}`}
                     className={cn("hover:bg-indigo-500/5", tableRowHover, "transition-colors duration-150")}
+                    style={{ contentVisibility: "auto", containIntrinsicSize: "auto 64px" }}
                   >
                     <td className="px-6 py-4 font-mono text-xs text-muted-foreground">
                       {idx + 1}
@@ -217,7 +223,10 @@ export default function StoredKeysTable({
                           onClick={() => onTestStoredKey(purpose, k.provider, k.index)}
                           disabled={status?.state === "testing"}
                           aria-label={`Test ${k.providerLabel} key ${k.index + 1}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px] cursor-pointer"
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-3 py-2 bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer",
+                            focusRing
+                          )}
                         >
                           {status?.state === "testing" ? (
                             <>
@@ -236,7 +245,10 @@ export default function StoredKeysTable({
                           }
                           disabled={delLoading}
                           aria-label={`Delete ${k.providerLabel} key ${k.index + 1}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[40px] cursor-pointer"
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl text-xs font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] cursor-pointer",
+                            focusRing
+                          )}
                         >
                           {delLoading ? (
                             <>

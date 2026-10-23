@@ -26,8 +26,7 @@ import { Button, StatusBadge } from "@/components/ui/index.js";
 import useUserManagement from "@/hooks/useUserManagement.js";
 import useAdminStore from "@/features/admin/store.js";
 import apiClient from "@/lib/apiClient.js";
-import { formatRole, getRoleBadgeColor, getRoleAvatarBg } from "@/utils/roleDisplay.js";
-import { formatDate } from "@/utils/formatDate.js";
+import UserManagementTable from "@/components/admin/UserManagementTable.jsx";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
 import AddUserModal from "./components/AddUserModal.jsx";
@@ -90,11 +89,11 @@ export default function SuperAdminDashboard() {
 
         {/* Executive Header Banner */}
         <div className="mb-8">
-          <div className={cn(card, "p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-2xl")}>
+          <div className={cn(card, "@container p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-2xl")}>
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="p-1.5 rounded-lg bg-yellow-500/20 text-yellow-400">
+                  <span className="p-1.5 rounded-lg bg-yellow-500/20 text-yellow-600 dark:text-yellow-400">
                     <FaCrown className="w-3.5 h-3.5" />
                   </span>
                   <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 uppercase tracking-wider">
@@ -457,95 +456,16 @@ export default function SuperAdminDashboard() {
             </Link>
           </div>
 
-          <div className={cn(card, "p-0 overflow-hidden")}>
-            <div className="overflow-x-auto">
-              <table className="w-full text-start text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-border bg-input/40 text-muted-foreground uppercase tracking-wider text-[11px]">
-                    <th scope="col" className="py-3 px-4 text-start font-semibold">User</th>
-                    <th scope="col" className="py-3 px-4 text-start font-semibold">Role</th>
-                    <th scope="col" className="py-3 px-4 text-start font-semibold hidden sm:table-cell">Joined</th>
-                    <th scope="col" className="py-3 px-4 text-end font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {recentUsers.map((u) => {
-                    const isSelf = u.id === user?.id;
-                    const initials = u.name
-                      ? u.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase()
-                      : "?";
-
-                    return (
-                      <tr key={u.id} className="hover:bg-surface-elevated/50 transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={cn(
-                                "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 bg-gradient-to-br",
-                                getRoleAvatarBg(u.role)
-                              )}
-                            >
-                              {initials}
-                            </span>
-                            <div className="min-w-0">
-                              <p className="font-semibold text-foreground truncate">{u.name}</p>
-                              <p className="text-muted-foreground text-[11px] truncate">{u.email}</p>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="py-3 px-4">
-                          <span
-                            className={cn(
-                              "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border",
-                              getRoleBadgeColor(u.role)
-                            )}
-                          >
-                            {formatRole(u.role)}
-                          </span>
-                        </td>
-
-                        <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
-                          {formatDate(u.createdAt)}
-                        </td>
-
-                        <td className="py-3 px-4 text-end">
-                          {!isSelf ? (
-                            <div className="inline-flex items-center gap-2">
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => openRoleModal(u)}
-                                className="text-xs py-1 px-2.5 h-auto"
-                              >
-                                Change Role
-                              </Button>
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() => handleDeleteUser(u.id, u.name)}
-                                className="text-xs py-1 px-2.5 h-auto"
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-muted-foreground italic px-2">
-                              Current User
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          <div className={cn(card, "@container p-0 overflow-hidden")}>
+            <UserManagementTable
+              users={recentUsers}
+              compact
+              currentUserId={user?.id}
+              actionLoading={actionLoading}
+              onOpenRoleModal={openRoleModal}
+              onDelete={handleDeleteUser}
+              canDelete
+            />
 
             <div className="p-3 bg-input/20 border-t border-border flex items-center justify-between">
               <span className="text-xs text-muted-foreground">

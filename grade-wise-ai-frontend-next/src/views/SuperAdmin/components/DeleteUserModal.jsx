@@ -125,7 +125,7 @@ export default function DeleteUserModal({
               variant="danger"
               onClick={onConfirm}
               loading={loading}
-              className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white"
+              className="w-full sm:w-auto"
             >
               {loading ? "Deleting..." : "Delete User"}
             </Button>

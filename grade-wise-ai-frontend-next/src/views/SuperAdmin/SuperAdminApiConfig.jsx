@@ -2,9 +2,8 @@
 
 import { cn } from "@/lib/cn.js";
 import { iconBadge, page, pageInner } from "@/lib/ui.js";
-import Link from "next/link";
 import { Modal, Button } from "@/components/ui";
-import { FaKey, FaArrowLeft } from "react-icons/fa";
+import { FaKey } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
@@ -52,14 +51,6 @@ export default function SuperAdminApiConfig() {
 
         {/* Page Header */}
         <div className="mb-8">
-          <Link
-            href="/super-admin/dashboard"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium mb-6 transition-colors duration-150 group"
-          >
-            <FaArrowLeft className="w-3 h-3 transition-transform duration-150 group-hover:-translate-x-0.5" />
-            Back to Dashboard
-          </Link>
-
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className={cn("p-3 rounded-xl", iconBadge)}>

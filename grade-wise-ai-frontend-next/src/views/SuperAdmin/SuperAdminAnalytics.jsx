@@ -17,6 +17,7 @@ import {
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
+import { Button } from "@/components/ui/index.js";
 import { DashboardStatCard, DashboardStatGrid } from "@/components/dashboard/shared/index.js";
 import useAdminStore from "@/features/admin/store.js";
 import SuperAdminNavTabs from "./components/SuperAdminNavTabs.jsx";
@@ -90,15 +91,16 @@ export default function SuperAdminAnalytics() {
             </p>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={handleRefresh}
             disabled={refreshing}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px] self-start sm:self-auto"
+            className="gap-2 self-start sm:self-auto"
           >
             <FaSync className={refreshing ? "animate-spin" : ""} />
             {refreshing ? "Refreshing..." : "Refresh Metrics"}
-          </button>
+          </Button>
         </div>
 
         {/* Primary KPI Grid */}
@@ -283,6 +285,42 @@ export default function SuperAdminAnalytics() {
                   />
                 </div>
               </div>
+
+              {/* Super Admins (if any) */}
+              {Math.max(0, users.total - (users.students + users.instructors + users.admins)) > 0 && (
+                <div>
+                  <div className="flex justify-between text-xs font-medium mb-1">
+                    <span className="flex items-center gap-1.5 text-foreground">
+                      <FaCrown className="text-purple-500" /> Super Administrators
+                    </span>
+                    <span className="text-muted-foreground">
+                      {Math.max(0, users.total - (users.students + users.instructors + users.admins))} (
+                      {users.total > 0
+                        ? Math.round(
+                            (Math.max(0, users.total - (users.students + users.instructors + users.admins)) /
+                              users.total) *
+                              100
+                          )
+                        : 0}
+                      %)
+                    </span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-input border border-border overflow-hidden">
+                    <div
+                      className="h-full bg-purple-500 rounded-full"
+                      style={{
+                        width: `${
+                          users.total > 0
+                            ? (Math.max(0, users.total - (users.students + users.instructors + users.admins)) /
+                                users.total) *
+                              100
+                            : 0
+                        }%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

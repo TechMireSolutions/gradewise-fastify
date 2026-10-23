@@ -129,9 +129,80 @@ export default function UserManagementTable({
   onOpenRoleModal,
   onDelete,
   canDelete = false,
+  compact = false,
 }) {
   if (users.length === 0) {
     return <EmptyUsersState />;
+  }
+
+  if (compact) {
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full text-start text-xs border-collapse">
+          <thead>
+            <tr className="border-b border-border bg-input/40 text-muted-foreground uppercase tracking-wider text-[11px]">
+              <th scope="col" className="py-3 px-4 text-start font-semibold">User</th>
+              <th scope="col" className="py-3 px-4 text-start font-semibold">Role</th>
+              <th scope="col" className="py-3 px-4 text-start font-semibold hidden sm:table-cell">Joined</th>
+              <th scope="col" className="py-3 px-4 text-end font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border/60">
+            {users.map((userData) => (
+              <tr
+                key={userData.id}
+                className="hover:bg-surface-elevated/50 transition-colors"
+                style={{ contentVisibility: "auto", containIntrinsicSize: "auto 60px" }}
+              >
+                <td className="py-3 px-4">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 bg-gradient-to-br",
+                        getRoleAvatarBg(userData.role)
+                      )}
+                    >
+                      {userData.name ? userData.name.charAt(0).toUpperCase() : "?"}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-foreground truncate">{userData.name}</p>
+                      <p className="text-muted-foreground text-[11px] truncate">{userData.email}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <td className="py-3 px-4">
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border",
+                      getRoleBadgeColor(userData.role)
+                    )}
+                  >
+                    {formatRole(userData.role)}
+                  </span>
+                </td>
+
+                <td className="py-3 px-4 text-muted-foreground hidden sm:table-cell">
+                  {formatDate(userData.createdAt || userData.created_at)}
+                </td>
+
+                <td className="py-3 px-4 text-end">
+                  <RoleActions
+                    userData={userData}
+                    currentUserId={currentUserId}
+                    actionLoading={actionLoading}
+                    onRoleChange={onRoleChange}
+                    onOpenRoleModal={onOpenRoleModal}
+                    onDelete={onDelete}
+                    canDelete={canDelete}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 
   return (
@@ -233,6 +304,9 @@ export default function UserManagementTable({
 export function UserStatsGrid({ stats, totalUsers }) {
   const cards = [
     { value: totalUsers, label: "Total Users", icon: FaUsers, tone: "indigo" },
+    ...(stats.super_admin !== undefined && stats.super_admin > 0
+      ? [{ value: stats.super_admin, label: "Super Admins", icon: FaCrown, tone: "purple" }]
+      : []),
     { value: stats.admin, label: "Admins", icon: FaCrown, tone: "rose" },
     { value: stats.instructor, label: "Instructors", icon: FaChalkboardTeacher, tone: "purple" },
     { value: stats.student, label: "Students", icon: FaUserGraduate, tone: "emerald" },
@@ -240,7 +314,7 @@ export function UserStatsGrid({ stats, totalUsers }) {
   ];
 
   return (
-    <DashboardStatGrid columns={5}>
+    <DashboardStatGrid columns={cards.length > 5 ? 6 : 5}>
       {cards.map(({ value, label, icon, tone }) => (
         <DashboardStatCard
           key={label}

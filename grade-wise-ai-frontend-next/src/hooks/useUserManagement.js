@@ -3,7 +3,7 @@ import useAuthStore from "@/features/auth/store.js";
 import useAdminStore from "@/features/admin/store.js";
 import useModal from "./useModal.js";
 
-export default function useUserManagement() {
+export default function useUserManagement(options = {}) {
   const { user } = useAuthStore();
   const {
     overview,
@@ -148,30 +148,40 @@ export default function useUserManagement() {
     }
   };
 
-  const filteredUsers = users.filter((u) => u.role !== "super_admin");
+  const shouldIncludeSuperAdmin =
+    options.includeSuperAdmin !== undefined
+      ? Boolean(options.includeSuperAdmin)
+      : user?.role === "super_admin";
+
+  const visibleUsers = shouldIncludeSuperAdmin
+    ? users
+    : users.filter((u) => u.role !== "super_admin");
+
+  const superAdminCount = users.filter((u) => u.role === "super_admin").length;
 
   // Prefer database-aggregated KPI stats from /api/admin/overview
   const stats = overview?.users
     ? {
+        super_admin: superAdminCount,
         admin: overview.users.admins || 0,
         instructor: overview.users.instructors || 0,
         student: overview.users.students || 0,
         verified: overview.users.verified || 0,
         unverified: overview.users.unverified || 0,
       }
-    : filteredUsers.reduce(
+    : visibleUsers.reduce(
         (acc, u) => {
           acc[u.role] = (acc[u.role] || 0) + 1;
           if (u.verified) acc.verified++;
           else acc.unverified++;
           return acc;
         },
-        { admin: 0, instructor: 0, student: 0, verified: 0, unverified: 0 }
+        { super_admin: 0, admin: 0, instructor: 0, student: 0, verified: 0, unverified: 0 }
       );
 
   return {
     user,
-    users: filteredUsers,
+    users: visibleUsers,
     totalUsers: overview?.users?.total ?? totalUsers,
     loading,
     actionLoading,

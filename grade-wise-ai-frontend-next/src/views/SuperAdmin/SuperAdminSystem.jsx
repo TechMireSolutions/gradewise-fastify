@@ -243,7 +243,7 @@ export default function SuperAdminSystem() {
               return (
                 <div
                   key={svc.id}
-                  className={cn(card, "p-5 flex flex-col justify-between relative overflow-hidden")}
+                  className={cn(card, "@container p-5 flex flex-col justify-between relative overflow-hidden")}
                 >
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-3">

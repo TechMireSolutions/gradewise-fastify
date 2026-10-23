@@ -2,8 +2,10 @@
 
 import { useEffect } from "react";
 import { page, pageInner } from "@/lib/ui.js";
+import { FaUserPlus } from "react-icons/fa";
 import Modal from "@/components/ui/Modal.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
+import { Button } from "@/components/ui/index.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
@@ -78,6 +80,15 @@ export default function SuperAdminUsers() {
                 Search, filter, invite, and reassign roles across all platform accounts.
               </p>
             </div>
+
+            <Button
+              variant="primary"
+              onClick={openCreateModal}
+              className="gap-2 self-start sm:self-auto"
+            >
+              <FaUserPlus className="w-3.5 h-3.5" />
+              Add New User
+            </Button>
           </div>
         </div>
 

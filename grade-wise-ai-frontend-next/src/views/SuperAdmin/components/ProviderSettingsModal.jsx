@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react";
 import { cn } from "@/lib/cn.js";
 import { focusRing } from "@/lib/ui.js";
 import { FaWrench, FaTimes, FaFlask, FaSave } from "react-icons/fa";
-import { Label, Textarea, LoadingSpinner } from "@/components/ui";
+import { Label, Textarea, LoadingSpinner, Button } from "@/components/ui/index.js";
 import ModelSelector from "./ModelSelector.jsx";
 import TestResultBadge from "./TestResultBadge.jsx";
 import {
@@ -40,11 +40,9 @@ export default function ProviderSettingsModal({
   useEffect(() => {
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
     }
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
     };
   }, [isOpen, handleKeyDown]);
 
@@ -152,7 +150,7 @@ export default function ProviderSettingsModal({
             <div>
               <Label htmlFor="modal-new-keys">
                 Add New API Key
-                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                <span className="ms-2 text-xs font-normal text-muted-foreground">
                   comma-separate for bulk addition
                 </span>
               </Label>
@@ -170,15 +168,15 @@ export default function ProviderSettingsModal({
 
               {/* Real-time Auto-Detection Notice */}
               {card.detectedInfo ? (
-                <div className="mt-2.5 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl flex items-center gap-2 text-xs font-medium text-indigo-400 animate-fade-in">
-                  <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse flex-shrink-0" />
+                <div className="mt-2.5 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl flex items-center gap-2 text-xs font-medium text-indigo-700 dark:text-indigo-400 animate-fade-in">
+                  <span className="w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse flex-shrink-0" />
                   <span>
                     Auto-detected: <strong className="text-foreground">{providerLabels[card.detectedInfo.provider]}</strong> · Model: <strong className="font-mono text-foreground">{card.detectedInfo.model}</strong>
                   </span>
                 </div>
               ) : card.keysDirty ? (
-                <p className="text-xs font-medium text-indigo-400 mt-2 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                <p className="text-xs font-medium text-indigo-700 dark:text-indigo-400 mt-2 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse" />
                   Key ready — will be saved to the {providerLabels[provider]} pool.
                 </p>
               ) : (
@@ -201,36 +199,36 @@ export default function ProviderSettingsModal({
         <div className="sticky bottom-0 bg-input/95 backdrop-blur-md px-6 py-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
           <div>
             {card.keysDirty && (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 onClick={onTestInlineKey}
                 disabled={configLoading}
-                className="px-4 py-2.5 bg-btn-secondary hover:bg-surface-elevated border border-border text-secondary-foreground hover:text-foreground rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer inline-flex items-center gap-2 min-h-[42px]"
+                className="gap-2 min-h-[44px]"
               >
                 <FaFlask className="w-3.5 h-3.5" />
                 Test Key
-              </button>
+              </Button>
             )}
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onClose}
               disabled={configLoading}
-              className="px-4 py-2.5 bg-btn-secondary hover:bg-surface-elevated border border-border text-muted-foreground hover:text-foreground rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 cursor-pointer min-h-[42px]"
+              className="min-h-[44px]"
             >
               Cancel
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="primary"
               onClick={onSaveCard}
               disabled={configLoading}
-              className={cn(
-                "px-5 py-2.5 text-white rounded-xl font-semibold text-sm shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 inline-flex items-center gap-2 min-h-[42px] cursor-pointer",
-                `bg-gradient-to-r ${pStyle.saveGradient}`
-              )}
+              className="gap-2 min-h-[44px]"
             >
               {configLoading ? (
                 <>
@@ -242,7 +240,7 @@ export default function ProviderSettingsModal({
                   {card.keysDirty ? "Add Key to Pool" : "Save Model Setting"}
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

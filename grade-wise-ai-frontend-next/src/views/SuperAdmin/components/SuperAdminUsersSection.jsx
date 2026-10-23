@@ -1,9 +1,9 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card, select } from "@/lib/ui.js";
+import { card } from "@/lib/ui.js";
 import { FaUsers, FaSync, FaUserPlus } from "react-icons/fa";
-import { SearchField, Button } from "@/components/ui/index.js";
+import { SearchField, Button, Select } from "@/components/ui/index.js";
 import UserManagementTable from "@/components/admin/UserManagementTable.jsx";
 
 export default function SuperAdminUsersSection({
@@ -20,7 +20,7 @@ export default function SuperAdminUsersSection({
   onRoleFilterChange,
 }) {
   return (
-    <div className={cn(card, "shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200")}>
+    <div className={cn(card, "@container shadow-2xl overflow-hidden hover:border-indigo-500/30 transition-all duration-200")}>
       {/* Section Header & Toolbar */}
       <div className="px-6 py-4 border-b border-border bg-input">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -46,43 +46,47 @@ export default function SuperAdminUsersSection({
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   onClear={() => onSearchChange("")}
-                  className="h-10 text-xs"
+                  className="h-11 text-xs"
                 />
               </div>
             )}
 
             {onRoleFilterChange && (
-              <select
-                value={roleFilter}
-                onChange={(e) => onRoleFilterChange(e.target.value)}
-                className={cn(select, "py-2 px-3 text-xs h-10 w-auto min-w-[120px]")}
-                aria-label="Filter by role"
-              >
-                <option value="">All Roles</option>
-                <option value="admin">Admins</option>
-                <option value="instructor">Instructors</option>
-                <option value="student">Students</option>
-              </select>
+              <div className="w-auto min-w-[130px]">
+                <Select
+                  value={roleFilter}
+                  onChange={(e) => onRoleFilterChange(e.target.value)}
+                  aria-label="Filter by role"
+                  className="py-2 px-3 text-xs h-11 w-auto"
+                >
+                  <option value="">All Roles</option>
+                  <option value="super_admin">Super Admins</option>
+                  <option value="admin">Admins</option>
+                  <option value="instructor">Instructors</option>
+                  <option value="student">Students</option>
+                </Select>
+              </div>
             )}
 
-            <button
+            <Button
               type="button"
+              variant="secondary"
               onClick={onRefresh}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer min-h-[40px]"
               aria-label="Refresh user list"
+              className="text-xs px-3.5 min-h-[44px] gap-2"
             >
               <FaSync aria-hidden="true" className={actionLoading === "fetch" ? "animate-spin" : ""} />
               Refresh
-            </button>
+            </Button>
 
             {onOpenCreateModal && (
               <Button
                 type="button"
                 variant="primary"
                 onClick={onOpenCreateModal}
-                className="text-xs px-3.5 py-2 min-h-[40px] whitespace-nowrap"
+                className="text-xs px-3.5 min-h-[44px] whitespace-nowrap gap-1.5"
               >
-                <FaUserPlus className="w-3.5 h-3.5 me-1.5" />
+                <FaUserPlus className="w-3.5 h-3.5" />
                 Add User
               </Button>
             )}
