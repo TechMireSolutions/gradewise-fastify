@@ -25,6 +25,8 @@ import {
   shape,
   statusTone,
   gradient,
+  chip,
+  chipTone,
 } from "./ui.js";
 
 test("Design System Layout & Surface Tokens", async (t) => {
@@ -166,5 +168,26 @@ test("Centralized Brand Gradient Tokens", async (t) => {
         `gradient.${key} should declare bg-gradient-to-br`
       );
     }
+  });
+});
+
+test("Centralized Action Chip & Tone Tokens", async (t) => {
+  await t.test("enforces rounded-xl on chip primitive for Tier 2 shape compliance", () => {
+    assert.ok(chip.includes("rounded-xl"), "chip primitive must declare rounded-xl");
+    assert.ok(chip.includes("min-h-9"), "chip primitive must declare min-h-9 for accessibility");
+  });
+
+  await t.test("enforces dual-theme WCAG AA contrast on all chipTone variants", () => {
+    const tones = ["indigo", "emerald", "violet", "purple", "amber", "sky"];
+    for (const tone of tones) {
+      assert.ok(
+        chipTone[tone].includes("dark:hover:text-"),
+        `chipTone.${tone} is missing dark theme hover contrast class`
+      );
+    }
+    assert.ok(
+      chipTone.danger.includes("dark:text-red-400"),
+      "chipTone.danger is missing dark:text-red-400"
+    );
   });
 });

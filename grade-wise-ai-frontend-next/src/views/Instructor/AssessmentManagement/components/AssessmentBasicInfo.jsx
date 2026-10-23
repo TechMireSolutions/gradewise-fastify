@@ -90,7 +90,7 @@ export default function AssessmentBasicInfo({ assessment }) {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 bg-input border border-border hover:border-indigo-500/30 rounded-xl transition-all duration-200 group"
                 >
-                  <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20 flex-shrink-0">
+                  <div className="p-2 rounded-xl bg-violet-500/15 border border-violet-500/20 flex-shrink-0">
                     <FaLink className="text-violet-500 dark:text-violet-400 text-sm" />
                   </div>
                   <span className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-sm break-all flex-1 transition-colors">

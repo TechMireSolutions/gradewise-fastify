@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/cn.js";
 import { card, iconBadge, focusRing } from "@/lib/ui.js";
-import { Label, LoadingSpinner } from "@/components/ui";
+import { Label, LoadingSpinner, StatusBadge } from "@/components/ui";
 import { FiBook, FiCheck, FiUploadCloud, FiFile } from "react-icons/fi";
 
 export default function AssessmentResourcePicker({
@@ -30,9 +30,9 @@ export default function AssessmentResourcePicker({
           </div>
         </div>
 
-        <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-xs font-semibold self-start sm:self-auto">
+        <StatusBadge variant="info" className="self-start sm:self-auto">
           {selectedResources.length} {selectedResources.length === 1 ? "Resource" : "Resources"} Selected
-        </span>
+        </StatusBadge>
       </div>
 
       <div className="p-6 sm:p-8 space-y-6">

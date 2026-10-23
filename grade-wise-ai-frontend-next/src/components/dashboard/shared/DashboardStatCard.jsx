@@ -43,7 +43,7 @@ export default function DashboardStatCard({
       <div className={cn("rounded-xl border border-border bg-card/60 p-4 sm:p-5 backdrop-blur-sm animate-pulse", className)}>
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <div className="h-7 w-14 rounded-lg bg-muted-foreground/20" />
+            <div className="h-7 w-14 rounded-xl bg-muted-foreground/20" />
             <div className="h-3 w-24 rounded bg-muted-foreground/15" />
           </div>
           <div className="h-11 w-11 rounded-xl bg-muted-foreground/20" />

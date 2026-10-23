@@ -18,7 +18,7 @@ export default function EnrolledRosterTable({
       <div className={cardHeader}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className={cn("p-2 rounded-lg", iconBadge)}>
+            <div className={cn("p-2", iconBadge)}>
               <FaUsers className="text-white text-sm" aria-hidden="true" />
             </div>
             <div>

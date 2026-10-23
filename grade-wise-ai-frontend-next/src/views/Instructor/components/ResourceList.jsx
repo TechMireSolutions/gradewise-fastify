@@ -96,7 +96,7 @@ export default function ResourceList({
                   >
                     <td className="px-6 py-4 text-sm text-secondary-foreground font-semibold">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 shrink-0">
+                        <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 shrink-0">
                           {getFileIcon(resource.name || resource.title, resource.fileType || resource.contentType)}
                         </div>
                         <span className="truncate max-w-sm">{resource.name || resource.title || "Untitled Document"}</span>
@@ -140,7 +140,7 @@ export default function ResourceList({
               >
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 shrink-0">
+                    <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 shrink-0">
                       {getFileIcon(resource.name || resource.title, resource.fileType || resource.contentType)}
                     </div>
                     <div className="flex-1 min-w-0">

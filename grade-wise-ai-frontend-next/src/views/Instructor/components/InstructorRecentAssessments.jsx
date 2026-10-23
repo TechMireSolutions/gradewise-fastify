@@ -85,7 +85,7 @@ export default function InstructorRecentAssessments({
                   >
                     <td className="px-6 py-4 text-sm text-secondary-foreground font-semibold">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 shrink-0">
+                        <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 shrink-0">
                           <FaClipboardList className="w-4 h-4 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
                         </div>
                         <span className="truncate max-w-xs">{assessment.title}</span>
@@ -126,7 +126,7 @@ export default function InstructorRecentAssessments({
               >
                 <div className="flex items-start justify-between mb-4 gap-3">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 shrink-0">
+                    <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 shrink-0">
                       <FaClipboardList className="w-4 h-4 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
                     </div>
                     <div className="flex-1 min-w-0">

@@ -138,7 +138,7 @@ function Footer() {
                   href="https://policies.google.com/privacy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-400 underline hover:text-indigo-300 transition-colors duration-150 font-medium"
+                  className="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-150 font-medium"
                 >
                   Privacy Policy
                 </a>{" "}
@@ -147,7 +147,7 @@ function Footer() {
                   href="https://policies.google.com/terms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-400 underline hover:text-indigo-300 transition-colors duration-150 font-medium"
+                  className="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-150 font-medium"
                 >
                   Terms of Service
                 </a>{" "}

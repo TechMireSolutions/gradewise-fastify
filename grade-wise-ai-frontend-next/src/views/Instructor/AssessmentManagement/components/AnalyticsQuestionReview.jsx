@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/cn.js";
 import { card, cardInteractive } from "@/lib/ui.js";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 import { FaTable, FaArrowUp } from "react-icons/fa";
 
 export const isAnswerCorrect = (correct, student) => {
@@ -45,7 +46,7 @@ export default function AnalyticsQuestionReview({
 
       <div className={cn(card, cardInteractive, "shadow-2xl mt-10 overflow-hidden")}>
         <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
+          <div className="p-2 rounded-xl bg-violet-500/15 border border-violet-500/20">
             <FaTable className="text-violet-500 dark:text-violet-400 text-sm" />
           </div>
           <h3 className="text-xl font-bold text-foreground">Student Answer Details</h3>
@@ -76,9 +77,9 @@ export default function AnalyticsQuestionReview({
               >
                 <div className="flex items-start justify-between mb-4">
                   <h4 className="font-bold text-lg text-foreground flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                    <StatusBadge variant="info">
                       Question {q.question_order || i + 1}
-                    </span>
+                    </StatusBadge>
                     <span className="text-sm font-normal text-muted-foreground capitalize">
                       ({q.question_type?.replace(/_/g, " ")})
                     </span>

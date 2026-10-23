@@ -136,7 +136,7 @@ function Modal({
           {/* Close Button — 44×44px touch target */}
           <button
             onClick={handleClose}
-            className={cn("absolute", "top-2", "right-2", "w-11", "h-11", "flex", "items-center", "justify-center", "rounded-lg", "bg-surface-elevated", "hover:opacity-80", "text-muted-foreground", "hover:text-foreground", "transition-all", "duration-150", "hover:scale-110", "active:scale-95", "z-10", focusRing, "cursor-pointer")}
+            className={cn("absolute", "top-2", "right-2", "w-11", "h-11", "flex", "items-center", "justify-center", "rounded-xl", "bg-surface-elevated", "hover:opacity-80", "text-muted-foreground", "hover:text-foreground", "transition-all", "duration-150", "hover:scale-110", "active:scale-95", "z-10", focusRing, "cursor-pointer")}
             aria-label="Close notification"
           >
             <FaTimes className="w-3.5 h-3.5" />

@@ -23,7 +23,7 @@ function SampleQuestionsTab({ questions, questionError, loading, selectedLanguag
                 type="button"
                 onClick={() => onLanguageChange?.(lang.value)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
                   selectedLanguage === lang.value
                     ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
                     : "bg-btn-secondary border border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"

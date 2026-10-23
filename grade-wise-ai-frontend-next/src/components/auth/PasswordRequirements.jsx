@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { cn } from "@/lib/cn.js";
+import { statusTone } from "@/lib/ui.js";
 import { FaCheck, FaShieldAlt } from "react-icons/fa";
 
 export default function PasswordRequirements({
@@ -65,18 +66,18 @@ export default function PasswordRequirements({
     >
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          <FaShieldAlt className="text-indigo-400 text-xs shrink-0" />
+          <FaShieldAlt className="text-indigo-600 dark:text-indigo-400 text-xs shrink-0" />
           <span>Password Requirements</span>
         </div>
         {password.length > 0 && showStrengthBar && (
           <span
             className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full",
+              "text-xs font-medium px-2 py-0.5 rounded-full border",
               metCount <= 2
-                ? "text-red-600 bg-red-500/10 dark:text-red-400"
+                ? statusTone.danger
                 : metCount === 3
-                ? "text-amber-600 bg-amber-500/10 dark:text-amber-400"
-                : "text-emerald-600 bg-emerald-500/10 dark:text-emerald-400"
+                ? statusTone.warning
+                : statusTone.success
             )}
           >
             {strengthText}

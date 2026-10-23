@@ -13,7 +13,7 @@ export default function AnalyticsAssessmentPicker({
   return (
     <div className={cn(card, cardInteractive, "shadow-2xl overflow-hidden")}>
       <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20">
+        <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20">
           <FaList className="text-indigo-500 dark:text-indigo-400 text-sm" />
         </div>
         <h3 className="text-xl font-bold text-foreground">My Executed Assessments</h3>

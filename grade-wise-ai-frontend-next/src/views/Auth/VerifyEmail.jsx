@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { btn, card, iconBadge, page } from "@/lib/ui.js";
+import { btn, card, gradient, iconBadge, page, shape, statusTone } from "@/lib/ui.js";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -104,7 +104,7 @@ function VerifyEmail() {
         {isSuccess ? (
           <div className="space-y-6">
             <div className="flex items-center justify-center">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+              <div className={cn("p-2.5 rounded-xl shadow-lg shadow-emerald-500/25", gradient.emerald)}>
                 <FaCheckCircle className="text-white text-3xl" />
               </div>
             </div>
@@ -115,8 +115,8 @@ function VerifyEmail() {
             </div>
 
             {result.user && (
-              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4">
-                <p className="text-emerald-400 text-sm font-semibold mb-1">
+              <div className={cn(statusTone.success, shape.panel, "p-4 text-start")}>
+                <p className="text-emerald-700 dark:text-emerald-400 text-sm font-semibold mb-1">
                   Welcome, {result.user.name}!
                 </p>
                 <p className={cn("text-muted-foreground", "text-xs")}>
@@ -126,8 +126,8 @@ function VerifyEmail() {
             )}
 
             {result.status === "already_used" && (
-              <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-4">
-                <p className="text-indigo-400 text-sm font-semibold mb-1">Good news!</p>
+              <div className={cn(statusTone.info, shape.panel, "p-4 text-start")}>
+                <p className="text-indigo-700 dark:text-indigo-400 text-sm font-semibold mb-1">Good news!</p>
                 <p className={cn("text-muted-foreground", "text-xs")}>
                   This verification link was already used successfully. Your account is active.
                 </p>
@@ -145,7 +145,7 @@ function VerifyEmail() {
         ) : (
           <div className="space-y-6">
             <div className="flex items-center justify-center">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/25">
+              <div className={cn("p-2.5 rounded-xl shadow-lg shadow-red-500/25", gradient.danger)}>
                 <FaTimesCircle className="text-white text-3xl" />
               </div>
             </div>
@@ -169,7 +169,7 @@ function VerifyEmail() {
                   <span>Try signing up again if needed</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <span className="text-indigo-400 mt-0.5">&#8226;</span>
+                  <span className="text-indigo-600 dark:text-indigo-400 mt-0.5">&#8226;</span>
                   <span>Contact support if the issue persists</span>
                 </li>
               </ul>
@@ -184,7 +184,7 @@ function VerifyEmail() {
               </Link>
               <Link
                 href="/signup"
-                className={cn("px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "inline-flex", "items-center", "justify-center", "gap-2", "cursor-pointer")}
+                className={cn(btn.secondary, "px-4 py-2.5 inline-flex items-center justify-center gap-2 cursor-pointer")}
               >
                 Sign Up Again
               </Link>

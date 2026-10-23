@@ -17,7 +17,7 @@ export default function AnalyticsStudentTable({
       <div className="hidden lg:block mb-10">
         <div className={cn(card, cardInteractive, "shadow-2xl overflow-hidden")}>
           <div className="px-6 py-4 border-b border-border bg-input flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-violet-500/15 border border-violet-500/20">
+            <div className="p-2 rounded-xl bg-violet-500/15 border border-violet-500/20">
               <FaUsers className="text-violet-500 dark:text-violet-400 text-sm" />
             </div>
             <h3 className="text-xl font-bold text-foreground">

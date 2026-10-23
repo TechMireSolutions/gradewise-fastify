@@ -28,7 +28,7 @@ export default function StudentAssessmentCard({ assessment }) {
             href={`/student/assessments/${assessment.id}/take`}
             className={cn(
               btn.primary,
-              "px-5 py-2.5 text-xs font-semibold rounded-lg min-h-[44px]"
+              "px-5 py-2.5 text-xs font-semibold rounded-xl min-h-[44px]"
             )}
             aria-label={`Start assessment ${assessment.title || "Untitled"}`}
           >

@@ -37,7 +37,7 @@ export default function AdminHeader({ user, totalUsers = 0, onOpenCreateModal })
 
             <div className="bg-input backdrop-blur-sm border border-border rounded-xl px-5 py-3 text-center flex sm:flex-col items-center justify-between sm:justify-center gap-2">
               <div className="flex items-center gap-2">
-                <span className={cn("p-1.5 rounded-lg text-white", iconBadge)}>
+                <span className={cn("p-1.5 text-white", iconBadge)}>
                   <FaUsers className="w-4 h-4" aria-hidden="true" />
                 </span>
                 <span className="text-xs text-muted-foreground sm:hidden">Total Users:</span>

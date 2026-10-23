@@ -208,7 +208,7 @@ function Login() {
               type="button"
               onClick={handleGoogleLogin}
               disabled={googleLoading || loading || accountSigningIn}
-              className="w-full text-center text-xs font-medium text-muted-foreground hover:text-indigo-400 py-1 transition-colors cursor-pointer disabled:opacity-50"
+              className="w-full text-center text-xs font-medium text-muted-foreground hover:text-indigo-700 dark:hover:text-indigo-400 py-1 transition-colors cursor-pointer disabled:opacity-50"
             >
               Use another account
             </button>

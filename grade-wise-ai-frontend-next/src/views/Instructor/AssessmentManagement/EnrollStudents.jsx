@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card, cardHeader, iconBadge, page, pageInner } from "@/lib/ui.js";
+import { card, cardHeader, gradient, iconBadge, page, pageInner } from "@/lib/ui.js";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button, Modal } from "@/components/ui";
@@ -71,7 +71,7 @@ export default function EnrollStudents() {
           <div className={cn(card, "shadow-xl h-fit overflow-hidden")}>
             <div className={cardHeader}>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md shadow-emerald-500/25">
+                <div className={cn("p-2 rounded-xl shadow-md shadow-emerald-500/25", gradient.emerald)}>
                   <FaUserGraduate className="text-white text-sm" aria-hidden="true" />
                 </div>
                 <h2 className="text-xl font-bold text-foreground text-balance">Enroll Student</h2>
