@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loginSchema, signupSchema } from "./authSchemas.js";
+import { loginSchema, signupSchema, createUserSchema } from "./authSchemas.js";
 
 test("loginSchema", async (t) => {
   await t.test("accepts valid login credentials", () => {
@@ -99,5 +99,44 @@ test("signupSchema", async (t) => {
     const result = signupSchema.safeParse(invalid);
     assert.strictEqual(result.success, false);
     assert.match(result.error.issues[0].message, /one number/);
+  });
+});
+
+test("createUserSchema", async (t) => {
+  await t.test("accepts valid user creation payload", () => {
+    const valid = {
+      name: "Professor Turing",
+      email: "turing@university.edu",
+      password: "StrongPassword1",
+      confirmPassword: "StrongPassword1",
+      role: "instructor",
+    };
+    const result = createUserSchema.safeParse(valid);
+    assert.strictEqual(result.success, true);
+  });
+
+  await t.test("rejects mismatched passwords", () => {
+    const invalid = {
+      name: "Professor Turing",
+      email: "turing@university.edu",
+      password: "StrongPassword1",
+      confirmPassword: "DifferentPassword2",
+      role: "instructor",
+    };
+    const result = createUserSchema.safeParse(invalid);
+    assert.strictEqual(result.success, false);
+    assert.match(result.error.issues[0].message, /Passwords do not match/);
+  });
+
+  await t.test("rejects unsupported role", () => {
+    const invalid = {
+      name: "Professor Turing",
+      email: "turing@university.edu",
+      password: "StrongPassword1",
+      confirmPassword: "StrongPassword1",
+      role: "super_admin",
+    };
+    const result = createUserSchema.safeParse(invalid);
+    assert.strictEqual(result.success, false);
   });
 });

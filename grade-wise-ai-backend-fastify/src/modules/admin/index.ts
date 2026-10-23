@@ -9,12 +9,14 @@ import {
   AdminOverviewResponseSchema,
   AdminUsersQuerySchema,
   ChangeRoleBodySchema,
+  CreateAdminUserBodySchema,
 } from "./admin.schema.js";
 import {
   getAdminOverviewService,
   getAdminUsersService,
   changeUserRoleService,
   removeUserService,
+  createAdminUserService,
 } from "./admin.service.js";
 
 export default async function adminModule(app: FastifyInstance) {
@@ -46,6 +48,24 @@ export default async function adminModule(app: FastifyInstance) {
         total: result.total,
         page: result.page,
         limit: result.limit,
+      });
+    } catch (err) {
+      const { statusCode, message } = toHttpError(err);
+      return reply.code(statusCode).send({ success: false, message });
+    }
+  });
+
+  // Create user with designated role (Admin / Super Admin)
+  f.post("/users", {
+    preHandler: [authenticate, authorize(...ADMIN_ROLES)],
+    schema: { body: CreateAdminUserBodySchema },
+  }, async (request, reply) => {
+    try {
+      const user = await createAdminUserService(request.body);
+      return reply.code(201).send({
+        success: true,
+        message: "User created successfully.",
+        user,
       });
     } catch (err) {
       const { statusCode, message } = toHttpError(err);

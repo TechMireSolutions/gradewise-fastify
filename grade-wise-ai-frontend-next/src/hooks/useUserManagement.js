@@ -13,6 +13,7 @@ export default function useUserManagement() {
     getAdminUsers,
     changeUserRole: changeRoleInStore,
     deleteUser: deleteUserInStore,
+    createAdminUser: createAdminUserInStore,
   } = useAdminStore();
 
   const { modal, showModal, closeModal: closeModalBase } = useModal();
@@ -25,10 +26,38 @@ export default function useUserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
 
+  // Popup modal state
+  const [activeModal, setActiveModal] = useState(null); // 'create' | 'change-role' | 'delete' | 'api-config' | null
+  const [selectedUser, setSelectedUser] = useState(null);
+
   const closeModal = useCallback(() => {
     closeModalBase();
     setPendingDelete(null);
   }, [closeModalBase]);
+
+  const closeActiveModal = useCallback(() => {
+    setActiveModal(null);
+    setSelectedUser(null);
+  }, []);
+
+  const openCreateModal = useCallback(() => {
+    setActiveModal("create");
+  }, []);
+
+  const openRoleModal = useCallback((targetUser) => {
+    setSelectedUser(targetUser);
+    setActiveModal("change-role");
+  }, []);
+
+  const openDeleteModal = useCallback((targetUser) => {
+    setSelectedUser(targetUser);
+    setPendingDelete({ userId: targetUser.id, userName: targetUser.name });
+    setActiveModal("delete");
+  }, []);
+
+  const openApiConfigModal = useCallback(() => {
+    setActiveModal("api-config");
+  }, []);
 
   const fetchUsers = useCallback(async (params = {}) => {
     try {
@@ -57,6 +86,7 @@ export default function useUserManagement() {
     try {
       setActionLoading(`role-${userId}`);
       await changeRoleInStore(userId, newRole);
+      closeActiveModal();
       await fetchUsers();
       showModal("success", "Success", `Successfully changed ${userName || userEmail}'s role to ${newRole}.`);
     } catch (error) {
@@ -70,27 +100,51 @@ export default function useUserManagement() {
     }
   };
 
+  const handleCreateUser = async (formData) => {
+    try {
+      setActionLoading("create-user");
+      await createAdminUserInStore({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role || "student",
+      });
+      closeActiveModal();
+      await fetchUsers();
+      showModal("success", "User Created", `Successfully created ${formData.name} as ${formData.role || "student"}.`);
+    } catch (error) {
+      showModal(
+        "error",
+        "Failed to Create User",
+        error.message || "An unexpected error occurred while creating the user."
+      );
+      throw error;
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleDeleteUser = (userId, userName) => {
     setPendingDelete({ userId, userName });
-    showModal(
-      "warning",
-      "Confirm Deletion",
-      `Are you sure you want to delete ${userName}? This action cannot be undone.`
-    );
+    setSelectedUser({ id: userId, name: userName });
+    setActiveModal("delete");
   };
 
   const confirmDeleteUser = async () => {
-    if (!pendingDelete) return;
+    const target = selectedUser || pendingDelete;
+    if (!target) return;
     try {
-      setActionLoading(`delete-${pendingDelete.userId}`);
-      await deleteUserInStore(pendingDelete.userId);
+      setActionLoading(`delete-${target.userId || target.id}`);
+      await deleteUserInStore(target.userId || target.id);
+      closeActiveModal();
       await fetchUsers();
-      showModal("success", "User Deleted", `${pendingDelete.userName} has been deleted successfully.`);
+      showModal("success", "User Deleted", `${target.userName || target.name} has been deleted successfully.`);
     } catch (error) {
       showModal("error", "Error", error.message || "Failed to delete user.");
     } finally {
       setActionLoading(null);
       setPendingDelete(null);
+      setSelectedUser(null);
     }
   };
 
@@ -126,6 +180,7 @@ export default function useUserManagement() {
     closeModal,
     fetchUsers,
     handleRoleChange,
+    handleCreateUser,
     handleDeleteUser,
     confirmDeleteUser,
     pendingDelete,
@@ -134,5 +189,15 @@ export default function useUserManagement() {
     setSearchQuery,
     roleFilter,
     setRoleFilter,
+    // Popup modal controls
+    activeModal,
+    setActiveModal,
+    selectedUser,
+    setSelectedUser,
+    openCreateModal,
+    openRoleModal,
+    openDeleteModal,
+    openApiConfigModal,
+    closeActiveModal,
   };
 }

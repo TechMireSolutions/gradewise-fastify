@@ -10,6 +10,7 @@ import {
   FaSync,
   FaTrash,
   FaCalendarAlt,
+  FaShieldAlt,
 } from "react-icons/fa";
 import { getRoleBadgeColor, getRoleAvatarBg, formatRole } from "../../utils/roleDisplay.js";
 import { formatDate } from "../../utils/formatDate.js";
@@ -17,12 +18,53 @@ import EmptyState from "../ui/EmptyState.jsx";
 import StatusBadge from "../ui/StatusBadge.jsx";
 import { DashboardStatCard, DashboardStatGrid } from "@/components/dashboard/shared/index.js";
 
-function RoleActions({ userData, currentUserId, actionLoading, onRoleChange, onDelete, canDelete }) {
+function RoleActions({
+  userData,
+  currentUserId,
+  actionLoading,
+  onRoleChange,
+  onOpenRoleModal,
+  onDelete,
+  canDelete,
+}) {
   const isSelf = userData.id === currentUserId;
   const loadingKey = `role-${userData.id}`;
   const isLoading = actionLoading === userData.id || actionLoading === loadingKey;
 
   if (isSelf) return null;
+
+  if (onOpenRoleModal) {
+    return (
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => onOpenRoleModal(userData)}
+          disabled={isLoading}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-2 bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 min-h-[44px]",
+            focusRing
+          )}
+        >
+          <FaShieldAlt className="text-xs text-indigo-500 dark:text-indigo-400" />
+          Change Role
+        </button>
+
+        {canDelete && onDelete && (
+          <button
+            type="button"
+            onClick={() => onDelete(userData.id, userData.name)}
+            aria-label={`Delete user ${userData.name}`}
+            className={cn(
+              "p-2 rounded-lg text-muted-foreground hover:text-red-700 dark:hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all duration-150 cursor-pointer min-w-[44px] min-h-[44px] flex items-center justify-center",
+              focusRing
+            )}
+          >
+            <FaTrash className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -84,6 +126,7 @@ export default function UserManagementTable({
   currentUserId,
   actionLoading,
   onRoleChange,
+  onOpenRoleModal,
   onDelete,
   canDelete = false,
 }) {
@@ -141,6 +184,7 @@ export default function UserManagementTable({
                     currentUserId={currentUserId}
                     actionLoading={actionLoading}
                     onRoleChange={onRoleChange}
+                    onOpenRoleModal={onOpenRoleModal}
                     onDelete={onDelete}
                     canDelete={canDelete}
                   />
@@ -175,6 +219,7 @@ export default function UserManagementTable({
               currentUserId={currentUserId}
               actionLoading={actionLoading}
               onRoleChange={onRoleChange}
+              onOpenRoleModal={onOpenRoleModal}
               onDelete={onDelete}
               canDelete={canDelete}
             />

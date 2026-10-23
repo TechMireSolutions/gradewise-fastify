@@ -1,7 +1,8 @@
+import bcrypt from "bcryptjs";
 import { db, users, assessments, assessmentAttempts, questionBlocks } from "../../db/index.js";
 import { eq, sql, and, or, ilike, desc } from "drizzle-orm";
 import type { User } from "../../db/schema.js";
-import { AppError, NotFoundError } from "../../utils/errors.js";
+import { AppError, ConflictError, NotFoundError } from "../../utils/errors.js";
 import { roundScore } from "../analytics/shared.js";
 import type { AdminOverviewResponse, AdminUsersQuery } from "./admin.schema.js";
 
@@ -159,4 +160,52 @@ export async function removeUserService(userId: number, requesterId: number): Pr
 
   const result = await db.delete(users).where(eq(users.id, userId)).returning();
   if (result.length === 0) throw new NotFoundError("User");
+}
+
+export async function createAdminUserService(input: {
+  name: string;
+  email: string;
+  password: string;
+  role: "admin" | "instructor" | "student";
+}): Promise<CleanUser> {
+  const normalizedEmail = input.email.toLowerCase().trim();
+  const existing = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, normalizedEmail))
+    .limit(1);
+
+  if (existing.length > 0) {
+    throw new ConflictError("A user with this email already exists.");
+  }
+
+  const hashedPassword = await bcrypt.hash(input.password, 12);
+  const [newUser] = await db
+    .insert(users)
+    .values({
+      name: input.name.trim(),
+      email: normalizedEmail,
+      password: hashedPassword,
+      role: input.role,
+      verified: true,
+      provider: "manual",
+    })
+    .returning({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      verified: users.verified,
+      provider: users.provider,
+      uid: users.uid,
+      resetTokenExpires: users.resetTokenExpires,
+      createdAt: users.createdAt,
+      updatedAt: users.updatedAt,
+    });
+
+  if (!newUser) {
+    throw new AppError("CREATE_FAILED", "Failed to create user", 500);
+  }
+
+  return newUser;
 }

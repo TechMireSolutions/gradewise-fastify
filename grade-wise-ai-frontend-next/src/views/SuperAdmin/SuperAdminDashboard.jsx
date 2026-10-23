@@ -1,140 +1,152 @@
-import { cn } from "@/lib/cn.js";
-import { card, iconBadge, page, pageInner } from "@/lib/ui.js";
+"use client";
+
 import { useEffect } from "react";
-import Link from "next/link";
+import { page, pageInner } from "@/lib/ui.js";
 import Modal from "@/components/ui/Modal.jsx";
 import PageLoader from "@/components/ui/PageLoader.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
 import MainLandmark from "@/components/layout/MainLandmark.jsx";
-import UserManagementTable, { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
-import { DashboardSectionCard } from "@/components/dashboard/shared/index.js";
+import { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
 import useUserManagement from "@/hooks/useUserManagement.js";
-import {
-  FaUsers,
-  FaCrown,
-  FaSync,
-  FaShieldAlt,
-  FaKey,
-  FaArrowRight,
-} from "react-icons/fa";
+import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
+import SuperAdminHeader from "./components/SuperAdminHeader.jsx";
+import SuperAdminUsersSection from "./components/SuperAdminUsersSection.jsx";
+import AddUserModal from "./components/AddUserModal.jsx";
+import ChangeRoleModal from "./components/ChangeRoleModal.jsx";
+import DeleteUserModal from "./components/DeleteUserModal.jsx";
+import ProviderSettingsModal from "./components/ProviderSettingsModal.jsx";
 
-function SuperAdminDashboard() {
+export default function SuperAdminDashboard() {
   const {
     user,
     users,
+    totalUsers,
     loading,
     actionLoading,
     modal,
     closeModal,
     fetchUsers,
     handleRoleChange,
+    handleCreateUser,
     handleDeleteUser,
     confirmDeleteUser,
-    pendingDelete,
     stats,
+    searchQuery,
+    setSearchQuery,
+    roleFilter,
+    setRoleFilter,
+    activeModal,
+    selectedUser,
+    openCreateModal,
+    openRoleModal,
+    closeActiveModal,
   } = useUserManagement();
+
+  const apiConfig = useSuperAdminApiConfig();
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  if (loading) return <PageLoader message="Loading users..." />;
+  const handleSearchChange = (term) => {
+    setSearchQuery(term);
+    fetchUsers({ search: term });
+  };
+
+  const handleRoleFilterChange = (role) => {
+    setRoleFilter(role);
+    fetchUsers({ role: role || undefined });
+  };
+
+  if (loading && users.length === 0) {
+    return <PageLoader message="Loading users..." />;
+  }
 
   return (
     <div className={page}>
       <AmbientBackground />
 
       <MainLandmark className={pageInner}>
-        <div className="mb-8 sm:mb-10">
-          <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8", "lg:p-10")}>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-              <div className="flex-1">
-                <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-3")}>
-                  System Control
-                </p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight flex items-center gap-3 mb-2">
-                  <span className={cn("p-2.5", "rounded-xl", iconBadge)}>
-                    <FaCrown className="w-5 h-5 text-yellow-300" />
-                  </span>
-                  Super Admin Dashboard
-                </h1>
-                <p className={cn("text-secondary-foreground", "leading-relaxed", "mb-5")}>
-                  Welcome back, <span className="text-foreground font-semibold">{user?.name}</span>
-                </p>
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 sm:p-4 inline-flex items-start gap-3">
-                  <FaShieldAlt className="text-amber-500 dark:text-amber-400 text-lg flex-shrink-0 mt-0.5" />
-                  <div className="text-xs sm:text-sm">
-                    <strong className="block text-amber-700 dark:text-amber-300 mb-0.5">Role Permissions</strong>
-                    <span className={"text-muted-foreground"}>
-                      Manage users, promote/demote roles, and configure system API keys.
-                    </span>
-                  </div>
-                </div>
-              </div>
+        <SuperAdminHeader
+          user={user}
+          totalUsers={totalUsers}
+          onOpenCreateModal={openCreateModal}
+          onOpenApiConfigModal={apiConfig.openSettingsModal}
+        />
 
-              <div className="flex flex-row sm:flex-col gap-3 flex-shrink-0">
-                <div className="bg-input border border-border rounded-2xl p-4 text-center min-w-[90px]">
-                  <FaUsers className="w-7 h-7 mx-auto mb-1.5 text-indigo-500 dark:text-indigo-400" />
-                  <p className="text-2xl font-bold text-foreground leading-none mb-1">{users.length}</p>
-                  <p className={cn("text-xs", "text-muted-foreground", "font-medium")}>Total Users</p>
-                </div>
-                <Link
-                  href="/super-admin/api-config"
-                  className="inline-flex flex-col items-center gap-1.5 bg-input hover:bg-btn-secondary border border-border hover:border-indigo-500/30 backdrop-blur-sm rounded-2xl p-4 text-center transition-all duration-200 group min-w-[90px]"
-                >
-                  <FaKey className="w-7 h-7 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-150" />
-                  <span className={cn("text-xs", "font-semibold", "text-secondary-foreground", "group-hover:text-foreground", "transition-colors", "whitespace-nowrap")}>API Keys</span>
-                  <FaArrowRight className={cn("w-3", "h-3", "text-muted-foreground", "group-hover:text-indigo-600 dark:group-hover:text-indigo-400", "transition-colors")} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+        <UserStatsGrid stats={stats} totalUsers={totalUsers} />
 
-        <UserStatsGrid stats={stats} totalUsers={users.length} />
-
-        <DashboardSectionCard
-          icon={FaUsers}
-          title="Platform Users Management"
-          subtitle={`${users.length} user${users.length !== 1 ? "s" : ""} (excluding super admins)`}
-          headerClassName="bg-input"
-          bodyClassName="p-0"
-          actions={
-            <button
-              onClick={fetchUsers}
-              className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "min-h-[44px]")}
-            >
-              <FaSync />
-              Refresh
-            </button>
-          }
-        >
-          <UserManagementTable
-            users={users}
-            currentUserId={user?.id}
-            actionLoading={actionLoading}
-            onRoleChange={handleRoleChange}
-            onDelete={handleDeleteUser}
-            canDelete
-          />
-        </DashboardSectionCard>
-
+        <SuperAdminUsersSection
+          users={users}
+          currentUserId={user?.id}
+          actionLoading={actionLoading}
+          onRefresh={() => fetchUsers()}
+          onOpenCreateModal={openCreateModal}
+          onOpenRoleModal={openRoleModal}
+          onDelete={handleDeleteUser}
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          roleFilter={roleFilter}
+          onRoleFilterChange={handleRoleFilterChange}
+        />
       </MainLandmark>
 
+      {/* ─── Popup Modal Forms (Pure Dialogs) ────────────────────────────────── */}
+
+      {/* 1. Add User Popup Form */}
+      <AddUserModal
+        isOpen={activeModal === "create"}
+        onClose={closeActiveModal}
+        onSubmit={handleCreateUser}
+        loading={actionLoading === "create-user"}
+      />
+
+      {/* 2. Change Role Popup Form */}
+      <ChangeRoleModal
+        isOpen={activeModal === "change-role"}
+        onClose={closeActiveModal}
+        user={selectedUser}
+        onRoleChange={handleRoleChange}
+        loading={Boolean(actionLoading?.startsWith("role-"))}
+      />
+
+      {/* 3. Delete Confirmation Popup Modal */}
+      <DeleteUserModal
+        isOpen={activeModal === "delete"}
+        onClose={closeActiveModal}
+        user={selectedUser}
+        onConfirm={confirmDeleteUser}
+        loading={Boolean(actionLoading?.startsWith("delete-"))}
+      />
+
+      {/* 4. Quick AI Key Configuration Popup Modal */}
+      <ProviderSettingsModal
+        isOpen={apiConfig.isSettingsModalOpen}
+        onClose={apiConfig.closeSettingsModal}
+        purpose={apiConfig.purpose}
+        provider={apiConfig.provider}
+        card={apiConfig.card}
+        pStyle={apiConfig.pStyle}
+        aiState={apiConfig.aiState}
+        configLoading={apiConfig.configLoading}
+        inlineTestStatus={apiConfig.inlineTestStatus}
+        onChangeProvider={(p) =>
+          apiConfig.setActiveProvider((prev) => ({ ...prev, [apiConfig.purpose]: p }))
+        }
+        onUpdateCard={apiConfig.updateActiveCard}
+        onTestInlineKey={apiConfig.handleTestInlineKey}
+        onSaveCard={apiConfig.handleSaveCard}
+      />
+
+      {/* 5. General Notification Alert Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={closeModal}
-        onConfirm={pendingDelete ? confirmDeleteUser : undefined}
         type={modal.type}
         title={modal.title}
-        loading={Boolean(pendingDelete && actionLoading === `delete-${pendingDelete.userId}`)}
-        closeOnConfirm={false}
-        confirmText="Delete User"
       >
         {modal.message}
       </Modal>
     </div>
   );
 }
-
-export default SuperAdminDashboard;

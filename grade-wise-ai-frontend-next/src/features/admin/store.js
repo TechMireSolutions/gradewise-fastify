@@ -4,6 +4,7 @@ import {
   fetchAdminUsersAPI,
   changeUserRoleAPI,
   deleteAdminUserAPI,
+  createAdminUserAPI,
 } from "./api.js";
 
 const initialOverview = {
@@ -101,6 +102,24 @@ const useAdminStore = create((set, get) => ({
       return res.data;
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to delete user";
+      throw new Error(msg);
+    }
+  },
+
+  createAdminUser: async (payload) => {
+    try {
+      const res = await createAdminUserAPI(payload);
+      const newUser = res.data?.user || res.data?.data;
+      if (newUser) {
+        set((state) => ({
+          users: [newUser, ...state.users],
+          totalUsers: state.totalUsers + 1,
+        }));
+      }
+      get().getAdminOverview().catch(() => {});
+      return res.data;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || "Failed to create user";
       throw new Error(msg);
     }
   },

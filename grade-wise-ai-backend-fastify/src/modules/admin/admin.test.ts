@@ -3,12 +3,14 @@ import {
   AdminOverviewResponseSchema,
   AdminUsersQuerySchema,
   ChangeRoleBodySchema,
+  CreateAdminUserBodySchema,
 } from "./admin.schema.js";
 import {
   getAdminOverviewService,
   getAdminUsersService,
   changeUserRoleService,
   removeUserService,
+  createAdminUserService,
 } from "./admin.service.js";
 import { db } from "../../db/index.js";
 import { AppError, NotFoundError } from "../../utils/errors.js";
@@ -67,6 +69,28 @@ describe("Admin Module Schema Validation", () => {
     expect(ChangeRoleBodySchema.safeParse({ newRole: "admin" }).success).toBe(true);
     expect(ChangeRoleBodySchema.safeParse({ newRole: "instructor" }).success).toBe(true);
     expect(ChangeRoleBodySchema.safeParse({ newRole: "student" }).success).toBe(true);
+  });
+
+  it("validates CreateAdminUserBodySchema correctly", () => {
+    const valid = {
+      name: "Dr. Jane Smith",
+      email: "jane.smith@university.edu",
+      password: "SecurePassword123!",
+      role: "instructor",
+    };
+    const parsed = CreateAdminUserBodySchema.safeParse(valid);
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.name).toBe("Dr. Jane Smith");
+      expect(parsed.data.role).toBe("instructor");
+    }
+
+    // rejects short password
+    expect(CreateAdminUserBodySchema.safeParse({ ...valid, password: "123" }).success).toBe(false);
+    // rejects invalid email
+    expect(CreateAdminUserBodySchema.safeParse({ ...valid, email: "invalid-email" }).success).toBe(false);
+    // rejects super_admin role
+    expect(CreateAdminUserBodySchema.safeParse({ ...valid, role: "super_admin" }).success).toBe(false);
   });
 });
 

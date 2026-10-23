@@ -31,5 +31,13 @@ export const ChangeRoleBodySchema = z.object({
   newRole: z.enum(["admin", "instructor", "student"]),
 });
 
+export const CreateAdminUserBodySchema = z.object({
+  name: z.string().min(2).max(100),
+  email: z.string().email(),
+  password: z.string().min(8).max(128),
+  role: z.enum(["admin", "instructor", "student"]).default("student"),
+});
+
 export type AdminOverviewResponse = z.infer<typeof AdminOverviewResponseSchema>;
 export type AdminUsersQuery = z.infer<typeof AdminUsersQuerySchema>;
+export type CreateAdminUserBody = z.infer<typeof CreateAdminUserBodySchema>;
