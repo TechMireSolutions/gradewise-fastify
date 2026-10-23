@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { iconBadge, page, pageInner } from "@/lib/ui.js";
+import { iconBadge, page, pageInner, statSurface } from "@/lib/ui.js";
 import { Modal, Button } from "@/components/ui";
 import { FaKey } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
@@ -65,11 +65,11 @@ export default function SuperAdminApiConfig() {
 
             {/* Quick Stats */}
             <div className="flex gap-3 flex-shrink-0">
-              <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-3 sm:p-4 text-center min-w-[80px]">
+              <div className={cn(statSurface.indigo, "p-3 sm:p-4 text-center min-w-[80px]")}>
                 <div className="text-xl sm:text-2xl font-bold text-foreground leading-none">{totalKeys}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">Total keys</div>
               </div>
-              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3 sm:p-4 text-center min-w-[80px]">
+              <div className={cn(statSurface.emerald, "p-3 sm:p-4 text-center min-w-[80px]")}>
                 <div className="text-xl sm:text-2xl font-bold text-foreground leading-none">
                   {configuredCount}
                   <span className="text-sm font-normal text-muted-foreground">/6</span>

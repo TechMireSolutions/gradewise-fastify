@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/cn.js";
-import { card, page, pageInner } from "@/lib/ui.js";
+import { card, page, pageInner, statusTone } from "@/lib/ui.js";
 import {
   FaServer,
   FaDatabase,
@@ -210,9 +210,7 @@ export default function SuperAdminSystem() {
         <div
           className={cn(
             "p-5 rounded-2xl border mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4",
-            isHealthy
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-800 dark:text-emerald-300"
-              : "bg-red-500/10 border-red-500/20 text-red-800 dark:text-red-300"
+            isHealthy ? statusTone.success : statusTone.danger
           )}
         >
           <div className="flex items-center gap-3.5 min-w-0">

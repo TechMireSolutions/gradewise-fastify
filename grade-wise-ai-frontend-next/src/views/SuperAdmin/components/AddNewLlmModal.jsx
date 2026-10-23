@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/cn.js";
-import { focusRing, iconBadge } from "@/lib/ui.js";
+import { focusRing, iconBadge, statusTone, shape } from "@/lib/ui.js";
 import {
   FaRobot,
   FaTimes,
@@ -23,7 +23,7 @@ import {
   FaSync,
   FaEdit,
 } from "react-icons/fa";
-import { Label, Textarea, Select, Input, LoadingSpinner, Button } from "@/components/ui/index.js";
+import { Label, Textarea, Select, Input, LoadingSpinner, Button, StatusBadge } from "@/components/ui/index.js";
 import TestResultBadge from "./TestResultBadge.jsx";
 import { fetchProviderModels } from "@/features/ai-config/api.js";
 import {
@@ -255,9 +255,9 @@ export default function AddNewLlmModal({
                 <h2 id="add-llm-title" className="text-xl sm:text-2xl font-bold text-foreground truncate">
                   Add New LLM
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
+                <StatusBadge variant="info">
                   Step {currentStep} of 4
-                </span>
+                </StatusBadge>
               </div>
               <p className="text-xs text-muted-foreground truncate mt-0.5">
                 Configure foundation model keys and active models for educational workflows
@@ -639,9 +639,9 @@ export default function AddNewLlmModal({
                     Format: <code className="font-mono text-muted-foreground">{currentProviderMeta.keyPrefix}</code>. Comma-separated for bulk keys.
                   </p>
                   {parsedKeys.length > 1 && (
-                    <span className="font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                    <StatusBadge variant="info">
                       {parsedKeys.length} keys detected for rotation
-                    </span>
+                    </StatusBadge>
                   )}
                 </div>
               </div>
@@ -798,8 +798,8 @@ export default function AddNewLlmModal({
               {!isFetchingModels && fetchedModels.length > 0 && !isCustomModelMode && (
                 <div className="space-y-4 animate-fade-in">
                   {/* Live Success Banner */}
-                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs flex items-center justify-between gap-2">
-                    <span className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold truncate">
+                  <div className={cn("p-3 border text-xs flex items-center justify-between gap-2", statusTone.success, shape.panel)}>
+                    <span className="flex items-center gap-2 font-semibold truncate">
                       <FaCheck className="w-3.5 h-3.5 flex-shrink-0" />
                       <span>
                         Discovered <strong>{fetchedModels.length}</strong> available models live from {currentProviderMeta.name} API
