@@ -64,7 +64,7 @@ export default function AccountDetailsCard({
                 </span>
               </label>
               <div className="bg-input border border-border px-4 py-3 rounded-xl">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full ${theme.badge}`}>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-xl whitespace-nowrap ${theme.badge}`}>
                   <RoleIcon className="text-xs" />
                   {theme.label}
                 </span>

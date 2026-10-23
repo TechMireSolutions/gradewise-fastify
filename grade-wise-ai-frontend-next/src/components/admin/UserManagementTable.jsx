@@ -174,7 +174,7 @@ export default function UserManagementTable({
                 <td className="py-3 px-4">
                   <span
                     className={cn(
-                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border",
+                      "inline-flex items-center px-2 py-0.5 rounded-xl text-[11px] font-semibold border",
                       getRoleBadgeColor(userData.role)
                     )}
                   >

@@ -144,7 +144,7 @@ export default function ChangeRoleModal({
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-semibold text-foreground text-base truncate">{user.name}</h3>
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${getRoleBadgeColor(
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-xl text-xs font-semibold ${getRoleBadgeColor(
                     user.role
                   )}`}
                 >
@@ -188,7 +188,7 @@ export default function ChangeRoleModal({
                       <div className="flex items-center gap-2 mb-1">
                         <span className="font-bold text-sm text-foreground">{roleOpt.name}</span>
                         {isCurrent && (
-                          <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-input border border-border text-muted-foreground">
+                          <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-xl bg-input border border-border text-muted-foreground">
                             Current
                           </span>
                         )}

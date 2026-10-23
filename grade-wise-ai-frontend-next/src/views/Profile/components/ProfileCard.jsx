@@ -21,7 +21,7 @@ export default function ProfileCard({ user, theme, RoleIcon }) {
       <div className="p-6 sm:p-8">
         <div className="flex flex-col items-center gap-4">
           {/* Role badge */}
-          <span className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-full ${theme.badge}`}>
+          <span className={`inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl whitespace-nowrap ${theme.badge}`}>
             <RoleIcon className="text-xs" />
             {theme.label}
           </span>

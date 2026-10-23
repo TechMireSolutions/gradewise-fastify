@@ -26,14 +26,14 @@ export default function TestResultBadge({ r }) {
           )}
         </span>
         {r.autoSwitchedModelFrom && (
-          <span className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded w-fit", statusTone.info)}>
+          <span className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-lg w-fit", statusTone.info)}>
             <FaWrench className="w-2.5 h-2.5 flex-shrink-0" /> Model auto-switched:{" "}
             <code className="font-mono">{r.autoSwitchedModelFrom}</code> →{" "}
             <code className="font-mono">{r.modelUsed}</code>
           </span>
         )}
         {r.providerOverridden && (
-          <span className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded w-fit", statusTone.warning)}>
+          <span className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-lg w-fit", statusTone.warning)}>
             <FaExclamationTriangle className="w-2.5 h-2.5 flex-shrink-0" /> Key belongs to{" "}
             <strong>{r.providerDetected}</strong> — consider moving it there.
           </span>
@@ -49,7 +49,7 @@ export default function TestResultBadge({ r }) {
         {(r.message || "Invalid key").substring(0, 60)}
       </span>
       {r.providerOverridden && (
-        <span className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded w-fit", statusTone.warning)}>
+        <span className={cn("inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-lg w-fit", statusTone.warning)}>
           <FaExclamationTriangle className="w-2.5 h-2.5 flex-shrink-0" /> Key prefix suggests{" "}
           <strong>{r.providerDetected}</strong> provider.
         </span>

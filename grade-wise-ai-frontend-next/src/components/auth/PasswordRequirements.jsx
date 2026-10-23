@@ -72,7 +72,7 @@ export default function PasswordRequirements({
         {password.length > 0 && showStrengthBar && (
           <span
             className={cn(
-              "text-xs font-medium px-2 py-0.5 rounded-full border",
+              "text-xs font-medium px-2 py-0.5 rounded-xl whitespace-nowrap border",
               metCount <= 2
                 ? statusTone.danger
                 : metCount === 3

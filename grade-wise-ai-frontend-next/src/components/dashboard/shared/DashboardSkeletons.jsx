@@ -27,7 +27,7 @@ export function TableSkeleton({ rows = 5, className }) {
               <div className="h-3 w-24 rounded bg-muted-foreground/15" />
             </div>
           </div>
-          <div className="h-6 w-16 rounded-full bg-muted-foreground/20" />
+          <div className="h-6 w-16 rounded-xl bg-muted-foreground/20" />
           <div className="hidden sm:flex gap-2">
             <div className="h-8 w-14 rounded-xl bg-muted-foreground/20" />
             <div className="h-8 w-14 rounded-xl bg-muted-foreground/20" />
@@ -47,7 +47,7 @@ export function CardListSkeleton({ count = 3, className }) {
         <div key={i} className="rounded-xl border border-border bg-card/60 p-4 sm:p-5 space-y-3">
           <div className="flex items-center justify-between">
             <div className="h-5 w-48 rounded bg-muted-foreground/20" />
-            <div className="h-6 w-16 rounded-full bg-muted-foreground/20" />
+            <div className="h-6 w-16 rounded-xl bg-muted-foreground/20" />
           </div>
           <div className="h-3 w-32 rounded bg-muted-foreground/15" />
           <div className="pt-2 border-t border-border/60 flex justify-end">

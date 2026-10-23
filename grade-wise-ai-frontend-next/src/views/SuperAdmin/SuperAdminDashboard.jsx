@@ -347,7 +347,7 @@ export default function SuperAdminDashboard() {
                     <h3 className="text-base font-bold text-foreground">
                       AI Engine & Key Management Vault
                     </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20">
+                    <span className="px-2 py-0.5 rounded-xl text-[10px] font-semibold bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20 whitespace-nowrap">
                       AES-256 Vault
                     </span>
                   </div>

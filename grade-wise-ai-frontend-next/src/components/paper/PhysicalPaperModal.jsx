@@ -348,7 +348,7 @@ const PhysicalPaperModal = ({
                 type="button"
                 onClick={handleClose}
                 aria-label="Close modal"
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-200 hover:rotate-90 active:scale-90 cursor-pointer"
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl p-2 transition-all duration-200 hover:rotate-90 active:scale-90 cursor-pointer"
               >
                 <FaTimes className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>

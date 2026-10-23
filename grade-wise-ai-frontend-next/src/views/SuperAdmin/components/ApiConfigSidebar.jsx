@@ -124,7 +124,7 @@ export default function ApiConfigSidebar({
                         onClick={() => onOpenSettings?.(p, isConfigured ? 4 : 1, purpose)}
                         aria-label={`Configure ${meta?.name || p}`}
                         className={cn(
-                          "text-[10px] font-mono px-1.5 py-0.5 rounded-full flex-shrink-0 hover:scale-105 transition-all cursor-pointer",
+                          "text-[10px] font-mono px-2 py-0.5 rounded-xl whitespace-nowrap flex-shrink-0 hover:scale-105 transition-all cursor-pointer",
                           isConfigured
                             ? cn("font-semibold", statusTone.success)
                             : "text-muted-foreground/60 hover:text-foreground hover:bg-input",

@@ -88,7 +88,7 @@ export default function DeleteUserModal({
             <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
               <span className="font-bold text-foreground text-base">{targetName}</span>
               {targetRole && (
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${getRoleBadgeColor(targetRole)}`}>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-xl text-xs font-semibold ${getRoleBadgeColor(targetRole)}`}>
                   {formatRole(targetRole)}
                 </span>
               )}

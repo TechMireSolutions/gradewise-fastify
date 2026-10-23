@@ -98,7 +98,7 @@ test("Modern Web Typography & Legibility", async (t) => {
   await t.test("defines heading gradient and eyebrows", () => {
     assert.ok(headingGradient.includes("bg-clip-text"));
     assert.ok(eyebrow.includes("uppercase"));
-    assert.ok(eyebrowPill.includes("rounded-full"));
+    assert.ok(eyebrowPill.includes("rounded-xl"));
   });
 });
 
@@ -126,9 +126,9 @@ test("Concentric Shape Hierarchy (3-Tier Radius Standard)", async (t) => {
     assert.strictEqual(shape.chip, "rounded-xl");
   });
 
-  await t.test("enforces Tier 3 badge/pill/avatar full radius (rounded-full)", () => {
-    assert.strictEqual(shape.badge, "rounded-full");
-    assert.strictEqual(shape.pill, "rounded-full");
+  await t.test("enforces Tier 3 badge/pill standardized 12px radius (rounded-xl) and avatar circle (rounded-full)", () => {
+    assert.strictEqual(shape.badge, "rounded-xl");
+    assert.strictEqual(shape.pill, "rounded-xl");
     assert.strictEqual(shape.avatar, "rounded-full");
   });
 });

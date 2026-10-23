@@ -78,7 +78,7 @@ export default function StoredKeysTable({
               <h3 className="text-lg font-bold text-foreground">
                 Stored Keys
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border">
+              <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-btn-secondary text-muted-foreground border border-border">
                 {allPurposeKeys.length} key{allPurposeKeys.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -222,11 +222,11 @@ export default function StoredKeysTable({
                     <td className="px-6 py-4">
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap",
                           k.theme.badge
                         )}
                       >
-                        <span className={cn("w-1.5 h-1.5 rounded-full", k.theme.dot)} />
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", k.theme.dot)} />
                         {k.providerLabel}
                       </span>
                     </td>
@@ -237,7 +237,7 @@ export default function StoredKeysTable({
                           type="button"
                           onClick={() => handleCopySnippet(k.snippet)}
                           className={cn(
-                            "p-1 rounded text-muted-foreground hover:text-foreground transition-colors cursor-pointer",
+                            "p-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-colors cursor-pointer",
                             focusRing
                           )}
                           title="Copy snippet"
@@ -257,7 +257,7 @@ export default function StoredKeysTable({
                         onClick={() => onOpenSettings?.(k.provider, 4, purpose)}
                         title="Click to change model for this provider"
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-btn-secondary hover:bg-indigo-500/15 text-muted-foreground hover:text-indigo-700 dark:hover:text-indigo-400 border border-border hover:border-indigo-500/30 font-mono transition-all duration-150 cursor-pointer group",
+                          "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-indigo-500/15 text-muted-foreground hover:text-indigo-700 dark:hover:text-indigo-400 border border-border hover:border-indigo-500/30 font-mono transition-all duration-150 cursor-pointer group whitespace-nowrap",
                           focusRing
                         )}
                       >

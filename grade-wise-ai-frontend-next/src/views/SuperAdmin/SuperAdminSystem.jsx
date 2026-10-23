@@ -245,7 +245,7 @@ export default function SuperAdminSystem() {
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-input border border-border text-foreground font-mono">
+            <span className="text-xs px-2.5 py-1 rounded-xl bg-input border border-border text-foreground font-mono">
               Fastify 5 + Node 24 ESM
             </span>
           </div>

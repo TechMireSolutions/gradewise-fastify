@@ -141,7 +141,7 @@ export default function SuperAdminAnalytics() {
                 <FaClipboardList className="text-indigo-500 dark:text-indigo-400" />
                 Assessment Lifecycle
               </h2>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+              <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 whitespace-nowrap">
                 {executionRate}% Live
               </span>
             </div>
@@ -229,7 +229,7 @@ export default function SuperAdminAnalytics() {
                 <FaUsers className="text-indigo-500 dark:text-indigo-400" />
                 Role Demographics
               </h2>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-input border border-border text-secondary-foreground">
+              <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-input border border-border text-secondary-foreground whitespace-nowrap">
                 {users.total} Total
               </span>
             </div>
@@ -322,7 +322,7 @@ export default function SuperAdminAnalytics() {
                 <FaCheckCircle className="text-sky-500 dark:text-sky-400" />
                 Identity & Verification
               </h2>
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/20">
+              <span className="px-2.5 py-1 rounded-xl text-xs font-semibold bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/20 whitespace-nowrap">
                 {verificationRate}% Verified
               </span>
             </div>

@@ -34,7 +34,7 @@ export default function ExamHeader({
           <span
             role="timer"
             aria-live="polite"
-            className={cn(chip, "rounded-full px-3 py-1.5 font-mono tabular-nums")}
+            className={cn(chip, "px-3 py-1.5 font-mono tabular-nums")}
           >
             {totalLabel}: {formatTime(timeRemaining)}
           </span>

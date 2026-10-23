@@ -398,7 +398,7 @@ export default function AddNewLlmModal({
                     >
                       <FaFileAlt className="w-5 h-5" />
                     </span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-btn-secondary border border-border text-muted-foreground">
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-xl bg-btn-secondary border border-border text-muted-foreground whitespace-nowrap">
                       {totalPdfKeys} keys stored
                     </span>
                   </div>
@@ -441,7 +441,7 @@ export default function AddNewLlmModal({
                     >
                       <FaPencilAlt className="w-5 h-5" />
                     </span>
-                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-btn-secondary border border-border text-muted-foreground">
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-xl bg-btn-secondary border border-border text-muted-foreground whitespace-nowrap">
                       {totalTextKeys} keys stored
                     </span>
                   </div>
@@ -518,14 +518,14 @@ export default function AddNewLlmModal({
                             <FaCheck />
                           </span>
                         ) : count > 0 ? (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-btn-secondary border border-border text-muted-foreground flex-shrink-0">
+                          <span className="text-[11px] px-2 py-0.5 rounded-xl bg-btn-secondary border border-border text-muted-foreground flex-shrink-0 whitespace-nowrap">
                             {count} active
                           </span>
                         ) : null}
                       </div>
 
                       <div className="my-2">
-                        <span className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-full inline-block mb-1", theme.badge)}>
+                        <span className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-xl inline-block mb-1 whitespace-nowrap", theme.badge)}>
                           {meta.badge}
                         </span>
                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed text-pretty">
@@ -554,7 +554,7 @@ export default function AddNewLlmModal({
                     Step 3 of 4
                   </span>
                   <span className="text-xs text-muted-foreground">·</span>
-                  <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", currentProviderTheme.badge)}>
+                  <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-xl whitespace-nowrap", currentProviderTheme.badge)}>
                     {currentProviderMeta.name}
                   </span>
                   <span className="text-xs text-muted-foreground">·</span>
@@ -728,7 +728,7 @@ export default function AddNewLlmModal({
                     Step 4 of 4
                   </span>
                   <span className="text-xs text-muted-foreground">·</span>
-                  <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", currentProviderTheme.badge)}>
+                  <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-xl whitespace-nowrap", currentProviderTheme.badge)}>
                     {currentProviderMeta.name}
                   </span>
                   <span className="text-xs text-muted-foreground">·</span>
@@ -844,7 +844,7 @@ export default function AddNewLlmModal({
                             <div className="flex items-center justify-between gap-1">
                               <span
                                 className={cn(
-                                  "text-[10px] font-semibold px-2 py-0.5 rounded-full",
+                                  "text-[10px] font-semibold px-2 py-0.5 rounded-xl whitespace-nowrap",
                                   isCur
                                     ? "bg-indigo-600 text-white"
                                     : "bg-btn-secondary text-muted-foreground border border-border"

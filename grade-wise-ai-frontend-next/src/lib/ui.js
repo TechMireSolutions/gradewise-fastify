@@ -18,8 +18,8 @@ export const shape = {
   input: "rounded-xl",
   panel: "rounded-xl",
   chip: "rounded-xl",
-  badge: "rounded-full",
-  pill: "rounded-full",
+  badge: "rounded-xl",
+  pill: "rounded-xl",
   avatar: "rounded-full",
 };
 
@@ -109,7 +109,7 @@ export const eyebrow =
   "mb-2 inline-flex items-center gap-2 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-eyebrow";
 
 export const eyebrowPill =
-  "inline-flex items-center gap-2 rounded-full border border-indigo-500/22 bg-indigo-500/10 px-4 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-indigo-700 dark:border-indigo-500/25 dark:bg-indigo-500/12 dark:text-indigo-300";
+  "inline-flex items-center gap-2 rounded-xl border border-indigo-500/22 bg-indigo-500/10 px-4 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-indigo-700 dark:border-indigo-500/25 dark:bg-indigo-500/12 dark:text-indigo-300";
 
 export const pageTitle =
   "text-[clamp(1.75rem,4vw,2.25rem)] font-bold leading-tight tracking-tight text-foreground text-balance";
