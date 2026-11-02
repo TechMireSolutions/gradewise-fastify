@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { btn, focusRing } from "@/lib/ui.js";
+import { btn } from "@/lib/ui.js";
 import { useState } from "react";
 import {
   FaPlus,
@@ -9,8 +9,6 @@ import {
   FaArrowLeft,
   FaDownload,
   FaFileAlt,
-  FaCheck,
-  FaExclamationTriangle,
 } from "react-icons/fa";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
 
@@ -169,6 +167,11 @@ export default function PaperQuestionsEditor({
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Language: <strong className="text-foreground uppercase">{language}</strong>
             </span>
+            {assessmentTitle ? (
+              <span className="text-xs font-medium text-muted-foreground truncate max-w-[220px]">
+                • {assessmentTitle}
+              </span>
+            ) : null}
           </div>
           <h3 className="text-xl font-bold text-foreground mt-1.5">
             Customize & Fix Exam Questions
