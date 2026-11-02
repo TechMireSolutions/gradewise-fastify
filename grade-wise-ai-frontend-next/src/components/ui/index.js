@@ -5,6 +5,7 @@ export { default as EmptyState } from "./EmptyState";
 export { default as IconBadge } from "./IconBadge";
 export { default as Input } from "./Input";
 export { default as Label } from "./Label";
+export { default as LanguageFlag } from "./LanguageFlag";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as LoadingState } from "./LoadingState";
 export { default as Modal } from "./Modal";

@@ -4,6 +4,7 @@ import EmptyState from "@/components/ui/EmptyState.jsx";
 import QuestionCard from "./QuestionCard.jsx";
 import { FiAlertCircle, FiList } from "react-icons/fi";
 import { LANGUAGE_OPTIONS } from "@/utils/translations.js";
+import LanguageFlag from "@/components/ui/LanguageFlag.jsx";
 
 function SampleQuestionsTab({ questions, questionError, loading, selectedLanguage, onLanguageChange }) {
   return (
@@ -23,14 +24,14 @@ function SampleQuestionsTab({ questions, questionError, loading, selectedLanguag
                 type="button"
                 onClick={() => onLanguageChange?.(lang.value)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
+                  "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer",
                   selectedLanguage === lang.value
                     ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
                     : "bg-btn-secondary border border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
                 )}
               >
-                <span className="text-sm leading-none">{lang.label.split(" ")[0]}</span>
-                <span>{lang.label.replace(/^\S+\s/, "")}</span>
+                <LanguageFlag language={lang.value} size="sm" />
+                <span>{lang.name || lang.label.replace(/^\S+\s/, "")}</span>
               </button>
             ))}
           </div>

@@ -323,11 +323,56 @@ export const TRANSLATIONS = {
 };
 
 export const LANGUAGE_OPTIONS = [
-  { value: "all", label: "🌐 All 4 Languages", rtl: false },
-  { value: "en", label: "🇬🇧 English", rtl: false },
-  { value: "ur", label: "🇵🇰 Urdu (اردو)", rtl: true },
-  { value: "ar", label: "🇸🇦 Arabic (العربية)", rtl: true },
-  { value: "fa", label: "🇮🇷 Persian (فارسی)", rtl: true },
+  {
+    value: "all",
+    label: "🌐 All 4 Languages",
+    name: "All 4 Languages",
+    nativeName: "تمام زبانیں",
+    code: "ALL",
+    description: "Generate an all-inclusive exam paper combining questions in all 4 supported languages",
+    rtl: false,
+    badge: "Multilingual",
+  },
+  {
+    value: "en",
+    label: "🇬🇧 English",
+    name: "English",
+    nativeName: "English",
+    code: "EN",
+    description: "Standard English assessment with left-to-right (LTR) layout",
+    rtl: false,
+    badge: "LTR • Latin",
+  },
+  {
+    value: "ur",
+    label: "🇵🇰 Urdu (اردو)",
+    name: "Urdu",
+    nativeName: "اردو",
+    code: "UR",
+    description: "Urdu assessment with Nastaliq typography and right-to-left layout",
+    rtl: true,
+    badge: "RTL • نستعلیق",
+  },
+  {
+    value: "ar",
+    label: "🇸🇦 Arabic (العربية)",
+    name: "Arabic",
+    nativeName: "العربية",
+    code: "AR",
+    description: "Formal Arabic paper with classical Quranic/Naskh typography",
+    rtl: true,
+    badge: "RTL • العربية",
+  },
+  {
+    value: "fa",
+    label: "🇮🇷 Persian (فارسی)",
+    name: "Persian",
+    nativeName: "فارسی",
+    code: "FA",
+    description: "Persian language paper with standard Farsi typography",
+    rtl: true,
+    badge: "RTL • فارسی",
+  },
 ];
 
 export const RTL_LANGUAGES = ["ar", "ur", "fa", "he"];

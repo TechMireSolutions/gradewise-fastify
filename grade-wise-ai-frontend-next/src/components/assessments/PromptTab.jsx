@@ -5,6 +5,7 @@ import React from "react";
 import { generateAIPrompt } from "@/utils/promptGenerator.js";
 import { LANGUAGE_OPTIONS, isRTLLanguage } from "@/utils/translations.js";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
+import LanguageFlag from "@/components/ui/LanguageFlag.jsx";
 
 const QUESTION_TYPE_LABELS = {
   multiple_choice: { en: "Multiple Choice", ur: "کثیر الانتخابی سوالات (MCQs)", ar: "أسئلة الاختيار من متعدد", fa: "سوالات چند گزینه‌ای" },
@@ -66,15 +67,15 @@ export default function PromptTab({
                   type="button"
                   onClick={() => onLanguageChange?.(lang.value)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer min-h-9",
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer min-h-9",
                     focusRing,
                     selectedLanguage === lang.value
                       ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
                       : "bg-btn-secondary border border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
                   )}
                 >
-                  <span className="text-sm leading-none">{lang.label.split(" ")[0]}</span>
-                  <span>{lang.label.replace(/^\S+\s/, "")}</span>
+                  <LanguageFlag language={lang.value} size="sm" />
+                  <span>{lang.name || lang.label.replace(/^\S+\s/, "")}</span>
                 </button>
               ))}
             </div>
@@ -100,7 +101,7 @@ export default function PromptTab({
             <LoadingSpinner size="lg" type="dots" color="blue" />
           </div>
           <p className={cn("text-muted-foreground", "text-sm")}>
-            Building full AI prompt in {activeLangOption?.label?.replace(/^\S+\s/, "") || selectedLanguage}...
+            Building full AI prompt in {activeLangOption?.name || selectedLanguage}...
           </p>
         </div>
       ) : aiPrompt?.unifiedPrompt ? (
@@ -178,7 +179,7 @@ export default function PromptTab({
         <>
           <p className={cn("text-xs text-muted-foreground mb-2")}>
             Showing preview based on assessment configuration in{" "}
-            <span className="font-semibold text-foreground">{activeLangOption?.label?.replace(/^\S+\s/, "") || selectedLanguage}</span>:
+            <span className="font-semibold text-foreground">{activeLangOption?.name || selectedLanguage}</span>:
           </p>
           <pre
             dir={isRTL ? "rtl" : "ltr"}
