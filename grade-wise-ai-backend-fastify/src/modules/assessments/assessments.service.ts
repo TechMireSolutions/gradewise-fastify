@@ -409,16 +409,54 @@ export async function generatePhysicalPaperService(
     .where(eq(questionBlocks.assessmentId, assessmentId));
   if (blocks.length === 0) throw new AppError("NO_BLOCKS", "No question blocks configured", 400);
 
-  // Generate preview questions to populate the paper
-  const questions = await generatePreviewQuestions(assessment, options.language);
-  const paperQuestions = questions.map((q, i) => {
-    const question = q as Record<string, unknown>;
+  // If questions are provided directly (e.g. from customized editor), use them;
+  // otherwise generate preview questions from AI
+  let questionsToUse: Array<Record<string, unknown>> = [];
+
+  if (Array.isArray(options.questions) && options.questions.length > 0) {
+    questionsToUse = options.questions as Array<Record<string, unknown>>;
+  } else {
+    try {
+      const generated = await generatePreviewQuestions(assessment, options.language);
+      questionsToUse = (generated || []) as Array<Record<string, unknown>>;
+    } catch (genErr: unknown) {
+      const errMsg = genErr instanceof Error ? genErr.message : String(genErr);
+      throw new AppError(
+        "PREVIEW_GENERATION_FAILED",
+        `Failed to generate questions via AI: ${errMsg}. You can customize or add questions manually in Edit Mode.`,
+        422
+      );
+    }
+  }
+
+  if (questionsToUse.length === 0) {
+    throw new AppError(
+      "NO_QUESTIONS_AVAILABLE",
+      `No questions were generated for language "${options.language}". You can customize or add questions manually in Edit Mode.`,
+      422
+    );
+  }
+
+  const paperQuestions = questionsToUse.map((q, i) => {
+    const rawOpts = q["options"];
+    let parsedOpts: string[] | undefined;
+    if (Array.isArray(rawOpts)) {
+      parsedOpts = rawOpts.map((o) => (typeof o === "string" ? o : (o as any)?.text ?? String(o)));
+    } else if (typeof rawOpts === "string") {
+      try {
+        const parsed = JSON.parse(rawOpts);
+        if (Array.isArray(parsed)) parsedOpts = parsed;
+      } catch {
+        parsedOpts = undefined;
+      }
+    }
+
     return {
-      questionNumber: i + 1,
-      questionText: String(question["question_text"] ?? question["questionText"] ?? `Question ${i + 1}`),
-      questionType: String(question["question_type"] ?? question["questionType"] ?? "multiple_choice"),
-      options: Array.isArray(question["options"]) ? (question["options"] as string[]) : undefined,
-      marks: Number(blocks[0]?.positiveMarks ?? 1),
+      questionNumber: Number(q["questionNumber"] ?? i + 1),
+      questionText: String(q["question_text"] ?? q["questionText"] ?? `Question ${i + 1}`),
+      questionType: String(q["question_type"] ?? q["questionType"] ?? "multiple_choice"),
+      options: parsedOpts,
+      marks: Number(q["marks"] ?? blocks[0]?.positiveMarks ?? 1),
     };
   });
 

@@ -12,10 +12,13 @@ import {
   FaArrowRight,
   FaCheck,
   FaDownload,
+  FaEdit,
+  FaExclamationTriangle,
 } from "react-icons/fa";
 import { sanitizeFileName } from "@/utils/paperUtils.js";
 import PaperFormFields from "./PaperFormFields.jsx";
 import FormattingOptions from "./FormattingOptions.jsx";
+import PaperQuestionsEditor from "./PaperQuestionsEditor.jsx";
 import { LANGUAGE_OPTIONS, getTranslation, isRTLLanguage } from "@/utils/translations.js";
 import useAssessmentStore from "@/features/assessments/store.js";
 import LanguageFlag, { FlagUK, FlagPK, FlagSA, FlagIR } from "@/components/ui/LanguageFlag.jsx";
@@ -60,6 +63,13 @@ const INITIAL_FORM = {
 
 const INITIAL_NOTIFY = { isOpen: false, type: "info", title: "", message: "" };
 
+const INITIAL_ISSUE = {
+  isOpen: false,
+  title: "",
+  message: "",
+  details: "",
+};
+
 const PhysicalPaperModal = ({
   isOpen,
   onClose,
@@ -67,16 +77,24 @@ const PhysicalPaperModal = ({
   assessmentTitle,
   assessment,
 }) => {
-  const [step, setStep] = useState("language");
+  const [step, setStep] = useState("language"); // "language" | "form" | "edit-questions"
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [form, setForm] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [notify, setNotify] = useState(INITIAL_NOTIFY);
+  const [issueAlert, setIssueAlert] = useState(INITIAL_ISSUE);
+  const [customQuestions, setCustomQuestions] = useState(null);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   const hasInitializedRef = useRef(false);
   const userModifiedMarksRef = useRef(false);
 
-  const { generatePhysicalPaper, getAssessmentById, currentAssessment } = useAssessmentStore();
+  const {
+    generatePhysicalPaper,
+    getAssessmentById,
+    fetchPreviewQuestions,
+    currentAssessment,
+  } = useAssessmentStore();
 
   const t = (key) => getTranslation(selectedLanguage, key);
   const isRTL = isRTLLanguage(selectedLanguage);
@@ -194,6 +212,7 @@ const PhysicalPaperModal = ({
 
   const handleLanguageSelect = (lang) => {
     setSelectedLanguage(lang);
+    setCustomQuestions(null);
     setStep("form");
   };
 
@@ -228,7 +247,88 @@ const PhysicalPaperModal = ({
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+  // Open Edit Mode with preview questions or draft templates
+  const handleOpenEditMode = async () => {
+    if (customQuestions && customQuestions.length > 0) {
+      setStep("edit-questions");
+      return;
+    }
+
+    setLoadingQuestions(true);
+    try {
+      let loaded = null;
+      if (typeof fetchPreviewQuestions === "function" && assessmentId) {
+        try {
+          loaded = await fetchPreviewQuestions(assessmentId, selectedLanguage);
+        } catch (fetchErr) {
+          console.warn("[PhysicalPaperModal] Fetch preview questions failed, using fallback templates:", fetchErr);
+        }
+      }
+
+      if (Array.isArray(loaded) && loaded.length > 0) {
+        setCustomQuestions(
+          loaded.map((q, i) => {
+            let options = q.options;
+            if (typeof options === "string") {
+              try {
+                options = JSON.parse(options);
+              } catch {
+                options = ["Option A", "Option B", "Option C", "Option D"];
+              }
+            }
+            if (Array.isArray(options)) {
+              options = options.map((o) => (typeof o === "string" ? o : o?.text || String(o)));
+            }
+            return {
+              questionNumber: i + 1,
+              questionText: String(q.question_text || q.questionText || `Question ${i + 1}`),
+              questionType: String(q.question_type || q.questionType || "multiple_choice"),
+              options: options || ["Option A", "Option B", "Option C", "Option D"],
+              marks: Number(q.marks || targetAssessment?.question_blocks?.[0]?.positiveMarks || 1),
+            };
+          })
+        );
+      } else {
+        // Build fallback template questions from configured blocks
+        const initialList = [];
+        const blocks = targetAssessment?.question_blocks || [];
+        if (blocks.length > 0) {
+          let counter = 1;
+          blocks.forEach((b) => {
+            const count = Math.min(Number(b.question_count || b.questionCount || 1), 10);
+            for (let j = 0; j < count; j++) {
+              initialList.push({
+                questionNumber: counter++,
+                questionText: `Question ${initialList.length + 1} (${(b.question_type || b.questionType || "").replace(/_/g, " ")})`,
+                questionType: b.question_type || b.questionType || "multiple_choice",
+                options: ["Option A", "Option B", "Option C", "Option D"],
+                marks: Number(b.positive_marks || b.positiveMarks || 1),
+              });
+            }
+          });
+        }
+
+        setCustomQuestions(
+          initialList.length > 0
+            ? initialList
+            : [
+                {
+                  questionNumber: 1,
+                  questionText: "",
+                  questionType: "multiple_choice",
+                  options: ["Option A", "Option B", "Option C", "Option D"],
+                  marks: 1,
+                },
+              ]
+        );
+      }
+      setStep("edit-questions");
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  const handleSubmit = async (overrideQuestions) => {
     if (!assessmentId) {
       showNotify("error", "Error", t("noAssessment"));
       return;
@@ -258,9 +358,11 @@ const PhysicalPaperModal = ({
       pageSize: form.pageSize,
     });
 
+    const activeQuestions = overrideQuestions || customQuestions;
+
     setLoading(true);
     try {
-      const blob = await generatePhysicalPaper(assessmentId, {
+      const payload = {
         language: selectedLanguage,
         instituteName: form.instituteName,
         teacherName: form.teacherName,
@@ -275,7 +377,10 @@ const PhysicalPaperModal = ({
         bodyFontSize: Number(form.questionFontSize),
         optionFontSize: Number(form.optionFontSize),
         outputFormat: "pdf",
-      });
+        ...(activeQuestions && activeQuestions.length > 0 ? { questions: activeQuestions } : {}),
+      };
+
+      const blob = await generatePhysicalPaper(assessmentId, payload);
 
       const fileName = `${sanitizeFileName(assessmentTitle || form.subjectName)}_Paper_${selectedLanguage.toUpperCase()}.pdf`;
       const url = window.URL.createObjectURL(blob);
@@ -293,7 +398,16 @@ const PhysicalPaperModal = ({
       }, 1000);
     } catch (err) {
       console.error("[PhysicalPaperModal] Paper generation error:", err);
-      showNotify("error", "Error", t("generationFailed"));
+      const errMsg = err?.message || "Failed to generate paper";
+
+      // Show comprehensive issue alert dialog so user knows what went wrong and can enter edit mode to fix
+      setIssueAlert({
+        isOpen: true,
+        title: "PDF Generation Issue Detected",
+        message: errMsg,
+        details:
+          "The system was unable to generate the physical paper with automated settings (e.g. AI generation timeout, missing questions, or option count mismatch). You can enter Edit Mode to manually add, edit, or adjust questions and options, then download directly.",
+      });
     } finally {
       setLoading(false);
     }
@@ -304,6 +418,9 @@ const PhysicalPaperModal = ({
     setSelectedLanguage("en");
     setForm(INITIAL_FORM);
     setNotify(INITIAL_NOTIFY);
+    setIssueAlert(INITIAL_ISSUE);
+    setCustomQuestions(null);
+    setLoadingQuestions(false);
     hasInitializedRef.current = false;
     userModifiedMarksRef.current = false;
   };
@@ -320,6 +437,7 @@ const PhysicalPaperModal = ({
 
   return (
     <>
+      {/* Standard Info/Success Notification Modal */}
       <Modal
         isOpen={notify.isOpen}
         onClose={() => setNotify(INITIAL_NOTIFY)}
@@ -330,11 +448,61 @@ const PhysicalPaperModal = ({
         {notify.message}
       </Modal>
 
+      {/* Generation Issue Alert Modal with Action to Enter Edit Mode */}
+      <Modal
+        isOpen={issueAlert.isOpen}
+        onClose={() => setIssueAlert(INITIAL_ISSUE)}
+        type="warning"
+        title={issueAlert.title}
+        zIndex="z-[120]"
+      >
+        <div className="space-y-4 text-start">
+          <div className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
+            <FaExclamationTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                {issueAlert.message}
+              </p>
+              {issueAlert.details && (
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {issueAlert.details}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIssueAlert(INITIAL_ISSUE)}
+              className={cn(btn.secondary, "w-full sm:w-auto text-xs py-2.5 px-4 font-semibold")}
+            >
+              Cancel / Stay on Settings
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIssueAlert(INITIAL_ISSUE);
+                handleOpenEditMode();
+              }}
+              className={cn(
+                btn.primary,
+                "w-full sm:w-auto text-xs py-2.5 px-4 font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20"
+              )}
+            >
+              <FaEdit className="w-3.5 h-3.5" />
+              <span>Fix in Edit Mode</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm p-4 overflow-y-auto overscroll-contain">
         <div className="min-h-full flex items-center justify-center">
           <div
             className={cn(
-              "bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300 text-start",
+              "bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300",
+              isRTL ? "text-right" : "text-left",
               isQuranic && "font-quran"
             )}
             dir={isRTL ? "rtl" : "ltr"}
@@ -345,14 +513,22 @@ const PhysicalPaperModal = ({
                 <div className="bg-white/20 dark:bg-white/10 backdrop-blur-sm p-2 sm:p-3 rounded-xl">
                   {step === "language" ? (
                     <FaGlobe className="text-2xl sm:text-3xl text-indigo-100 dark:text-indigo-300" />
+                  ) : step === "edit-questions" ? (
+                    <FaEdit className="text-2xl sm:text-3xl text-indigo-100 dark:text-indigo-300" />
                   ) : (
                     <FaFilePdf className="text-2xl sm:text-3xl text-indigo-100 dark:text-indigo-300" />
                   )}
                 </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white">{t("modalTitle")}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
+                    {step === "edit-questions" ? "Customize Exam Questions" : t("modalTitle")}
+                  </h2>
                   <p className="text-indigo-100 dark:text-indigo-200 text-xs sm:text-sm truncate max-w-xs sm:max-w-md">
-                    {step === "language" ? t("modalSubtitle") : assessmentTitle}
+                    {step === "language"
+                      ? t("modalSubtitle")
+                      : step === "edit-questions"
+                      ? `Adjust questions & choices for ${selectedLanguage.toUpperCase()} paper`
+                      : assessmentTitle}
                   </p>
                 </div>
               </div>
@@ -360,7 +536,7 @@ const PhysicalPaperModal = ({
                 type="button"
                 onClick={handleClose}
                 aria-label="Close modal"
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl p-2 transition-all duration-200 hover:rotate-90 active:scale-90 cursor-pointer"
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-200 hover:rotate-90 active:scale-90 cursor-pointer"
               >
                 <FaTimes className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
@@ -515,7 +691,22 @@ const PhysicalPaperModal = ({
                     })}
                   </div>
                 </div>
+              ) : step === "edit-questions" ? (
+                /* Step 3: Question Paper Editor Mode */
+                <PaperQuestionsEditor
+                  questions={customQuestions || []}
+                  onChangeQuestions={(updated) => setCustomQuestions(updated)}
+                  onSaveAndDownload={(sanitizedQuestions) => {
+                    setCustomQuestions(sanitizedQuestions);
+                    handleSubmit(sanitizedQuestions);
+                  }}
+                  onCancel={() => setStep("form")}
+                  loading={loading}
+                  language={selectedLanguage}
+                  assessmentTitle={assessmentTitle}
+                />
               ) : (
+                /* Step 2: Settings Form */
                 <>
                   {/* Selected Language Banner */}
                   <div className="bg-card/80 p-4 rounded-2xl border border-border flex items-center justify-between gap-4 flex-wrap shadow-sm">
@@ -544,14 +735,34 @@ const PhysicalPaperModal = ({
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => setStep("language")}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-border bg-btn-secondary hover:bg-surface-elevated hover:border-accent/40 text-secondary-foreground hover:text-foreground transition-all cursor-pointer shadow-xs active:scale-95"
-                    >
-                      <FaArrowLeft className="text-xs" />
-                      <span>{t("back")}</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleOpenEditMode}
+                        disabled={loadingQuestions || loading}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 transition-all cursor-pointer shadow-xs active:scale-95"
+                      >
+                        {loadingQuestions ? (
+                          <LoadingSpinner size="xs" color="blue" />
+                        ) : (
+                          <FaEdit className="text-xs" />
+                        )}
+                        <span>
+                          {customQuestions?.length
+                            ? `Custom Questions (${customQuestions.length})`
+                            : "Customize Questions"}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setStep("language")}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-border bg-btn-secondary hover:bg-surface-elevated hover:border-accent/40 text-secondary-foreground hover:text-foreground transition-all cursor-pointer shadow-xs active:scale-95"
+                      >
+                        <FaArrowLeft className="text-xs" />
+                        <span>{t("back")}</span>
+                      </button>
+                    </div>
                   </div>
 
                   <PaperFormFields
@@ -565,7 +776,7 @@ const PhysicalPaperModal = ({
 
                   <FormattingOptions form={form} onChange={handleChange} language={selectedLanguage} />
 
-                  <div className="border-t border-border flex flex-col sm:flex-row items-center justify-end gap-3 sm:gap-4 pt-4 mt-6">
+                  <div className="border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 mt-6">
                     <button
                       type="button"
                       onClick={handleClose}
@@ -574,24 +785,48 @@ const PhysicalPaperModal = ({
                     >
                       {t("cancel")}
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={loading}
-                      className={cn(btn.success, "font-bold w-full sm:w-auto text-sm sm:text-base py-3 sm:py-3.5")}
-                    >
-                      {loading ? (
-                        <>
-                          <LoadingSpinner size="sm" color="white" type="dots" />
-                          <span>{t("generating")}</span>
-                        </>
-                      ) : (
-                        <>
-                          <FaDownload className="text-lg sm:text-xl" />
-                          <span>{t("generateDownload")}</span>
-                        </>
-                      )}
-                    </button>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                      <button
+                        type="button"
+                        onClick={handleOpenEditMode}
+                        disabled={loadingQuestions || loading}
+                        className={cn(
+                          btn.secondary,
+                          "font-bold w-full sm:w-auto text-sm py-3 flex items-center justify-center gap-2 border-indigo-500/30 text-indigo-700 dark:text-indigo-300"
+                        )}
+                      >
+                        {loadingQuestions ? (
+                          <LoadingSpinner size="xs" color="blue" />
+                        ) : (
+                          <FaEdit className="text-sm" />
+                        )}
+                        <span>
+                          {customQuestions?.length
+                            ? `Review / Edit (${customQuestions.length})`
+                            : "Edit Questions First"}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSubmit()}
+                        disabled={loading}
+                        className={cn(btn.success, "font-bold w-full sm:w-auto text-sm sm:text-base py-3 sm:py-3.5 shadow-lg shadow-emerald-500/20")}
+                      >
+                        {loading ? (
+                          <>
+                            <LoadingSpinner size="sm" color="white" type="dots" />
+                            <span>{t("generating")}</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaDownload className="text-lg sm:text-xl" />
+                            <span>{t("generateDownload")}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </>
               )}

@@ -47,8 +47,21 @@ export const UpdateAssessmentSchema = z.object({
   language: AssessmentLanguageSchema.optional(),
 });
 
+export const GenerateAssessmentSchema = z.object({
+  studentId: z.number().int().positive(),
+  language: z.string().min(2).max(10).default("en"),
+});
+
 export const EnrollStudentSchema = z.object({
   email: z.string().email(),
+});
+
+export const PhysicalPaperQuestionSchema = z.object({
+  questionNumber: z.number().optional(),
+  questionText: z.string().min(1),
+  questionType: z.string().optional(),
+  options: z.array(z.string()).optional(),
+  marks: z.number().optional(),
 });
 
 export const PhysicalPaperSchema = z.object({
@@ -66,8 +79,10 @@ export const PhysicalPaperSchema = z.object({
   optionFontSize: z.number().int().min(8).max(24).optional(),
   outputFormat: z.enum(["pdf", "docx"]).default("pdf"),
   language: z.string().default("en"),
+  questions: z.array(PhysicalPaperQuestionSchema).optional(),
 });
 
 export type CreateAssessmentInput = z.infer<typeof CreateAssessmentSchema>;
 export type UpdateAssessmentInput = z.infer<typeof UpdateAssessmentSchema>;
 export type PhysicalPaperInput = z.infer<typeof PhysicalPaperSchema>;
+export type PhysicalPaperQuestionInput = z.infer<typeof PhysicalPaperQuestionSchema>;
