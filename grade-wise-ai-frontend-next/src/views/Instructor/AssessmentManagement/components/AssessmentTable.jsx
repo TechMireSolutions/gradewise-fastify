@@ -39,7 +39,7 @@ export default function AssessmentTable({
               <tr key={assessment.id} className={cn(tableRowHover, "transition-colors duration-150")}>
                 <td className="px-6 py-4 text-sm font-semibold text-foreground">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 shrink-0">
+                    <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 shrink-0">
                       <FaClipboardList className="w-4 h-4 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
                     </div>
                     <span className="truncate max-w-sm">{assessment.title}</span>

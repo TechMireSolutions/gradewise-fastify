@@ -334,8 +334,7 @@ const PhysicalPaperModal = ({
         <div className="min-h-full flex items-center justify-center">
           <div
             className={cn(
-              "bg-card border border-border rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300",
-              isRTL ? "text-right" : "text-left",
+              "bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto overscroll-contain transition-all duration-300 text-start",
               isQuranic && "font-quran"
             )}
             dir={isRTL ? "rtl" : "ltr"}
@@ -361,7 +360,7 @@ const PhysicalPaperModal = ({
                 type="button"
                 onClick={handleClose}
                 aria-label="Close modal"
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all duration-200 hover:rotate-90 active:scale-90 cursor-pointer"
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-xl p-2 transition-all duration-200 hover:rotate-90 active:scale-90 cursor-pointer"
               >
                 <FaTimes className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>

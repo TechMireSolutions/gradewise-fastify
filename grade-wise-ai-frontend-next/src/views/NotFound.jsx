@@ -1,5 +1,5 @@
 import { cn } from "@/lib/cn.js";
-import { accentPanel, btn, card, cardInteractive, iconBadge, page } from "@/lib/ui.js";
+import { accentPanel, btn, card, cardInteractive, iconBadge, page, shape, statusTone } from "@/lib/ui.js";
 import Link from "next/link";
 import { FaHome, FaArrowLeft, FaQuestionCircle, FaBookOpen } from "react-icons/fa"
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
@@ -60,7 +60,7 @@ function NotFound() {
 
             {/* Help Section */}
             <div className="mt-10 pt-6 border-t border-border">
-              <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 px-4 py-2 rounded-xl">
+              <div className={cn("inline-flex items-center gap-2 px-4 py-2", statusTone.info, shape.panel)}>
                 <FaQuestionCircle />
                 <p className="text-sm font-semibold">
                   Need help? Contact your instructor or admin.

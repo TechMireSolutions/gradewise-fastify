@@ -11,3 +11,16 @@ export const signupSchema = z.object({
   email: emailField,
   password: passwordField,
 });
+
+export const createUserSchema = z
+  .object({
+    name: nameField,
+    email: emailField,
+    password: passwordField,
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    role: z.enum(["admin", "instructor", "student"]),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });

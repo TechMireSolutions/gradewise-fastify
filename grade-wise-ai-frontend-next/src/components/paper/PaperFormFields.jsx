@@ -10,6 +10,7 @@ import {
   FaCalculator,
 } from "react-icons/fa";
 import { cn } from "@/lib/cn.js";
+import { gradient } from "@/lib/ui.js";
 import { Label } from "@/components/ui";
 import { getTranslation } from "@/utils/translations.js";
 
@@ -57,7 +58,7 @@ const PaperFormFields = ({
           {t("instituteName")}
         </Label>
         <div className="flex items-center gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
-          <div className="bg-gradient-to-br from-indigo-500 to-violet-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+          <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.brand)}>
             <FaUniversity className="text-base" />
           </div>
           <input
@@ -78,7 +79,7 @@ const PaperFormFields = ({
           {t("teacherName")}
         </Label>
         <div className="flex items-center gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+          <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.emerald)}>
             <FaChalkboardTeacher className="text-base" />
           </div>
           <input
@@ -99,7 +100,7 @@ const PaperFormFields = ({
           {t("subjectName")}
         </Label>
         <div className="flex items-center gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
-          <div className="bg-gradient-to-br from-purple-500 to-violet-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+          <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.primary)}>
             <FaBook className="text-base" />
           </div>
           <input
@@ -121,7 +122,7 @@ const PaperFormFields = ({
             {t("paperDate")}
           </Label>
           <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-500/25 transition-all duration-200 h-[54px] sm:h-[60px]" dir="ltr">
-            <div className="bg-gradient-to-br from-orange-500 to-amber-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.amber)}>
               <FaCalendarAlt className="text-base" />
             </div>
             <input
@@ -143,7 +144,7 @@ const PaperFormFields = ({
             <span className="text-xs text-muted-foreground">{t("quickSlots") || "Slots below"}</span>
           </div>
           <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-500/25 transition-all duration-200 h-[54px] sm:h-[60px]" dir="ltr">
-            <div className="bg-gradient-to-br from-rose-500 to-red-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.danger)}>
               <FaClock className="text-base" />
             </div>
             <input
@@ -167,7 +168,7 @@ const PaperFormFields = ({
                   type="button"
                   onClick={() => updateField("paperTime", val)}
                   className={cn(
-                    "text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer text-center font-medium min-h-8 inline-flex items-center justify-center",
+                    "text-xs px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer text-center font-medium min-h-8 inline-flex items-center justify-center",
                     isSelected
                       ? "bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500 font-semibold shadow-sm shadow-rose-500/20"
                       : "bg-btn-secondary border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
@@ -204,7 +205,7 @@ const PaperFormFields = ({
             )}
           </div>
           <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
-            <div className="bg-gradient-to-br from-teal-500 to-emerald-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.teal)}>
               <FaHourglass className="text-base" />
             </div>
             <input
@@ -225,7 +226,7 @@ const PaperFormFields = ({
                 type="button"
                 onClick={() => updateField("paperDuration", preset)}
                 className={cn(
-                  "text-xs px-2.5 py-1.5 rounded-lg border transition-all cursor-pointer text-center font-medium min-h-8 inline-flex items-center justify-center",
+                  "text-xs px-2.5 py-1.5 rounded-xl border transition-all cursor-pointer text-center font-medium min-h-8 inline-flex items-center justify-center",
                   form.paperDuration === preset
                     ? "bg-gradient-to-r from-teal-500 to-emerald-600 text-white border-teal-500 font-semibold shadow-sm shadow-teal-500/20"
                     : "bg-btn-secondary border-border text-secondary-foreground hover:text-foreground hover:bg-surface-elevated"
@@ -256,7 +257,7 @@ const PaperFormFields = ({
             )}
           </div>
           <div className="flex items-center gap-3 bg-input p-3 rounded-xl border border-border focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/25 transition-all duration-200 h-[54px] sm:h-[60px]">
-            <div className="bg-gradient-to-br from-violet-500 to-purple-600 text-white p-2.5 rounded-lg flex-shrink-0 shadow-sm">
+            <div className={cn("text-white p-2.5 rounded-xl flex-shrink-0 shadow-sm", gradient.primary)}>
               <FaStar className="text-base" />
             </div>
             <input
@@ -283,7 +284,7 @@ const PaperFormFields = ({
           {t("notes")}
         </Label>
         <div className="flex items-start gap-3 sm:gap-4 bg-input p-3 rounded-xl border border-border focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-500/25 transition-all duration-200">
-          <div className="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-2.5 rounded-lg mt-1 flex-shrink-0 shadow-sm">
+          <div className={cn("text-white p-2.5 rounded-xl mt-1 flex-shrink-0 shadow-sm", gradient.amber)}>
             <FaStickyNote className="text-base" />
           </div>
           <textarea

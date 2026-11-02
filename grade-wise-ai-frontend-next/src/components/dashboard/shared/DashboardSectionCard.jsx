@@ -17,7 +17,7 @@ export default function DashboardSectionCard({
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div className="flex items-center gap-3">
             {Icon && (
-              <div className={cn(iconBadge, "p-2 rounded-lg")}>
+              <div className={cn(iconBadge, "p-2")}>
                 {typeof Icon === "function" ? (
                   <Icon className="w-4 h-4 text-white" aria-hidden="true" />
                 ) : (

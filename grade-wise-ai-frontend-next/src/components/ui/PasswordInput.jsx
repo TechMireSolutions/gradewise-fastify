@@ -47,7 +47,7 @@ export default function PasswordInput({
         tabIndex={-1}
         onClick={() => setShowPassword((prev) => !prev)}
         className={cn(
-          "absolute right-1.5 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-150 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/20"
+          "absolute right-1.5 top-1/2 -translate-y-1/2 min-h-11 min-w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors duration-150 cursor-pointer rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/20"
         )}
         aria-label={showPassword ? "Hide password" : "Show password"}
         aria-pressed={showPassword}

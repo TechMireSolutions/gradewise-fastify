@@ -1,139 +1,569 @@
-import { cn } from "@/lib/cn.js";
-import { card, iconBadge, page, pageInner } from "@/lib/ui.js";
-import { useEffect } from "react";
-import Link from "next/link";
-import Modal from "@/components/ui/Modal.jsx";
-import PageLoader from "@/components/ui/PageLoader.jsx";
-import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
-import UserManagementTable, { UserStatsGrid } from "@/components/admin/UserManagementTable.jsx";
-import { DashboardSectionCard } from "@/components/dashboard/shared/index.js";
-import useUserManagement from "@/hooks/useUserManagement.js";
-import {
-  FaUsers,
-  FaCrown,
-  FaSync,
-  FaShieldAlt,
-  FaKey,
-  FaArrowRight,
-} from "react-icons/fa";
+"use client";
 
-function SuperAdminDashboard() {
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/cn.js";
+import { card, page, pageInner, focusRing, statusTone, shape } from "@/lib/ui.js";
+import {
+  FaCrown,
+  FaShieldAlt,
+  FaUsers,
+  FaKey,
+  FaChartBar,
+  FaServer,
+  FaUserPlus,
+  FaArrowRight,
+  FaCogs,
+  FaCheckCircle,
+  FaExclamationTriangle,
+  FaPlus,
+} from "react-icons/fa";
+import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
+import PageLoader from "@/components/ui/PageLoader.jsx";
+import Modal from "@/components/ui/Modal.jsx";
+import { Button, StatusBadge } from "@/components/ui/index.js";
+import useUserManagement from "@/hooks/useUserManagement.js";
+import useAdminStore from "@/features/admin/store.js";
+import apiClient from "@/lib/apiClient.js";
+import UserManagementTable from "@/components/admin/UserManagementTable.jsx";
+import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
+import AddUserModal from "./components/AddUserModal.jsx";
+import ChangeRoleModal from "./components/ChangeRoleModal.jsx";
+import DeleteUserModal from "./components/DeleteUserModal.jsx";
+import AddNewLlmModal from "./components/AddNewLlmModal.jsx";
+
+export default function SuperAdminDashboard() {
   const {
     user,
     users,
-    loading,
+    totalUsers,
+    loading: usersLoading,
     actionLoading,
     modal,
     closeModal,
     fetchUsers,
     handleRoleChange,
+    handleCreateUser,
     handleDeleteUser,
     confirmDeleteUser,
-    pendingDelete,
-    stats,
+    activeModal,
+    selectedUser,
+    openCreateModal,
+    openRoleModal,
+    closeActiveModal,
   } = useUserManagement();
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  const apiConfig = useSuperAdminApiConfig();
+  const { overview, getAdminOverview } = useAdminStore();
+  const [healthStatus, setHealthStatus] = useState("checking");
 
-  if (loading) return <PageLoader message="Loading users..." />;
+  useEffect(() => {
+    fetchUsers({ limit: 5 });
+    getAdminOverview().catch(() => {});
+    apiClient
+      .get("/health")
+      .then((res) => setHealthStatus(res.data?.status === "ok" ? "ok" : "degraded"))
+      .catch(() => setHealthStatus("degraded"));
+  }, [fetchUsers, getAdminOverview]);
+
+  if (usersLoading && users.length === 0) {
+    return <PageLoader message="Loading Super Admin Command Center..." />;
+  }
+
+  const { assessments, attempts } = overview || {
+    assessments: { total: 0, executed: 0 },
+    attempts: { total: 0, completed: 0, averageScore: 0 },
+  };
+
+  const configuredKeyCount = apiConfig.configuredCount || 0;
+  const recentUsers = users.slice(0, 5);
 
   return (
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
-        <div className="mb-8 sm:mb-10">
-          <div className={cn(card, "shadow-2xl", "p-6", "sm:p-8", "lg:p-10")}>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-              <div className="flex-1">
-                <p className={cn("text-xs", "font-semibold", "text-muted-foreground", "uppercase", "tracking-widest", "mb-3")}>
-                  System Control
-                </p>
-                <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight flex items-center gap-3 mb-2">
-                  <span className={cn("p-2.5", "rounded-xl", iconBadge)}>
-                    <FaCrown className="w-5 h-5 text-yellow-300" />
+      <MainLandmark className={pageInner}>
+        {/* Executive Header Banner */}
+        <div className="mb-8">
+          <div className={cn(card, "@container p-6 sm:p-8 lg:p-10 relative overflow-hidden shadow-2xl")}>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn("p-1.5", statusTone.warning, shape.control)}>
+                    <FaCrown className="w-3.5 h-3.5" />
                   </span>
-                  Super Admin Dashboard
+                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+                    Super Administrator Authority
+                  </span>
+                </div>
+
+                <h1 className="text-2xl sm:text-4xl font-extrabold text-foreground tracking-tight text-balance">
+                  Executive Command Center
                 </h1>
-                <p className={cn("text-secondary-foreground", "leading-relaxed", "mb-5")}>
-                  Welcome back, <span className="text-white font-semibold">{user?.name}</span>
+
+                <p className="text-sm sm:text-base text-secondary-foreground leading-relaxed mt-1 text-pretty">
+                  Welcome back, <span className="text-foreground font-semibold">{user?.name}</span>. Full platform authority over user governance, AI engine configuration, system diagnostics, and assessment analytics.
                 </p>
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 sm:p-4 inline-flex items-start gap-3">
-                  <FaShieldAlt className="text-amber-400 text-lg flex-shrink-0 mt-0.5" />
-                  <div className="text-xs sm:text-sm">
-                    <strong className="block text-amber-300 mb-0.5">Role Permissions</strong>
-                    <span className={"text-muted-foreground"}>
-                      Manage users, promote/demote roles, and configure system API keys.
-                    </span>
-                  </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <StatusBadge
+                    variant={healthStatus === "ok" ? "success" : healthStatus === "checking" ? "info" : "danger"}
+                    size="md"
+                    label={
+                      healthStatus === "ok"
+                        ? "Infrastructure Operational"
+                        : healthStatus === "checking"
+                        ? "Probing Health..."
+                        : "Subsystems Degraded"
+                    }
+                  />
+
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5 bg-input px-3 py-1.5 rounded-xl border border-border">
+                    <FaShieldAlt className="text-indigo-500 w-3 h-3" />
+                    AES-256 Vault Active
+                  </span>
                 </div>
               </div>
 
-              <div className="flex flex-row sm:flex-col gap-3 flex-shrink-0">
-                <div className="bg-input border border-border rounded-2xl p-4 text-center min-w-[90px]">
-                  <FaUsers className="w-7 h-7 mx-auto mb-1.5 text-indigo-400" />
-                  <p className="text-2xl font-bold text-foreground leading-none mb-1">{users.length}</p>
-                  <p className={cn("text-xs", "text-muted-foreground", "font-medium")}>Total Users</p>
-                </div>
-                <Link
-                  href="/super-admin/api-config"
-                  className="inline-flex flex-col items-center gap-1.5 bg-input hover:bg-btn-secondary border border-border hover:border-indigo-500/30 backdrop-blur-sm rounded-2xl p-4 text-center transition-all duration-200 group min-w-[90px]"
+              {/* Header Quick Action Popups */}
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+                <Button
+                  variant="primary"
+                  onClick={openCreateModal}
+                  className="w-full justify-center gap-2"
                 >
-                  <FaKey className="w-7 h-7 text-indigo-400 group-hover:scale-110 transition-transform duration-150" />
-                  <span className={cn("text-xs", "font-semibold", "text-secondary-foreground", "group-hover:text-foreground", "transition-colors", "whitespace-nowrap")}>API Keys</span>
-                  <FaArrowRight className={cn("w-3", "h-3", "text-muted-foreground", "group-hover:text-indigo-400", "transition-colors")} />
+                  <FaUserPlus className="w-3.5 h-3.5" />
+                  Add New User
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  onClick={() => apiConfig.openSettingsModal(null, 1)}
+                  className="w-full justify-center gap-2"
+                >
+                  <FaPlus className="w-3.5 h-3.5" />
+                  Add New LLM
+                </Button>
+
+                <Link
+                  href="/super-admin/system"
+                  className={cn(
+                    "inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-input hover:bg-btn-secondary text-secondary-foreground hover:text-foreground border border-border transition-all active:scale-95 min-h-[44px]",
+                    focusRing
+                  )}
+                >
+                  <FaServer className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                  System Health
                 </Link>
               </div>
             </div>
           </div>
         </div>
 
-        <UserStatsGrid stats={stats} totalUsers={users.length} />
+        {/* Executive KPI Summary Highlights (Links to Sub-pages) */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between gap-4 mb-3">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Platform Health & Metric Highlights
+            </h2>
+          </div>
 
-        <DashboardSectionCard
-          icon={FaUsers}
-          title="Platform Users Management"
-          subtitle={`${users.length} user${users.length !== 1 ? "s" : ""} (excluding super admins)`}
-          headerClassName="bg-input"
-          bodyClassName="p-0"
-          actions={
-            <button
-              onClick={fetchUsers}
-              className={cn("inline-flex", "items-center", "gap-2", "px-4", "py-2.5", "bg-btn-secondary", "hover:bg-surface-elevated", "border", "border-border", "text-secondary-foreground", "hover:text-foreground", "rounded-xl", "font-medium", "text-sm", "transition-all", "duration-200", "active:scale-95", "cursor-pointer", "min-h-[44px]")}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Metric 1: Users */}
+            <Link
+              href="/super-admin/users"
+              className={cn(
+                card,
+                "@container p-5 hover:border-indigo-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
+              )}
             >
-              <FaSync />
-              Refresh
-            </button>
-          }
-        >
-          <UserManagementTable
-            users={users}
-            currentUserId={user?.id}
-            actionLoading={actionLoading}
-            onRoleChange={handleRoleChange}
-            onDelete={handleDeleteUser}
-            canDelete
-          />
-        </DashboardSectionCard>
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Total Registered Users</span>
+                  <FaUsers className="w-4 h-4 text-indigo-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-3xl font-extrabold text-foreground">
+                  {totalUsers}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Global accounts across all 4 roles
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-indigo-600 dark:text-indigo-400">
+                <span>Manage Users & RBAC</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
 
-      </div>
+            {/* Metric 2: AI Config */}
+            <Link
+              href="/super-admin/api-config"
+              className={cn(
+                card,
+                "@container p-5 hover:border-violet-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Configured AI Providers</span>
+                  <FaKey className="w-4 h-4 text-violet-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-3xl font-extrabold text-foreground">
+                  {configuredKeyCount}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Active keys for PDF & Text AI engines
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-violet-600 dark:text-violet-400">
+                <span>Open Key Vault</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
 
+            {/* Metric 3: Assessment Analytics */}
+            <Link
+              href="/super-admin/analytics"
+              className={cn(
+                card,
+                "@container p-5 hover:border-emerald-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Total Assessments</span>
+                  <FaChartBar className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-3xl font-extrabold text-foreground">
+                  {assessments.total}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {attempts.total} attempts submitted ({attempts.completed} completed)
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                <span>View Full Telemetry</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+
+            {/* Metric 4: System Health */}
+            <Link
+              href="/super-admin/system"
+              className={cn(
+                card,
+                "@container p-5 hover:border-amber-500/40 hover:bg-surface-elevated transition-all duration-200 group flex flex-col justify-between",
+                focusRing
+              )}
+            >
+              <div>
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-xs font-medium">Infrastructure State</span>
+                  <FaServer className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
+                </div>
+                <div className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+                  {healthStatus === "ok" ? (
+                    <>
+                      <FaCheckCircle className="w-5 h-5 text-emerald-500" />
+                      Healthy
+                    </>
+                  ) : (
+                    <>
+                      <FaExclamationTriangle className="w-5 h-5 text-amber-500" />
+                      Degraded
+                    </>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PostgreSQL, Redis & BullMQ Workers
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs font-medium text-amber-600 dark:text-amber-400">
+                <span>Diagnostics & Probes</span>
+                <FaArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Dedicated Workspace Launchers */}
+        <div className="mb-8">
+          <h2 className="text-base font-semibold text-foreground mb-3 flex items-center gap-2">
+            <FaCogs className="w-4 h-4 text-indigo-500" />
+            Dedicated Administrative Portals
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Workspace 1 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-lg shrink-0">
+                  <FaUsers className="w-6 h-6" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      User Directory & Role Governance
+                    </h3>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-semibold", statusTone.success, shape.pill)}>
+                      RBAC Active
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Search and filter users across Super Admin, Admin, Instructor, and Student tiers. Invite new accounts and change user roles via modal dialogs.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  {totalUsers} registered users
+                </span>
+                <Link
+                  href="/super-admin/users"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-all",
+                    focusRing
+                  )}
+                >
+                  Open Users Page
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Workspace 2 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shrink-0">
+                  <FaKey className="w-6 h-6" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      AI Engine & Key Management Vault
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-xl text-[10px] font-semibold bg-violet-500/15 text-violet-700 dark:text-violet-400 border border-violet-500/20 whitespace-nowrap">
+                      AES-256 Vault
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Manage multi-provider API keys for Gemini, OpenAI, Claude, Groq, Mistral, and DeepSeek. Configure model tiers for PDF parsing and text generation.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  {configuredKeyCount} active providers
+                </span>
+                <Link
+                  href="/super-admin/api-config"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border transition-all",
+                    focusRing
+                  )}
+                >
+                  Open AI Vault
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Workspace 3 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shrink-0">
+                  <FaChartBar className="w-6 h-6" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      Platform & Assessment Analytics
+                    </h3>
+                    <span className={cn("px-2 py-0.5 text-[10px] font-semibold", statusTone.info, shape.pill)}>
+                      Telemetry Live
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    System-wide assessment completion metrics, student attempt score averages, role distributions, and verification audits.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  {assessments.total} assessments tracked
+                </span>
+                <Link
+                  href="/super-admin/analytics"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border transition-all",
+                    focusRing
+                  )}
+                >
+                  View Analytics
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Workspace 4 */}
+            <div className={cn(card, "p-6 flex flex-col justify-between")}>
+              <div className="flex items-start gap-4">
+                <span className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg shrink-0">
+                  <FaServer className="w-6 h-6" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="text-base font-bold text-foreground">
+                      Infrastructure & System Diagnostics
+                    </h3>
+                    <span
+                      className={cn(
+                        "px-2 py-0.5 text-[10px] font-semibold",
+                        shape.pill,
+                        healthStatus === "ok" ? statusTone.success : statusTone.warning
+                      )}
+                    >
+                      {healthStatus === "ok" ? "All Probes Passing" : "Subsystems Degraded"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Inspect PostgreSQL database ping, Redis caching state, BullMQ background worker queue, and export raw diagnostic JSON dumps.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs text-muted-foreground font-mono">
+                  Status: {healthStatus === "ok" ? "All Operational" : "Degraded"}
+                </span>
+                <Link
+                  href="/super-admin/system"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-btn-secondary hover:bg-surface-elevated text-secondary-foreground hover:text-foreground border border-border transition-all",
+                    focusRing
+                  )}
+                >
+                  Run Diagnostics
+                  <FaArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Users Preview Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                <FaUsers className="w-4 h-4 text-indigo-500" />
+                Recent User Accounts
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Quick preview of latest registered accounts. Navigate to Users page for complete directory and search.
+              </p>
+            </div>
+
+            <Link
+              href="/super-admin/users"
+              className={cn(
+                "inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline self-start sm:self-auto",
+                focusRing
+              )}
+            >
+              View Full User Directory ({totalUsers})
+              <FaArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+
+          <div className={cn(card, "@container p-0 overflow-hidden")}>
+            <UserManagementTable
+              users={recentUsers}
+              compact
+              currentUserId={user?.id}
+              actionLoading={actionLoading}
+              onOpenRoleModal={openRoleModal}
+              onDelete={handleDeleteUser}
+              canDelete
+            />
+
+            <div className="p-3 bg-input/20 border-t border-border flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">
+                Showing {recentUsers.length} of {totalUsers} total users
+              </span>
+              <Link
+                href="/super-admin/users"
+                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                Go to Users &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
+      </MainLandmark>
+
+      {/* ─── Popup Modal Forms (Pure Dialogs) ────────────────────────────────── */}
+
+      {/* 1. Add User Popup Form */}
+      <AddUserModal
+        isOpen={activeModal === "create"}
+        onClose={closeActiveModal}
+        onSubmit={handleCreateUser}
+        loading={actionLoading === "create-user"}
+      />
+
+      {/* 2. Change Role Popup Form */}
+      <ChangeRoleModal
+        isOpen={activeModal === "change-role"}
+        onClose={closeActiveModal}
+        user={selectedUser}
+        onRoleChange={handleRoleChange}
+        loading={Boolean(actionLoading?.startsWith("role-"))}
+      />
+
+      {/* 3. Delete Confirmation Popup Modal */}
+      <DeleteUserModal
+        isOpen={activeModal === "delete"}
+        onClose={closeActiveModal}
+        user={selectedUser}
+        onConfirm={confirmDeleteUser}
+        loading={Boolean(actionLoading?.startsWith("delete-"))}
+      />
+
+      {/* 4. Quick AI Key Configuration / Add New LLM Modal */}
+      <AddNewLlmModal
+        isOpen={apiConfig.isSettingsModalOpen}
+        onClose={apiConfig.closeSettingsModal}
+        initialPurpose={apiConfig.purpose}
+        initialProvider={apiConfig.provider}
+        initialStep={apiConfig.modalInitialStep}
+        aiState={apiConfig.aiState}
+        configLoading={apiConfig.configLoading}
+        onSaveLlm={apiConfig.handleSaveLlm}
+        onTestInlineKey={apiConfig.handleTestInlineKey}
+        totalPdfKeys={apiConfig.totalPdfKeys}
+        totalTextKeys={apiConfig.totalTextKeys}
+      />
+
+      {/* 5. General Notification Alert Modal (Unifies User Management and AI Config alerts) */}
       <Modal
-        isOpen={modal.isOpen}
-        onClose={closeModal}
-        onConfirm={pendingDelete ? confirmDeleteUser : undefined}
-        type={modal.type}
-        title={modal.title}
-        loading={Boolean(pendingDelete && actionLoading === `delete-${pendingDelete.userId}`)}
-        closeOnConfirm={false}
-        confirmText="Delete User"
+        isOpen={modal.isOpen || apiConfig.modal.isOpen}
+        onClose={() => {
+          if (modal.isOpen) closeModal();
+          if (apiConfig.modal.isOpen) apiConfig.closeModal();
+        }}
+        type={modal.isOpen ? modal.type : apiConfig.modal.type}
+        title={modal.isOpen ? modal.title : apiConfig.modal.title}
       >
-        {modal.message}
+        {modal.isOpen ? modal.message : apiConfig.modal.message}
       </Modal>
     </div>
   );
 }
-
-export default SuperAdminDashboard;

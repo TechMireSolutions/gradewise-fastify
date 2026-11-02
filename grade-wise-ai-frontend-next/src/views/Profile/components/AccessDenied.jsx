@@ -7,7 +7,7 @@ export default function AccessDenied() {
   return (
     <div className="flex flex-col items-center justify-center py-28 text-center px-4">
       <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mb-6">
-        <FaShieldAlt className="text-4xl text-red-400" />
+        <FaShieldAlt className="text-4xl text-red-500 dark:text-red-400" />
       </div>
       <h3 className="text-2xl font-bold text-foreground mb-2 text-wrap-balance">
         Access Denied

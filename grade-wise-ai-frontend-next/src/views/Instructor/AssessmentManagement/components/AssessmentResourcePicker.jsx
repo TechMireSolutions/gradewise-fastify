@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/cn.js";
 import { card, iconBadge, focusRing } from "@/lib/ui.js";
-import { Label, LoadingSpinner } from "@/components/ui";
+import { Label, LoadingSpinner, StatusBadge } from "@/components/ui";
 import { FiBook, FiCheck, FiUploadCloud, FiFile } from "react-icons/fi";
 
 export default function AssessmentResourcePicker({
@@ -30,9 +30,9 @@ export default function AssessmentResourcePicker({
           </div>
         </div>
 
-        <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20 text-xs font-semibold self-start sm:self-auto">
+        <StatusBadge variant="info" className="self-start sm:self-auto">
           {selectedResources.length} {selectedResources.length === 1 ? "Resource" : "Resources"} Selected
-        </span>
+        </StatusBadge>
       </div>
 
       <div className="p-6 sm:p-8 space-y-6">
@@ -60,7 +60,7 @@ export default function AssessmentResourcePicker({
                   onClick={() => onToggleResource(resource.id)}
                   disabled={disabled}
                   className={cn(
-                    "flex items-start gap-3 p-3.5 rounded-xl border text-left transition-all duration-150 active:scale-[0.99]",
+                    "flex items-start gap-3 p-3.5 rounded-xl border text-start transition-all duration-150 active:scale-[0.99]",
                     isSelected
                       ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-900 dark:text-indigo-200 shadow-sm"
                       : "border-border bg-input/40 hover:bg-surface-elevated text-secondary-foreground",

@@ -6,6 +6,7 @@ import { generateAIPrompt } from "@/utils/promptGenerator.js";
 import { LANGUAGE_OPTIONS, isRTLLanguage } from "@/utils/translations.js";
 import LoadingSpinner from "@/components/ui/LoadingSpinner.jsx";
 import LanguageFlag from "@/components/ui/LanguageFlag.jsx";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 
 const QUESTION_TYPE_LABELS = {
   multiple_choice: { en: "Multiple Choice", ur: "کثیر الانتخابی سوالات (MCQs)", ar: "أسئلة الاختيار من متعدد", fa: "سوالات چند گزینه‌ای" },
@@ -41,16 +42,16 @@ export default function PromptTab({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
                 <FaFileAlt className="text-indigo-500 dark:text-indigo-400 text-sm" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                 AI Prompt Blueprint
               </h2>
               {aiPrompt?.languageLabel && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+                <StatusBadge variant="info">
                   <FaLanguage /> {aiPrompt.languageLabel}
-                </span>
+                </StatusBadge>
               )}
             </div>
             <p className={cn("text-muted-foreground", "text-sm", "mt-1")}>
@@ -67,7 +68,7 @@ export default function PromptTab({
                   type="button"
                   onClick={() => onLanguageChange?.(lang.value)}
                   className={cn(
-                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer min-h-9",
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer min-h-9",
                     focusRing,
                     selectedLanguage === lang.value
                       ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-500/25"
@@ -85,7 +86,7 @@ export default function PromptTab({
               onClick={onCopy}
               disabled={!assessment || aiPromptLoading}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-lg font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-9",
+                "inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-btn-secondary hover:bg-indigo-500/20 border border-border hover:border-indigo-500/40 text-secondary-foreground hover:text-indigo-300 rounded-xl font-medium text-xs transition-all duration-200 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-9",
                 focusRing
               )}
             >
@@ -111,7 +112,7 @@ export default function PromptTab({
             <span className="font-semibold text-foreground">{aiPrompt.languageLabel || selectedLanguage}</span>{" "}
             (instructions, question items, marks distribution, and answer key):
           </p>
-          <div className="rounded-lg border border-border overflow-hidden">
+          <div className="rounded-xl border border-border overflow-hidden">
             <div className="px-3.5 py-2.5 bg-input text-xs font-semibold text-secondary-foreground flex items-center justify-between border-b border-border">
               <span>Unified Assignment Generation Prompt ({aiPrompt.languageLabel || selectedLanguage})</span>
               <span className="text-muted-foreground font-mono text-[11px]">Single Pipeline Execution</span>
@@ -127,7 +128,7 @@ export default function PromptTab({
             </pre>
           </div>
           {aiPrompt.blocks?.length > 0 && (
-            <details className="rounded-lg border border-border/60 overflow-hidden text-xs">
+            <details className="rounded-xl border border-border/60 overflow-hidden text-xs">
               <summary className="px-3 py-2 bg-input/50 cursor-pointer text-muted-foreground hover:text-foreground">
                 View Section Breakdown ({aiPrompt.blocks.length} sections)
               </summary>
@@ -159,7 +160,7 @@ export default function PromptTab({
             <span className="font-semibold text-foreground">{aiPrompt.languageLabel || selectedLanguage}</span>:
           </p>
           {aiPrompt.blocks.map((block, i) => (
-            <details key={block.id ?? i} open={aiPrompt.blocks.length === 1} className="rounded-lg border border-border overflow-hidden">
+            <details key={block.id ?? i} open={aiPrompt.blocks.length === 1} className="rounded-xl border border-border overflow-hidden">
               <summary className="px-3 py-2.5 bg-input cursor-pointer text-sm font-semibold text-secondary-foreground">
                 Block {i + 1} — {getSectionTypeLabel(block.questionType, selectedLanguage)} × {block.questionCount} questions
               </summary>

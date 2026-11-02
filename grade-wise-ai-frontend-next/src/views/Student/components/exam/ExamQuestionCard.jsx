@@ -18,7 +18,7 @@ export default function ExamQuestionCard({
   const rawType = question.question_type || question.questionType || "multiple_choice";
 
   return (
-    <div className={cn(card, "p-6 sm:p-8 space-y-6 shadow-2xl")}>
+    <div className={cn(card, "@container p-6 sm:p-8 space-y-6 shadow-2xl")}>
       <div className={cn(panel, "text-center py-6")}>
         <p className="text-xl font-semibold text-foreground leading-relaxed text-balance">
           {rawText || "No Question Text Found"}

@@ -1,13 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { card, iconBadge, page } from "@/lib/ui.js";
+import { card, iconBadge, page, pageInner } from "@/lib/ui.js";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import useInstructorAnalyticsStore from "@/features/instructor-analytics/store.js";
 import { FaChartBar, FaArrowUp, FaExclamationTriangle } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import AnalyticsAssessmentPicker from "./components/AnalyticsAssessmentPicker.jsx";
 import AnalyticsStudentTable from "./components/AnalyticsStudentTable.jsx";
 import AnalyticsQuestionReview from "./components/AnalyticsQuestionReview.jsx";
@@ -116,10 +117,10 @@ export default function AssessmentAnalytics() {
         <AmbientBackground />
         <div className={cn("relative w-full max-w-md", card, "shadow-2xl p-8 text-center")}>
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500/20 to-rose-500/20 border border-red-500/30 flex items-center justify-center mx-auto mb-5">
-            <FaExclamationTriangle className="text-red-400 text-2xl" />
+            <FaExclamationTriangle className="text-red-500 dark:text-red-400 text-2xl" />
           </div>
           <h3 className="text-xl font-bold text-foreground mb-2">Error</h3>
-          <p className="text-red-400 font-medium text-sm">{error}</p>
+          <p className="text-red-700 dark:text-red-400 font-medium text-sm">{error}</p>
         </div>
       </div>
     );
@@ -129,7 +130,7 @@ export default function AssessmentAnalytics() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className="relative w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl">
+      <MainLandmark className={pageInner}>
         {/* Header */}
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-3">
@@ -174,7 +175,7 @@ export default function AssessmentAnalytics() {
             />
           </div>
         )}
-      </div>
+      </MainLandmark>
 
       {/* Scroll to Top */}
       {showScrollTop && (

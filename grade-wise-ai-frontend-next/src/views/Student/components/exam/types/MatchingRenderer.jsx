@@ -46,12 +46,12 @@ export default function MatchingRenderer({ question, onAnswer }) {
         return (
           <div
             key={i}
-            className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-input rounded-xl border border-border"
+            className="flex flex-col @sm:flex-row @sm:items-center gap-3 p-3 bg-input rounded-xl border border-border"
           >
             <span className="font-semibold text-secondary-foreground flex-1 break-words">
               {left}
             </span>
-            <div className="sm:w-72">
+            <div className="@sm:w-72">
               <Select
                 value={pair ? pair[1] : ""}
                 onChange={(e) => handleMatchChange(left, e.target.value)}

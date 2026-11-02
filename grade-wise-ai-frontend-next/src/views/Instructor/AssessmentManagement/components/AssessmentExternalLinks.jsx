@@ -33,7 +33,7 @@ export default function AssessmentExternalLinks({
           disabled={disabled}
           className={cn(
             btn.secondary,
-            "py-1.5 px-3 text-xs font-semibold flex items-center gap-1.5 rounded-lg"
+            "py-1.5 px-3 text-xs font-semibold flex items-center gap-1.5 rounded-xl"
           )}
         >
           <FiPlus />

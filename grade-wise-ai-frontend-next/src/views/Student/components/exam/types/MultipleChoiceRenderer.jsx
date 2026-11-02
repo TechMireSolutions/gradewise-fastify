@@ -24,7 +24,7 @@ export default function MultipleChoiceRenderer({ question, onAnswer }) {
     "border-indigo-500/50 bg-indigo-500/15 text-indigo-800 shadow-lg shadow-indigo-500/10 dark:text-indigo-300 font-bold";
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 @sm:grid-cols-2 gap-4">
       {rawOptions.map((opt, i) => {
         const isSelected = question.answer === opt;
         return (

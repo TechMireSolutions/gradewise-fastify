@@ -30,7 +30,7 @@ export default function AssessmentDetailHeader({
         <div className="flex items-center gap-2 mb-4">
           <Link
             href="/instructor/assessments"
-            className="text-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
+            className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium text-sm transition-colors duration-150 cursor-pointer inline-flex items-center gap-1.5"
           >
             <FaArrowLeft className="text-xs" /> Back to Assessments
           </Link>

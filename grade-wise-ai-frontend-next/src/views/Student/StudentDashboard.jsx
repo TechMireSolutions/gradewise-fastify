@@ -2,6 +2,7 @@
 
 import { page, pageInner } from "@/lib/ui.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useStudentDashboard from "./hooks/useStudentDashboard.js";
 import StudentHeader from "./components/StudentHeader.jsx";
 import StudentStats from "./components/StudentStats.jsx";
@@ -14,7 +15,7 @@ function StudentDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         <StudentHeader userName={user?.name} />
 
         <StudentStats
@@ -26,7 +27,7 @@ function StudentDashboard() {
           assessments={assessments}
           loading={loading}
         />
-      </div>
+      </MainLandmark>
     </div>
   );
 }

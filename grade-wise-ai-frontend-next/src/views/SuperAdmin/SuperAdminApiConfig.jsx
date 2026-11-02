@@ -1,15 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/cn.js";
-import { iconBadge, page, pageInner } from "@/lib/ui.js";
-import Link from "next/link";
+import { iconBadge, page, pageInner, statSurface } from "@/lib/ui.js";
 import { Modal, Button } from "@/components/ui";
-import { FaKey, FaArrowLeft } from "react-icons/fa";
+import { FaKey } from "react-icons/fa";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useSuperAdminApiConfig from "./hooks/useSuperAdminApiConfig.js";
 import ApiConfigSidebar from "./components/ApiConfigSidebar.jsx";
 import StoredKeysTable from "./components/StoredKeysTable.jsx";
-import ProviderSettingsModal from "./components/ProviderSettingsModal.jsx";
+import AddNewLlmModal from "./components/AddNewLlmModal.jsx";
 
 export default function SuperAdminApiConfig() {
   const {
@@ -18,23 +18,20 @@ export default function SuperAdminApiConfig() {
     setActiveProvider,
     purpose,
     provider,
-    card,
-    pStyle,
     totalPdfKeys,
     totalTextKeys,
     totalKeys,
     configuredCount,
     configLoading,
     actionLoading,
-    inlineTestStatus,
     pendingKeyDelete,
     isSettingsModalOpen,
+    modalInitialStep,
     openSettingsModal,
     closeSettingsModal,
     modal,
     closeModal,
-    updateActiveCard,
-    handleSaveCard,
+    handleSaveLlm,
     handleTestStoredKey,
     handleDeleteStoredKey,
     confirmDeleteKey,
@@ -45,17 +42,9 @@ export default function SuperAdminApiConfig() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         {/* Page Header */}
         <div className="mb-8">
-          <Link
-            href="/super-admin/dashboard"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium mb-6 transition-colors duration-150 group"
-          >
-            <FaArrowLeft className="w-3 h-3 transition-transform duration-150 group-hover:-translate-x-0.5" />
-            Back to Dashboard
-          </Link>
-
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className={cn("p-3 rounded-xl", iconBadge)}>
@@ -76,11 +65,11 @@ export default function SuperAdminApiConfig() {
 
             {/* Quick Stats */}
             <div className="flex gap-3 flex-shrink-0">
-              <div className="bg-gradient-to-br from-indigo-500/20 to-violet-500/20 backdrop-blur-sm border border-indigo-500/30 rounded-xl p-3 sm:p-4 text-center min-w-[80px]">
+              <div className={cn(statSurface.indigo, "p-3 sm:p-4 text-center min-w-[80px]")}>
                 <div className="text-xl sm:text-2xl font-bold text-foreground leading-none">{totalKeys}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">Total keys</div>
               </div>
-              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-3 sm:p-4 text-center min-w-[80px]">
+              <div className={cn(statSurface.emerald, "p-3 sm:p-4 text-center min-w-[80px]")}>
                 <div className="text-xl sm:text-2xl font-bold text-foreground leading-none">
                   {configuredCount}
                   <span className="text-sm font-normal text-muted-foreground">/6</span>
@@ -102,11 +91,13 @@ export default function SuperAdminApiConfig() {
             totalPdfKeys={totalPdfKeys}
             totalTextKeys={totalTextKeys}
             onSelectPurpose={setConfigSubTab}
+            onSelectProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
             onOpenSettings={openSettingsModal}
+            aiState={aiState}
           />
 
           {/* Main Area: Stored Keys Table */}
-          <main className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0">
             <StoredKeysTable
               purpose={purpose}
               aiState={aiState}
@@ -117,25 +108,23 @@ export default function SuperAdminApiConfig() {
               onTestStoredKey={handleTestStoredKey}
               onDeleteStoredKey={handleDeleteStoredKey}
             />
-          </main>
+          </div>
         </div>
-      </div>
+      </MainLandmark>
 
-      {/* Provider & Model Settings Modal */}
-      <ProviderSettingsModal
+      {/* Add New LLM Modal */}
+      <AddNewLlmModal
         isOpen={isSettingsModalOpen}
         onClose={closeSettingsModal}
-        purpose={purpose}
-        provider={provider}
-        card={card}
-        pStyle={pStyle}
+        initialPurpose={purpose}
+        initialProvider={provider}
+        initialStep={modalInitialStep}
         aiState={aiState}
         configLoading={configLoading}
-        inlineTestStatus={inlineTestStatus}
-        onChangeProvider={(p) => setActiveProvider((prev) => ({ ...prev, [purpose]: p }))}
-        onUpdateCard={updateActiveCard}
+        onSaveLlm={handleSaveLlm}
         onTestInlineKey={handleTestInlineKey}
-        onSaveCard={handleSaveCard}
+        totalPdfKeys={totalPdfKeys}
+        totalTextKeys={totalTextKeys}
       />
 
       {/* Confirmation & Alert Modal */}
@@ -156,7 +145,6 @@ export default function SuperAdminApiConfig() {
                 variant="danger"
                 onClick={confirmDeleteKey}
                 disabled={Boolean(actionLoading)}
-                className="bg-red-600 hover:bg-red-700 text-white"
               >
                 {actionLoading ? "Deleting..." : "Delete Key"}
               </Button>

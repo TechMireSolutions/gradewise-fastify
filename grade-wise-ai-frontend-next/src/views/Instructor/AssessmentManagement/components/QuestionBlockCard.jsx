@@ -23,7 +23,7 @@ export default function QuestionBlockCard({
       {/* Header */}
       <div className="flex items-center justify-between pb-4 mb-5 border-b border-border/70">
         <div className="flex items-center gap-3">
-          <div className={cn("p-2 rounded-lg", iconBadge)}>
+          <div className={cn("p-2", iconBadge)}>
             <FiLayers className="text-white text-sm" />
           </div>
           <div>
@@ -42,7 +42,7 @@ export default function QuestionBlockCard({
           disabled={disabled || isSingleBlock}
           aria-label={`Remove question block ${index + 1}`}
           className={cn(
-            "p-2 rounded-lg transition-all duration-200",
+            "p-2 rounded-xl transition-all duration-200",
             isSingleBlock
               ? "opacity-30 cursor-not-allowed text-muted-foreground"
               : "text-red-700 dark:text-red-400 hover:bg-red-500/10 active:scale-95 cursor-pointer",

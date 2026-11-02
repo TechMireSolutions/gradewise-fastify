@@ -28,7 +28,7 @@ export default function AssessmentGrid({
           <div>
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                <div className="p-2 rounded-lg bg-indigo-500/15 border border-indigo-500/20 shrink-0">
+                <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/20 shrink-0">
                   <FaClipboardList className="w-4 h-4 text-indigo-500 dark:text-indigo-400" aria-hidden="true" />
                 </div>
                 <h3 className="font-semibold text-foreground text-base truncate">

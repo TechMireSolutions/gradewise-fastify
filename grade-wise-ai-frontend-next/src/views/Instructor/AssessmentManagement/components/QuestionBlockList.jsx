@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn.js";
 import { btn, card, iconBadge } from "@/lib/ui.js";
 import { FiList, FiPlus } from "react-icons/fi";
 import QuestionBlockCard from "./QuestionBlockCard.jsx";
+import StatusBadge from "@/components/ui/StatusBadge.jsx";
 
 export default function QuestionBlockList({
   questionBlocks,
@@ -42,12 +43,12 @@ export default function QuestionBlockList({
 
         {/* Live Summary Chips */}
         <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-semibold">
-          <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-500/20">
+          <StatusBadge variant="info">
             {totalQuestions} {totalQuestions === 1 ? "Question" : "Questions"}
-          </span>
-          <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">
+          </StatusBadge>
+          <StatusBadge variant="success">
             ~{totalMinutes} min total
-          </span>
+          </StatusBadge>
         </div>
       </div>
 

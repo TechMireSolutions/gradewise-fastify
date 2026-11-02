@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn.js";
 import { card } from "@/lib/ui.js";
 import { LoadingSpinner } from "@/components/ui";
 import { getExamTranslation } from "@/utils/translations.js";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useTakeAssessment from "./hooks/useTakeAssessment.js";
 import ExamLanguageSelector from "./components/exam/ExamLanguageSelector.jsx";
 import ExamHeader from "./components/exam/ExamHeader.jsx";
@@ -49,7 +50,7 @@ export default function TakeAssessment() {
   }
 
   return (
-    <div className={cn("min-h-screen", isQuranic && "font-quran")} dir={isRTL ? "rtl" : "ltr"}>
+    <MainLandmark className={cn("min-h-screen", isQuranic && "font-quran")} dir={isRTL ? "rtl" : "ltr"}>
       {/* Pre-Exam Language Selection */}
       {!hasStarted && (
         <ExamLanguageSelector
@@ -102,6 +103,6 @@ export default function TakeAssessment() {
           </div>
         </div>
       )}
-    </div>
+    </MainLandmark>
   );
 }

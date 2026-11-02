@@ -2,6 +2,7 @@
 
 import { page, pageInner } from "@/lib/ui.js";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useInstructorDashboard from "./hooks/useInstructorDashboard.js";
 import InstructorHeader from "./components/InstructorHeader.jsx";
 import InstructorStats from "./components/InstructorStats.jsx";
@@ -31,7 +32,7 @@ function InstructorDashboard() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         <InstructorHeader userName={user?.name} />
 
         <InstructorStats
@@ -47,7 +48,7 @@ function InstructorDashboard() {
           onOpenDelete={openDeleteConfirm}
           onOpenPaper={openPaperModal}
         />
-      </div>
+      </MainLandmark>
 
       <InstructorModals
         paperModal={paperModal}

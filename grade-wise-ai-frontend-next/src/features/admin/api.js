@@ -15,3 +15,7 @@ export const changeUserRoleAPI = async (userId, newRole) => {
 export const deleteAdminUserAPI = async (userId) => {
   return apiClient.delete(`/admin/users/${userId}`);
 };
+
+export const createAdminUserAPI = async (data) => {
+  return apiClient.post("/admin/users", data);
+};

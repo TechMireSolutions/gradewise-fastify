@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn.js";
+import { focusRing } from "@/lib/ui.js";
 import { FaUserCircle, FaTimes } from "react-icons/fa";
 
 export function GoogleColorIcon({ className = "w-5 h-5" }) {
@@ -74,8 +75,8 @@ export default function RememberedAccountCard({
           </div>
         )}
 
-        <div className="min-w-0 flex-1 text-left">
-          <p className="text-sm font-semibold text-foreground group-hover:text-indigo-400 transition-colors truncate">
+        <div className="min-w-0 flex-1 text-start">
+          <p className="text-sm font-semibold text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
             Sign in as {firstName}
           </p>
           <p className="text-xs text-muted-foreground truncate">{account.email}</p>
@@ -94,7 +95,10 @@ export default function RememberedAccountCard({
               e.stopPropagation();
               onRemove(account.email);
             }}
-            className="p-1 rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+            className={cn(
+              "p-1.5 rounded-lg text-muted-foreground hover:text-red-700 dark:hover:text-red-400 hover:bg-red-500/15 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer min-h-8 min-w-8 flex items-center justify-center",
+              focusRing
+            )}
           >
             <FaTimes className="w-3 h-3" />
           </button>

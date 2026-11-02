@@ -36,7 +36,7 @@ class ErrorBoundary extends Component {
               An unexpected error occurred. Try refreshing the page or return to the homepage.
             </p>
 
-            <div className={cn(card, "p-4", "mb-6", "text-left", "shadow-none")}>
+            <div className={cn(card, "p-4", "mb-6", "text-start", "shadow-none")}>
               <p className={cn("text-xs", "text-secondary-foreground", "font-mono", "break-words")}>
                 <span className="font-semibold text-red-500 dark:text-red-400">Error: </span>
                 {this.state.error?.message || "Unknown error"}
@@ -55,7 +55,7 @@ class ErrorBoundary extends Component {
             </div>
 
             {process.env.NODE_ENV === "development" && this.state.errorInfo && (
-              <details className="mt-8 text-left">
+              <details className="mt-8 text-start">
                 <summary className={cn("cursor-pointer", "text-sm", "font-medium", "text-secondary-foreground")}>
                   Technical details (development)
                 </summary>

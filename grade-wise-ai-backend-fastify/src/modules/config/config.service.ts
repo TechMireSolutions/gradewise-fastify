@@ -193,3 +193,193 @@ export async function bulkUpdateConfigs(
   }
   invalidateConfigCache();
 }
+
+export interface DiscoveredModel {
+  id: string;
+  name: string;
+  description?: string;
+  isDefault?: boolean;
+}
+
+export async function fetchLiveProviderModels(
+  provider: ProviderType,
+  apiKey: string
+): Promise<{ success: boolean; models: DiscoveredModel[]; error?: string }> {
+  const timeoutMs = 8000;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    let url = "";
+    const headers: Record<string, string> = {
+      "User-Agent": "GradeWiseAI-Backend/2.1",
+    };
+
+    if (provider === "gemini") {
+      url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+    } else if (provider === "openai") {
+      url = "https://api.openai.com/v1/models";
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    } else if (provider === "groq") {
+      url = "https://api.groq.com/openai/v1/models";
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    } else if (provider === "claude") {
+      url = "https://api.anthropic.com/v1/models";
+      headers["x-api-key"] = apiKey;
+      headers["anthropic-version"] = "2023-06-01";
+    } else if (provider === "mistral") {
+      url = "https://api.mistral.ai/v1/models";
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    } else if (provider === "deepseek") {
+      url = "https://api.deepseek.com/models";
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    } else {
+      clearTimeout(timeout);
+      return { success: false, models: [], error: `Unsupported provider: ${provider}` };
+    }
+
+    const res = await fetch(url, { headers, signal: controller.signal });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      let errDetail = `${res.status} ${res.statusText}`;
+      try {
+        const errJson = (await res.json()) as Record<string, unknown>;
+        const errObj = errJson?.error as Record<string, unknown> | undefined;
+        errDetail = (errObj?.message as string) || (errJson?.message as string) || errDetail;
+      } catch {
+        // ignore json parse error
+      }
+      return { success: false, models: [], error: `Failed to fetch models from ${provider}: ${errDetail}` };
+    }
+
+    const data = (await res.json()) as Record<string, unknown>;
+    const discovered: DiscoveredModel[] = [];
+
+    if (provider === "gemini" && Array.isArray(data.models)) {
+      for (const m of data.models as Array<Record<string, unknown>>) {
+        const id = ((m.name as string) || "").replace(/^models\//, "");
+        const methods = Array.isArray(m.supportedGenerationMethods) ? (m.supportedGenerationMethods as string[]) : [];
+        if (methods.includes("generateContent") && !id.includes("embedding") && !id.includes("aqa")) {
+          discovered.push({
+            id,
+            name: (m.displayName as string) || id,
+            description: m.description as string | undefined,
+            isDefault: id === AI_DEFAULT_MODELS.gemini,
+          });
+        }
+      }
+    } else if (
+      (provider === "openai" ||
+        provider === "groq" ||
+        provider === "mistral" ||
+        provider === "deepseek" ||
+        provider === "claude") &&
+      Array.isArray(data.data)
+    ) {
+      for (const m of data.data as Array<Record<string, unknown>>) {
+        const id = (m.id as string) || (m.name as string);
+        if (!id) continue;
+
+        if (provider === "openai") {
+          const isRelevant =
+            /^(gpt|o1|o3|chatgpt)/i.test(id) &&
+            !id.includes("audio") &&
+            !id.includes("transcription") &&
+            !id.includes("embedding") &&
+            !id.includes("moderation");
+          if (isRelevant) {
+            discovered.push({
+              id,
+              name: id,
+              isDefault: id === AI_DEFAULT_MODELS.openai,
+            });
+          }
+        } else if (provider === "groq") {
+          if (m.active !== false && !id.includes("whisper") && !id.includes("distil-whisper")) {
+            discovered.push({
+              id,
+              name: id,
+              description: m.owned_by ? `Owned by ${m.owned_by}` : undefined,
+              isDefault: id === AI_DEFAULT_MODELS.groq,
+            });
+          }
+        } else if (provider === "claude") {
+          discovered.push({
+            id,
+            name: (m.display_name as string) || id,
+            isDefault:
+              id.includes("claude-sonnet-4-6") ||
+              id.includes("claude-3-7-sonnet") ||
+              id === AI_DEFAULT_MODELS.claude,
+          });
+        } else if (provider === "mistral") {
+          if (!id.includes("embed")) {
+            discovered.push({
+              id,
+              name: (m.name as string) || id,
+              description: m.description as string | undefined,
+              isDefault: id === AI_DEFAULT_MODELS.mistral,
+            });
+          }
+        } else if (provider === "deepseek") {
+          discovered.push({
+            id,
+            name: id,
+            isDefault: id === AI_DEFAULT_MODELS.deepseek,
+          });
+        }
+      }
+    }
+
+    discovered.sort((a, b) => {
+      if (a.isDefault) return -1;
+      if (b.isDefault) return 1;
+      return a.id.localeCompare(b.id);
+    });
+
+    return { success: true, models: discovered };
+  } catch (err: unknown) {
+    clearTimeout(timeout);
+    const errorObj = err as Error | undefined;
+    return {
+      success: false,
+      models: [],
+      error:
+        errorObj?.name === "AbortError"
+          ? `Request timed out connecting to ${provider} API`
+          : errorObj?.message || "Network error",
+    };
+  }
+}
+
+export async function getProviderModels(
+  provider: ProviderType,
+  options?: { apiKey?: string; purpose?: PurposeType; keyIndex?: number }
+): Promise<{ success: boolean; models: DiscoveredModel[]; error?: string }> {
+  let keyToUse = (options?.apiKey || "").trim();
+
+  if (!keyToUse && options?.purpose) {
+    const configKey = buildConfigKey(options.purpose, provider, "KEYS");
+    const raw = await getRawConfigValue(configKey);
+    if (raw) {
+      const keys = raw
+        .split(",")
+        .map((k) => decryptSecret(k.trim()))
+        .filter(Boolean);
+      const idx =
+        options.keyIndex !== undefined && options.keyIndex < keys.length ? options.keyIndex : 0;
+      keyToUse = keys[idx] ?? "";
+    }
+  }
+
+  if (!keyToUse) {
+    return {
+      success: false,
+      models: [],
+      error: `No API key provided or found in stored pool for ${provider}.`,
+    };
+  }
+
+  return fetchLiveProviderModels(provider, keyToUse);
+}

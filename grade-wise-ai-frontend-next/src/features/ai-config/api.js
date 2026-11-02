@@ -1,15 +1,5 @@
 import apiClient from "@/lib/apiClient.js";
 
-export const getAllConfigs = async () => {
-  const response = await apiClient.get("/config");
-  return response.data;
-};
-
-export const bulkUpdateConfigs = async (configs) => {
-  const response = await apiClient.post("/config/bulk-update", { configs });
-  return response.data;
-};
-
 export const listAiKeys = async (purpose, provider) => {
   const response = await apiClient.get("/config/ai-summary");
   const raw = response.data;
@@ -73,5 +63,15 @@ export const testStoredAiKey = async (purpose, provider, index) => {
 
 export const testInlineAiKey = async (provider, model, key) => {
   const response = await apiClient.post("/config/ai-keys/test-inline", { provider, model, apiKey: key });
+  return response.data;
+};
+
+export const fetchProviderModels = async ({ provider, apiKey, purpose, keyIndex }) => {
+  const response = await apiClient.post("/config/ai-keys/fetch-models", {
+    provider,
+    apiKey,
+    purpose,
+    keyIndex,
+  });
   return response.data;
 };

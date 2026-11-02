@@ -6,6 +6,7 @@ import useStudentAnalyticsStore from "@/features/student-analytics/store.js";
 import apiClient from "@/lib/apiClient.js";
 import Modal from "@/components/ui/Modal.jsx";
 import AmbientBackground from "@/components/layout/AmbientBackground.jsx";
+import MainLandmark from "@/components/layout/MainLandmark.jsx";
 import useModal from "@/hooks/useModal.js";
 import WelcomeBanner from "@/components/layout/WelcomeBanner.jsx";
 import { FaGraduationCap } from "react-icons/fa";
@@ -69,7 +70,7 @@ export default function StudentAnalytics() {
     <div className={page}>
       <AmbientBackground />
 
-      <div className={pageInner}>
+      <MainLandmark className={pageInner}>
         <div className="max-w-5xl mx-auto mb-8 sm:mb-10">
           <WelcomeBanner
             eyebrow="Student Portal"
@@ -95,7 +96,7 @@ export default function StudentAnalytics() {
             />
           </div>
         )}
-      </div>
+      </MainLandmark>
 
       <Modal
         isOpen={modal.isOpen}

@@ -1,7 +1,8 @@
 "use client";
 import { cn } from "@/lib/cn.js";
 
-import { card, headingGradient, nav } from "@/lib/ui.js";
+import { card, headingGradient, nav, btn, shape } from "@/lib/ui.js";
+import { getRoleBadgeColor } from "@/utils/roleDisplay.js";
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -21,6 +22,9 @@ import {
   FaCrown,
   FaGraduationCap,
   FaSignOutAlt,
+  FaUsers,
+  FaKey,
+  FaHeartbeat,
 } from "react-icons/fa";
 
 const ROLE_LABELS = {
@@ -59,7 +63,11 @@ function Navbar() {
     switch (user.role) {
       case "super_admin":
         return [
-          { name: "Dashboard", href: "/super-admin/dashboard", icon: <FaTachometerAlt className="w-4 h-4" /> },
+          { name: "Overview", href: "/super-admin/dashboard", icon: <FaTachometerAlt className="w-4 h-4" /> },
+          { name: "Users", href: "/super-admin/users", icon: <FaUsers className="w-4 h-4" /> },
+          { name: "AI Config", href: "/super-admin/api-config", icon: <FaKey className="w-4 h-4" /> },
+          { name: "Analytics", href: "/super-admin/analytics", icon: <FaChartBar className="w-4 h-4" /> },
+          { name: "System", href: "/super-admin/system", icon: <FaHeartbeat className="w-4 h-4" /> },
           profileLink,
         ];
       case "admin":
@@ -157,13 +165,15 @@ function Navbar() {
                   <div className="hidden xl:block">
                     <div className={cn("text-xs", "font-semibold", "text-foreground", "leading-tight")}>{user.name}</div>
                     <div className={cn("text-xs", "text-muted-foreground", "leading-tight")}>
-                      {ROLE_LABELS[user.role] ?? user.role}
+                      {user.name?.trim().toLowerCase() === (ROLE_LABELS[user.role] ?? user.role).toLowerCase()
+                        ? (user.email || (ROLE_LABELS[user.role] ?? user.role))
+                        : (ROLE_LABELS[user.role] ?? user.role)}
                     </div>
                   </div>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 whitespace-nowrap min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-background cursor-pointer"
+                  className={cn(btn.danger, "px-3 py-2 text-sm whitespace-nowrap min-h-[44px]")}
                 >
                   <FaSignOutAlt />
                   <span className="hidden xl:inline">Logout</span>
@@ -210,7 +220,7 @@ function Navbar() {
                       : "text-muted-foreground hover:text-foreground hover:bg-surface-elevated"
                   }`}
                 >
-                  <span className={isActiveLink(link.href) ? "text-white" : "text-indigo-400"}>
+                  <span className={isActiveLink(link.href) ? "text-white" : "text-indigo-600 dark:text-indigo-400"}>
                     {link.icon}
                   </span>
                   <span>{link.name}</span>
@@ -229,7 +239,7 @@ function Navbar() {
                         <div className="min-w-0">
                           <div className={cn("font-semibold", "text-foreground", "text-sm", "leading-tight", "truncate")}>{user.name}</div>
                           <div className={cn("text-xs", "text-muted-foreground", "truncate", "mt-0.5")}>{user.email}</div>
-                          <div className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
+                          <div className={cn("inline-flex items-center gap-1 mt-1.5 px-2.5 py-0.5 text-xs font-semibold", shape.badge, getRoleBadgeColor(user.role))}>
                             {ROLE_LABELS[user.role] ?? user.role}
                           </div>
                         </div>
@@ -238,7 +248,7 @@ function Navbar() {
 
                     <button
                       onClick={handleLogout}
-                      className="w-full px-4 py-3 bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/20 hover:bg-red-500/25 rounded-xl font-medium text-sm transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-1 focus-visible:ring-offset-background cursor-pointer"
+                      className={cn(btn.danger, "w-full min-h-[44px]")}
                     >
                       <FaSignOutAlt className="w-4 h-4" />
                       Logout
