@@ -437,7 +437,7 @@ export async function generatePhysicalPaperService(
     );
   }
 
-  const paperQuestions = questionsToUse.map((q, i) => {
+  const paperQuestions: import("../../utils/pdf.js").PaperQuestion[] = questionsToUse.map((q, i) => {
     const rawOpts = q["options"];
     let parsedOpts: string[] | undefined;
     if (Array.isArray(rawOpts)) {
@@ -460,17 +460,34 @@ export async function generatePhysicalPaperService(
     };
   });
 
+  const paperOptions: import("../../utils/pdf.js").PhysicalPaperOptions = {
+    instituteName: options.instituteName,
+    teacherName: options.teacherName,
+    subjectName: options.subjectName,
+    paperDate: options.paperDate,
+    paperTime: options.paperTime,
+    paperDuration: options.paperDuration,
+    totalMarks: options.totalMarks,
+    notes: options.notes,
+    pageSize: options.pageSize,
+    headerFontSize: options.headerFontSize,
+    bodyFontSize: options.bodyFontSize,
+    optionFontSize: options.optionFontSize,
+    language: options.language,
+    questions: paperQuestions,
+  };
+
   const pdfBuffer: Buffer = await new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     const stream = new PassThrough();
     stream.on("data", (chunk: Buffer) => chunks.push(chunk));
     stream.on("end", () => resolve(Buffer.concat(chunks)));
     stream.on("error", reject);
-    generatePhysicalPaperPdf({ ...options, questions: paperQuestions }, stream);
+    generatePhysicalPaperPdf(paperOptions, stream);
   });
 
   // Automated PDF check and validation pipeline
-  const validation = validateAndProcessPdf(pdfBuffer, options);
+  const validation = validateAndProcessPdf(pdfBuffer, paperOptions);
   if (!validation.isValid) {
     console.warn("[PhysicalPaper] PDF check pipeline reported formatting warnings:", validation.issues);
   }
